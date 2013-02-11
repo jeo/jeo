@@ -9,9 +9,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.jeo.feature.Feature;
-import org.jeo.feature.Field;
 import org.jeo.feature.MapFeature;
-import org.jeo.feature.Schema;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;

@@ -2,13 +2,8 @@ package org.jeo.geojson;
 
 import static org.junit.Assert.assertEquals;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
 import org.jeo.feature.Feature;
 import org.jeo.feature.Features;
-import org.jeo.feature.ListFeature;
 import org.jeo.feature.Schema;
 import org.jeo.geom.GeometryBuilder;
 import org.junit.Before;

@@ -111,7 +111,7 @@ public class GeoJSONWriter extends JSONStringer {
             }
         }
 
-        switch(Geometries.get(g)) {
+        switch(Geometries.fromObject(g)) {
         case POINT:
             return point((Point)g);
         case LINESTRING:

@@ -99,9 +99,9 @@ public enum Geometries {
      * @return the {@code Geometries} for the argument's class, or {@code null}
      *         if the argument is {@code null}
      */
-    public static Geometries get(Geometry geom) {
+    public static Geometries fromObject(Geometry geom) {
         if (geom != null) {
-            return get(geom.getClass());
+            return fromClass(geom.getClass());
         }
     
         return null;
@@ -114,7 +114,7 @@ public enum Geometries {
      *
      * @return the constant for this class
      */
-    public static Geometries get(Class<? extends Geometry> geomClass) {
+    public static Geometries fromClass(Class<?> geomClass) {
         for (Geometries gt : Geometries.values()) {
             if (gt.type == geomClass) {
                 return gt;
@@ -159,7 +159,7 @@ public enum Geometries {
      * 
      * @return The constant for the name.
      */
-    public static Geometries get(String name) {
+    public static Geometries fromName(String name) {
         for (Geometries gt : Geometries.values()) {
             if (gt.getName().equalsIgnoreCase(name)) {
                 return gt;

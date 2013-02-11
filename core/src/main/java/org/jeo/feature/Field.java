@@ -1,5 +1,7 @@
 package org.jeo.feature;
 
+import com.vividsolutions.jts.geom.Geometry;
+
 public class Field {
 
     String name;
@@ -16,6 +18,10 @@ public class Field {
 
     public Class<?> getType() {
         return type;
+    }
+
+    public boolean isGeometry() {
+        return Geometry.class.isAssignableFrom(type);
     }
 
     @Override

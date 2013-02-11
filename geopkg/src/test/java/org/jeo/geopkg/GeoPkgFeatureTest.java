@@ -12,6 +12,7 @@ import java.util.List;
 import org.apache.commons.io.FileUtils;
 import org.jeo.data.Cursor;
 import org.jeo.feature.Feature;
+import org.jeo.feature.ListFeature;
 import org.jeo.feature.Schema;
 import org.jeo.geom.GeometryBuilder;
 import org.junit.After;
@@ -54,8 +55,8 @@ public class GeoPkgFeatureTest extends GeoPkgTestSupport {
         Schema schema = geopkg.createSchema(entry);
         assertEquals("states", schema.getName());
 
-        assertNotNull(schema.getGeometry());
-        assertEquals(MultiPolygon.class, schema.getGeometry().getType());
+        assertNotNull(schema.geometry());
+        assertEquals(MultiPolygon.class, schema.geometry().getType());
 
         assertNotNull(schema.field("STATE_NAME"));
     }
@@ -78,7 +79,7 @@ public class GeoPkgFeatureTest extends GeoPkgTestSupport {
             Feature f = c.next();
             assertNotNull(f);
 
-            assertTrue(f.getGeometry() instanceof MultiPolygon);
+            assertTrue(f.geometry() instanceof MultiPolygon);
             assertNotNull(f.get("STATE_NAME"));
         }
 
@@ -90,10 +91,11 @@ public class GeoPkgFeatureTest extends GeoPkgTestSupport {
     @Test
     public void testAdd() throws Exception {
         FeatureEntry entry = geopkg.feature("states");
-        Feature f = new Feature(geopkg.schema(entry));
-        Geometry g = new GeometryBuilder().point(0,0).buffer(1);
-        f.setGeometry(g);
+        Schema schema = geopkg.schema(entry);
 
+        Geometry g = new GeometryBuilder().point(0,0).buffer(1);
+        Feature f = new ListFeature(null, schema);
+        f.put(schema.geometry().getName(), g);
         f.put("STATE_NAME", "JEOLAND");
         geopkg.add(entry, f);
 

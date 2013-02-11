@@ -54,14 +54,16 @@ public class GeoJSONWriter extends JSONStringer {
 
             key("type").value("Feature");
             key("geometry");
-            geometry(f.getGeometry());
+            geometry(f.geometry());
 
             key("properties").object();
 
-            Schema schema = f.getSchema();
-            for (int i = 0; i < schema.getFields().size(); i++) {
-                Field fld = schema.getFields().get(i);
-                key(fld.getName()).value(f.getValues().get(i));
+            Schema schema = f.schema();
+            Field geometry = schema.geometry();
+            for (Field fld : schema) {
+                if (!fld.equals(geometry)) {
+                    key(fld.getName()).value(f.get(fld.getName()));
+                }
             }
 
             endObject();

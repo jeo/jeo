@@ -218,13 +218,17 @@ public class GeoPackage implements Workspace {
     public Cursor<Feature> read(FeatureEntry entry, Envelope bbox) throws IOException {
         try {
             Schema schema = schema(entry);
+            Field geom = schema.geometry();
 
             SQLBuilder sql = new SQLBuilder("SELECT ");
-            if (schema.getGeometry() != null) {
-                sql.add("AsBinary(").name(schema.getGeometry().getName()).add("),");
-            }
+
             for (Field f : schema) {
-                sql.name(f.getName()).add(",");
+                if (Geometry.class.isAssignableFrom(f.getType())) {
+                    sql.add("AsBinary(").name(geom.getName()).add("),");
+                }
+                else {
+                    sql.name(f.getName()).add(",");
+                }
             }
             sql.trim(1);
             sql.add("FROM ").name(entry.getTableName());
@@ -249,16 +253,19 @@ public class GeoPackage implements Workspace {
             StringBuilder vals = new StringBuilder();
             List<Object> objs = new ArrayList<Object>();
 
-            if (f.getGeometry() != null) {
-                sql.name(entry.getGeometryColumn()).add(", ");
-                vals.append("GeomFromWKB(?), ");
-                objs.add(f.getGeometry());
-            }
-            for (Field fld : f.getSchema()) {
+            for (Field fld : f.schema()) {
                 Object o = f.get(fld.getName());
                 if (o != null) {
                     sql.name(fld.getName()).add(", ");
-                    vals.append("?, ");
+
+                    if (o instanceof Geometry) {
+                        vals.append("GeomFromWKB(?), ");
+                    }
+                    else {
+                        
+                        vals.append("?, ");
+                    }
+
                     objs.add(o);
                 }
             }
@@ -325,20 +332,22 @@ public class GeoPackage implements Workspace {
         String sql = format("SELECT * FROM %s", entry.getTableName());
         TableResult table = db.get_table(log(sql), 1);
         
-        Field geom = null;
         List<Field> fields = new ArrayList<Field>();
 
         for (String col : table.column) {
+            Class<?> type = null;
             if (col.equals(entry.getGeometryColumn())) {
-                geom = new Field(col, entry.getGeometryType().getType());
+                type = entry.getGeometryType().getType();
             }
             else {
                 //TODO: map type
-                fields.add(new Field(col, Object.class));
+                type = Object.class;
             }
+
+            fields.add(new Field(col, type));
         }
 
-        return new Schema(entry.getTableName(), geom, fields);
+        return new Schema(entry.getTableName(), fields);
     }
 
     /**
@@ -497,7 +506,7 @@ public class GeoPackage implements Workspace {
     }
 
     SQLBuilder encodeBBOX(SQLBuilder sql, Schema schema, Envelope bbox) {
-        return sql.add(" Intersects(").name(schema.getGeometry().getName()).add(",")
+        return sql.add(" Intersects(").name(schema.geometry().getName()).add(",")
            .add(" BuildMbr(").add(bbox.getMinX()).add(",").add(bbox.getMinY()).add(",")
            .add(bbox.getMaxX()).add(",").add(bbox.getMaxY()).add("))");
     }

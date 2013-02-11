@@ -8,6 +8,8 @@ import jsqlite.Stmt;
 
 import org.jeo.data.Cursor;
 import org.jeo.feature.Feature;
+import org.jeo.feature.Field;
+import org.jeo.feature.ListFeature;
 import org.jeo.feature.Schema;
 
 import com.vividsolutions.jts.geom.Geometry;
@@ -45,22 +47,19 @@ public class FeatureCursor implements Cursor<Feature> {
         try {
             if (next != null && next) {
                 try {
-                    //read the geometry, if this table has a geometry it will be the first column
-                    Geometry geom = null;
-    
-                    int i = 0;
-                    if (schema.getGeometry() != null) {
-                        byte[] wkb = stmt.column_bytes(i++);
-                        geom = wkbReader.read(wkb);
+                    List<Field> fields = schema.getFields();
+                    List<Object> values = new ArrayList<Object>(stmt.column_count());
+
+                    for (int i = 0; i < fields.size(); i++) {
+                        if (Geometry.class.isAssignableFrom(fields.get(i).getType())) {
+                            values.add(wkbReader.read(stmt.column_bytes(i)));
+                        }
+                        else {
+                            values.add(stmt.column(i));
+                        }
                     }
     
-                    //read the other values
-                    List<Object> values = new ArrayList<Object>(stmt.column_count()-1);
-                    for (; i < stmt.column_count(); i++) {
-                        values.add(stmt.column(i));
-                    }
-    
-                    return new Feature(schema, geom, values);
+                    return new ListFeature(values, schema);
                 }
                 finally {
                     next = null;

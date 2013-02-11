@@ -135,11 +135,10 @@ public class GeoJSONReaderTest {
             "'coordinates': [ [ [100.0, 0.0], [101.0, 0.0], [101.0, 1.0], [100.0, 1.0], [100.0, 0.0] ] ] }, " +
             "'properties': { 'prop0': 'this', 'prop1': 'that'} }");
 
-        assertTrue(f.getGeometry() instanceof Polygon);
+        assertTrue(f.geometry() instanceof Polygon);
 
         Set<String> set = Sets.newHashSet("this", "that");
-        set.remove(f.getValues().get(0));
-        set.remove(f.getValues().get(1));
+        set.removeAll(f.values());
         assertTrue(set.isEmpty());
     }
 

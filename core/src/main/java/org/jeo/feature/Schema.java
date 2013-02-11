@@ -10,14 +10,13 @@ import com.vividsolutions.jts.geom.Geometry;
 public class Schema implements Iterable<Field> {
 
     String name;
-    Field geom;
     List<Field> fields;
 
     public static Schema build(String name) {
         return build(name, Geometry.class);
     }
 
-    public static Schema build(String name, Class<? extends Geometry> geom, Object... fields) {
+    public static Schema build(String name, Object... fields) {
         if (fields.length % 2 != 0) {
             throw new IllegalArgumentException("fields must be specified as String,Class pairs");
         }
@@ -27,12 +26,11 @@ public class Schema implements Iterable<Field> {
             flds.add(new Field((String) fields[i], (Class<?>)fields[i+1]));
         }
 
-        return new Schema(name, new Field("geometry", geom), flds);
+        return new Schema(name, flds);
     }
 
-    public Schema(String name, Field geom, List<Field> fields) {
+    public Schema(String name, List<Field> fields) {
         this.name = name;
-        this.geom = geom;
         this.fields = Collections.unmodifiableList(fields);
     }
 
@@ -40,16 +38,17 @@ public class Schema implements Iterable<Field> {
         return name;
     }
 
-    public Field getGeometry() {
-        return geom;
+    public Field geometry() {
+        for (Field f : this) {
+            if (Geometry.class.isAssignableFrom(f.getType())) {
+                return f;
+            }
+        }
+        return null;
     }
 
     public List<Field> getFields() {
         return fields;
-    }
-
-    public Field field(int i) {
-        return fields.get(i);
     }
 
     public Field field(String name) {
@@ -66,6 +65,10 @@ public class Schema implements Iterable<Field> {
             }
         }
         return -1;
+    }
+
+    public int size() {
+        return fields.size();
     }
 
     @Override

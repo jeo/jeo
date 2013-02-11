@@ -4,10 +4,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.jeo.feature.Feature;
 import org.jeo.feature.Field;
+import org.jeo.feature.MapFeature;
 import org.jeo.feature.Schema;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -146,28 +149,21 @@ public class GeoJSONReader {
     }
 
     Feature readFeature(JSONObject obj) throws JSONException {
-        Geometry geom = null;
-        List<Object> values = new ArrayList<Object>();
-        List<Field> fields = new ArrayList<Field>();
 
+        Map<String,Object> map = new LinkedHashMap<String, Object>();
         if (obj.has("geometry")) {
-            geom = (Geometry)read(obj.getJSONObject("geometry"));
+            map.put("geometry", read(obj.getJSONObject("geometry")));
         }
         if (obj.has("properties")) {
             //TODO: this assumes all simple properties
             JSONObject props = obj.getJSONObject("properties");
             for (Iterator<?> it = props.keys(); it.hasNext();) {
                 String key = it.next().toString();
-                Object val = props.get(key);
-
-                values.add(val);
-                fields.add(new Field(key, val != null ? val.getClass() : null));
+                map.put(key, props.get(key));
             }
         }
 
-        Schema schema = new Schema("feature", 
-            new Field("geometry", geom != null ? geom.getClass() : Geometry.class), fields);
-        return new Feature(schema, geom, values);
+        return new MapFeature(map);
     }
 
     List<Feature> readFeatureCollection(JSONObject obj) throws JSONException {

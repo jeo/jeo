@@ -2,7 +2,13 @@ package org.jeo.geojson;
 
 import static org.junit.Assert.assertEquals;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import org.jeo.feature.Feature;
+import org.jeo.feature.Features;
+import org.jeo.feature.ListFeature;
 import org.jeo.feature.Schema;
 import org.jeo.geom.GeometryBuilder;
 import org.junit.Before;
@@ -85,14 +91,10 @@ public class GeoJSONWriterTest {
 
     @Test
     public void testFeature() {
-        Schema schema = 
-            Schema.build("widget", Geometry.class, "name", String.class, "cost", Double.class);
+        Schema schema = Schema.build("widget", 
+            "geometry", Geometry.class, "name", String.class, "cost", Double.class);
 
-        Feature f = new Feature(schema);
-        f.setGeometry(new GeometryBuilder().point(0,0));
-        f.getValues().set(0, "anvil");
-        f.getValues().set(1, 10.99);
-
+        Feature f = Features.create(schema, new GeometryBuilder().point(0,0), "anvil", 10.99);
         w.feature(f);
         assertJSON("{'type':'Feature','geometry':{'type':'Point','coordinates':[0,0]}," +
             "'properties':{'name':'anvil','cost':10.99}}");
@@ -100,15 +102,15 @@ public class GeoJSONWriterTest {
 
     @Test
     public void testFeatureCollection() {
-        Schema schema = 
-            Schema.build("widget", Geometry.class, "name", String.class, "cost", Double.class);
+        Schema schema = Schema.build("widget", 
+            "geometry", Geometry.class, "name", String.class, "cost", Double.class);
 
         GeometryBuilder b = new GeometryBuilder();
 
         w.featureCollection();
-        w.feature(new Feature(schema, b.point(0,0), "anvil", 10.99));
-        w.feature(new Feature(schema, b.point(1,1), "dynamite", 2.99));
-        w.feature(new Feature(schema, b.point(2,2), "bomb", 7.99));
+        w.feature(Features.create(schema, b.point(0,0), "anvil", 10.99));
+        w.feature(Features.create(schema, b.point(1,1), "dynamite", 2.99));
+        w.feature(Features.create(schema, b.point(2,2), "bomb", 7.99));
 
         w.endFeatureCollection();
         assertJSON("{'type':'FeatureCollection','features':[" +

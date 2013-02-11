@@ -12,6 +12,7 @@ import java.util.List;
 import org.apache.commons.io.FileUtils;
 import org.jeo.data.Cursor;
 import org.jeo.feature.Feature;
+import org.jeo.feature.Features;
 import org.jeo.feature.ListFeature;
 import org.jeo.feature.Schema;
 import org.jeo.geom.GeometryBuilder;
@@ -19,8 +20,10 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.MultiPolygon;
+import com.vividsolutions.jts.geom.Point;
 
 public class GeoPkgFeatureTest extends GeoPkgTestSupport {
 
@@ -106,5 +109,33 @@ public class GeoPkgFeatureTest extends GeoPkgTestSupport {
 
         assertEquals("JEOLAND", c.next().get("STATE_NAME"));
         c.close();
+    }
+
+    @Test
+    public void testCreate() throws Exception {
+        Schema schema = Schema.build("widgets", 
+            "geometry", Point.class, "name", String.class, "cost", Double.class);
+
+        FeatureEntry entry = new FeatureEntry();
+        entry.setSrid(4326);
+        entry.setBounds(new Envelope(-180, 180, -90, 90));
+        geopkg.create(entry, schema);
+
+        GeometryBuilder gb = new GeometryBuilder();
+        geopkg.add(entry, Features.create(schema, gb.point(1,2), "anvil", 10.99));
+
+        Cursor<Feature> c = geopkg.read(entry, null);
+        try {
+            assertTrue(c.hasNext());
+    
+            Feature f = c.next();
+            assertEquals(((Point)f.geometry()).getX(), 1f, 0.1);
+            assertEquals(((Point)f.geometry()).getY(), 2f, 0.1);
+            assertEquals("anvil", f.get("name"));
+            assertEquals(10.99, ((Number)f.get("cost")).doubleValue(), 0.1);
+        }
+        finally {
+            c.close();
+        }
     }
 }

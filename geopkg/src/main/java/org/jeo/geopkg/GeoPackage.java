@@ -9,8 +9,12 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import java.util.TimeZone;
 
 import jsqlite.Database;
@@ -42,6 +46,40 @@ import com.vividsolutions.jts.io.WKBWriter;
  * @author Justin Deoliveira, OpenGeo
  */
 public class GeoPackage implements Workspace {
+
+    static enum Types {
+        INTEGER(Integer.class, Long.class, Short.class, Byte.class, Boolean.class),
+        REAL(Double.class, Float.class),
+        TEXT(String.class),
+        BLOB(byte[].class);
+
+        Set<Class<?>> classes;
+        Types(Class<?>... classes) {
+            this.classes = new HashSet<Class<?>>(Arrays.asList(classes));
+        }
+
+        Class<?> getPrimaryClass() {
+            return classes.iterator().next();
+        }
+
+        static Types forClass(Class<?> clazz) {
+            for (Types t : values() ) {
+                if (t.classes.contains(clazz)) {
+                    return t;
+                }
+            }
+            return null;
+        }
+
+        static Types forName(String name) {
+            for (Types t : values()) {
+                if (t.name().equals(name)) {
+                    return t;
+                }
+            }
+            return null;
+        }
+    }
 
     Logger LOG = LoggerFactory.getLogger(GeoPackage.class);
 
@@ -307,12 +345,150 @@ public class GeoPackage implements Workspace {
         }
     }
 
+    public void create(FeatureEntry entry, Schema schema) throws IOException {
+        //clone entry so we can work on it
+        FeatureEntry e = new FeatureEntry();
+        e.init(entry);
+        e.setTableName(schema.getName());
+
+        if (e.getGeometryColumn() != null) {
+            //check it
+            if (schema.field(e.getGeometryColumn()) == null) {
+                throw new IllegalArgumentException(
+                        format("Geometry column %s does not exist in schema", e.getGeometryColumn()));
+            }
+        }
+        else {
+            e.setGeometryColumn(findGeometryName(schema));
+        }
+
+        if (e.getIdentifier() == null) {
+            e.setIdentifier(schema.getName());
+        }
+        if (e.getDescription() == null) {
+            e.setDescription(e.getIdentifier());
+        }
+
+        //check for bounds
+        if (e.getBounds() == null) {
+            throw new IllegalArgumentException("Entry must have bounds");
+        }
+
+        //check for srid
+        if (e.getSrid() == null) {
+            //TODO: srid
+            /*try {
+                e.setSrid(findSRID(schema));
+            } catch (Exception ex) {
+                throw new IllegalArgumentException(ex);
+            }*/
+        }
+        if (e.getSrid() == null) {
+            throw new IllegalArgumentException("Entry must have srid");
+        }
+
+        if (e.getCoordDimension() == null) {
+            e.setCoordDimension(2);
+        }
+
+        if (e.getGeometryType() == null) {
+            e.setGeometryType(findGeometryType(schema));
+        }
+        //mark changed
+        e.setLastChange(new Date());
+
+        //create the feature table
+        try {
+            createFeatureTable(schema, e);
+        } catch (Exception ex) {
+            throw new IOException("Error creating feature table", ex);
+        }
+
+        //update the entry
+        entry.init(e);
+    }
+
+    void createFeatureTable(Schema schema, FeatureEntry entry) throws Exception {
+        SQLBuilder sql = new SQLBuilder("CREATE TABLE ").name(schema.getName()).add("(");
+        
+        sql.name(findPrimaryKeyColumnName(schema)).add(" INTEGER PRIMARY KEY, ");
+        for (Field f : schema) {
+            sql.name(f.getName()).add(" ");
+            if (f.isGeometry()) {
+                sql.add(Geometries.fromClass(f.getType()).getSimpleName());
+            }
+            else {
+                Types t = Types.forClass(f.getType());
+                sql.add(t != null ? t.name() : Types.TEXT.name());
+            }
+
+            sql.add(", ");
+        }
+        sql.trim(2).add(")");
+
+        Stmt st = db.prepare(log(sql.toString()));
+        try { 
+            st.step();
+
+            //update geometry columns
+            addGeometryColumnsEntry(schema, entry);
+
+        }
+        finally {
+            st.close();
+        }
+    }
+
+    void addGeometryColumnsEntry(Schema schema, FeatureEntry entry) throws Exception {
+        SQLBuilder sql = new SQLBuilder(format("INSERT INTO %s", GEOMETRY_COLUMNS));
+        sql.add("(")
+           .name("f_table_name").add(", ")
+           .name("f_geometry_column").add(",")
+           .name("type").add(",")
+           .name("coord_dimension").add(",")
+           .name("srid").add(",")
+           .name("spatial_index_enabled");
+        sql.add(") VALUES (?,?,?,?,?,?)");
+        
+        Stmt st = db.prepare(log(sql.toString(), entry.getTableName(), entry.getGeometryColumn(), 
+            entry.getGeometryType(), entry.getCoordDimension(), entry.getSrid(), false));
+        st.bind(1, entry.getTableName());
+        st.bind(2, entry.getGeometryColumn());
+        st.bind(3, entry.getGeometryType().getSimpleName());
+        st.bind(4, entry.getCoordDimension());
+        st.bind(5, entry.getSrid());
+        st.bind(6, 0);
+
+        st.step();
+        st.close();
+    }
+
+    String findPrimaryKeyColumnName(Schema schema) {
+        String[] names = new String[]{"fid", "gid", "oid"};
+        for (String name : names) {
+            if (schema.field(name) == null && schema.field(name.toUpperCase()) == null) {
+                return name;
+            }
+        }
+        return null;
+    }
+
+    Geometries findGeometryType(Schema schema) {
+        Field geom = schema.geometry();
+        return geom != null ? Geometries.fromClass(geom.getType()) : null;
+    }
+
+    String findGeometryName(Schema schema) {
+        Field geom = schema.geometry();
+        return geom != null ? geom.getName() : null;
+    }
+
     FeatureEntry createFeatureEntry(Stmt st) throws Exception {
         FeatureEntry e = new FeatureEntry();
 
         initEntry(e, st);
         e.setGeometryColumn(st.column_string(10));
-        e.setGeometryType(Geometries.get(st.column_string(11)));
+        e.setGeometryType(Geometries.fromName(st.column_string(11)));
         e.setCoordDimension((st.column_int(12)));
         return e;
     }
@@ -334,14 +510,15 @@ public class GeoPackage implements Workspace {
         
         List<Field> fields = new ArrayList<Field>();
 
-        for (String col : table.column) {
+        for (int i = 0; i < table.column.length; i++) {
+            String col = table.column[i];
             Class<?> type = null;
             if (col.equals(entry.getGeometryColumn())) {
                 type = entry.getGeometryType().getType();
             }
             else {
-                //TODO: map type
-                type = Object.class;
+                Types t = Types.valueOf(table.types[i].toUpperCase());
+                type = t != null ? t.getPrimaryClass() : Object.class;
             }
 
             fields.add(new Field(col, type));

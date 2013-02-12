@@ -2,84 +2,65 @@ package org.jeo.feature;
 
 import java.util.List;
 
+import org.osgeo.proj4j.CoordinateReferenceSystem;
+
 import com.vividsolutions.jts.geom.Geometry;
 
-public interface Feature {
+public abstract class Feature {
 
-    Object get(String key);
+    protected Schema schema;
 
-    void put(String key, Object val);
+    protected CoordinateReferenceSystem crs;
 
-    Geometry geometry();
+    protected Feature(Schema schema) {
+        this.schema = schema;
+    }
 
-    Schema schema();
+    public CoordinateReferenceSystem getCRS() {
+        return crs;
+    }
 
-    List<Object> values();
+    public void setCRS(CoordinateReferenceSystem crs) {
+        this.crs = crs;
+    }
 
-//    Schema schema;
-//    Geometry geom;
-//    List<Object> values;
-//
-//    public Feature() {
-//        this(null);
-//    }
-//
-//    public Feature(Schema schema) {
-//        this(schema, null, new ArrayList<Object>());
-//    }
-//
-//    public Feature(Schema schema, Geometry geom, Object... values) {
-//        this(schema, geom, Arrays.asList(values));
-//    }
-//
-//    public Feature(Schema schema, Geometry geom, List<Object> values) {
-//        this.schema = schema;
-//        this.geom = geom;
-//        this.values = pad(values, schema);
-//
-//    }
-//
-//    List<Object> pad(List<Object> l, Schema schema) {
-//        l = l == null ? new ArrayList<Object>() : new ArrayList<Object>(l);
-//
-//        if (schema != null) {
-//            while(l.size() < schema.getFields().size()) {
-//                l.add(null);
-//            }    
-//        }
-//        
-//        return l;
-//    }
-//
-//    public Schema getSchema() {
-//        return schema;
-//    }
-//
-//    public void setSchema(Schema schema) {
-//        this.schema = schema;
-//    }
-//
-//    public Geometry getGeometry() {
-//        return geom;
-//    }
-//
-//    public void setGeometry(Geometry geom) {
-//        this.geom = geom;
-//    }
-//
-//    public Object get(String name) {
-//        int i = schema.indexOf(name);
-//        return i != -1 ? values.get(i) : null;
-//    }
-//
-//    public void put(String name, Object value) {
-//        int i = schema.indexOf(name);
-//        if (i != -1) {
-//            values.set(i, value);
-//        }
-//    }
-//
-//    public List<Object> getValues() {
-//        return values;
-//    }
+    public CoordinateReferenceSystem crs() {
+        if (crs != null) {
+            return crs;
+        }
+
+        if (schema != null) {
+            return schema.crs();
+        }
+
+        return null;
+    }
+
+    public abstract Object get(String key);
+
+    public abstract void put(String key, Object val);
+
+    public Geometry geometry() {
+        if (schema != null) {
+            Field f = schema.geometry();
+            if (f != null) {
+                return (Geometry) get(f.getName());
+            }
+        }
+
+        return findGeometry();
+    }
+
+    protected abstract Geometry findGeometry();
+
+    public Schema schema() {
+        if (schema == null) {
+            schema = buildSchema();
+        }
+        return schema;
+    }
+
+    protected abstract Schema buildSchema();
+
+    public abstract List<Object> values();
 }

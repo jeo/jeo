@@ -5,9 +5,8 @@ import java.util.List;
 
 import com.vividsolutions.jts.geom.Geometry;
 
-public class ListFeature implements Feature {
+public class ListFeature extends Feature {
 
-    Schema schema;
     List<Object> values;
 
     public ListFeature(List<Object> values) {
@@ -15,7 +14,7 @@ public class ListFeature implements Feature {
     }
 
     public ListFeature(List<Object> values, Schema schema) {
-        this.schema = schema;
+        super(schema);
         this.values = pad(values, schema);
     }
 
@@ -56,14 +55,7 @@ public class ListFeature implements Feature {
     }
 
     @Override
-    public Geometry geometry() {
-        if (schema != null) {
-            Field f = schema.geometry();
-            if (f != null) {
-                return (Geometry) get(f.getName());
-            }
-        }
-
+    protected Geometry findGeometry() {
         for (Object o : values) {
             if (o instanceof Geometry) {
                 return (Geometry) o;
@@ -73,15 +65,7 @@ public class ListFeature implements Feature {
         return null;
     }
 
-    @Override
-    public Schema schema() {
-        if (schema == null) {
-            schema = buildSchema();
-        }
-        return schema;
-    }
-
-    Schema buildSchema() {
+    protected Schema buildSchema() {
         List<Field> fields = new ArrayList<Field>();
         int i = 0;
         boolean g = false;

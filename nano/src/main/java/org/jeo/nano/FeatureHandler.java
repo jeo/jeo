@@ -2,7 +2,6 @@ package org.jeo.nano;
 
 import static org.jeo.nano.NanoHTTPD.HTTP_BADREQUEST;
 import static org.jeo.nano.NanoHTTPD.HTTP_CREATED;
-import static org.jeo.nano.NanoHTTPD.HTTP_INTERNALERROR;
 import static org.jeo.nano.NanoHTTPD.HTTP_METHOD_NOT_ALLOWED;
 import static org.jeo.nano.NanoHTTPD.HTTP_NOTFOUND;
 import static org.jeo.nano.NanoHTTPD.HTTP_OK;
@@ -10,8 +9,11 @@ import static org.jeo.nano.NanoHTTPD.MIME_JSON;
 import static org.jeo.nano.NanoHTTPD.MIME_PLAINTEXT;
 
 import java.io.BufferedInputStream;
+import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.List;
 import java.util.Properties;
 import java.util.regex.Matcher;
@@ -21,10 +23,14 @@ import org.jeo.data.Cursor;
 import org.jeo.data.Layer;
 import org.jeo.data.Registry;
 import org.jeo.data.Vector;
+import org.jeo.data.Workspace;
 import org.jeo.feature.Feature;
+import org.jeo.feature.Schema;
 import org.jeo.geojson.GeoJSON;
 import org.jeo.geojson.GeoJSONWriter;
 import org.jeo.nano.NanoHTTPD.Response;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,9 +40,9 @@ public class FeatureHandler extends Handler {
 
     static final Logger LOG = LoggerFactory.getLogger(FeatureHandler.class);
 
-    /** uri pattern, /<layer>/features?bbox=<bbox> */
+    // /features/<workspace>[/<layer>]
     static final Pattern FEATURES_URI_RE = 
-        Pattern.compile("/(.+)/+features", Pattern.CASE_INSENSITIVE);
+        Pattern.compile("/features/([^/]+)(?:/([^/]+))?/?", Pattern.CASE_INSENSITIVE);
 
     Registry reg;
 
@@ -57,32 +63,24 @@ public class FeatureHandler extends Handler {
 
     @Override
     public Response handle(Request request) {
-        Matcher m = (Matcher) request.getContext().get(Matcher.class);
-
-        String key = m.group(1);
-        Layer l = reg.get(key);
-        if (l == null) {
-            //no such layer
-            return new Response(HTTP_NOTFOUND, MIME_PLAINTEXT, "No such layer: " + key);
+        try {
+            if ("GET".equalsIgnoreCase(request.getMethod())) {
+                return handleGet(request);
+            }
+            else if ("POST".equalsIgnoreCase(request.getMethod())) {
+                return handlePost(request);
+            }
+    
+            return new Response(HTTP_METHOD_NOT_ALLOWED, MIME_PLAINTEXT, "");
         }
-
-        if (!(l instanceof Vector)) {
-            // not a vector layer
-            return new Response(HTTP_BADREQUEST, MIME_PLAINTEXT, key + " not a feature layer");
+        catch(IOException e) {
+            throw new RuntimeException(e);
         }
-
-        Vector v = (Vector) l;
-        if ("GET".equalsIgnoreCase(request.getMethod())) {
-            return handleGet(request, v);
-        }
-        else if ("POST".equalsIgnoreCase(request.getMethod())) {
-            return handlePost(request, v);
-        }
-
-        return new Response(HTTP_METHOD_NOT_ALLOWED, MIME_PLAINTEXT, "");
     }
 
-    Response handleGet(Request request, Vector v) {
+    Response handleGet(Request request) throws IOException {
+        Vector layer = findVectorLayer(request);
+
         //parse the bbox
         Properties q = request.getParms();
         if (!q.containsKey("bbox")) {
@@ -93,48 +91,86 @@ public class FeatureHandler extends Handler {
 
         GeoJSONWriter w = new GeoJSONWriter();
 
-        try {
-            Cursor<Feature> c = v.read(bbox);
-    
-            w.featureCollection();
-            while(c.hasNext()) {
-                w.feature(c.next());
-            }
-            w.endFeatureCollection();
-        }
-        catch(IOException e) {
-            LOG.warn("Error reading features", e);
-            return new Response(HTTP_INTERNALERROR, MIME_PLAINTEXT, 
-                "Error reading features: " + e.getLocalizedMessage());
-        }
+        Cursor<Feature> c = layer.read(bbox);
 
+        w.featureCollection();
+        while(c.hasNext()) {
+            w.feature(c.next());
+        }
+        w.endFeatureCollection();
+        
         return new Response(HTTP_OK, MIME_JSON, w.toString());
     }
 
-    Response handlePost(Request request, Vector v) {
-        try {
-            String file = request.getFiles().getProperty("content");
-    
-            BufferedInputStream in = new BufferedInputStream(new FileInputStream(file));
-            Object obj = GeoJSON.read(in);
-            in.close();
-    
-            if (obj instanceof Feature) {
-                v.add((Feature)obj);
-            }
-            else if (obj instanceof List) {
-                for (Feature f : (List<Feature>)obj) {
-                    v.add(f);
-                }
-            }
+    Response handlePost(Request request) throws IOException {
+        Matcher m = (Matcher) request.getContext().get(Matcher.class);
 
-            return new Response(HTTP_CREATED, MIME_PLAINTEXT, "");
+        String file = request.getFiles().getProperty("content");
+        BufferedInputStream in = new BufferedInputStream(new FileInputStream(file));
+        try {
+            if (m.group(2) == null) {
+                return handlePostCreateLayer(request, in);
+            }
+            else {
+                return handlePostAddFeatures(request, in);
+            }
         }
-        catch(IOException e) {
-            LOG.warn("Error adding features", e);
-            return new Response(HTTP_INTERNALERROR, MIME_PLAINTEXT, 
-                "Error adding features: " + e.getLocalizedMessage());
+        finally {
+            in.close();
         }
+    }
+
+    Response handlePostCreateLayer(Request request, InputStream body) throws IOException {
+        Schema schema = (Schema) GeoJSON.read(body);
+
+        Workspace ws = findWorkspace(request);
+        ws.create(schema);
+
+        //TODO: set Location header
+        return new Response(HTTP_CREATED, MIME_PLAINTEXT, "");
+    }
+
+    Response handlePostAddFeatures(Request request, InputStream body) throws IOException {
+        Vector layer = findVectorLayer(request);
+
+        Object obj = GeoJSON.read(body);
+
+        if (obj instanceof Feature) {
+            layer.add((Feature)obj);
+        }
+        else if (obj instanceof List) {
+            for (Feature f : (List<Feature>)obj) {
+                layer.add(f);
+            }
+        }
+
+        //TODO: set Location header
+        return new Response(HTTP_CREATED, MIME_PLAINTEXT, "");
+    }
+
+    Vector findVectorLayer(Request request) throws IOException {
+        Workspace ws = findWorkspace(request);
+
+        Matcher m = (Matcher) request.getContext().get(Matcher.class);
+        Layer l = ws.get(m.group(2));
+        if (l == null || !(l instanceof Vector)) {
+            //no such layer
+            throw new HttpException(HTTP_NOTFOUND, "No such feature layer: " + m.group(0));
+        }
+
+        return (Vector) l;
+    }
+
+    Workspace findWorkspace(Request request) throws IOException {
+        Matcher m = (Matcher) request.getContext().get(Matcher.class);
+
+        String key = m.group(1);
+        Workspace ws = reg.get(key);
+        if ( ws == null) {
+            throw new HttpException(HTTP_NOTFOUND, "No such workspace: " +key);
+        }
+
+        return ws;
     }
 
     Envelope parseBBOX(String bbox) {
@@ -143,4 +179,16 @@ public class FeatureHandler extends Handler {
             Double.parseDouble(split[1]), Double.parseDouble(split[3]));
     }
 
+    JSONObject parseJSON(InputStream body) throws JSONException, IOException {
+        BufferedReader r  = new BufferedReader(new InputStreamReader(body));
+
+        StringBuilder buf = new StringBuilder();
+        String line = null;
+        while((line = r.readLine()) != null) {
+            buf.append(line);
+        }
+
+        
+        return new JSONObject(buf.toString());
+    }
 }

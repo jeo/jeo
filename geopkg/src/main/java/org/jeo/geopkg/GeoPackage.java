@@ -33,6 +33,8 @@ import org.jeo.feature.Field;
 import org.jeo.feature.Schema;
 import org.jeo.geom.Geometries;
 import org.jeo.geopkg.Entry.DataType;
+import org.jeo.proj.Proj;
+import org.osgeo.proj4j.CoordinateReferenceSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -345,6 +347,11 @@ public class GeoPackage implements Workspace {
         }
     }
 
+    public GeoPkgVector create(Schema schema) throws IOException {
+        create(new FeatureEntry(), schema);
+        return (GeoPkgVector) get(schema.getName());
+    }
+
     public void create(FeatureEntry entry, Schema schema) throws IOException {
         //clone entry so we can work on it
         FeatureEntry e = new FeatureEntry();
@@ -369,22 +376,21 @@ public class GeoPackage implements Workspace {
             e.setDescription(e.getIdentifier());
         }
 
-        //check for bounds
-        if (e.getBounds() == null) {
-            throw new IllegalArgumentException("Entry must have bounds");
-        }
-
         //check for srid
         if (e.getSrid() == null) {
-            //TODO: srid
-            /*try {
-                e.setSrid(findSRID(schema));
-            } catch (Exception ex) {
-                throw new IllegalArgumentException(ex);
-            }*/
+            e.setSrid(findSRID(schema));
         }
         if (e.getSrid() == null) {
             throw new IllegalArgumentException("Entry must have srid");
+        }
+
+        //check for bounds
+        if (e.getBounds() == null) {
+            //TODO: this is pretty inaccurate
+            e.setBounds(Proj.bounds(Proj.crs(e.getSrid())));
+        }
+        if (e.getBounds() == null) {
+            throw new IllegalArgumentException("Entry must have bounds");
         }
 
         if (e.getCoordDimension() == null) {
@@ -404,6 +410,12 @@ public class GeoPackage implements Workspace {
             throw new IOException("Error creating feature table", ex);
         }
 
+        try {
+            addGeopackageContentsEntry(e);
+        } catch (Exception ex) {
+            throw new IOException("Error updating " + GEOPACKAGE_CONTENTS, ex);
+        }
+        
         //update the entry
         entry.init(e);
     }
@@ -439,6 +451,52 @@ public class GeoPackage implements Workspace {
         }
     }
 
+    void addGeopackageContentsEntry(FeatureEntry entry) throws Exception {
+        SQLBuilder sql = new SQLBuilder(format("INSERT INTO %s", GEOPACKAGE_CONTENTS));
+        sql.add("(")
+           .name("table_name").add(", ")
+           .name("data_type").add(",")
+           .name("identifier").add(",")
+           .name("description").add(",")
+           .name("last_change").add(",")
+           .name("min_x").add(",")
+           .name("min_y").add(",")
+           .name("max_x").add(",")
+           .name("max_y").add(",")
+           .name("srid");
+        sql.add(") VALUES (?,?,?,?,?,?,?,?,?,?)");
+
+        Stmt st = db.prepare(log(sql.toString(), entry.getTableName(), entry.getDataType(), 
+            entry.getIdentifier(), entry.getDescription(), entry.getLastChange(), entry.getBounds(),
+            entry.getSrid()));
+
+        st.bind(1, entry.getTableName());
+        st.bind(2, entry.getDataType().value());
+        st.bind(3, entry.getIdentifier());
+        st.bind(4, entry.getDescription());
+        st.bind(5, DATE_FORMAT.format(entry.getLastChange()));
+        st.bind(6, entry.getBounds().getMinX());
+        st.bind(7, entry.getBounds().getMinY());
+        st.bind(8, entry.getBounds().getMaxX());
+        st.bind(9, entry.getBounds().getMaxY());
+        st.bind(10, entry.getSrid());
+
+        st.step();
+        st.close();
+        /*
+        table_name TEXT NOT NULL PRIMARY KEY,
+        data_type TEXT NOT NULL,
+        identifier TEXT NOT NULL UNIQUE,
+        description TEXT NOT NULL DEFAULT 'none',
+        last_change TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ',CURRENT_TIMESTAMP)),
+        min_x DOUBLE NOT NULL DEFAULT -180.0,
+        min_y DOUBLE NOT NULL DEFAULT -90.0,
+        max_x DOUBLE NOT NULL DEFAULT 180.0,
+        max_y DOUBLE NOT NULL DEFAULT 90.0,
+        srid INTEGER NOT NULL DEFAULT 0,
+        */
+    }
+
     void addGeometryColumnsEntry(Schema schema, FeatureEntry entry) throws Exception {
         SQLBuilder sql = new SQLBuilder(format("INSERT INTO %s", GEOMETRY_COLUMNS));
         sql.add("(")
@@ -471,6 +529,11 @@ public class GeoPackage implements Workspace {
             }
         }
         return null;
+    }
+
+    Integer findSRID(Schema schema) {
+        CoordinateReferenceSystem crs = schema.crs();
+        return crs != null ? Proj.epsgCode(crs) : null;
     }
 
     Geometries findGeometryType(Schema schema) {

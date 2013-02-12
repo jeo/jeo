@@ -7,14 +7,13 @@ import java.util.Map;
 
 import com.vividsolutions.jts.geom.Geometry;
 
-public class MapFeature implements Feature {
+public class MapFeature extends Feature {
 
     public static MapFeature build(Object... kv) {
         LinkedHashMap<String, Object> map = new LinkedHashMap<String, Object>();
         return new MapFeature(map);
     }
 
-    Schema schema;
     Map<String,Object> values;
 
     public MapFeature(Map<String,Object> values) {
@@ -22,19 +21,11 @@ public class MapFeature implements Feature {
     }
 
     public MapFeature(Map<String,Object> values, Schema schema) {
+        super(schema);
         this.values = values;
-        this.schema = schema;
     }
 
-    @Override
-    public Schema schema() {
-        if (schema == null) {
-            schema = buildSchema();
-        }
-        return schema;
-    }
-
-    Schema buildSchema() {
+    protected Schema buildSchema() {
         List<Field> fields = new ArrayList<Field>();
         for (Map.Entry<String, Object> e : values.entrySet()) {
             fields.add(new Field(e.getKey(), e.getValue() != null ? e.getValue().getClass() : null));
@@ -44,12 +35,7 @@ public class MapFeature implements Feature {
     }
 
     @Override
-    public Geometry geometry() {
-        if (schema != null) {
-            Field g = schema.geometry();
-            return (Geometry) (g != null ? values.get(g.getName()) : null);
-        }
-
+    protected Geometry findGeometry() {
         for (Object obj : values.values()) {
             if (obj instanceof Geometry) {
                 return (Geometry) obj;

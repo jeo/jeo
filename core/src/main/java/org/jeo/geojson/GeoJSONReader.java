@@ -9,10 +9,15 @@ import java.util.List;
 import java.util.Map;
 
 import org.jeo.feature.Feature;
+import org.jeo.feature.Field;
 import org.jeo.feature.MapFeature;
+import org.jeo.feature.Schema;
+import org.jeo.geom.Geometries;
+import org.jeo.proj.Proj;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.osgeo.proj4j.CoordinateReferenceSystem;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
@@ -32,7 +37,7 @@ public class GeoJSONReader {
 
     public Object read(InputStream in) throws IOException {
         StringBuilder sb = new StringBuilder();
-        
+
         byte[] buf = new byte[1024];
         int n = -1;
         while((n = in.read(buf)) != -1) {
@@ -86,6 +91,9 @@ public class GeoJSONReader {
             else if ("FeatureCollection".equalsIgnoreCase(type)) {
                 return readFeatureCollection(obj);
             }
+            else if ("Schema".equalsIgnoreCase(type)) {
+                return readSchema(obj);
+            }
             else {
                 throw new IllegalArgumentException("Unrecognized object type: " + type);
             }
@@ -96,27 +104,26 @@ public class GeoJSONReader {
 
     }
 
-    Point readPoint(JSONObject obj) throws JSONException {
+    public Point readPoint(JSONObject obj) throws JSONException {
         JSONArray arr = obj.getJSONArray("coordinates");
         return gf.createPoint(coord(arr));
     }
-    
 
-    LineString readLineString(JSONObject obj) throws JSONException {
+    public LineString readLineString(JSONObject obj) throws JSONException {
         JSONArray arr = obj.getJSONArray("coordinates");
         return gf.createLineString(coords(arr));
     }
 
-    Polygon readPolygon(JSONObject obj) throws JSONException {
+    public Polygon readPolygon(JSONObject obj) throws JSONException {
         JSONArray arr = obj.getJSONArray("coordinates");
         return polygon(arr);
     }
 
-    MultiPoint readMultiPoint(JSONObject obj) throws JSONException {
+    public MultiPoint readMultiPoint(JSONObject obj) throws JSONException {
         return gf.createMultiPoint(coords(obj.getJSONArray("coordinates")));
     }
 
-    MultiLineString readMultiLineString(JSONObject obj) throws JSONException {
+    public MultiLineString readMultiLineString(JSONObject obj) throws JSONException {
         JSONArray arr = obj.getJSONArray("coordinates");
         LineString[] lines = new LineString[arr.length()];
 
@@ -126,7 +133,7 @@ public class GeoJSONReader {
         return gf.createMultiLineString(lines);
     }
 
-    MultiPolygon readMultiPolygon(JSONObject obj) throws JSONException {
+    public MultiPolygon readMultiPolygon(JSONObject obj) throws JSONException {
         JSONArray arr = obj.getJSONArray("coordinates");
         Polygon[] polys = new Polygon[arr.length()];
 
@@ -137,7 +144,7 @@ public class GeoJSONReader {
         return gf.createMultiPolygon(polys);
     }
 
-    GeometryCollection readGeometryCollection(JSONObject obj) throws JSONException {
+    public GeometryCollection readGeometryCollection(JSONObject obj) throws JSONException {
         JSONArray arr = obj.getJSONArray("geometries");
         Geometry[] geoms = new Geometry[arr.length()];
         for (int i = 0; i < arr.length(); i++) {
@@ -146,7 +153,7 @@ public class GeoJSONReader {
         return gf.createGeometryCollection(geoms);
     }
 
-    Feature readFeature(JSONObject obj) throws JSONException {
+    public Feature readFeature(JSONObject obj) throws JSONException {
 
         Map<String,Object> map = new LinkedHashMap<String, Object>();
         if (obj.has("geometry")) {
@@ -160,17 +167,89 @@ public class GeoJSONReader {
                 map.put(key, props.get(key));
             }
         }
-
-        return new MapFeature(map);
+        
+        MapFeature f = new MapFeature(map);
+        if (obj.has("crs")) {
+            f.setCRS(readCRS(obj.getJSONObject("crs")));
+        }
+        return f;
     }
 
-    List<Feature> readFeatureCollection(JSONObject obj) throws JSONException {
+    public List<Feature> readFeatureCollection(JSONObject obj) throws JSONException {
         List<Feature> features = new ArrayList<Feature>();
+
+        CoordinateReferenceSystem crs = null;
+        if (obj.has("crs")) {
+            crs = readCRS(obj.getJSONObject("crs"));
+        }
+
         JSONArray arr = obj.getJSONArray("features");
         for (int i = 0; i < arr.length(); i++) {
-            features.add(readFeature(arr.getJSONObject(i)));
+            Feature f = readFeature(arr.getJSONObject(i));
+            if (crs != null && f.getCRS() == null) {
+                f.setCRS(crs);
+            }
+
+            features.add(f);
         }
+
         return features;
+    }
+
+    public Schema readSchema(JSONObject obj) throws JSONException {
+       //not part of GeoJSON
+        String name = obj.getString("name");
+        if (name == null) {
+            throw new IllegalArgumentException("Object must specify name property");
+        }
+
+        JSONObject properties = obj.getJSONObject("properties");
+        List<Field> fields = new ArrayList<Field>();
+
+        for (Iterator<?> it = properties.keys(); it.hasNext(); ) {
+            String key = it.next().toString();
+            JSONObject prop = properties.getJSONObject(key);
+
+            String type = prop.getString("type");
+            Class<?> clazz = null; 
+
+            //first try as geometry
+            if (Geometries.fromName(type) != null) {
+                clazz = Geometries.fromName(type).getType();
+            }
+            else {
+                //try as a primitive
+                try {
+                    clazz = Class.forName("java.lang." + 
+                        Character.toUpperCase(type.charAt(0)) + type.substring(1));
+                } catch (ClassNotFoundException e) {
+                    throw new IllegalArgumentException("type " +type+ " not supported"); 
+                }
+            }
+
+            CoordinateReferenceSystem crs = null;
+            if (prop.has("crs")) {
+                crs = readCRS(prop.getJSONObject("crs"));
+            }
+
+            fields.add(new Field(key, clazz, crs));
+        }
+
+        return new Schema(name, fields);
+    }
+
+    public CoordinateReferenceSystem readCRS(JSONObject obj) throws JSONException {
+        String type = obj.getString("type");
+        if ("link".equalsIgnoreCase(type)) {
+            throw new IllegalArgumentException("Linked CRS objects not supported");
+        }
+
+        String name = obj.getJSONObject("properties").getString("name");
+        if (name == null) {
+            throw new IllegalArgumentException("No properties.name object");
+        }
+
+        return Proj.crs(name);
     }
 
     Coordinate coord(JSONArray arr) throws JSONException {

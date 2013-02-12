@@ -9,6 +9,9 @@ import static org.junit.Assert.assertTrue;
 import java.io.File;
 import java.util.List;
 
+import jsqlite.Database;
+import jsqlite.Stmt;
+
 import org.apache.commons.io.FileUtils;
 import org.jeo.data.Cursor;
 import org.jeo.feature.Feature;
@@ -16,6 +19,7 @@ import org.jeo.feature.Features;
 import org.jeo.feature.ListFeature;
 import org.jeo.feature.Schema;
 import org.jeo.geom.GeometryBuilder;
+import org.jeo.geopkg.Entry.DataType;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -137,5 +141,15 @@ public class GeoPkgFeatureTest extends GeoPkgTestSupport {
         finally {
             c.close();
         }
+
+        Database db = geopkg.getDatabase();
+        Stmt st = db.prepare(
+            "SELECT data_type FROM geopackage_contents WHERE table_name = ?");
+        st.bind(1, "widgets");
+
+        assertTrue(st.step());
+        assertEquals(DataType.Feature.value(), st.column_string(0));
+
+        st.close();
     }
 }

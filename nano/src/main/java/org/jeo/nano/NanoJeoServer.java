@@ -1,7 +1,11 @@
 package org.jeo.nano;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -49,7 +53,26 @@ public class NanoJeoServer extends NanoHTTPD {
             return new Response(HTTP_NOTFOUND, MIME_PLAINTEXT, "No handler for request");
         }
 
-        return h.handle(request);
+        try {
+            return h.handle(request);
+        }
+        catch(HttpException e) {
+            return e.toResponse();
+        }
+        catch(Exception e) {
+            LOG.warn("Request threw exception", e);
+            return new Response(HTTP_INTERNALERROR, MIME_PLAINTEXT, toStream(e));
+        }
+    }
+
+    InputStream toStream(Exception e) {
+        ByteArrayOutputStream bout = new ByteArrayOutputStream();
+
+        PrintStream stream = new PrintStream(bout);
+        e.printStackTrace(stream);
+        stream.flush();
+
+        return new ByteArrayInputStream(bout.toByteArray());
     }
 
     Handler findHandler(Request request) {
@@ -82,12 +105,8 @@ public class NanoJeoServer extends NanoHTTPD {
 //            throw new RuntimeException(e);
 //        }
 //
-//        try {
-//            reg.put("states", states.get("states"));
-//            reg.put("ne", ne.get("tiles"));
-//        } catch (IOException e) {
-//            throw new RuntimeException(e);
-//        }
+//        reg.put("states", states);
+//        reg.put("ne", ne);
 
         try {
             new NanoJeoServer(port, wwwRoot, reg);

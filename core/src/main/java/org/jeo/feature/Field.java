@@ -1,15 +1,23 @@
 package org.jeo.feature;
 
+import org.osgeo.proj4j.CoordinateReferenceSystem;
+
 import com.vividsolutions.jts.geom.Geometry;
 
 public class Field {
 
     String name;
     Class<?> type;
+    CoordinateReferenceSystem crs;
 
     public Field(String name, Class<?> type) {
+        this(name, type, null);
+    }
+
+    public Field(String name, Class<?> type, CoordinateReferenceSystem crs) {
         this.name = name;
         this.type = type != null ? type : Object.class;
+        this.crs = crs;
     }
 
     public String getName() {
@@ -24,6 +32,10 @@ public class Field {
         return Geometry.class.isAssignableFrom(type);
     }
 
+    public CoordinateReferenceSystem getCRS() {
+        return crs;
+    }
+
     @Override
     public String toString() {
         return String.format("(%s,%s)", name, getType().getSimpleName());
@@ -35,6 +47,7 @@ public class Field {
         int result = 1;
         result = prime * result + ((name == null) ? 0 : name.hashCode());
         result = prime * result + ((type == null) ? 0 : type.hashCode());
+        result = prime * result + ((crs == null) ? 0 : crs.hashCode());
         return result;
     }
 
@@ -56,6 +69,11 @@ public class Field {
             if (other.type != null)
                 return false;
         } else if (!type.equals(other.type))
+            return false;
+        if (crs == null) {
+            if (other.crs != null)
+                return false;
+        } else if (!crs.equals(other.crs))
             return false;
         return true;
     }

@@ -5,6 +5,8 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
+import org.osgeo.proj4j.CoordinateReferenceSystem;
+
 import com.vividsolutions.jts.geom.Geometry;
 
 public class Schema implements Iterable<Field> {
@@ -45,6 +47,11 @@ public class Schema implements Iterable<Field> {
             }
         }
         return null;
+    }
+
+    public CoordinateReferenceSystem crs() {
+        Field g = geometry();
+        return g != null ? g.getCRS() : null;
     }
 
     public List<Field> getFields() {

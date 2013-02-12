@@ -7,12 +7,8 @@ import com.vividsolutions.jts.geom.Geometry;
 
 public class GeoJSON {
 
-    public static Object read(InputStream in) {
-        try {
-            return new GeoJSONReader().read(in);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+    public static Object read(InputStream in) throws IOException {
+        return new GeoJSONReader().read(in);
     }
 
     public static String toString(Geometry geom) {

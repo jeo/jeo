@@ -17,15 +17,15 @@ import org.jeo.data.Registry;
 import org.jeo.data.Tile;
 import org.jeo.data.TileGrid;
 import org.jeo.data.TileSet;
+import org.jeo.data.Workspace;
 import org.jeo.nano.NanoHTTPD.Response;
 
 public class TileHandler extends Handler {
 
-    /**
-     * uri pattern
-     */
+    /* /tiles/<workspace>/<layer>/<z>/<x>/<y>.<format.  */
     static final Pattern TILES_URI_RE = 
-        Pattern.compile("/(.+)/+tiles/+(\\d+)/+(\\d+)/+(\\d+).(\\w+)", Pattern.CASE_INSENSITIVE);
+        Pattern.compile("/tiles/([^/]+)/([^/]+)/(\\d+)/+(\\d+)/+(\\d+).(\\w+)", Pattern.CASE_INSENSITIVE);
+
     
     Registry reg;
 
@@ -51,28 +51,39 @@ public class TileHandler extends Handler {
             throw new IllegalStateException("No matcher");
         }
 
-        String key = m.group(1);
-        Layer l = reg.get(key);
+        Workspace ws = reg.get(m.group(1));
+        if (ws == null) {
+            //no such layer
+            return new Response(HTTP_NOTFOUND, MIME_PLAINTEXT, "No such workspace: " + m.group(1));
+        }
+
+        Layer l;
+        try {
+            l = ws.get(m.group(2));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
         if (l == null) {
             //no such layer
-            return new Response(HTTP_NOTFOUND, MIME_PLAINTEXT, "No such layer: " + key);
+            return new Response(HTTP_NOTFOUND, MIME_PLAINTEXT, "No such layer: " + m.group(2));
         }
 
         if (!(l instanceof TileSet)) {
             // not a tile set
-            return new Response(HTTP_BADREQUEST, MIME_PLAINTEXT, "Layer " + key + " not a tile set");
+            return new Response(HTTP_BADREQUEST, MIME_PLAINTEXT, 
+                "Layer " + m.group(2) + " not a tile set");
         }
 
         TileSet ts = (TileSet) l;
 
         //get teh tile index
-        long z = Long.parseLong(m.group(2));
-        long x = Long.parseLong(m.group(3));
-        long y = Long.parseLong(m.group(4));
+        long z = Long.parseLong(m.group(3));
+        long x = Long.parseLong(m.group(4));
+        long y = Long.parseLong(m.group(5));
 
         //check for flipy flag
         Properties q = request.getParms();
-        if (q.containsKey("flipy") && Boolean.valueOf(q.getProperty("flipy"))) {
+        if (q != null && q.containsKey("flipy") && Boolean.valueOf(q.getProperty("flipy"))) {
             TileGrid g =  ts.grid(z);
             if (g == null) {
                 return new Response(HTTP_INTERNALERROR, MIME_PLAINTEXT, "No tile grid for zoom level " + z);

@@ -766,6 +766,15 @@ public class GeoPackage implements Workspace {
         return sql;
     }
 
+    @Override
+    public void dispose() {
+        try {
+            close();
+        } catch (Exception e) {
+            LOG.warn("Error disposing GeoPackage", e);
+        }
+    }
+
     /**
      * Closes the geopackage and the underlying database connection.
      * <p>

@@ -12,4 +12,6 @@ public interface Workspace {
     Iterator<String> layers() throws IOException;
 
     Layer get(String layer) throws IOException;
+
+    void dispose();
 }

@@ -4,4 +4,5 @@ public interface Registry {
 
     Workspace get(String key);
 
+    void dispose();
 }

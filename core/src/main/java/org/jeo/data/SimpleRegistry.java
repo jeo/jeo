@@ -3,12 +3,17 @@ package org.jeo.data;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class SimpleRegistry implements Registry {
 
-    Map<String,Object> reg;
+    static Logger LOG = LoggerFactory.getLogger(SimpleRegistry.class);
+
+    Map<String,Workspace> reg;
 
     public SimpleRegistry() {
-        reg = new HashMap<String, Object>();
+        reg = new HashMap<String, Workspace>();
     }
 
     public void put(String key, Workspace workspace) {
@@ -17,16 +22,18 @@ public class SimpleRegistry implements Registry {
 
     @Override
     public Workspace get(String key) {
-        return get(key, Workspace.class);
+        return reg.get(key);
     }
 
-    <T> T get(String key, Class<T> clazz) {
-        if (reg.containsKey(key)) {
-            Object o = reg.get(key);
-            if (clazz.isInstance(o)) {
-                return clazz.cast(o);
+    public void dispose() {
+        for (Workspace ws : reg.values()) {
+            try {
+                ws.dispose();
+            }
+            catch(Exception e) {
+                LOG.warn("Error disposing workspace", e);
             }
         }
-        return null;
+        reg.clear();
     }
 }

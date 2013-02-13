@@ -8,6 +8,16 @@
   <packaging>pom</packaging>
   <name>Java Geo Library</name>
 
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>com.google.guava</groupId>
+        <artifactId>guava</artifactId>
+        <version>13.0</version>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+
   <dependencies>
     <dependency>
       <groupId>junit</groupId>
@@ -36,7 +46,6 @@
     <dependency>
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>
-      <version>13.0</version>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -72,6 +81,7 @@
     <module>geopkg</module>
     <module>mbtiles</module>
     <module>nano</module>
+    <module>guava</module>
   </modules>
 
   <properties>

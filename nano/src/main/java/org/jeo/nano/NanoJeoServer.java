@@ -95,26 +95,27 @@ public class NanoJeoServer extends NanoHTTPD {
             wwwRoot = new File(args[1]);
         }
 
-        SimpleRegistry reg = new SimpleRegistry();
-
-//        org.jeo.geopkg.GeoPackage states, ne;
-//        try {
-//            states = new org.jeo.geopkg.GeoPackage(new File("/Users/jdeolive/states2.db"));
-//            ne = new org.jeo.geopkg.GeoPackage(new File("/Users/jdeolive/ne.db"));
-//        } catch (Exception e) {
-//            throw new RuntimeException(e);
-//        }
-//
-//        reg.put("states", states);
-//        reg.put("ne", ne);
-
         try {
-            new NanoJeoServer(port, wwwRoot, reg);
+            new NanoJeoServer(port, wwwRoot, loadRegistry());
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
         
         try { System.in.read(); } catch( Throwable t ) {}
+    }
+
+    static Registry loadRegistry() {
+        SimpleRegistry reg = new SimpleRegistry(); 
+
+//        try {
+//            reg.put("ne", new org.jeo.geopkg.GeoPackage(new File("/Users/jdeolive/ne.db")));
+//        } catch (Exception e) {
+//            throw new RuntimeException(e);
+//        }
+//
+//        return new org.jeo.data.CachedRegistry(reg);
+
+        return reg;
     }
 
     static void usage() {

@@ -8,8 +8,8 @@
     <version>1.0-SNAPSHOT</version>
   </parent>
 
-  <artifactId>jeo-nano</artifactId>
-  <name>NanoHTTPD Server</name>
+  <artifactId>jeo-guava</artifactId>
+  <name>Guava Utilities</name>
   <packaging>jar</packaging>
 
   <dependencies>
@@ -19,16 +19,8 @@
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>org.jeo</groupId>
-      <artifactId>jeo-geopkg</artifactId>
-      <version>${project.version}</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.jeo</groupId>
-      <artifactId>jeo-guava</artifactId>
-      <version>${project.version}</version>
-      <scope>test</scope>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava</artifactId>
     </dependency>
   </dependencies>
 

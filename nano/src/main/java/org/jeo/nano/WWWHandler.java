@@ -22,7 +22,7 @@ public class WWWHandler extends Handler {
     @Override
     public Response handle(Request request) {
         String uri = request.getUri().replaceAll("/www", "");
-        return server.serveFile(uri, request.getHeader(), wwwRoot, false);
+        return server.serveFile(uri, request.getHeader(), wwwRoot, true);
     }
 
 }

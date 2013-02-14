@@ -3,8 +3,15 @@ package org.jeo.proj;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
+import org.jeo.geom.GeometryBuilder;
 import org.junit.Test;
 import org.osgeo.proj4j.CoordinateReferenceSystem;
+
+import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.Point;
+import com.vividsolutions.jts.geom.Polygon;
+import com.vividsolutions.jts.io.ParseException;
+import com.vividsolutions.jts.io.WKTReader;
 
 public class ProjTest {
 
@@ -24,5 +31,14 @@ public class ProjTest {
     public void testBounds() {
         CoordinateReferenceSystem crs = Proj.crs("EPSG:3005");
         assertNotNull(Proj.bounds(crs));
+    }
+
+    @Test
+    public void testReproject() throws Exception {
+        GeometryBuilder gb = new GeometryBuilder();
+
+        Point p = Proj.reproject(gb.point(-117, 63.15), Proj.crs("epsg:4326"), Proj.crs("epsg:3157"));
+        assertEquals(802027.258082, p.getX(), 0.1);
+        assertEquals(7016429.376474, p.getY(), 0.1);
     }
 }

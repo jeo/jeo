@@ -9,6 +9,7 @@ import org.osgeo.proj4j.ProjCoordinate;
 import org.osgeo.proj4j.proj.Projection;
 
 import com.vividsolutions.jts.geom.Envelope;
+import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Point;
 
 public class Proj {
@@ -55,13 +56,15 @@ public class Proj {
         return null;
     }
 
-    public static Point reproject(Point p, CoordinateReferenceSystem from, CoordinateReferenceSystem to) {
-        ProjCoordinate c1 = new ProjCoordinate(p.getX(), p.getY());
+    public static <T extends Geometry> T reproject(T g, CoordinateReferenceSystem from, 
+        CoordinateReferenceSystem to) {
+
         CoordinateTransform tx = txFactory.createTransform(from, to);
         if (tx == null) {
             throw new IllegalArgumentException("Unable to find transform from " + from + " to " + to);
         }
-        tx.transform(c1, c1);
-        return gBuilder.point(c1.x, c1.y);
+
+        g.apply(new CoordinateTransformer(tx));
+        return g;
     }
 }

@@ -5,7 +5,6 @@ import org.osgeo.proj4j.CRSFactory;
 import org.osgeo.proj4j.CoordinateReferenceSystem;
 import org.osgeo.proj4j.CoordinateTransform;
 import org.osgeo.proj4j.CoordinateTransformFactory;
-import org.osgeo.proj4j.ProjCoordinate;
 import org.osgeo.proj4j.proj.Projection;
 
 import com.vividsolutions.jts.geom.Envelope;

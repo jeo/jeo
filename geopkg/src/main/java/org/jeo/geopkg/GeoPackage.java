@@ -23,10 +23,12 @@ import jsqlite.Stmt;
 import jsqlite.TableResult;
 
 import org.jeo.data.Cursor;
+import org.jeo.data.FileWorkspaceFactory;
 import org.jeo.data.Layer;
 import org.jeo.data.Tile;
 import org.jeo.data.TileGrid;
 import org.jeo.data.Workspace;
+import org.jeo.data.Workspaces;
 import org.jeo.feature.Feature;
 import org.jeo.feature.Features;
 import org.jeo.feature.Field;
@@ -48,6 +50,15 @@ import com.vividsolutions.jts.io.WKBWriter;
  * @author Justin Deoliveira, OpenGeo
  */
 public class GeoPackage implements Workspace {
+
+    static {
+        Workspaces.registerWorkspaceFactory(new FileWorkspaceFactory<Workspace>("geopkg") {
+            @Override
+            protected Workspace createFromFile(File file) throws IOException {
+                return new GeoPackage(file);
+            }
+        });
+    }
 
     static enum Types {
         INTEGER(Integer.class, Long.class, Short.class, Byte.class, Boolean.class),

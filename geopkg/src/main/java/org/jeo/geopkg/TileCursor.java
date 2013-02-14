@@ -1,10 +1,12 @@
 package org.jeo.geopkg;
 
 import java.io.IOException;
+import java.util.Iterator;
 
 import jsqlite.Stmt;
 
 import org.jeo.data.Cursor;
+import org.jeo.data.Cursors;
 import org.jeo.data.Tile;
 
 public class TileCursor implements Cursor<Tile> {
@@ -58,4 +60,8 @@ public class TileCursor implements Cursor<Tile> {
         }
     }
 
+    @Override
+    public Iterator<Tile> iterator() {
+        return Cursors.iterator(this);
+    }
 }

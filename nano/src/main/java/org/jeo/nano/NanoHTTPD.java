@@ -392,6 +392,10 @@ public class NanoHTTPD
 				ByteArrayInputStream bin = new ByteArrayInputStream(fbuf);
 				BufferedReader in = new BufferedReader( new InputStreamReader(bin));
 
+				if (method == null) {
+				    //assume get
+				    method = "GET";
+				}
 				// If the method is POST, there may be parameters
 				// in data section, too, read it:
 				if ( method.equalsIgnoreCase( "POST" ))
@@ -938,8 +942,10 @@ public class NanoHTTPD
 								files[i] += "/";
 							}
 
-							msg += "<a href=\"" + encodeUri( uri + files[i] ) + "\">" +
-								  files[i] + "</a>";
+							msg += "<a href=\"" + encodeUri( files[i] ) + "\">" +
+                                                                files[i] + "</a>";
+							//msg += "<a href=\"" + encodeUri( uri + files[i] ) + "\">" +
+							//	  files[i] + "</a>";
 
 							// Show file size
 							if ( curFile.isFile())

@@ -1,8 +1,48 @@
 package org.jeo.data;
 
 import java.io.IOException;
+import java.util.Iterator;
 
 public class Cursors {
+
+    public static <T> Iterator<T> iterator(final Cursor<T> c) {
+        return new Iterator<T>() {
+            boolean closed = false;
+
+            @Override
+            public boolean hasNext() {
+                if (closed) {
+                    return false;
+                }
+
+                try {
+                    boolean hasNext = c.hasNext();
+                    if (!hasNext) {
+                        //close the cursor
+                        c.close();
+                    }
+
+                    return hasNext;
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+
+            @Override
+            public T next() {
+                try {
+                    return c.next();
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+
+            @Override
+            public void remove() {
+                throw new UnsupportedOperationException();
+            }
+        };
+    }
 
     public static <T> Cursor<T> empty(Class<T> clazz) {
         return new Cursor<T>() {
@@ -16,6 +56,11 @@ public class Cursors {
             }
             @Override
             public void close() throws IOException {
+            }
+
+            @Override
+            public Iterator<T> iterator() {
+                return Cursors.iterator(this);
             }
         };
     }
@@ -50,6 +95,13 @@ public class Cursors {
         @Override
         public void close() throws IOException {
         }
+
+        @Override
+        public Iterator<T> iterator() {
+            return Cursors.iterator(this);
+        }
     }
+
+    
 }
 

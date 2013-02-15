@@ -42,6 +42,12 @@ public class CachedRegistry implements Registry {
     }
 
     @Override
+    public Iterator<String> keys() {
+        //TODO: might want to cache this
+        return reg.keys();
+    }
+
+    @Override
     public Workspace get(String key) {
         try {
             return wsCache.get(key);

@@ -59,6 +59,7 @@ public class CachedRegistry implements Registry {
 
     @Override
     public void dispose() {
+        wsCache.invalidateAll();
         reg.dispose();
     }
 
@@ -97,10 +98,10 @@ public class CachedRegistry implements Registry {
                 return ws.get(layer);
             }
         }
-    
+
         @Override
         public void dispose() {
-            ws.dispose();
+            //do nothing, we wait for the entry to expire before disposing
         }
     }
 }

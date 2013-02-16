@@ -12,7 +12,7 @@ import org.jeo.feature.Feature;
 import org.jeo.feature.Field;
 import org.jeo.feature.MapFeature;
 import org.jeo.feature.Schema;
-import org.jeo.geom.Geometries;
+import org.jeo.geom.Geom;
 import org.jeo.proj.Proj;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -214,8 +214,8 @@ public class GeoJSONReader {
             Class<?> clazz = null; 
 
             //first try as geometry
-            if (Geometries.fromName(type) != null) {
-                clazz = Geometries.fromName(type).getType();
+            if (Geom.Type.fromName(type) != null) {
+                clazz = Geom.Type.fromName(type).getType();
             }
             else {
                 //try as a primitive

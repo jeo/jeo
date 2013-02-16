@@ -3,7 +3,7 @@ package org.jeo.geojson;
 import org.jeo.feature.Feature;
 import org.jeo.feature.Field;
 import org.jeo.feature.Schema;
-import org.jeo.geom.Geometries;
+import org.jeo.geom.Geom;
 import org.json.JSONException;
 import org.json.JSONStringer;
 
@@ -111,7 +111,7 @@ public class GeoJSONWriter extends JSONStringer {
             }
         }
 
-        switch(Geometries.fromObject(g)) {
+        switch(Geom.Type.fromObject(g)) {
         case POINT:
             return point((Point)g);
         case LINESTRING:

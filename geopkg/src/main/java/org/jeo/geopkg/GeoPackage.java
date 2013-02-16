@@ -33,7 +33,7 @@ import org.jeo.feature.Feature;
 import org.jeo.feature.Features;
 import org.jeo.feature.Field;
 import org.jeo.feature.Schema;
-import org.jeo.geom.Geometries;
+import org.jeo.geom.Geom;
 import org.jeo.geopkg.Entry.DataType;
 import org.jeo.proj.Proj;
 import org.osgeo.proj4j.CoordinateReferenceSystem;
@@ -438,7 +438,7 @@ public class GeoPackage implements Workspace {
         for (Field f : schema) {
             sql.name(f.getName()).add(" ");
             if (f.isGeometry()) {
-                sql.add(Geometries.fromClass(f.getType()).getSimpleName());
+                sql.add(Geom.Type.fromClass(f.getType()).getSimpleName());
             }
             else {
                 Types t = Types.forClass(f.getType());
@@ -547,9 +547,9 @@ public class GeoPackage implements Workspace {
         return crs != null ? Proj.epsgCode(crs) : null;
     }
 
-    Geometries findGeometryType(Schema schema) {
+    Geom.Type findGeometryType(Schema schema) {
         Field geom = schema.geometry();
-        return geom != null ? Geometries.fromClass(geom.getType()) : null;
+        return geom != null ? Geom.Type.fromClass(geom.getType()) : null;
     }
 
     String findGeometryName(Schema schema) {
@@ -562,7 +562,7 @@ public class GeoPackage implements Workspace {
 
         initEntry(e, st);
         e.setGeometryColumn(st.column_string(10));
-        e.setGeometryType(Geometries.fromName(st.column_string(11)));
+        e.setGeometryType(Geom.Type.fromName(st.column_string(11)));
         e.setCoordDimension((st.column_int(12)));
         return e;
     }

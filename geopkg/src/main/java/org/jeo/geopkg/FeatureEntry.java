@@ -1,7 +1,7 @@
 package org.jeo.geopkg;
 
 import org.jeo.feature.Schema;
-import org.jeo.geom.Geometries;
+import org.jeo.geom.Geom;
 
 /**
  * Feature entry in a geopackage.
@@ -12,7 +12,7 @@ import org.jeo.geom.Geometries;
  */
 public class FeatureEntry extends Entry {
 
-    Geometries geometryType;
+    Geom.Type geometryType;
     Integer coordDimension;
     String geometryColumn;
 
@@ -30,11 +30,11 @@ public class FeatureEntry extends Entry {
         this.geometryColumn = geometryColumn;
     }
 
-    public Geometries getGeometryType() {
+    public Geom.Type getGeometryType() {
         return geometryType;
     }
 
-    public void setGeometryType(Geometries geometryType) {
+    public void setGeometryType(Geom.Type geometryType) {
         this.geometryType = geometryType;
     }
 

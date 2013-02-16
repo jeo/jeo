@@ -15,6 +15,11 @@ public interface Vector extends Layer {
     Schema getSchema() throws IOException;
 
     /**
+     * Counts features in the layer.
+    */
+    long count(Envelope bbox) throws IOException ;
+
+    /**
      * Reads data from the layer. 
      */
     Cursor<Feature> read(Envelope bbox) throws IOException;

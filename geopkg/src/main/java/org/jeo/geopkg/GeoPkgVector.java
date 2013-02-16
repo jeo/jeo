@@ -25,6 +25,16 @@ public class GeoPkgVector implements Vector {
     }
 
     @Override
+    public Envelope bounds() throws IOException {
+        return entry.getBounds();
+    }
+
+    @Override
+    public long count(Envelope bbox) throws IOException {
+        return geopkg.count(entry, bbox);
+    }
+
+    @Override
     public Cursor<Feature> read(Envelope bbox) throws IOException {
         return geopkg.read(entry, bbox);
     }

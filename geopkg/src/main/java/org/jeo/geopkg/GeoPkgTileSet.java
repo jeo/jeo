@@ -8,6 +8,8 @@ import org.jeo.data.Tile;
 import org.jeo.data.TileGrid;
 import org.jeo.data.TileSet;
 
+import com.vividsolutions.jts.geom.Envelope;
+
 public class GeoPkgTileSet implements TileSet {
 
     TileEntry entry;
@@ -31,6 +33,11 @@ public class GeoPkgTileSet implements TileSet {
             }
         }
         return null;
+    }
+
+    @Override
+    public Envelope bounds() throws IOException {
+        return entry.getBounds();
     }
 
     @Override

@@ -2,15 +2,25 @@ package org.jeo.data;
 
 import java.util.Arrays;
 
+/**
+ * A map tile, as defined by {@linkplain http://wiki.osgeo.org/wiki/Tile_Map_Service_Specification}.
+ * 
+ */
 public class Tile {
 
     Integer zoom, column, row;
     byte[] data;
     String mimeType;
 
+    /**
+     * Constructs an empty tile object.
+     */
     public Tile() {
     }
 
+    /**
+     * Constructs a tile object from its tile index and image data.
+     */
     public Tile(Integer zoom, Integer column, Integer row, byte[] data, String mimeType) {
         super();
         this.zoom = zoom;
@@ -20,42 +30,72 @@ public class Tile {
         this.mimeType = mimeType;
     }
 
+    /**
+     * The zoom level of the tile.
+     */
     public Integer getZoom() {
         return zoom;
     }
 
+    /**
+     * Sets the zoom level of the tile.
+     */
     public void setZoom(Integer zoom) {
         this.zoom = zoom;
     }
 
+    /**
+     * The column index of the tile.
+     */
     public Integer getColumn() {
         return column;
     }
 
+    /**
+     * Sets the column index of the tile.
+     */
     public void setColumn(Integer column) {
         this.column = column;
     }
 
+    /**
+     * The row index of the tile.
+     */
     public Integer getRow() {
         return row;
     }
 
+    /**
+     * Sets the row index of the tile.
+     */
     public void setRow(Integer row) {
         this.row = row;
     }
 
+    /**
+     * The tile image data.
+     */
     public byte[] getData() {
         return data;
     }
 
+    /**
+     * Sets the tile image data.
+     */
     public void setData(byte[] data) {
         this.data = data;
     }
 
+    /**
+     * The mime type specifying the format of the tile image data.
+     */
     public String getMimeType() {
         return mimeType;
     }
 
+    /**
+     * Sets the mime type specifying the format of the tile image data.
+     */
     public void setMimeType(String mimeType) {
         this.mimeType = mimeType;
     }

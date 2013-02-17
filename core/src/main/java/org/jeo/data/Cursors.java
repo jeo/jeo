@@ -3,8 +3,20 @@ package org.jeo.data;
 import java.io.IOException;
 import java.util.Iterator;
 
+/**
+ * Utility class for {@link Cursor} objects.
+ * 
+ * @author Justin Deoliveira, OpenGeo
+ */
 public class Cursors {
 
+    /**
+     * Returns an {@link Iterator} for a cursor object.
+     * <p>
+     * This method should be typically used by cursor implementors implementing the {@link Iterable} 
+     * interface.
+     * </p>
+     */
     public static <T> Iterator<T> iterator(final Cursor<T> c) {
         return new Iterator<T>() {
             boolean closed = false;
@@ -44,6 +56,9 @@ public class Cursors {
         };
     }
 
+    /**
+     * Returns a typed empty cursor object.
+     */
     public static <T> Cursor<T> empty(Class<T> clazz) {
         return new Cursor<T>() {
             @Override
@@ -65,6 +80,9 @@ public class Cursors {
         };
     }
 
+    /**
+     * Returns a cursor containing a single object.
+     */
     public static <T> Cursor<T> single(T obj) {
         return new SingleCursor<T>(obj);
     }
@@ -101,7 +119,5 @@ public class Cursors {
             return Cursors.iterator(this);
         }
     }
-
-    
 }
 

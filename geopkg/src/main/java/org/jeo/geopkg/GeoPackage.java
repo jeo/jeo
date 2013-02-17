@@ -722,15 +722,9 @@ public class GeoPackage implements Workspace {
         stm.bind(1, e.getTableName());
 
         while(stm.step()) {
-            TileGrid m = new TileGrid();
-            m.setZoom(stm.column_int(0));
-            m.setWidth(stm.column_int(1));
-            m.setHeight(stm.column_int(2));
-            m.setTileWidth(stm.column_int(3));
-            m.setTileHeight(stm.column_int(4));
-            m.setXRes(stm.column_double(5));
-            m.setYRes(stm.column_double(6));
-
+            TileGrid m = new TileGrid(
+                stm.column_int(0), stm.column_int(1), stm.column_int(2), stm.column_int(3), 
+                stm.column_int(4), stm.column_double(5), stm.column_double(6));
             e.getTileMatricies().add(m);
         }
 

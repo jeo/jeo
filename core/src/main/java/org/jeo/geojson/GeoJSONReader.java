@@ -31,10 +31,32 @@ import com.vividsolutions.jts.geom.MultiPolygon;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
 
+/**
+ * Encodes objects from GeoJSON.
+ * <p>
+ * Example usage:
+ * <pre>
+ * GeoJSONReader r = new GeoJSONReader();
+ * r.read("{'type':'Point', 'coordinates':[1.0,2.0]}");
+ * </pre>
+ * </p>
+ * @see {@linkplain http://geojson.org}
+ * 
+ * @author Justin Deoliveira, OpenGeo
+ */
 public class GeoJSONReader {
 
     GeometryFactory gf = new GeometryFactory();
 
+    /**
+     * Parses a GeoJSON input stream.
+     * 
+     * @param in The input stream.
+     * 
+     * @return The parsed object.
+     * 
+     * @throws IOException Any parsing or I/O errors.
+     */
     public Object read(InputStream in) throws IOException {
         StringBuilder sb = new StringBuilder();
 
@@ -47,15 +69,33 @@ public class GeoJSONReader {
         return read(sb.toString());
     }
 
-    public Object read(String json) {
+    /**
+     * Parses a GeoJSON string.
+     * 
+     * @param json The string.
+     * 
+     * @return The parsed object.
+     * 
+     * @throws IOException Any parsing or I/O errors.
+     */
+    public Object read(String json) throws IOException {
         try {
             return read(new JSONObject(json));
         } catch (JSONException e) {
-            throw new RuntimeException(e);
+            throw new IOException(e);
         }
     }
 
-    public Object read(JSONObject obj) {
+    /**
+     * Reads a JSON object.
+     * 
+     * @param obj The json object.
+     * 
+     * @return The parsed object.
+     * 
+     * @throws IOException Any parsing or I/O errors.
+     */
+    public Object read(JSONObject obj) throws IOException {
         try {
             
             if (!obj.has("type")) {
@@ -99,157 +139,243 @@ public class GeoJSONReader {
             }
         }
         catch(JSONException e) {
-            throw new RuntimeException(e);
+            throw new IOException(e);
         }
-
     }
 
-    public Point readPoint(JSONObject obj) throws JSONException {
-        JSONArray arr = obj.getJSONArray("coordinates");
-        return gf.createPoint(coord(arr));
-    }
-
-    public LineString readLineString(JSONObject obj) throws JSONException {
-        JSONArray arr = obj.getJSONArray("coordinates");
-        return gf.createLineString(coords(arr));
-    }
-
-    public Polygon readPolygon(JSONObject obj) throws JSONException {
-        JSONArray arr = obj.getJSONArray("coordinates");
-        return polygon(arr);
-    }
-
-    public MultiPoint readMultiPoint(JSONObject obj) throws JSONException {
-        return gf.createMultiPoint(coords(obj.getJSONArray("coordinates")));
-    }
-
-    public MultiLineString readMultiLineString(JSONObject obj) throws JSONException {
-        JSONArray arr = obj.getJSONArray("coordinates");
-        LineString[] lines = new LineString[arr.length()];
-
-        for (int i = 0; i < arr.length(); i++) {
-            lines[i] = gf.createLineString(coords(arr.getJSONArray(i)));
+    /**
+     * Reads a JSON object as a point.
+     */
+    public Point readPoint(JSONObject obj) throws IOException {
+        try {
+            JSONArray arr = obj.getJSONArray("coordinates");
+            return gf.createPoint(coord(arr));
         }
-        return gf.createMultiLineString(lines);
+        catch(JSONException e) {
+            throw new IOException(e);
+        }
     }
 
-    public MultiPolygon readMultiPolygon(JSONObject obj) throws JSONException {
-        JSONArray arr = obj.getJSONArray("coordinates");
-        Polygon[] polys = new Polygon[arr.length()];
-
-        for (int i = 0; i < arr.length(); i++) {
-            polys[i] = polygon(arr.getJSONArray(i));
+    /**
+     * Reads a JSON object as a linestring.
+     */
+    public LineString readLineString(JSONObject obj) throws IOException {
+        try {
+            JSONArray arr = obj.getJSONArray("coordinates");
+            return gf.createLineString(coords(arr));
         }
-
-        return gf.createMultiPolygon(polys);
+        catch(JSONException e) {
+            throw new IOException(e);
+        }
     }
 
-    public GeometryCollection readGeometryCollection(JSONObject obj) throws JSONException {
-        JSONArray arr = obj.getJSONArray("geometries");
-        Geometry[] geoms = new Geometry[arr.length()];
-        for (int i = 0; i < arr.length(); i++) {
-            geoms[i] = (Geometry) read(arr.getJSONObject(i));
+    /**
+     * Reads a JSON object as a polygon.
+     */
+    public Polygon readPolygon(JSONObject obj) throws IOException {
+        try {
+            JSONArray arr = obj.getJSONArray("coordinates");
+            return polygon(arr);
         }
-        return gf.createGeometryCollection(geoms);
+        catch(JSONException e) {
+            throw new IOException(e);
+        }
     }
 
-    public Feature readFeature(JSONObject obj) throws JSONException {
-
-        Map<String,Object> map = new LinkedHashMap<String, Object>();
-        if (obj.has("geometry")) {
-            map.put("geometry", read(obj.getJSONObject("geometry")));
+    /**
+     * Reads a JSON object as a multpoint.
+     */
+    public MultiPoint readMultiPoint(JSONObject obj) throws IOException {
+        try {
+            return gf.createMultiPoint(coords(obj.getJSONArray("coordinates")));
         }
-        if (obj.has("properties")) {
-            //TODO: this assumes all simple properties
-            JSONObject props = obj.getJSONObject("properties");
-            for (Iterator<?> it = props.keys(); it.hasNext();) {
-                String key = it.next().toString();
-                map.put(key, props.get(key));
+        catch(JSONException e) {
+            throw new IOException(e);
+        }
+    }
+
+    /**
+     * Reads a JSON object as a multilinestring.
+     */
+    public MultiLineString readMultiLineString(JSONObject obj) throws IOException {
+        try {
+            JSONArray arr = obj.getJSONArray("coordinates");
+            LineString[] lines = new LineString[arr.length()];
+    
+            for (int i = 0; i < arr.length(); i++) {
+                lines[i] = gf.createLineString(coords(arr.getJSONArray(i)));
             }
+            return gf.createMultiLineString(lines);
         }
-        
-        MapFeature f = new MapFeature(map);
-        if (obj.has("crs")) {
-            f.setCRS(readCRS(obj.getJSONObject("crs")));
+        catch(JSONException e) {
+            throw new IOException(e);
         }
-        return f;
     }
 
-    public List<Feature> readFeatureCollection(JSONObject obj) throws JSONException {
-        List<Feature> features = new ArrayList<Feature>();
-
-        CoordinateReferenceSystem crs = null;
-        if (obj.has("crs")) {
-            crs = readCRS(obj.getJSONObject("crs"));
-        }
-
-        JSONArray arr = obj.getJSONArray("features");
-        for (int i = 0; i < arr.length(); i++) {
-            Feature f = readFeature(arr.getJSONObject(i));
-            if (crs != null && f.getCRS() == null) {
-                f.setCRS(crs);
+    /**
+     * Reads a JSON object as a multipolygon.
+     */
+    public MultiPolygon readMultiPolygon(JSONObject obj) throws IOException {
+        try {
+            JSONArray arr = obj.getJSONArray("coordinates");
+            Polygon[] polys = new Polygon[arr.length()];
+    
+            for (int i = 0; i < arr.length(); i++) {
+                polys[i] = polygon(arr.getJSONArray(i));
             }
-
-            features.add(f);
+    
+            return gf.createMultiPolygon(polys);
         }
-
-        return features;
+        catch(JSONException e) {
+            throw new IOException(e);
+        }
     }
 
-    public Schema readSchema(JSONObject obj) throws JSONException {
-       //not part of GeoJSON
-        String name = obj.getString("name");
-        if (name == null) {
-            throw new IllegalArgumentException("Object must specify name property");
-        }
-
-        JSONObject properties = obj.getJSONObject("properties");
-        List<Field> fields = new ArrayList<Field>();
-
-        for (Iterator<?> it = properties.keys(); it.hasNext(); ) {
-            String key = it.next().toString();
-            JSONObject prop = properties.getJSONObject(key);
-
-            String type = prop.getString("type");
-            Class<?> clazz = null; 
-
-            //first try as geometry
-            if (Geom.Type.fromName(type) != null) {
-                clazz = Geom.Type.fromName(type).getType();
+    /**
+     * Reads a JSON object as a geometry collection.
+     */
+    public GeometryCollection readGeometryCollection(JSONObject obj) throws IOException {
+        try {
+            JSONArray arr = obj.getJSONArray("geometries");
+            Geometry[] geoms = new Geometry[arr.length()];
+            for (int i = 0; i < arr.length(); i++) {
+                geoms[i] = (Geometry) read(arr.getJSONObject(i));
             }
-            else {
-                //try as a primitive
-                try {
-                    clazz = Class.forName("java.lang." + 
-                        Character.toUpperCase(type.charAt(0)) + type.substring(1));
-                } catch (ClassNotFoundException e) {
-                    throw new IllegalArgumentException("type " +type+ " not supported"); 
+            return gf.createGeometryCollection(geoms);
+        }
+        catch(JSONException e) {
+            throw new IOException(e);
+        }
+    }
+
+    /**
+     * Reads a JSON object as a feature.
+     */
+    public Feature readFeature(JSONObject obj) throws IOException {
+        try {
+            Map<String,Object> map = new LinkedHashMap<String, Object>();
+            if (obj.has("geometry")) {
+                map.put("geometry", read(obj.getJSONObject("geometry")));
+            }
+            if (obj.has("properties")) {
+                //TODO: this assumes all simple properties
+                JSONObject props = obj.getJSONObject("properties");
+                for (Iterator<?> it = props.keys(); it.hasNext();) {
+                    String key = it.next().toString();
+                    map.put(key, props.get(key));
                 }
             }
-
-            CoordinateReferenceSystem crs = null;
-            if (prop.has("crs")) {
-                crs = readCRS(prop.getJSONObject("crs"));
+            
+            MapFeature f = new MapFeature(map);
+            if (obj.has("crs")) {
+                f.setCRS(readCRS(obj.getJSONObject("crs")));
             }
-
-            fields.add(new Field(key, clazz, crs));
+            return f;
         }
-
-        return new Schema(name, fields);
+        catch(JSONException e) {
+            throw new IOException(e);
+        }
     }
 
-    public CoordinateReferenceSystem readCRS(JSONObject obj) throws JSONException {
-        String type = obj.getString("type");
-        if ("link".equalsIgnoreCase(type)) {
-            throw new IllegalArgumentException("Linked CRS objects not supported");
+    /**
+     * Reads a JSON object as a feature collection.
+     */
+    public List<Feature> readFeatureCollection(JSONObject obj) throws IOException {
+        try {
+            List<Feature> features = new ArrayList<Feature>();
+    
+            CoordinateReferenceSystem crs = null;
+            if (obj.has("crs")) {
+                crs = readCRS(obj.getJSONObject("crs"));
+            }
+    
+            JSONArray arr = obj.getJSONArray("features");
+            for (int i = 0; i < arr.length(); i++) {
+                Feature f = readFeature(arr.getJSONObject(i));
+                if (crs != null && f.getCRS() == null) {
+                    f.setCRS(crs);
+                }
+    
+                features.add(f);
+            }
+    
+            return features;
         }
-
-        String name = obj.getJSONObject("properties").getString("name");
-        if (name == null) {
-            throw new IllegalArgumentException("No properties.name object");
+        catch(JSONException e) {
+            throw new IOException(e);
         }
+    }
 
-        return Proj.crs(name);
+    /**
+     * Reads a JSON object as a schema. 
+     */
+    public Schema readSchema(JSONObject obj) throws IOException {
+        try {
+           //not part of GeoJSON
+            String name = obj.getString("name");
+            if (name == null) {
+                throw new IllegalArgumentException("Object must specify name property");
+            }
+    
+            JSONObject properties = obj.getJSONObject("properties");
+            List<Field> fields = new ArrayList<Field>();
+    
+            for (Iterator<?> it = properties.keys(); it.hasNext(); ) {
+                String key = it.next().toString();
+                JSONObject prop = properties.getJSONObject(key);
+    
+                String type = prop.getString("type");
+                Class<?> clazz = null; 
+    
+                //first try as geometry
+                if (Geom.Type.fromName(type) != null) {
+                    clazz = Geom.Type.fromName(type).getType();
+                }
+                else {
+                    //try as a primitive
+                    try {
+                        clazz = Class.forName("java.lang." + 
+                            Character.toUpperCase(type.charAt(0)) + type.substring(1));
+                    } catch (ClassNotFoundException e) {
+                        throw new IllegalArgumentException("type " +type+ " not supported"); 
+                    }
+                }
+    
+                CoordinateReferenceSystem crs = null;
+                if (prop.has("crs")) {
+                    crs = readCRS(prop.getJSONObject("crs"));
+                }
+    
+                fields.add(new Field(key, clazz, crs));
+            }
+    
+            return new Schema(name, fields);
+        }
+        catch(JSONException e) {
+            throw new IOException(e);
+        }
+    }
+
+    /**
+     * Reads a JSON object as a named crs.
+     */
+    public CoordinateReferenceSystem readCRS(JSONObject obj) throws IOException {
+        try {
+            String type = obj.getString("type");
+            if ("link".equalsIgnoreCase(type)) {
+                throw new IllegalArgumentException("Linked CRS objects not supported");
+            }
+    
+            String name = obj.getJSONObject("properties").getString("name");
+            if (name == null) {
+                throw new IllegalArgumentException("No properties.name object");
+            }
+    
+            return Proj.crs(name);
+        }
+        catch(JSONException e) {
+            throw new IOException(e);
+        }
     }
 
     Coordinate coord(JSONArray arr) throws JSONException {

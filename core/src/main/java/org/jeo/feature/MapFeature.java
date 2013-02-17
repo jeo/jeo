@@ -1,6 +1,7 @@
 package org.jeo.feature;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -60,11 +61,16 @@ public class MapFeature extends Feature {
     }
 
     @Override
-    public List<Object> values() {
+    public List<Object> list() {
         List<Object> list = new ArrayList<Object>();
         for (Field f : schema()) {
             list.add(get(f.getName()));
         }
         return list;
+    }
+
+    @Override
+    public Map<String,Object> map() {
+        return Collections.unmodifiableMap(values);
     }
 }

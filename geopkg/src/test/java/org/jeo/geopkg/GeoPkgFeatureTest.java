@@ -117,7 +117,7 @@ public class GeoPkgFeatureTest extends GeoPkgTestSupport {
 
     @Test
     public void testCreate() throws Exception {
-        Schema schema = Schema.build("widgets", 
+        Schema schema = Features.schema("widgets", 
             "geometry", Point.class, "name", String.class, "cost", Double.class);
 
         FeatureEntry entry = new FeatureEntry();

@@ -6,6 +6,13 @@ import org.osgeo.proj4j.ProjCoordinate;
 import com.vividsolutions.jts.geom.CoordinateSequence;
 import com.vividsolutions.jts.geom.CoordinateSequenceFilter;
 
+/**
+ * Applies a coordinate transform to the coordinates of a geometry object.
+ * <p> 
+ * This class isn't intended to be used directly but rather through {@link Proj#reproject()}}.
+ * </p>
+ * @see Proj#reproject(com.vividsolutions.jts.geom.Geometry, org.osgeo.proj4j.CoordinateReferenceSystem, org.osgeo.proj4j.CoordinateReferenceSystem)
+ */
 public class CoordinateTransformer implements CoordinateSequenceFilter{
 
     CoordinateTransform tx;

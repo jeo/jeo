@@ -5,8 +5,26 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+import com.vividsolutions.jts.geom.Geometry;
+
+/**
+ * Feature utility class.
+ * 
+ * @author Justin Deoliveira, OpenGeo
+ */
 public class Features {
 
+    /**
+     * Retypes a feature object to a new schema.
+     * <p>
+     * This method works by "pulling" the attributes defined by the fields of {@link Schema} from 
+     * the feature object. 
+     * </p>
+     * @param feature The original feature.
+     * @param schema The schema to retype to.
+     * 
+     * @return The retyped feature.
+     */
     public static Feature retype(Feature feature, Schema schema) {
         List<Object> values = new ArrayList<Object>();
         for (Field f : schema) {
@@ -16,11 +34,58 @@ public class Features {
         return new ListFeature(values, schema);
     }
 
+    /**
+     * Creates a feature object from a map.
+     */
     public static MapFeature create(Map<String, Object> map) {
-        return new MapFeature(map, null);
+        return create(null, map);
     }
 
+    /**
+     * Creates a feature object from a map with an explicit schema.
+     */
+    public static MapFeature create(Schema schema, Map<String, Object> map) {
+        return new MapFeature(map, schema);
+    }
+
+    /**
+     * Creates a feature object from a list with an explicit schema.
+     */
     public static ListFeature create(Schema schema, Object... values) {
         return new ListFeature(Arrays.asList(values), schema);
+    }
+
+    /**
+     * Creates a schema object consisting of a single geometry field named "geometry". 
+     * 
+     * @param name The schema name.
+     */
+    public static Schema schema(String name) {
+        return schema(name, "geometry", Geometry.class);
+    }
+
+    /**
+     * Creates a schema object.
+     * <p>
+     * Example usage:
+     * <pre>
+     * Features.schema("cities", "loc", Point.class, "name", String.class, "pop", Integer.class)
+     * </pre>
+     * </p>
+     * 
+     * @param name The schema name.
+     * @param fields A list of alternating String, Class pairs. 
+     */
+    public static Schema schema(String name, Object... fields) {
+        if (fields.length % 2 != 0) {
+            throw new IllegalArgumentException("fields must be specified as String,Class pairs");
+        }
+
+        List<Field> flds = new ArrayList<Field>();
+        for (int i = 0; i < fields.length; i += 2) {
+            flds.add(new Field((String) fields[i], (Class<?>)fields[i+1]));
+        }
+
+        return new Schema(name, flds);
     }
 }

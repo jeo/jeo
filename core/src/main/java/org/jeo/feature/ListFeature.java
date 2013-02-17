@@ -1,10 +1,19 @@
 package org.jeo.feature;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.vividsolutions.jts.geom.Geometry;
 
+/**
+ * Feature implementation backed by a List.
+ * <p>
+ * </p>
+ * @author Justin Deoliveira, OpenGeo
+ */
 public class ListFeature extends Feature {
 
     List<Object> values;
@@ -84,7 +93,16 @@ public class ListFeature extends Feature {
     }
 
     @Override
-    public List<Object> values() {
-        return values;
+    public List<Object> list() {
+        return Collections.unmodifiableList(values);
+    }
+
+    @Override
+    public Map<String, Object> map() {
+        LinkedHashMap<String, Object> map = new LinkedHashMap<String, Object>();
+        for (Field f : schema()) {
+            map.put(f.getName(), get(f.getName()));
+        }
+        return map;
     }
 }

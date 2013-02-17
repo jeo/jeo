@@ -10,10 +10,17 @@ import com.vividsolutions.jts.geom.MultiPoint;
 import com.vividsolutions.jts.geom.MultiPolygon;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
-import com.vividsolutions.jts.simplify.DouglasPeuckerSimplifier;
 
+/**
+ * Geometry module utility module. 
+ * 
+ * @author Justin Deoliveira, OpenGeo
+ */
 public class Geom {
 
+    /**
+     * Geometry type enumeration.
+     */
     public enum Type {
         POINT(Point.class),
         LINESTRING(LineString.class),
@@ -151,26 +158,37 @@ public class Geom {
         }
     }
 
-    public static Geometry simplify(Geometry g, double tol) {
-        return DouglasPeuckerSimplifier.simplify(g, tol);
-    }
-
+    /**
+     * Returns an iterable over the points of a multipoint.
+     */
     public static Iterable<Point> iterate(MultiPoint mp) {
         return new GeometryIterable<Point>(mp);
     }
 
+    /**
+     * Returns an iterable over the lines of a multilinestring.
+     */
     public static Iterable<LineString> iterate(MultiLineString ml) {
         return new GeometryIterable<LineString>(ml);
     }
 
+    /**
+     * Returns an iterable over the polygons of a multipolygon.
+     */
     public static Iterable<Polygon> iterate(MultiPolygon mp) {
         return new GeometryIterable<Polygon>(mp);
     }
     
+    /**
+     * Returns an iterable over the geometries of a geometry collection.. 
+     */
     public static Iterable<Geometry> iterate(GeometryCollection gc) {
         return new GeometryIterable<Geometry>(gc);
     }
 
+    /*
+     * Private iterable class.
+     */
     private static class GeometryIterable<T extends Geometry> implements Iterable<T> {
 
         GeometryCollection gc;
@@ -185,6 +203,9 @@ public class Geom {
         }
     }
 
+    /*
+     * Private iterator class.
+     */
     private static class GeometryIterator<T extends Geometry> implements Iterator<T> {
 
         int i = 0; 
@@ -199,6 +220,7 @@ public class Geom {
             return i < gc.getNumGeometries();
         }
 
+        @SuppressWarnings("unchecked")
         @Override
         public T next() {
             return (T) gc.getGeometryN(i++);

@@ -7,11 +7,25 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 
+/**
+ * A registry that loads workspaces from files in a specified directory.
+ *  
+ * @author Justin Deoliveira, OpenGeo
+ */
 public class DirectoryRegistry implements Registry {
 
+    /** base directory */
     File baseDir;
+
+    /** list of file extensions to restrict to */
     List<String> exts;
 
+    /**
+     * Constructs a new registry.
+     * 
+     * @param baseDir The directory to search for files in.
+     * @param exts Optional file name extensions to restrict look ups to.
+     */
     public DirectoryRegistry(File baseDir, String... exts) {
         this.baseDir = baseDir;
         this.exts = exts.length > 0 ? Arrays.asList(exts) : null; 

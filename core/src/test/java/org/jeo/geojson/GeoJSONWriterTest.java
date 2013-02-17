@@ -2,6 +2,8 @@ package org.jeo.geojson;
 
 import static org.junit.Assert.assertEquals;
 
+import java.io.IOException;
+
 import org.jeo.feature.Feature;
 import org.jeo.feature.Features;
 import org.jeo.feature.Schema;
@@ -21,25 +23,25 @@ public class GeoJSONWriterTest {
     }
 
     @Test
-    public void testPoint() {
+    public void testPoint() throws IOException {
         w.point(new GeometryBuilder().point(1,2));
         assertJSON("{'type':'Point','coordinates':[1,2]}");
     }
 
     @Test
-    public void testLineString() {
+    public void testLineString() throws IOException{
         w.lineString(new GeometryBuilder().lineString(1,2,3,4));
         assertJSON("{'type':'LineString','coordinates':[[1,2],[3,4]]}");
     }
 
     @Test
-    public void testPolygon() {
+    public void testPolygon() throws IOException{
         w.polygon(new GeometryBuilder().polygon(1,2,3,4,5,6,1,2));
         assertJSON("{'type':'Polygon','coordinates':[[[1,2],[3,4],[5,6],[1,2]]]}");
     }
 
     @Test
-    public void testPolygonWithHole() {
+    public void testPolygonWithHole() throws IOException{
         GeometryBuilder b = new GeometryBuilder();
         w.polygon(b.polygon(b.linearRing(100.0, 0.0, 101.0, 0.0, 101.0, 1.0, 100.0, 1.0, 100.0, 0.0), 
                 b.linearRing(100.2, 0.2, 100.8, 0.2, 100.8, 0.8, 100.2, 0.8, 100.2, 0.2)));
@@ -49,20 +51,20 @@ public class GeoJSONWriterTest {
     }
 
     @Test
-    public void testMultiPoint() {
+    public void testMultiPoint() throws IOException{
         w.multiPoint(new GeometryBuilder().multiPoint(1,2,3,4));
         assertJSON("{'type':'MultiPoint','coordinates':[[1,2],[3,4]]}");
     }
 
     @Test
-    public void testMultiLineString() {
+    public void testMultiLineString() throws IOException{
         GeometryBuilder b = new GeometryBuilder();
         w.multiLineString(b.multiLineString(b.lineString(1,2,3,4), b.lineString(5,6,7,8)));
         assertJSON("{'type':'MultiLineString','coordinates':[[[1,2],[3,4]],[[5,6],[7,8]]]}");
     }
 
     @Test
-    public void testMultiPolygon() {
+    public void testMultiPolygon()throws IOException {
         GeometryBuilder b = new GeometryBuilder();
         w.multiPolygon(b.multiPolygon(
             b.polygon(102.0, 2.0, 103.0, 2.0, 103.0, 3.0, 102.0, 3.0,102.0, 2.0),
@@ -75,7 +77,7 @@ public class GeoJSONWriterTest {
     }
 
     @Test
-    public void testGeometryCollection() {
+    public void testGeometryCollection() throws IOException{
         GeometryBuilder b = new GeometryBuilder();
         w.geometryCollection(
             b.geometryCollection(b.point(100.0, 0.0), b.lineString(101.0, 0.0,102.0, 1.0)));
@@ -85,8 +87,8 @@ public class GeoJSONWriterTest {
     }
 
     @Test
-    public void testFeature() {
-        Schema schema = Schema.build("widget", 
+    public void testFeature() throws IOException {
+        Schema schema = Features.schema("widget", 
             "geometry", Geometry.class, "name", String.class, "cost", Double.class);
 
         Feature f = Features.create(schema, new GeometryBuilder().point(0,0), "anvil", 10.99);
@@ -96,8 +98,8 @@ public class GeoJSONWriterTest {
     }
 
     @Test
-    public void testFeatureCollection() {
-        Schema schema = Schema.build("widget", 
+    public void testFeatureCollection() throws IOException{
+        Schema schema = Features.schema("widget", 
             "geometry", Geometry.class, "name", String.class, "cost", Double.class);
 
         GeometryBuilder b = new GeometryBuilder();

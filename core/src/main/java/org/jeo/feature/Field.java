@@ -4,10 +4,20 @@ import org.osgeo.proj4j.CoordinateReferenceSystem;
 
 import com.vividsolutions.jts.geom.Geometry;
 
+/**
+ * Describes an attribute of a {@link Feature}.
+ * 
+ * @author Justin Deoliveira, OpenGeo
+ */
 public class Field {
 
+    /** field name */
     String name;
+
+    /** field type */
     Class<?> type;
+
+    /** field crs */
     CoordinateReferenceSystem crs;
 
     public Field(String name, Class<?> type) {
@@ -20,18 +30,38 @@ public class Field {
         this.crs = crs;
     }
 
+    /**
+     * The name of the field.
+     */
     public String getName() {
         return name;
     }
 
+    /**
+     * The type of the field.
+     */
     public Class<?> getType() {
         return type;
     }
 
+    /**
+     * Determines if the field refers to a geometry type.
+     * <p>
+     * This method is short-hand for <code>Geometry.class.isAssignableFrom(geteType())</code>.
+     * <p>
+     * 
+     * @return The crs object, or <code>null</code>.
+     */
     public boolean isGeometry() {
         return Geometry.class.isAssignableFrom(type);
     }
 
+    /**
+     * Returns the coordinate reference system associated with the field, if set.
+     * <p>
+     * This value is typically only set when {@link #isGeometry()} returns <code>true</code>.
+     * </p>
+     */
     public CoordinateReferenceSystem getCRS() {
         return crs;
     }

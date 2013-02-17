@@ -7,6 +7,8 @@ import org.jeo.data.Cursor;
 import org.jeo.data.Tile;
 import org.jeo.data.TileGrid;
 import org.jeo.data.TileSet;
+import org.jeo.proj.Proj;
+import org.osgeo.proj4j.CoordinateReferenceSystem;
 
 import com.vividsolutions.jts.geom.Envelope;
 
@@ -33,6 +35,12 @@ public class GeoPkgTileSet implements TileSet {
             }
         }
         return null;
+    }
+
+    @Override
+    public CoordinateReferenceSystem getCRS() {
+        int srid = entry.getSrid();
+        return srid != -1 ? Proj.crs(srid) : null;
     }
 
     @Override

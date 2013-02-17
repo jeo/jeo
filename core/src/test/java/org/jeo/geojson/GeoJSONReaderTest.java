@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Set;
 
@@ -114,7 +115,7 @@ public class GeoJSONReaderTest {
     }
 
     @Test
-    public void testGeometryCollection() {
+    public void testGeometryCollection() throws IOException {
         GeometryCollection gc = (GeometryCollection) read("{ 'type': 'GeometryCollection', 'geometries': [ " +
             "{ 'type': 'Point', 'coordinates': [100.0, 0.0] }, " +
             "{ 'type': 'LineString', 'coordinates': [ [101.0, 0.0], [102.0, 1.0] ] } ] }");
@@ -130,7 +131,7 @@ public class GeoJSONReaderTest {
     }
 
     @Test
-    public void testFeature() {
+    public void testFeature() throws IOException {
         Feature f = (Feature) read("{ 'type': 'Feature', 'geometry': { 'type': 'Polygon', " +
             "'coordinates': [ [ [100.0, 0.0], [101.0, 0.0], [101.0, 1.0], [100.0, 1.0], [100.0, 0.0] ] ] }, " +
             "'properties': { 'prop0': 'this', 'prop1': 'that'} }");
@@ -138,12 +139,12 @@ public class GeoJSONReaderTest {
         assertTrue(f.geometry() instanceof Polygon);
 
         Set<String> set = Sets.newHashSet("this", "that");
-        set.removeAll(f.values());
+        set.removeAll(f.list());
         assertTrue(set.isEmpty());
     }
 
     @Test
-    public void testFeatureCollection() {
+    public void testFeatureCollection() throws IOException {
         @SuppressWarnings("unchecked")
         List<Feature> features = (List<Feature>) read("{ 'type': 'FeatureCollection', 'features': [ " +
             "{ 'type': 'Feature', 'geometry': {'type': 'Point', 'coordinates': [102.0, 0.5]}, " +
@@ -158,7 +159,7 @@ public class GeoJSONReaderTest {
         assertEquals(3, features.size());
     }
 
-    Object read(String json) {
+    Object read(String json) throws IOException {
         return r.read(json);
     }
 }

@@ -11,20 +11,42 @@ import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Point;
 
+/**
+ * Projection module utility class.
+ * 
+ * @author Justin Deoliveira, OpenGeo
+ */
 public class Proj {
 
     static CRSFactory csFactory = new CRSFactory();
     static CoordinateTransformFactory txFactory = new CoordinateTransformFactory();
     static GeometryBuilder gBuilder = new GeometryBuilder();
 
+    /**
+     * Looks up a crs object base on its EPSG identifier.  
+     * <p>
+     * This method is equivalent to calling <pre>crs("EPSG:" + srid)</pre> 
+     * </p>
+     * @return The matching crs object, or <code>null</code> if none found.
+     */
     public static CoordinateReferenceSystem crs(int srid) {
         return crs("EPSG:"+srid);
     }
 
+    /**
+     * Looks up a crs object base on its identifier.  
+     *
+     * @return The matching crs object, or <code>null</code> if none found.
+     */
     public static CoordinateReferenceSystem crs(String s) {
         return csFactory.createFromName(s);
     }
 
+    /**
+     * Returns the EPSG identifier for a crs object.  
+     *
+     * @return The epsg identifier, or null if the CRS has no epsg code.
+     */
     public static Integer epsgCode(CoordinateReferenceSystem crs) {
         String name = crs.getName();
         if (name != null) {
@@ -36,6 +58,14 @@ public class Proj {
         return null;
     }
 
+    /**
+     * Returns the valid bounds of the crs object.
+     * <p>
+     * <i>Warning</i>: This method is as currently implemented is inaccurate.  
+     * </p>
+     * @return An approximate bounds of validity for the crs object, or <code>null</code> if it 
+     *  can not be determined.
+     */
     public static Envelope bounds(CoordinateReferenceSystem crs) {
         //TODO: this method is wildly inaccurate, find a better way to determine bounds 
         // from a projection/crs        
@@ -55,6 +85,23 @@ public class Proj {
         return null;
     }
 
+    /**
+     * Reprojects a geometry object between two coordinate reference systems.
+     * <p>
+     * In the event a transformation between the two crs' can not be found this method throws
+     * {@link IllegalArgumentException}.
+     * 
+     * In the event the two specified coordinate reference systems are equal this method is a 
+     * no-op and returns the original geometry object. 
+     * </p>
+     * @param g The geometry to reproject.
+     * @param from The source coordinate reference system.
+     * @param to The target coordinate reference system.
+     * 
+     * @return The reprojected geometry.
+     * 
+     * @throws IllegalArgumentException If no coordinate transform can be found.
+     */
     public static <T extends Geometry> T reproject(T g, CoordinateReferenceSystem from, 
         CoordinateReferenceSystem to) {
 

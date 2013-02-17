@@ -1,5 +1,10 @@
 package org.jeo.data;
 
+/**
+ * Describes a tile matrix (grid).
+ * 
+ * @author Justin Deoliveira, OpenGeo
+ */
 public class TileGrid {
 
     Integer zoom;
@@ -7,9 +12,6 @@ public class TileGrid {
     Integer tileWidth, tileHeight;
     Double xRes;
     Double yRes;
-
-    public TileGrid() {
-    }
 
     public TileGrid(Integer zoom, Integer width, Integer height, Integer tileWidth, 
         Integer tileHeight, Double xRes, Double yRes) {
@@ -23,59 +25,52 @@ public class TileGrid {
         this.yRes = yRes;
     }
 
+    /**
+     * The zoom level of the tile grid.
+     */
     public Integer getZoom() {
         return zoom;
     }
 
-    public void setZoom(Integer zoom) {
-        this.zoom = zoom;
-    }
-
+    /**
+     * The number of columns of the tile grid.
+     */
     public Integer getWidth() {
         return width;
     }
 
-    public void setWidth(Integer width) {
-        this.width = width;
-    }
-
+    /**
+     * The number of rows of the tile grid.
+     */
     public Integer getHeight() {
         return height;
     }
 
-    public void setHeight(Integer height) {
-        this.height = height;
-    }
-
+    /**
+     * The width of a tile in the matrix, measured in pixels.
+     */
     public Integer getTileWidth() {
         return tileWidth;
     }
 
-    public void setTileWidth(Integer tileWidth) {
-        this.tileWidth = tileWidth;
-    }
-
+    /**
+     * The height of a tile in the matrix, measured in pixels.
+     */
     public Integer getTileHeight() {
         return tileHeight;
     }
 
-    public void setTileHeight(Integer tileHeight) {
-        this.tileHeight = tileHeight;
-    }
-
+    /**
+     * The horizontal resolution of the tile grid.
+     */
     public Double getXRes() {
         return xRes;
     }
 
-    public void setXRes(Double xRes) {
-        this.xRes = xRes;
-    }
-
+    /**
+     * The vertical resolution of the tile grid.
+     */
     public Double getYRes() {
         return yRes;
-    }
-
-    public void setYRes(Double yRes) {
-        this.yRes = yRes;
     }
 }

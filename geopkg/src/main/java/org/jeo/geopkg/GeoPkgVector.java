@@ -6,6 +6,8 @@ import org.jeo.data.Cursor;
 import org.jeo.data.Vector;
 import org.jeo.feature.Feature;
 import org.jeo.feature.Schema;
+import org.jeo.proj.Proj;
+import org.osgeo.proj4j.CoordinateReferenceSystem;
 
 import com.vividsolutions.jts.geom.Envelope;
 
@@ -22,6 +24,12 @@ public class GeoPkgVector implements Vector {
     @Override
     public Schema getSchema() throws IOException {
         return geopkg.schema(entry);
+    }
+
+    @Override
+    public CoordinateReferenceSystem getCRS() {
+        int srid = entry.getSrid();
+        return srid != -1 ? Proj.crs(srid) : null;
     }
 
     @Override

@@ -93,7 +93,6 @@
   <modules>
     <module>core</module>
     <module>geopkg</module>
-    <module>mbtiles</module>
     <module>nano</module>
     <module>guava</module>
     <module>gmaps</module>

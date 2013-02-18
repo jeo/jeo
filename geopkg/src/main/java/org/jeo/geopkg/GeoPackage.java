@@ -219,7 +219,8 @@ public class GeoPackage implements Workspace {
         String sql = format(
                 "SELECT a.*, b.f_geometry_column, b.type, b.coord_dimension" +
                  " FROM %s a, %s b" + 
-                " WHERE a.table_name = ?" + 
+                " WHERE a.table_name = b.f_table_name" +
+                  " AND a.table_name = ?" + 
                   " AND a.data_type = ?", 
               GEOPACKAGE_CONTENTS, GEOMETRY_COLUMNS);
 

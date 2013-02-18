@@ -18,6 +18,7 @@ import org.jeo.feature.Feature;
 import org.jeo.feature.Features;
 import org.jeo.feature.ListFeature;
 import org.jeo.feature.Schema;
+import org.jeo.geom.Geom;
 import org.jeo.geom.GeometryBuilder;
 import org.jeo.geopkg.Entry.DataType;
 import org.junit.After;
@@ -142,6 +143,12 @@ public class GeoPkgFeatureTest extends GeoPkgTestSupport {
             c.close();
         }
 
+        //test re-loading the entry
+        entry = geopkg.feature("widgets");
+        assertNotNull(entry);
+
+        assertEquals(Geom.Type.POINT, entry.getGeometryType());
+        
         Database db = geopkg.getDatabase();
         Stmt st = db.prepare(
             "SELECT data_type FROM geopackage_contents WHERE table_name = ?");

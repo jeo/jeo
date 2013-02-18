@@ -17,6 +17,24 @@ import com.vividsolutions.jts.geom.Envelope;
 public interface Layer {
 
     /**
+     * Name of the layer.
+     * <p>
+     * The value used to look up a layer in a workspace.
+     * </p>
+     */
+    String getName();
+
+    /**
+     * Human readable title of the layer, or <code>null</code>. 
+     */
+    String getTitle();
+
+    /**
+     * Human readable description of the layer, or <code>null</code>. 
+     */
+    String getDescription();
+
+    /**
      * The native coordinate reference system of the layer, or <code>null</code> if unknown. 
      */
     CoordinateReferenceSystem getCRS();

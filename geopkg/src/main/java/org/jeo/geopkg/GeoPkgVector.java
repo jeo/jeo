@@ -22,6 +22,21 @@ public class GeoPkgVector implements Vector {
     }
 
     @Override
+    public String getName() {
+        return entry.getTableName();
+    }
+
+    @Override
+    public String getTitle() {
+        return entry.getIdentifier();
+    }
+
+    @Override
+    public String getDescription() {
+        return entry.getDescription();
+    }
+
+    @Override
     public Schema getSchema() throws IOException {
         return geopkg.schema(entry);
     }

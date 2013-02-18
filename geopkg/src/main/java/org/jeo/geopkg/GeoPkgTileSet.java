@@ -23,6 +23,21 @@ public class GeoPkgTileSet implements TileSet {
     }
 
     @Override
+    public String getName() {
+        return entry.getTableName();
+    }
+
+    @Override
+    public String getTitle() {
+        return entry.getIdentifier();
+    }
+
+    @Override
+    public String getDescription() {
+        return entry.getDescription();
+    }
+
+    @Override
     public List<TileGrid> grids() {
         return entry.getTileMatricies();
     }

@@ -5,8 +5,12 @@ import org.osgeo.proj4j.CRSFactory;
 import org.osgeo.proj4j.CoordinateReferenceSystem;
 import org.osgeo.proj4j.CoordinateTransform;
 import org.osgeo.proj4j.CoordinateTransformFactory;
+import org.osgeo.proj4j.Proj4jException;
+import org.osgeo.proj4j.ProjCoordinate;
 import org.osgeo.proj4j.proj.Projection;
 
+import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.CoordinateSequenceFilter;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Point;
@@ -88,7 +92,7 @@ public class Proj {
     /**
      * Reprojects a geometry object between two coordinate reference systems.
      * <p>
-     * In the event a transformation between the two crs' can not be found this method throws
+     * In the event a transformation between the two crs objects can not be found this method throws
      * {@link IllegalArgumentException}.
      * 
      * In the event the two specified coordinate reference systems are equal this method is a 
@@ -105,12 +109,80 @@ public class Proj {
     public static <T extends Geometry> T reproject(T g, CoordinateReferenceSystem from, 
         CoordinateReferenceSystem to) {
 
+        CoordinateTransform tx = findTransform(from, to);
+        if (tx instanceof IdentityCoordinateTransform) {
+            return g;
+        }
+
+        g.apply((CoordinateSequenceFilter) new CoordinateTransformer(tx));
+        return g;
+    }
+
+    /**
+     * Reprojects an envelope between two coordinate reference systems.
+     * <p>
+     * In the event a transformation between the two crs objects can not be found this method throws
+     * {@link IllegalArgumentException}.
+     * 
+     * In the event the two specified coordinate reference systems are equal this method is a 
+     * no-op and returns the original envelope. 
+     * </p>
+     * @param e The envelope to reproject.
+     * @param from The source coordinate reference system.
+     * @param to The target coordinate reference system.
+     * 
+     * @return The reprojected envelope.
+     * 
+     * @throws IllegalArgumentException If no coordinate transform can be found.
+     */
+    public static Envelope reproject(Envelope e, CoordinateReferenceSystem from, 
+        CoordinateReferenceSystem to) {
+        
+        CoordinateTransform tx = findTransform(from, to);
+        if (tx instanceof IdentityCoordinateTransform) {
+            return e;
+        }
+
+        CoordinateTransformer txr = new CoordinateTransformer(tx);
+
+        Coordinate c1 = new Coordinate(e.getMinX(), e.getMinY());
+        Coordinate c2 = new Coordinate(e.getMaxX(), e.getMaxY());
+        txr.filter(c1);
+        txr.filter(c2);
+
+        return new Envelope(c1.x, c2.x, c1.y, c2.y);
+    }
+
+    private static CoordinateTransform findTransform(CoordinateReferenceSystem from, 
+        CoordinateReferenceSystem to) {
+
+        if (from.equals(to)) {
+            return new IdentityCoordinateTransform();
+        }
+
         CoordinateTransform tx = txFactory.createTransform(from, to);
         if (tx == null) {
             throw new IllegalArgumentException("Unable to find transform from " + from + " to " + to);
         }
+        return tx;
+    }
 
-        g.apply(new CoordinateTransformer(tx));
-        return g;
+    private static class IdentityCoordinateTransform implements CoordinateTransform {
+
+        @Override
+        public CoordinateReferenceSystem getSourceCRS() {
+            return null;
+        }
+
+        @Override
+        public CoordinateReferenceSystem getTargetCRS() {
+            return null;
+        }
+
+        @Override
+        public ProjCoordinate transform(ProjCoordinate src, ProjCoordinate tgt) throws Proj4jException {
+            return src;
+        }
+    
     }
 }

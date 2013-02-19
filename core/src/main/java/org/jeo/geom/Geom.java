@@ -2,6 +2,7 @@ package org.jeo.geom;
 
 import java.util.Iterator;
 
+import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryCollection;
 import com.vividsolutions.jts.geom.LineString;
@@ -230,5 +231,13 @@ public class Geom {
         public void remove() {
             throw new UnsupportedOperationException();
         }
+    }
+
+    /**
+     * Converts the envelope to a Polygon.
+     */
+    public static Polygon toPolygon(Envelope e) {
+        return new GeometryBuilder().polygon(e.getMinX(), e.getMinY(), e.getMaxX(), e.getMinY(), 
+            e.getMaxX(), e.getMaxY(), e.getMinX(), e.getMaxY(), e.getMinX(), e.getMinY());
     }
 }

@@ -25,11 +25,15 @@ public class Proj {
     /** 
      * The canonical geographic coordinate reference system.
      */
-    public static final CoordinateReferenceSystem EPSG_4326 = Proj.crs("EPSG:4326");
+    public static final CoordinateReferenceSystem EPSG_4326;
 
     static CRSFactory csFactory = new CRSFactory();
     static CoordinateTransformFactory txFactory = new CoordinateTransformFactory();
     static GeometryBuilder gBuilder = new GeometryBuilder();
+
+    static {
+        EPSG_4326 = Proj.crs("EPSG:4326");
+    }
 
     /**
      * Looks up a crs object base on its EPSG identifier.  

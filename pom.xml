@@ -116,6 +116,7 @@
     <module>guava</module>
     <module>gmaps</module>
     <module>shp</module>
+    <module>agg</module>
   </modules>
 
   <properties>

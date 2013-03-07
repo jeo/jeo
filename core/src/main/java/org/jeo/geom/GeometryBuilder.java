@@ -359,7 +359,17 @@ public class GeometryBuilder {
         return geomFact
                 .createMultiPoint(new Point[] { point(x1, y1), point(x2, y2) });
     }
-    
+
+    /**
+     * Creates a 2D MultiPoint.
+     * 
+     * @param ord the XY ordinates
+     * @return a MutliPoint
+     */
+    public MultiPoint multiPoint(double... ord) {
+        return geomFact.createMultiPoint(createCS(ord, 2));
+    }
+
     /**
      * Creates a MultiPoint with 2 3D Points.
      * 

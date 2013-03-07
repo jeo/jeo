@@ -1,6 +1,7 @@
 package org.jeo.data;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.Iterator;
 
 /**
@@ -117,6 +118,48 @@ public class Cursors {
         @Override
         public Iterator<T> iterator() {
             return Cursors.iterator(this);
+        }
+    }
+
+    /**
+     * Creates a cursor from an existing collection.
+     */
+    public static <T> Cursor<T> create(Collection<T> collection) {
+        return create(collection.iterator());
+    }
+
+    /**
+     * Creates a cursor from an existing iterator.
+     */
+    public static <T> Cursor<T> create(Iterator<T> it) {
+        return new IteratorCursor<T>(it);
+    }
+
+    private static class IteratorCursor<T> implements Cursor<T> {
+        Iterator<T> it;
+
+        IteratorCursor(Iterator<T> it) {
+            this.it = it;
+        }
+
+        @Override
+        public Iterator<T> iterator() {
+            return it;
+        }
+
+        @Override
+        public boolean hasNext() throws IOException {
+            return it.hasNext();
+        }
+
+        @Override
+        public T next() throws IOException {
+            return it.next();
+        }
+
+        @Override
+        public void close() throws IOException {
+            // TODO Auto-generated method stub
         }
     }
 }

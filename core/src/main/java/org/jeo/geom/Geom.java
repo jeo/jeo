@@ -89,9 +89,9 @@ public class Geom {
          * @return the {@code Geometries} for the argument's class, or {@code null}
          *         if the argument is {@code null}
          */
-        public static Type fromObject(Geometry geom) {
+        public static Type from(Geometry geom) {
             if (geom != null) {
-                return fromClass(geom.getClass());
+                return from(geom.getClass());
             }
         
             return null;
@@ -104,7 +104,7 @@ public class Geom {
          *
          * @return the constant for this class
          */
-        public static Type fromClass(Class<?> geomClass) {
+        public static Type from(Class<?> geomClass) {
             for (Type gt : Type.values()) {
                 if (gt.type == geomClass) {
                     return gt;
@@ -149,7 +149,7 @@ public class Geom {
          * 
          * @return The constant for the name.
          */
-        public static Type fromName(String name) {
+        public static Type from(String name) {
             for (Type gt : Type.values()) {
                 if (gt.getName().equalsIgnoreCase(name)) {
                     return gt;

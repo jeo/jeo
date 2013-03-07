@@ -237,7 +237,7 @@ public class GeoJSONWriter extends JSONStringer {
             }
         }
 
-        switch(Geom.Type.fromObject(g)) {
+        switch(Geom.Type.from(g)) {
         case POINT:
             return point((Point)g);
         case LINESTRING:

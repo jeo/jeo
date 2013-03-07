@@ -328,8 +328,8 @@ public class GeoJSONReader {
                 Class<?> clazz = null; 
     
                 //first try as geometry
-                if (Geom.Type.fromName(type) != null) {
-                    clazz = Geom.Type.fromName(type).getType();
+                if (Geom.Type.from(type) != null) {
+                    clazz = Geom.Type.from(type).getType();
                 }
                 else {
                     //try as a primitive

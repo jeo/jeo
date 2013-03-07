@@ -59,7 +59,7 @@ public class GeometryAdapter {
     }
 
     public Object adapt(Geometry geom) {
-        switch(Geom.Type.fromObject(geom)) {
+        switch(Geom.Type.from(geom)) {
         case POINT:
             return adapt((Point)geom);
         case LINESTRING:

@@ -439,7 +439,7 @@ public class GeoPackage implements Workspace {
         for (Field f : schema) {
             sql.name(f.getName()).add(" ");
             if (f.isGeometry()) {
-                sql.add(Geom.Type.fromClass(f.getType()).getSimpleName());
+                sql.add(Geom.Type.from(f.getType()).getSimpleName());
             }
             else {
                 Types t = Types.forClass(f.getType());
@@ -550,7 +550,7 @@ public class GeoPackage implements Workspace {
 
     Geom.Type findGeometryType(Schema schema) {
         Field geom = schema.geometry();
-        return geom != null ? Geom.Type.fromClass(geom.getType()) : null;
+        return geom != null ? Geom.Type.from(geom.getType()) : null;
     }
 
     String findGeometryName(Schema schema) {
@@ -563,7 +563,7 @@ public class GeoPackage implements Workspace {
 
         initEntry(e, st);
         e.setGeometryColumn(st.column_string(10));
-        e.setGeometryType(Geom.Type.fromName(st.column_string(11)));
+        e.setGeometryType(Geom.Type.from(st.column_string(11)));
         e.setCoordDimension((st.column_int(12)));
         return e;
     }

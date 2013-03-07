@@ -12,7 +12,7 @@ import com.vividsolutions.jts.geom.Envelope;
  *
  * @author Justin Deoliveira, OpenGeo
  */
-public interface Vector extends Layer {
+public interface Vector extends Dataset {
 
     /**
      * The schema for the layer.

@@ -66,14 +66,14 @@ public class CachedRegistry implements Registry {
     static class CachedWorkspace implements Workspace {
 
         Workspace ws;
-        LoadingCache<String,Layer> layerCache;
+        LoadingCache<String,Dataset> layerCache;
 
         CachedWorkspace(Workspace ws, int cacheSize) {
             this.ws = ws;
             layerCache = CacheBuilder.newBuilder().maximumSize(cacheSize)
-                .build(new CacheLoader<String, Layer>() {
+                .build(new CacheLoader<String, Dataset>() {
                     @Override
-                    public Layer load(String key) throws Exception {
+                    public Dataset load(String key) throws Exception {
                         return CachedWorkspace.this.ws.get(key);
                     }
             });
@@ -90,7 +90,7 @@ public class CachedRegistry implements Registry {
         }
 
         @Override
-        public Layer get(String layer) throws IOException {
+        public Dataset get(String layer) throws IOException {
             try {
                 return layerCache.get(layer);
             } catch (ExecutionException e) {

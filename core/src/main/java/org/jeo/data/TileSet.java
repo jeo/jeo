@@ -8,7 +8,7 @@ import java.util.List;
  * 
  * @author Justin Deoliveira, OpenGeo
  */
-public interface TileSet extends Layer {
+public interface TileSet extends Dataset {
 
     /**
      * The immutable list of tile grids of the layer.

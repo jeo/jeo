@@ -28,7 +28,7 @@ public class CachedRegistryTest {
 
     @Test
     public void testLayer() throws IOException {
-        Layer l = createMock(Layer.class);
+        Dataset l = createMock(Dataset.class);
         
         Workspace ws = createMock(Workspace.class);
         expect(ws.get("bar")).andReturn(l).once();

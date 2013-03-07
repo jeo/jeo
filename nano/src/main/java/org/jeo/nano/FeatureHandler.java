@@ -20,7 +20,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.jeo.data.Cursor;
-import org.jeo.data.Layer;
+import org.jeo.data.Dataset;
 import org.jeo.data.Registry;
 import org.jeo.data.Vector;
 import org.jeo.data.Workspace;
@@ -152,7 +152,7 @@ public class FeatureHandler extends Handler {
         Workspace ws = findWorkspace(request);
 
         Matcher m = (Matcher) request.getContext().get(Matcher.class);
-        Layer l = ws.get(m.group(2));
+        Dataset l = ws.get(m.group(2));
         if (l == null || !(l instanceof Vector)) {
             //no such layer
             throw new HttpException(HTTP_NOTFOUND, "No such feature layer: " + m.group(0));

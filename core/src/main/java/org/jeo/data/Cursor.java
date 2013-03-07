@@ -4,7 +4,7 @@ import java.io.Closeable;
 import java.io.IOException;
 
 /**
- * An iterator like object used to read contents of {@link Layer} objects. 
+ * An iterator like object used to read contents of {@link Dataset} objects. 
  * <p>
  * Example usage:
  * <pre>

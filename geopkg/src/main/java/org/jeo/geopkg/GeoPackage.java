@@ -24,7 +24,7 @@ import jsqlite.TableResult;
 
 import org.jeo.data.Cursor;
 import org.jeo.data.FileWorkspaceFactory;
-import org.jeo.data.Layer;
+import org.jeo.data.Dataset;
 import org.jeo.data.Tile;
 import org.jeo.data.TileGrid;
 import org.jeo.data.Workspace;
@@ -160,7 +160,7 @@ public class GeoPackage implements Workspace {
     }
 
     @Override
-    public Layer get(String layer) throws IOException {
+    public Dataset get(String layer) throws IOException {
         FeatureEntry fe = feature(layer);
         if (fe != null) {
             return new GeoPkgVector(fe, this);

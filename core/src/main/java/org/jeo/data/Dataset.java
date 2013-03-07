@@ -14,7 +14,7 @@ import com.vividsolutions.jts.geom.Envelope;
  * @see Vector
  * @see TileSet
  */
-public interface Layer {
+public interface Dataset {
 
     /**
      * Name of the layer.
@@ -42,7 +42,8 @@ public interface Layer {
     /**
      * The extent of the dataset in its native coordinate reference system.
      * <p>
-     * In the event the layer is empty this method should return <code>null</code>.
+     * In the event the layer is empty this method should return an null envelope with 
+     * {@link Envelope#setToNull()}.
      * </p>
      */
     Envelope bounds() throws IOException;

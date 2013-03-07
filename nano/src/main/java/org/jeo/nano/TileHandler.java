@@ -12,7 +12,7 @@ import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.jeo.data.Layer;
+import org.jeo.data.Dataset;
 import org.jeo.data.Registry;
 import org.jeo.data.Tile;
 import org.jeo.data.TileGrid;
@@ -57,7 +57,7 @@ public class TileHandler extends Handler {
             return new Response(HTTP_NOTFOUND, MIME_PLAINTEXT, "No such workspace: " + m.group(1));
         }
 
-        Layer l;
+        Dataset l;
         try {
             l = ws.get(m.group(2));
         } catch (IOException e) {

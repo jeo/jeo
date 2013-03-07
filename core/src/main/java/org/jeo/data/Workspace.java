@@ -6,11 +6,11 @@ import java.util.Iterator;
 import org.jeo.feature.Schema;
 
 /**
- * A container of {@link Layer} objects.
+ * A container of {@link Dataset} objects.
  * 
  * @author Justin Deoliveira, OpenGeo
  */
-public interface Workspace {
+public interface Workspace extends Disposable {
 
     /**
      * The names of all layers of the workspace.
@@ -26,7 +26,7 @@ public interface Workspace {
      * 
      * @return The Layer object, or <code>null</code> if no such layer exists.
      */
-    Layer get(String layer) throws IOException;
+    Dataset get(String layer) throws IOException;
 
     /**
      * Creates a new vector layer in the workspace.
@@ -37,7 +37,7 @@ public interface Workspace {
      * @param schema The schema of the vector layer.
      * 
      */
-    Vector create(Schema schema) throws IOException, UnsupportedOperationException;
+    Vector create(Schema schema) throws IOException;
 
     /**
      * Disposes the workspace.

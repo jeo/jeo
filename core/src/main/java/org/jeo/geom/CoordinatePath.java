@@ -56,6 +56,10 @@ public abstract class CoordinatePath implements Iterator<Coordinate> {
      * @return
      */
     public static CoordinatePath create(Geometry g, boolean generalize, double dx, double dy) {
+        if (g == null || g.isEmpty()) {
+            return new EmptyPath(g);
+        }
+
         switch(Geom.Type.from(g)) {
         case POINT:
             return new PointPath((Point) g);

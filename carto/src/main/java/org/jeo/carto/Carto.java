@@ -29,7 +29,7 @@ public class Carto {
     }
 
     public static class Polygon {
-        public static final Element FILL = new Element("polygon-color");
+        public static final Element FILL = new Element("polygon-fill");
         public static final Element OPACITY = new Element("polygon-opacity");
         public static final Element GAMMA = new Element("polygon-gamma");
         public static final Element GAMMA_METHOD = new Element("polygon-gamma-method");

@@ -3,6 +3,7 @@ package org.jeo.carto;
 import java.util.Deque;
 
 import org.jeo.filter.Filter;
+import org.jeo.map.Rule;
 
 import com.metaweb.lessen.tokenizers.Tokenizer;
 import com.metaweb.lessen.tokens.Token;
@@ -21,6 +22,9 @@ public class RuleHandler extends TokenHandler {
                 //push the name on the stack
                 stack.push(tok.getCleanText());
                 break;
+            case Operator:
+                stack.push(Rule.Type.CLASS);
+                break;
             case Delimiter:
                 String d = tok.getCleanText();
                 if ("[".equals(d)) {
@@ -30,7 +34,7 @@ public class RuleHandler extends TokenHandler {
                 else if ("{".equals(d)) {
                     //new selector
                     Rule s = new Rule();
-
+                    
                     //check for constraint on stack
                     if (stack.peek() instanceof Filter) {
                         s.setFilter((Filter) stack.pop());
@@ -39,8 +43,12 @@ public class RuleHandler extends TokenHandler {
                     //check for a name
                     if (stack.peek() instanceof String) {
                         s.setName(stack.pop().toString());
+                        s.setType(Rule.Type.NAME);
                     }
 
+                    if (stack.peek() instanceof Rule.Type) {
+                        s.setType((Rule.Type)stack.pop());
+                    }
                     stack.push(s);
                 }
                 else if (";".equals(d)) {
@@ -64,6 +72,17 @@ public class RuleHandler extends TokenHandler {
                 }
                 break;
             case Identifier:
+                if ("map".equalsIgnoreCase(tok.getCleanText())) {
+                    //do nothing
+                    break;
+                }
+
+                if (stack.peek() == Rule.Type.CLASS) {
+                    //start of class name
+                    stack.push(tok.getCleanText());
+                    break;
+                }
+
                 //start declaration
                 return new PropertyHandler();
             default:

@@ -1,11 +1,14 @@
 package org.jeo.carto;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 import java.util.List;
 
 import org.jeo.cql.CQL;
 import org.jeo.cql.ParseException;
+import org.jeo.map.Rule;
+import org.jeo.map.Stylesheet;
 import org.junit.Test;
 
 import com.metaweb.lessen.Utilities;
@@ -23,10 +26,10 @@ public class CartoTest {
                      "}";
 
         CartoParser p = new CartoParser();
-        List<Rule> result = p.parse(css);
+        Stylesheet result = p.parse(css);
 
-        assertEquals(1, result.size());
-        Rule s = result.get(0);
+        assertEquals(1, result.getRules().size());
+        Rule s = result.getRules().get(0);
         assertEquals("#layer", s.getName());
 
         assertEquals("#c00", s.get("line-color"));
@@ -34,17 +37,17 @@ public class CartoTest {
     }
 
     @Test
-    public void testParseSimpleConstraint() throws ParseException {
+    public void testParseSimpleFilter() throws ParseException {
         String css = "#layer[foo < 3] {" +
                 "  line-color: #c00ffd;" + 
                 "  line-width: 1;" +
                 "}";
 
         CartoParser p = new CartoParser();
-        List<Rule> result = p.parse(css);
+        Stylesheet  result = p.parse(css);
 
-        assertEquals(1, result.size());
-        Rule s = result.get(0);
+        assertEquals(1, result.getRules().size());
+        Rule s = result.getRules().get(0);
         assertEquals("#layer", s.getName());
         assertNotNull(s.getFilter());
         assertEquals(CQL.parse("foo < 3"), s.getFilter());
@@ -54,37 +57,37 @@ public class CartoTest {
     }
 
     @Test
-    public void testParseAndConstraint() throws Exception {
+    public void testParseAndFilter() throws Exception {
         String css = "#layer[foo < 3][bar >= 10] {" +
                 "  line-width: 1;" +
                 "}";
 
         CartoParser p = new CartoParser();
-        List<Rule> result = p.parse(css);
+        Stylesheet result = p.parse(css);
 
-        assertEquals(1, result.size());
-        Rule s = result.get(0);
+        assertEquals(1, result.getRules().size());
+        Rule s = result.getRules().get(0);
         assertNotNull(s.getFilter());
         assertEquals(CQL.parse("foo < 3 AND bar >= 10"), s.getFilter());
     }
 
     @Test
-    public void testParseOrConstraint() throws ParseException {
+    public void testParseOrFilter() throws ParseException {
         String css = "#layer[foo < 3], [bar >= 10] {" +
                 "  line-width: 1;" +
                 "}";
 
         CartoParser p = new CartoParser();
-        List<Rule> result = p.parse(css);
+        Stylesheet result = p.parse(css);
 
-        assertEquals(1, result.size());
-        Rule s = result.get(0);
+        assertEquals(1, result.getRules().size());
+        Rule s = result.getRules().get(0);
         assertNotNull(s.getFilter());
         assertEquals(CQL.parse("foo < 3 OR bar >= 10"), s.getFilter());
     }
 
     @Test
-    public void testParseNestedSelectors() throws ParseException {
+    public void testParseNested() throws ParseException {
         String css = 
                 "#layer {" +
                 "  line-width: 1;" +
@@ -97,22 +100,62 @@ public class CartoTest {
                 "}";
 
         CartoParser p = new CartoParser();
-        List<Rule> result = p.parse(css);
+        Stylesheet result = p.parse(css);
 
-        assertEquals(1, result.size());
-        assertEquals("#layer", result.get(0).getName());
+        List<Rule> rules = result.getRules();
+        assertEquals(1, rules.size());
+        assertEquals("#layer", rules.get(0).getName());
         
-        assertEquals(1, result.get(0).get("line-width"));
+        assertEquals(1, rules.get(0).get("line-width"));
         
-        assertEquals(2, result.get(0).getNested().size());
+        assertEquals(2, rules.get(0).getNested().size());
 
-        Rule n1 = result.get(0).getNested().get(0);
+        Rule n1 = rules.get(0).getNested().get(0);
         assertEquals(CQL.parse("foo < 3"), n1.getFilter());
         assertEquals("#aaa", n1.get("line-color"));
 
-        Rule n2 = result.get(0).getNested().get(1);
+        Rule n2 = rules.get(0).getNested().get(1);
         assertEquals(CQL.parse("bar >= 10"), n2.getFilter());
         assertEquals("#bbb", n2.get("line-color"));
+    }
+
+    @Test
+    public void testParseMap() {
+        String css = 
+                "Map {" + 
+                "  background-color: #ffffff;" + 
+                "}" + 
+                "#layer {" +
+                "  line-color: #c00;" + 
+                "  line-width: 1;" + 
+                "}";
+
+        Stylesheet result = new CartoParser().parse(css);
+        assertEquals("#ffffff", result.get("background-color"));
+
+        assertEquals(1, result.getRules().size());
+        
+        Rule r = result.getRules().get(0);
+        assertEquals("#layer", r.getName());
+        assertEquals(Rule.Type.NAME, r.getType());
+        assertEquals("#c00", r.get("line-color"));
+        assertEquals(Integer.valueOf(1), r.get("line-width"));
+    }
+
+    @Test
+    public void testParseClass() {
+        String css = 
+            ".class {" +
+            "  line-color: #c00;" + 
+            "  line-width: 1;" + 
+            "}";
+
+        Stylesheet result = new CartoParser().parse(css);
+        Rule r = result.getRules().get(0);
+        assertEquals("class", r.getName());
+        assertEquals(Rule.Type.CLASS, r.getType());
+        assertEquals("#c00", r.get("line-color"));
+        assertEquals(Integer.valueOf(1), r.get("line-width"));
     }
 
     void dumpTokens(String css) {

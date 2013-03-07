@@ -1,23 +1,25 @@
 package org.jeo.carto;
 
-import java.util.ArrayList;
 import java.util.Deque;
-import java.util.List;
+import java.util.Map;
+
+import org.jeo.map.Rule;
+import org.jeo.map.Stylesheet;
 
 import com.metaweb.lessen.tokenizers.Tokenizer;
 import com.metaweb.lessen.tokens.Token;
 
 public class RootHandler extends TokenHandler {
 
-    List<Rule> selectors = new ArrayList<Rule>();
+    Stylesheet stylesheet = new Stylesheet();
 
-    public List<Rule> getSelectors() {
-        return selectors;
+    public Stylesheet getStylesheet() {
+        return stylesheet;
     }
 
     @Override
     public TokenHandler handle(Tokenizer t, Deque<Object> stack) {
-        
+
         while(t.getToken() != null) {
             Token tok = t.getToken();
 
@@ -29,10 +31,28 @@ public class RootHandler extends TokenHandler {
             case Delimiter:
                 String d = tok.getCleanText();
                 if ("}".equals(d)) {
-                    //finished selector
-                    selectors.add((Rule) stack.pop());
+                    //finished selector, or map declaration
+                    if (stack.peek() instanceof Rule) {
+                        stylesheet.getRules().add((Rule) stack.pop());    
+                    }
+                    else if (stack.peek() instanceof Map) {
+                        stylesheet.getProperties().putAll(((Map)stack.pop()));
+                    }
+                    else {
+                        throw new IllegalStateException();
+                    }
                 }
                 break;
+            case Operator:
+                String o = tok.getCleanText();
+                if (".".equals(o)) {
+                    return new RuleHandler();
+                }
+                throwUnexpectedToken(tok);
+            case Identifier:
+                if ("map".equalsIgnoreCase(tok.getCleanText())) {
+                    return new MapHandler();
+                }
             default:
                 throwUnexpectedToken(tok);
             }
@@ -42,45 +62,5 @@ public class RootHandler extends TokenHandler {
 
         return null;
     }
-//            case Delimiter:
-//            
-//                String d = tok.getCleanText();
-//                
-//                if ("[".equals(d)) {
-//                    
-//                }
-//                else if (";".equals(d)) {
-//                    Declaration decl = (Declaration) stack.pop();
-//                    ((Selector)stack.peek()).getDeclarations().add(decl);
-//                }
-//                else if ("}".equals(d)) {
-//                    Selector selector = (Selector) stack.pop();
-//                    
-//                }
-//                break;
-//            case HashName:
-//                return new SelectorHandler();
-//                if (stack.peek() instanceof Declaration) {
-//                    Declaration decl = (Declaration) stack.pop();
-//                    decl.setValue(tok.getCleanText());
-//
-//                    ((Selector)stack.peek()).getDeclarations().add(decl);
-//                }
-//                else {
-//                    stack.push(new Selector(tok.getCleanText()));
-//                }
-//                
-//                break;
-//            case Identifier:
-//                if (stack.peek() instanceof Selector) {
-//                    stack.push(new Declaration(tok.getCleanText()));
-//                }
-//                break;
-//            case Number:
-//                ((Declaration)stack.peek()).setValue(tok.getCleanText());
-//                break;
-//            }
-            
-            
-//        }
+
 }

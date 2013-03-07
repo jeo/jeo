@@ -26,17 +26,20 @@ public class MapBuilder {
     public MapBuilder size(int width, int height) {
         map.setWidth(width);
         map.setHeight(height);
+        size = true;
         return this;
     }
 
     public MapBuilder bounds(Envelope bounds) {
         //TODO: set size based on bbox aspect ratio
         map.setBounds(bounds);
+        this.bounds = true;
         return this;
     }
 
     public MapBuilder crs(CoordinateReferenceSystem crs) {
         map.setCRS(crs);
+        this.crs = true;
         return this;
     }
 
@@ -119,7 +122,7 @@ public class MapBuilder {
             Envelope e = map.getBounds();
             if (e != null) {
                 map.setWidth(Map.DEFAULT_WIDTH);
-                map.setHeight((int)(map.getWidth() * e.getWidth() / e.getHeight()));
+                map.setHeight((int)(map.getWidth() * e.getHeight() / e.getWidth()));
             }
         }
 

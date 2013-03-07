@@ -56,7 +56,7 @@ public abstract class CoordinatePath implements Iterator<Coordinate> {
      * @return
      */
     public static CoordinatePath create(Geometry g, boolean generalize, double dx, double dy) {
-        switch(Geom.Type.fromObject(g)) {
+        switch(Geom.Type.from(g)) {
         case POINT:
             return new PointPath((Point) g);
         case LINESTRING:
@@ -91,6 +91,12 @@ public abstract class CoordinatePath implements Iterator<Coordinate> {
 
         prev = new Coordinate(Double.NaN, Double.NaN);
         curr = new Coordinate(Double.NaN, Double.NaN);
+    }
+
+    public abstract Geometry getGeometry();
+
+    public Coordinate getCoordinate() {
+        return curr;
     }
 
     public PathStep getStep() {

@@ -1,6 +1,7 @@
 package org.jeo.geom;
 
 import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryCollection;
 
 public class GeometryCollectionPath extends CoordinatePath {
@@ -14,6 +15,11 @@ public class GeometryCollectionPath extends CoordinatePath {
         super(generalize, dx, dy);
         this.gcol = gcol;
         doReset();
+    }
+
+    @Override
+    public Geometry getGeometry() {
+        return gcol;
     }
 
     @Override

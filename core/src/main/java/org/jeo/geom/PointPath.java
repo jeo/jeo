@@ -1,6 +1,7 @@
 package org.jeo.geom;
 
 import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Point;
 
 public class PointPath extends CoordinatePath {
@@ -11,6 +12,11 @@ public class PointPath extends CoordinatePath {
     PointPath(Point p) {
         this.p = p;
         doReset();
+    }
+
+    @Override
+    public Geometry getGeometry() {
+        return p;
     }
 
     @Override

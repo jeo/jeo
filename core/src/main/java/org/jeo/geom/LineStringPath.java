@@ -1,6 +1,7 @@
 package org.jeo.geom;
 
 import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.LineString;
 
 public class LineStringPath extends CoordinatePath {
@@ -15,6 +16,11 @@ public class LineStringPath extends CoordinatePath {
         super(generalize, dx, dy);
         this.line = line;
         doReset();
+    }
+
+    @Override
+    public Geometry getGeometry() {
+        return line;
     }
 
     @Override

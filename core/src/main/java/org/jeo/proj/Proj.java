@@ -22,6 +22,11 @@ import com.vividsolutions.jts.geom.Point;
  */
 public class Proj {
 
+    /** 
+     * The canonical geographic coordinate reference system.
+     */
+    public static final CoordinateReferenceSystem EPSG_4326 = Proj.crs("EPSG:4326");
+
     static CRSFactory csFactory = new CRSFactory();
     static CoordinateTransformFactory txFactory = new CoordinateTransformFactory();
     static GeometryBuilder gBuilder = new GeometryBuilder();

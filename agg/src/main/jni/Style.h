@@ -13,6 +13,9 @@ enum GammaMethod {
 
 struct Style {
   agg::comp_op_e comp_op;
+
+  Style(): comp_op(agg::comp_op_src_over) {
+  }
 };
 
 struct LineStyle: Style {

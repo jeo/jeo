@@ -10,10 +10,10 @@ extern "C" {
 /*
  * Class:     org_jeo_agg_AggRenderer
  * Method:    createRenderingPipeline
- * Signature: (III)J
+ * Signature: (II)J
  */
 JNIEXPORT jlong JNICALL Java_org_jeo_agg_AggRenderer_createRenderingPipeline
-  (JNIEnv *, jobject, jint, jint, jint);
+  (JNIEnv *, jobject, jint, jint);
 
 /*
  * Class:     org_jeo_agg_AggRenderer
@@ -26,18 +26,18 @@ JNIEXPORT void JNICALL Java_org_jeo_agg_AggRenderer_setTransform
 /*
  * Class:     org_jeo_agg_AggRenderer
  * Method:    drawLine
- * Signature: (JLorg/jeo/agg/VertexSource;[FFBB[D)V
+ * Signature: (JLorg/jeo/agg/VertexSource;[FFBB[DLjava/lang/String;)V
  */
 JNIEXPORT void JNICALL Java_org_jeo_agg_AggRenderer_drawLine
-  (JNIEnv *, jobject, jlong, jobject, jfloatArray, jfloat, jbyte, jbyte, jdoubleArray);
+  (JNIEnv *, jobject, jlong, jobject, jfloatArray, jfloat, jbyte, jbyte, jdoubleArray, jstring);
 
 /*
  * Class:     org_jeo_agg_AggRenderer
  * Method:    drawPolygon
- * Signature: (JLorg/jeo/agg/VertexSource;[F[FF)V
+ * Signature: (JLorg/jeo/agg/VertexSource;[F[FFLjava/lang/String;)V
  */
 JNIEXPORT void JNICALL Java_org_jeo_agg_AggRenderer_drawPolygon
-  (JNIEnv *, jobject, jlong, jobject, jfloatArray, jfloatArray, jfloat);
+  (JNIEnv *, jobject, jlong, jobject, jfloatArray, jfloatArray, jfloat, jstring);
 
 /*
  * Class:     org_jeo_agg_AggRenderer

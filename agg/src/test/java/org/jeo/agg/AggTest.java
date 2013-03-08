@@ -22,6 +22,8 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.rules.TestName;
 
+import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.Polygon;
 
 public class AggTest {
@@ -49,14 +51,23 @@ public class AggTest {
         AggRenderer r = new AggRenderer();
         r.init(map);
 
-        Polygon poly = (Polygon) new GeometryBuilder().point(0,0).buffer(50);
+        GeometryBuilder gb = new GeometryBuilder();
+
+        Polygon poly = (Polygon) gb.point(0,0).buffer(50);
+        LineString line = gb.lineString(-75,-75,75,75); 
 
         Rule rule = new Rule();
         rule.put("line-width", 2);
         rule.put("line-color", RGB.Green);
         rule.put("polygon-fill", RGB.Gray);
-
         r.drawPolygon(poly, null, rule);
+
+        rule.put("line-width", 2);
+        rule.put("line-color", RGB.Black);
+        rule.put("comp-op", "invert");
+        r.drawLine(line,  null, rule);
+        
+        //r.writePPM("/Users/jdeolive/foo.ppm");
         show(r, map);
     }
 
@@ -67,10 +78,10 @@ public class AggTest {
         
         SinglePixelPackedSampleModel sampleModel = 
             new SinglePixelPackedSampleModel( DataBufferInt.TYPE_INT, map.getWidth(), map.getHeight(), 
-            new int[]{0x00ff0000, 0x0000ff00, 0x000000ff});
+            new int[]{0xff000000, 0x00ff0000, 0x0000ff00,0x000000ff});
         Raster raster = Raster.createRaster(sampleModel, buf, null);
 
-        BufferedImage img = new BufferedImage(map.getWidth(), map.getHeight(), BufferedImage.TYPE_INT_RGB);
+        BufferedImage img = new BufferedImage(map.getWidth(), map.getHeight(), BufferedImage.TYPE_INT_ARGB);
         img.setData(raster);
         show(img);
     }

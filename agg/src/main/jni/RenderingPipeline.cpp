@@ -8,6 +8,7 @@
 #include "agg_renderer_scanline.h"
 #include "agg_rasterizer_scanline_aa.h"
 #include "agg_scanline_p.h"
+#include "agg_scanline_u.h"
 #include "agg_path_storage.h"
 #include "agg_conv_curve.h"
 #include "agg_conv_stroke.h"
@@ -17,12 +18,12 @@
 #include "VertexSource.h"
 
 template<class V> RenderingPipeline<V>::RenderingPipeline (
-    unsigned w, unsigned h, unsigned d) {
+    unsigned w, unsigned h) : depth(4) {
 
-  unsigned char* buffer = new unsigned char[w * h * d];
-  memset(buffer, 255, w * h * d);
+  unsigned char* buffer = new unsigned char[w * h * depth];
+  memset(buffer, 255, w * h * depth);
 
-  rbuf.attach(buffer, w, h, w * d);
+  rbuf.attach(buffer, w, h, w * depth);
   at = agg::trans_affine();
 }
 
@@ -42,9 +43,18 @@ template<class V> void RenderingPipeline<V>::draw_line(
   agg::conv_transform<agg::conv_stroke<V> > tx_stroke(stroke, at);
 
   // create the renderer
-  agg::pixfmt_rgb24 pixf(rbuf);
-  agg::renderer_base<agg::pixfmt_rgb24> rb(pixf);
-  agg::renderer_scanline_aa_solid<agg::renderer_base<agg::pixfmt_rgb24> > renderer(rb);
+  typedef agg::rgba8 color_type;
+  typedef agg::order_rgba order_type;
+  typedef agg::pixel32_type pixel_type;
+  typedef agg::comp_op_adaptor_rgba_pre<color_type, order_type> blender_type;
+  typedef agg::pixfmt_custom_blend_rgba<blender_type, agg::rendering_buffer> pixfmt_comp_type;
+  typedef agg::renderer_base<pixfmt_comp_type> renderer_type;
+
+  pixfmt_comp_type pixf(rbuf);
+  pixf.comp_op(style.comp_op);
+
+  agg::renderer_base<pixfmt_comp_type> rb(pixf);
+  agg::renderer_scanline_aa_solid<renderer_type> renderer(rb);
   renderer.color(style.color);
 
   // create the rasterizer
@@ -78,8 +88,17 @@ template<class V> void RenderingPipeline<V>::draw_line(
 template<class V> void RenderingPipeline<V>::draw_polygon(
     V poly, const PolyStyle &style) {
 
-  agg::pixfmt_rgb24 pixf(rbuf);
-  agg::renderer_base<agg::pixfmt_rgb24> rb(pixf);
+  typedef agg::rgba8 color_type;
+  typedef agg::order_rgba order_type;
+  typedef agg::pixel32_type pixel_type;
+  typedef agg::comp_op_adaptor_rgba_pre<color_type, order_type> blender_type;
+  typedef agg::pixfmt_custom_blend_rgba<blender_type, agg::rendering_buffer> pixfmt_comp_type;
+  typedef agg::renderer_base<pixfmt_comp_type> renderer_type;
+
+  pixfmt_comp_type pixf(rbuf);
+  pixf.comp_op(style.comp_op);
+
+  agg::renderer_base<pixfmt_comp_type> rb(pixf);
 
   agg::rasterizer_scanline_aa<> rasterizer;
   rasterizer.reset();
@@ -91,7 +110,7 @@ template<class V> void RenderingPipeline<V>::draw_polygon(
   stroke.width(style.line.width);
   agg::conv_transform<agg::conv_stroke<agg::conv_curve<V> > > tx_stroke(stroke,at);
 
-  agg::renderer_scanline_aa_solid<agg::renderer_base<agg::pixfmt_rgb24> > renderer(rb);
+  agg::renderer_scanline_aa_solid<renderer_type> renderer(rb);
   agg::scanline_p8 scanline;
 
   rasterizer.add_path(tx_curve);

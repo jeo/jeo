@@ -38,11 +38,11 @@ public class AggRenderer {
     long rp;
 
     public void init(Map map) {
-        rp = createRenderingPipeline(map.getWidth(), map.getHeight(), 3);
+        rp = createRenderingPipeline(map.getWidth(), map.getHeight());
         setTransform(rp, map.scaleX(), map.scaleX(), map.translateX(), map.translateY());
     }
 
-    private native long createRenderingPipeline(int width, int height, int depth);
+    private native long createRenderingPipeline(int width, int height);
 
     private native void setTransform(long handle, double scx, double scy, double tx, double ty);
 
@@ -60,11 +60,13 @@ public class AggRenderer {
         if (dash != null && dash.length % 2 != 0) {
             throw new IllegalArgumentException("line-dasharray pattern must be even length");
         }
-        drawLine(rp, new VertexSource(g), color(color), width, join, cap, dash);
+
+        String compOp = rule.string("comp-op", null);
+        drawLine(rp, new VertexSource(g), color(color), width, join, cap, dash, compOp);
     }
 
     private native void drawLine(long handle, VertexSource g, float[] color, float width, byte join,
-        byte cap, double[] dash);
+        byte cap, double[] dash, String compOp);
 
     void drawPolygon(Geometry g, Feature f, Rule rule) {
         RGB polyFill = (RGB) rule.get("polygon-fill", RGB.Gray);
@@ -74,12 +76,13 @@ public class AggRenderer {
         lineColor = lineColor.alpha(((Number) rule.get("line-opacity", 1f)).floatValue());
 
         float lineWidth = ((Number)rule.get("line-width", 1f)).floatValue();
+        String compOp = rule.string("comp-op", null);
 
-        drawPolygon(rp, new VertexSource(g), color(polyFill), color(lineColor), lineWidth);
+        drawPolygon(rp, new VertexSource(g), color(polyFill), color(lineColor), lineWidth, compOp);
     }
 
     private native void drawPolygon(long handle, VertexSource g, float[] fillColor, 
-            float[] lineColor, float lineWidth);
+            float[] lineColor, float lineWidth, String compOp);
 
     public void writePPM(String path) {
         writePPM(rp, path);

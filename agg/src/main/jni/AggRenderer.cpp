@@ -1,4 +1,4 @@
-#include <stdio.h>
+#include <iostream>
 #include <string.h>
 #include <jni.h>
 #include "agg_array.h"
@@ -16,6 +16,7 @@
 #include "AggRenderer.h"
 #include "RenderingPipeline.h"
 #include "VertexSource.h"
+#include "CompOp.h"
 
 void color(agg::rgba8 *rgb, const jfloatArray arr, JNIEnv *env) {
   jfloat *f = env->GetFloatArrayElements(arr, JNI_FALSE);
@@ -27,15 +28,23 @@ void color(agg::rgba8 *rgb, const jfloatArray arr, JNIEnv *env) {
   env->ReleaseFloatArrayElements(arr, f, 0);
 }
 
+void compop(Style* style, jstring comp_op, JNIEnv *env) {
+  const char* c = env->GetStringUTFChars(comp_op, JNI_FALSE);
+  std::string str = c;
+
+  style->comp_op = CompOp::map[str];
+  env->ReleaseStringUTFChars(comp_op, c); 
+}
+
 RenderingPipeline<VertexSource> * get_rp(jlong h) {
   return (RenderingPipeline<VertexSource> *) h;
 }
 
 JNIEXPORT jlong JNICALL Java_org_jeo_agg_AggRenderer_createRenderingPipeline
-  (JNIEnv *env, jobject obj, jint width, jint height, jint depth) {
+  (JNIEnv *env, jobject obj, jint width, jint height) {
 
   RenderingPipeline<VertexSource> *rp = 
-      new RenderingPipeline<VertexSource>(width, height, depth);
+      new RenderingPipeline<VertexSource>(width, height);
   return (jlong) rp;
 }
 
@@ -50,13 +59,17 @@ JNIEXPORT void JNICALL Java_org_jeo_agg_AggRenderer_setTransform
 JNIEXPORT void JNICALL Java_org_jeo_agg_AggRenderer_drawLine
   (JNIEnv *env, jobject obj, jlong rph, jobject line, 
   jfloatArray line_color, jfloat width, jbyte join, jbyte cap, 
-  jdoubleArray dash) {
+  jdoubleArray dash, jstring comp_op) {
 
   LineStyle style;
   color(&style.color, line_color, env);
   style.width = width; 
   style.join = (agg::line_join_e) join;
   style.cap = (agg::line_cap_e) join;
+
+  if (comp_op) {
+    compop(&style, comp_op, env);
+  }
 
   if (dash) {
     jdouble *d = env->GetDoubleArrayElements(dash, JNI_FALSE);
@@ -75,7 +88,8 @@ JNIEXPORT void JNICALL Java_org_jeo_agg_AggRenderer_drawLine
 
 JNIEXPORT void JNICALL Java_org_jeo_agg_AggRenderer_drawPolygon
   (JNIEnv *env, jobject obj, jlong rph, jobject poly, 
-  jfloatArray fill_color, jfloatArray line_color, jfloat line_width) {
+  jfloatArray fill_color, jfloatArray line_color, jfloat line_width,
+  jstring comp_op) {
 
   PolyStyle style;
   color(&style.fill_color, fill_color, env);
@@ -83,6 +97,9 @@ JNIEXPORT void JNICALL Java_org_jeo_agg_AggRenderer_drawPolygon
   style.line.width = line_width;
   color(&style.line.color, line_color, env);
 
+  if (comp_op) {
+    compop(&style, comp_op, env);
+  }
   VertexSource source(env, poly);
   RenderingPipeline<VertexSource> *rp = get_rp(rph);
   rp->draw_polygon(source, style);
@@ -101,7 +118,7 @@ JNIEXPORT void JNICALL Java_org_jeo_agg_AggRenderer_writePPM
     int h = rp->rbuf.height();
         
     fprintf(fd, "P6 %d %d 255 ", w, h);
-    fwrite(rp->rbuf.buf(), 1, w * h * 3, fd);
+    fwrite(rp->rbuf.buf(), 1, w * h * rp->depth, fd);
     fclose(fd);
   }
 
@@ -121,6 +138,7 @@ JNIEXPORT jintArray JNICALL Java_org_jeo_agg_AggRenderer_data
   int buf_size = rbuf.height()*rbuf.stride_abs();
   for (int i = 0; i < size; i++) {
     int x = *b++;
+    x = x << 8 | *b++;
     x = x << 8 | *b++;
     x = x << 8 | *b++;
     fill[i] = x;

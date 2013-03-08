@@ -12,9 +12,10 @@ template <class V> class RenderingPipeline {
 
  public:
     
+  int depth;
   agg::rendering_buffer rbuf;
 
-  RenderingPipeline(unsigned width, unsigned height, unsigned depth);
+  RenderingPipeline(unsigned width, unsigned height);
 
   void set_transform(double scx, double scy, double tx, double ty);
 

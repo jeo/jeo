@@ -48,10 +48,12 @@ public class GeoJSON {
      * @param obj The object to encode.
      *
      * @return GeoJSON string. 
-     * 
-     * @throws IOException In the event of an encoding error.
      */
-    public static String toString(Object obj) throws IOException {
-        return new GeoJSONWriter().write(obj).toString();
+    public static String toString(Object obj) {
+        try {
+            return new GeoJSONWriter().write(obj).toString();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

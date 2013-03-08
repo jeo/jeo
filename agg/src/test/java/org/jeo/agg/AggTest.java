@@ -11,6 +11,10 @@ import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferInt;
 import java.awt.image.Raster;
 import java.awt.image.SinglePixelPackedSampleModel;
+import java.io.File;
+import java.io.IOException;
+
+import javax.imageio.ImageIO;
 
 import org.jeo.geom.GeometryBuilder;
 import org.jeo.map.Map;
@@ -46,7 +50,7 @@ public class AggTest {
         Assume.assumeNoException(caught);
     }
     @Test
-    public void test() {
+    public void test() throws IOException {
         Map map = new MapBuilder().size(500, 256).map();
         AggRenderer r = new AggRenderer();
         r.init(map);
@@ -64,14 +68,16 @@ public class AggTest {
 
         rule.put("line-width", 2);
         rule.put("line-color", RGB.Black);
-        rule.put("comp-op", "invert");
+        rule.put("comp-op", "color-burn");
         r.drawLine(line,  null, rule);
         
+        BufferedImage img = img(r, map); 
+        //ImageIO.write(img, "PNG", new File("/Users/jdeolive/foo.png"));
         //r.writePPM("/Users/jdeolive/foo.ppm");
-        show(r, map);
+        show(img);
     }
 
-    void show(AggRenderer r, Map map) {
+    BufferedImage img(AggRenderer r, Map map) {
         int[] data = r.data();
 
         DataBufferInt buf = new DataBufferInt(data, data.length);
@@ -83,7 +89,7 @@ public class AggTest {
 
         BufferedImage img = new BufferedImage(map.getWidth(), map.getHeight(), BufferedImage.TYPE_INT_ARGB);
         img.setData(raster);
-        show(img);
+        return img;
     }
     void show(final BufferedImage img) {
         if (!Boolean.getBoolean("java.awt.headless")) {

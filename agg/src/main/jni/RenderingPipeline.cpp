@@ -21,7 +21,7 @@ template<class V> RenderingPipeline<V>::RenderingPipeline (
     unsigned w, unsigned h) : depth(4) {
 
   unsigned char* buffer = new unsigned char[w * h * depth];
-  memset(buffer, 255, w * h * depth);
+  //memset(buffer, 255, w * h * depth);
 
   rbuf.attach(buffer, w, h, w * depth);
   at = agg::trans_affine();

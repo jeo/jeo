@@ -134,14 +134,4 @@ public class Rule {
     public void merge(Rule other) {
         props.putAll(other.getProperties());
     }
-
-    public static void main(String[] args) {
-        //double[] x = new double[]{};
-        Object x = new Double[]{};
-
-        //System.out.println(x instanceof double[]);
-        System.out.println(x instanceof Double[]);
-        System.out.println(x.getClass().isArray());
-    }
-
 }

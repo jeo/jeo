@@ -156,6 +156,7 @@
     <module>geotools</module>
     <module>geogit</module>
     <module>postgis</module>
+    <module>mongo</module>
     <module>java2d</module>
     <module>agg</module>
     <module>carto</module>

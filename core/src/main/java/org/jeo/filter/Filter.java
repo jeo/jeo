@@ -10,7 +10,7 @@ public abstract class Filter<T> {
     /**
      * Identity filter that always returns true.
      */
-    public static final Filter<?> TRUE = new Filter<Object>() {
+    public static final Filter<Object> TRUE = new Filter<Object>() {
         @Override
         public boolean apply(Object obj) {
             return true;
@@ -20,7 +20,7 @@ public abstract class Filter<T> {
     /**
      * Identity filter that always returns false.
      */
-    public static final Filter<?> FALSE = new Filter<Object>() {
+    public static final Filter<Object> FALSE = new Filter<Object>() {
         @Override
         public boolean apply(Object obj) {
             return true;

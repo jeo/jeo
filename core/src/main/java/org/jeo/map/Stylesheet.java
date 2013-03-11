@@ -5,9 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.jeo.feature.Feature;
-import org.jeo.map.Rule.Type;
-
 /**
  * Defines the rules used to symbolize a map.
  * <p>
@@ -57,27 +54,27 @@ public class Stylesheet {
         return rules;
     }
 
-    
-    public Rule apply(Layer l, Feature f) {
-        Rule result = new Rule();
-
+    public List<Rule> select(RuleVisitor visitor) {
+        List<Rule> match = new ArrayList<Rule>();
         for (Rule r : rules) {
-            boolean match = false;
-            if (r.getType() == Type.NAME && r.getName().equals(l.getName())) {
-                match = true;
+            if (visitor.visit(r, this)) {
+                match.add(r);
             }
-
-            if (!match && r.getFilter().apply(f)) {
-                match = true;
-            }
-
-            if (match) {
-                result.merge(r);
-            }
-
-            //TODO: nested rules
         }
+        return match;
+    }
 
-        return result;
+    public List<Rule> select(final String name, final Selector.Type type) {
+        return select(new RuleVisitor() {
+            @Override
+            public boolean visit(Rule rule, Stylesheet stylesheet) {
+                for (Selector s : rule.getSelectors()) {
+                    if (name.equals(s.getName()) && type.equals(s.getType())) {
+                        return true;
+                    }
+                }
+                return false;
+            }
+        });
     }
 }

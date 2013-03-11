@@ -4,6 +4,7 @@ import org.jeo.feature.Feature;
 import org.jeo.map.Map;
 import org.jeo.map.RGB;
 import org.jeo.map.Rule;
+import org.jeo.map.Stylesheet;
 
 import com.vividsolutions.jts.geom.Geometry;
 
@@ -39,15 +40,24 @@ public class AggRenderer {
 
     public void init(Map map) {
         rp = createRenderingPipeline(map.getWidth(), map.getHeight());
-        setTransform(rp, map.scaleX(), map.scaleX(), map.translateX(), map.translateY());
+
+        setTransform(rp, map.scaleX(), -1*map.scaleY(), map.translateX(), map.translateY());
+
+        Stylesheet style = map.getStyle();
+        RGB bg = (RGB) style.get("background-color", null);
+        if (bg != null) {
+            setBackground(rp, color(bg));
+        }
     }
 
     private native long createRenderingPipeline(int width, int height);
 
     private native void setTransform(long handle, double scx, double scy, double tx, double ty);
 
+    private native void setBackground(long handle, float[] color);
+
     void drawLine(Geometry g, Feature f, Rule rule) {
-        RGB color = (RGB) rule.get("line-color", RGB.Black);
+        RGB color = (RGB) rule.get("line-color", RGB.black);
         float width = rule.number("line-width", 1f);
 
         byte join = LineCap.value(rule.string("line-join", "miter"));
@@ -69,11 +79,11 @@ public class AggRenderer {
         byte cap, double[] dash, String compOp);
 
     void drawPolygon(Geometry g, Feature f, Rule rule) {
-        RGB polyFill = (RGB) rule.get("polygon-fill", RGB.Gray);
-        polyFill = polyFill.alpha(((Number) rule.get("polygon-opacity", 1f)).floatValue());
-
-        RGB lineColor = (RGB) rule.get("line-color", RGB.Black);
-        lineColor = lineColor.alpha(((Number) rule.get("line-opacity", 1f)).floatValue());
+        RGB polyFill = (RGB) rule.get("polygon-fill", RGB.gray);
+        polyFill = polyFill.alpha(rule.number("polygon-opacity", 1f));
+        
+        RGB lineColor = (RGB) rule.get("line-color", RGB.black);
+        lineColor = lineColor.alpha(rule.number("line-opacity", 1f));
 
         float lineWidth = ((Number)rule.get("line-width", 1f)).floatValue();
         String compOp = rule.string("comp-op", null);

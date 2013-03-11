@@ -56,6 +56,16 @@ JNIEXPORT void JNICALL Java_org_jeo_agg_AggRenderer_setTransform
   rp->set_transform(scx, scy, tx, ty);
 }
 
+JNIEXPORT void JNICALL Java_org_jeo_agg_AggRenderer_setBackground
+  (JNIEnv *env, jobject obj, jlong rph, jfloatArray bgcolor) {
+
+  agg::rgba8 bgcol;
+  color(&bgcol, bgcolor, env);
+
+  RenderingPipeline<VertexSource> *rp = get_rp(rph); 
+  rp->set_background(bgcol);
+}
+
 JNIEXPORT void JNICALL Java_org_jeo_agg_AggRenderer_drawLine
   (JNIEnv *env, jobject obj, jlong rph, jobject line, 
   jfloatArray line_color, jfloat width, jbyte join, jbyte cap, 

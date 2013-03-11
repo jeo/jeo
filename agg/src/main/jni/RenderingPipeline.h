@@ -19,6 +19,8 @@ template <class V> class RenderingPipeline {
 
   void set_transform(double scx, double scy, double tx, double ty);
 
+  void set_background(agg::rgba8 color);
+
   void draw_line(V line, const LineStyle &style);
 
   void draw_polygon(V poly, const PolyStyle &style);

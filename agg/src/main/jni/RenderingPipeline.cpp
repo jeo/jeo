@@ -32,29 +32,43 @@ template<class V> void RenderingPipeline<V>::set_transform(
   at = agg::trans_affine(scx, 0, 0, scy, tx, ty);
 }
 
+template<class V> void RenderingPipeline<V>::set_background(agg::rgba8 color) {
+   unsigned n = rbuf.width() * rbuf.height() * 4;
+   unsigned char *p = rbuf.buf();
+   for(int i = 0; i < n; i+=4) {
+     *p++ = color.r;
+     *p++ = color.g; 
+     *p++ = color.b; 
+     *p++ = color.a; 
+   }
+}
+
 template<class V> void RenderingPipeline<V>::draw_line(
     V line, const LineStyle &style) {
 
+  typedef agg::conv_transform<V> LineType;
+
+  // apply transform to line
+  LineType tx_line(line, at);
+
   // create base stroke
-  agg::conv_stroke<V> stroke(line); 
+  typedef agg::conv_stroke<LineType> StrokeType;
+  StrokeType stroke(tx_line);
   stroke.width(style.width);
 
-  // apply the transform
-  agg::conv_transform<agg::conv_stroke<V> > tx_stroke(stroke, at);
-
   // create the renderer
-  typedef agg::rgba8 color_type;
-  typedef agg::order_rgba order_type;
-  typedef agg::pixel32_type pixel_type;
-  typedef agg::comp_op_adaptor_rgba_pre<color_type, order_type> blender_type;
-  typedef agg::pixfmt_custom_blend_rgba<blender_type, agg::rendering_buffer> pixfmt_comp_type;
-  typedef agg::renderer_base<pixfmt_comp_type> renderer_type;
+  typedef agg::rgba8 ColorType;
+  typedef agg::order_rgba OrderType;
+  typedef agg::pixel32_type PixelType;
+  typedef agg::comp_op_adaptor_rgba_pre<ColorType, OrderType> BlenderType;
+  typedef agg::pixfmt_custom_blend_rgba<BlenderType, agg::rendering_buffer> PixfmtCompType;
+  typedef agg::renderer_base<PixfmtCompType> RendererType;
 
-  pixfmt_comp_type pixf(rbuf);
+  PixfmtCompType pixf(rbuf);
   pixf.comp_op(style.comp_op);
 
-  agg::renderer_base<pixfmt_comp_type> rb(pixf);
-  agg::renderer_scanline_aa_solid<renderer_type> renderer(rb);
+  agg::renderer_base<PixfmtCompType> rb(pixf);
+  agg::renderer_scanline_aa_solid<RendererType> renderer(rb);
   renderer.color(style.color);
 
   // create the rasterizer
@@ -64,21 +78,22 @@ template<class V> void RenderingPipeline<V>::draw_line(
   if (style.dash_array.size() > 0) {
     stroke.width(0);
 
-    typedef agg::conv_transform<agg::conv_stroke<V> > base_stroke;
-
     //dash the stroke
-    agg::conv_dash<base_stroke> dash_stroke(tx_stroke);
+    typedef agg::conv_dash<StrokeType> DashType;
+    DashType dash_stroke(stroke);
+
     std::list<double>::const_iterator it = style.dash_array.begin();
     while(it != style.dash_array.end()) {
       dash_stroke.add_dash(*it++, *it++);
     }
 
-    agg::conv_stroke<agg::conv_dash<base_stroke> > stroke_dash(dash_stroke);
+    //stroke the dash
+    agg::conv_stroke<DashType> stroke_dash(dash_stroke);
     stroke_dash.width(style.width);
     rasterizer.add_path(stroke_dash);
   }
   else {
-    rasterizer.add_path(tx_stroke);
+    rasterizer.add_path(stroke);
   }
 
   agg::scanline_p8 scanline;
@@ -88,36 +103,38 @@ template<class V> void RenderingPipeline<V>::draw_line(
 template<class V> void RenderingPipeline<V>::draw_polygon(
     V poly, const PolyStyle &style) {
 
-  typedef agg::rgba8 color_type;
-  typedef agg::order_rgba order_type;
-  typedef agg::pixel32_type pixel_type;
-  typedef agg::comp_op_adaptor_rgba_pre<color_type, order_type> blender_type;
-  typedef agg::pixfmt_custom_blend_rgba<blender_type, agg::rendering_buffer> pixfmt_comp_type;
-  typedef agg::renderer_base<pixfmt_comp_type> renderer_type;
+  typedef agg::rgba8 ColorType;
+  typedef agg::order_rgba OrderType;
+  typedef agg::comp_op_adaptor_rgba_pre<ColorType, OrderType> BlenderType;
+  typedef agg::pixfmt_custom_blend_rgba<BlenderType, agg::rendering_buffer> PixfmtCompType;
+  typedef agg::renderer_base<PixfmtCompType> RendererType;
 
-  pixfmt_comp_type pixf(rbuf);
+  PixfmtCompType pixf(rbuf);
   pixf.comp_op(style.comp_op);
 
-  agg::renderer_base<pixfmt_comp_type> rb(pixf);
+  agg::renderer_base<PixfmtCompType> rb(pixf);
 
   agg::rasterizer_scanline_aa<> rasterizer;
   rasterizer.reset();
 
-  agg::conv_curve<V> curve(poly);
-  agg::conv_transform<agg::conv_curve<V> > tx_curve(curve, at);
+  typedef agg::conv_transform<V> PolyType;
+  PolyType tx_poly(poly, at);
 
-  agg::conv_stroke<agg::conv_curve<V> > stroke(curve); 
+  typedef agg::conv_curve<PolyType> CurveType;
+  CurveType curve(tx_poly);
+
+  typedef agg::conv_stroke<CurveType> StrokeType;
+  StrokeType stroke(curve);
   stroke.width(style.line.width);
-  agg::conv_transform<agg::conv_stroke<agg::conv_curve<V> > > tx_stroke(stroke,at);
 
-  agg::renderer_scanline_aa_solid<renderer_type> renderer(rb);
+  agg::renderer_scanline_aa_solid<RendererType> renderer(rb);
   agg::scanline_p8 scanline;
 
-  rasterizer.add_path(tx_curve);
+  rasterizer.add_path(curve);
   renderer.color(style.fill_color);
   agg::render_scanlines(rasterizer, scanline, renderer);
 
-  rasterizer.add_path(tx_stroke);
+  rasterizer.add_path(stroke);
   renderer.color(style.line.color);
   agg::render_scanlines(rasterizer, scanline, renderer);
 }

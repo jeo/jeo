@@ -25,6 +25,14 @@ JNIEXPORT void JNICALL Java_org_jeo_agg_AggRenderer_setTransform
 
 /*
  * Class:     org_jeo_agg_AggRenderer
+ * Method:    setBackground
+ * Signature: (J[F)V
+ */
+JNIEXPORT void JNICALL Java_org_jeo_agg_AggRenderer_setBackground
+  (JNIEnv *, jobject, jlong, jfloatArray);
+
+/*
+ * Class:     org_jeo_agg_AggRenderer
  * Method:    drawLine
  * Signature: (JLorg/jeo/agg/VertexSource;[FFBB[DLjava/lang/String;)V
  */

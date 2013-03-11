@@ -52,7 +52,7 @@ public class ShapefileCursor implements Cursor<Feature> {
         }
         List<Object> values = new ArrayList<Object>();
 
-        values.add(next.getSimplifiedShape());
+        values.add(next.shape());
         if (dbfReader.hasNext()) {
             for (Object o : dbfReader.readEntry()) {
                 values.add(o);

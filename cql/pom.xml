@@ -27,7 +27,7 @@
         <artifactId>javacc-maven-plugin</artifactId>
         <version>2.6</version>
         <configuration>
-          <nodeClass>org.jeo.cql.SimpleNode</nodeClass>
+          <nodeClass>org.jeo.filter.cql.SimpleNode</nodeClass>
         </configuration>
         <executions>
           <execution>

@@ -1,4 +1,4 @@
-package org.jeo.cql;
+package org.jeo.filter.cql;
 
 import static org.junit.Assert.*;
 

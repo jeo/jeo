@@ -1,4 +1,4 @@
-package org.jeo.cql;
+package org.jeo.filter.cql;
 
 import java.io.StringReader;
 import java.util.ArrayDeque;
@@ -8,7 +8,6 @@ import org.jeo.filter.Comparison;
 import org.jeo.filter.Expression;
 import org.jeo.filter.Filter;
 import org.jeo.filter.FilterBuilder;
-import org.jeo.filter.Property;
 
 import com.vividsolutions.jts.io.WKTReader;
 

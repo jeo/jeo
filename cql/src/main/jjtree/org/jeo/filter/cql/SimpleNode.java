@@ -15,7 +15,7 @@
  *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  *    Lesser General Public License for more details.
  */
-package org.jeo.cql;
+package org.jeo.filter.cql;
 
 /**
  * Redefines SimpleNode to allow access to additional 

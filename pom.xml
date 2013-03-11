@@ -96,7 +96,6 @@
     <module>nano</module>
     <module>guava</module>
     <module>gmaps</module>
-    <module>cql</module>
     <module>shp</module>
   </modules>
 

@@ -36,7 +36,7 @@ public class Map implements Disposable {
     
     List<Layer> layers = new ArrayList<Layer>();
 
-    Stylesheet style;
+    Stylesheet style = new Stylesheet();
 
     List<Disposable> cleanup = new ArrayList<Disposable>(); 
 

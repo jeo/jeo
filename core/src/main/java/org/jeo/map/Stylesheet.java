@@ -64,16 +64,33 @@ public class Stylesheet {
         return match;
     }
 
-    public List<Rule> select(final String name, final Selector.Type type) {
-        return select(new RuleVisitor() {
-            @Override
-            public boolean visit(Rule rule, Stylesheet stylesheet) {
-                for (Selector s : rule.getSelectors()) {
-                    if (name.equals(s.getName()) && type.equals(s.getType())) {
-                        return true;
-                    }
+    public RuleSet select(SelectorVisitor visitor) {
+        List<Rule> match = new ArrayList<Rule>();
+        O: for (Rule r : rules) {
+            for (Selector s : r.getSelectors()) {
+                if (visitor.visit(s, r, this)) {
+                    match.add(r);
+                    continue O;
                 }
-                return false;
+            }
+        }
+        return new RuleSet(match);
+    }
+
+    public RuleSet selectById(final String id) {
+        return select(new SelectorVisitor() {
+            @Override
+            public boolean visit(Selector selector, Rule rule, Stylesheet style) {
+                return id == null && selector.getId() == null || id.equals(selector.getId());
+            }
+        });
+    }
+   
+    public RuleSet selectByName(final String name) {
+        return select(new SelectorVisitor() {
+            @Override
+            public boolean visit(Selector selector, Rule rule, Stylesheet style) {
+                return name == null && selector.getName() == null || name.equals(selector.getName());
             }
         });
     }

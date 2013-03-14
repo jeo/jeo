@@ -2,7 +2,6 @@ package org.jeo.map;
 
 import static org.junit.Assert.*;
 
-import org.jeo.map.Selector.Type;
 import org.junit.Test;
 
 public class StyleBuilderTest {
@@ -21,6 +20,5 @@ public class StyleBuilderTest {
 
         Selector s = r.getSelectors().get(0);
         assertEquals("Map", s.getName());
-        assertEquals(Type.NAME, s.getType());
     }
 }

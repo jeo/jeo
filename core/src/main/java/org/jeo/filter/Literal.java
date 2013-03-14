@@ -5,16 +5,16 @@ package org.jeo.filter;
  * 
  * @author Justin Deoliveira, OpenGeo
  */
-public class Literal<T> implements Expression<T> {
+public class Literal implements Expression {
 
-    T value;
+    Object value;
 
-    public Literal(T value) {
+    public Literal(Object value) {
         this.value = value;
     }
 
     @Override
-    public T evaluate(Object obj) {
+    public Object evaluate(Object obj) {
         return value;
     }
 
@@ -39,7 +39,7 @@ public class Literal<T> implements Expression<T> {
             return false;
         if (getClass() != obj.getClass())
             return false;
-        Literal<?> other = (Literal<?>) obj;
+        Literal other = (Literal) obj;
         if (value == null) {
             if (other.value != null)
                 return false;

@@ -9,7 +9,7 @@ import java.util.List;
  * 
  * @author Justin Deoliveira, OpenGeo
  */
-public class Logic<T> extends Filter<T> {
+public class Logic extends Filter {
     
     /**
      * Logical operator type.  
@@ -19,13 +19,13 @@ public class Logic<T> extends Filter<T> {
     }
 
     Type type;
-    List<Filter<T>> parts;
+    List<Filter> parts;
 
-    public Logic(Type type, Filter<T>... parts) {
+    public Logic(Type type, Filter... parts) {
         this(type, Arrays.asList(parts));
     }
     
-    public Logic(Type type, List<Filter<T>> parts) {
+    public Logic(Type type, List<Filter> parts) {
         this.type = type;
         this.parts = parts;
 
@@ -41,12 +41,12 @@ public class Logic<T> extends Filter<T> {
         return type;
     }
 
-    public List<Filter<T>> getParts() {
+    public List<Filter> getParts() {
         return parts;
     }
 
     @Override
-    public boolean apply(T obj) {
+    public boolean apply(Object obj) {
         switch(type) {
         case AND:
             return and(obj);
@@ -59,12 +59,12 @@ public class Logic<T> extends Filter<T> {
         }
     }
 
-    boolean not(T obj) {
+    boolean not(Object obj) {
         return !parts.get(0).apply(obj);
     }
 
-    boolean and(T obj) {
-        Iterator<Filter<T>> it = parts.iterator();
+    boolean and(Object obj) {
+        Iterator<Filter> it = parts.iterator();
         boolean result = it.next().apply(obj);
         while (it.hasNext()) {
             result =  result && it.next().apply(obj);
@@ -72,8 +72,8 @@ public class Logic<T> extends Filter<T> {
         return result;
     }
 
-    boolean or(T obj) {
-        Iterator<Filter<T>> it = parts.iterator();
+    boolean or(Object obj) {
+        Iterator<Filter> it = parts.iterator();
         boolean result = it.next().apply(obj);
         while (it.hasNext()) {
             result = result || it.next().apply(obj);
@@ -99,7 +99,7 @@ public class Logic<T> extends Filter<T> {
             return false;
         if (getClass() != obj.getClass())
             return false;
-        Logic<?> other = (Logic<?>) obj;
+        Logic other = (Logic) obj;
         if (parts == null) {
             if (other.parts != null)
                 return false;
@@ -117,7 +117,7 @@ public class Logic<T> extends Filter<T> {
         }
         else {
             StringBuilder sb = new StringBuilder();
-            for (Filter<?> f : parts) {
+            for (Filter f : parts) {
                 sb.append(f).append(" ").append(type.name()).append(" ");
             }
             if (sb.length() > 0) {

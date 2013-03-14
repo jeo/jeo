@@ -7,7 +7,7 @@ import org.jeo.feature.Feature;
  *  
  * @author Justin Deoliveira, OpenGeo
  */
-public class Property<T> implements Expression<T> {
+public class Property implements Expression {
 
     String property;
 
@@ -19,11 +19,10 @@ public class Property<T> implements Expression<T> {
         return property;
     }
 
-    @SuppressWarnings("unchecked")
     @Override
-    public T evaluate(Object obj) {
+    public Object evaluate(Object obj) {
         if (obj instanceof Feature) {
-            return (T) ((Feature)obj).get(property);
+            return ((Feature)obj).get(property);
         }
         return null;
     }
@@ -45,7 +44,7 @@ public class Property<T> implements Expression<T> {
             return false;
         if (getClass() != obj.getClass())
             return false;
-        Property<?> other = (Property<?>) obj;
+        Property other = (Property) obj;
         if (property == null) {
             if (other.property != null)
                 return false;

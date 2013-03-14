@@ -26,12 +26,12 @@ public class FilterBuilder {
     }
 
     public FilterBuilder literal(Object o) {
-        stack.push(new Literal<Object>(o));
+        stack.push(new Literal(o));
         return this;
     }
 
     public FilterBuilder property(String prop) {
-        stack.push(new Property<Object>(prop));
+        stack.push(new Property(prop));
         return this;
     }
 
@@ -74,35 +74,32 @@ public class FilterBuilder {
     public FilterBuilder intersect() {
         return spatial(Spatial.Type.INTERSECT);
     }
-    @SuppressWarnings("unchecked")
-    public Filter<Object> filter() {
-        return (Filter<Object>) stack.pop();
+
+    public Filter filter() {
+        return (Filter) stack.pop();
     }
 
-    @SuppressWarnings("unchecked")
     FilterBuilder cmp(Comparison.Type type) {
-        Expression<Object> e2 = (Expression<Object>) stack.pop();
-        Expression<Object> e1 = (Expression<Object>) stack.pop();
-        stack.push(new Comparison<Object>(type, e1, e2));
+        Expression e2 = (Expression) stack.pop();
+        Expression e1 = (Expression) stack.pop();
+        stack.push(new Comparison(type, e1, e2));
         return this;
     }
 
-    @SuppressWarnings("unchecked")
     FilterBuilder log(Logic.Type type) {
-        LinkedList<Filter<Object>> parts = new LinkedList<Filter<Object>>();
+        LinkedList<Filter> parts = new LinkedList<Filter>();
         while(stack.peek() instanceof Filter) {
-            parts.addFirst((Filter<Object>)stack.pop());
+            parts.addFirst((Filter)stack.pop());
         }
 
-        stack.push(new Logic<Object>(type, parts));
+        stack.push(new Logic(type, parts));
         return this;
     }
 
-    @SuppressWarnings("unchecked")
     FilterBuilder spatial(Spatial.Type type) {
-        Expression<Object> e2 = (Expression<Object>) stack.pop();
-        Expression<Object> e1 = (Expression<Object>) stack.pop();
-        stack.push(new Spatial<Object>(type, e1, e2));
+        Expression e2 = (Expression) stack.pop();
+        Expression e1 = (Expression) stack.pop();
+        stack.push(new Spatial(type, e1, e2));
         return this;
     }
 }

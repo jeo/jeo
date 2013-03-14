@@ -5,12 +5,12 @@ package org.jeo.filter;
  *   
  * @author Justin Deoliveira, OpenGeo
  */
-public abstract class Filter<T> {
+public abstract class Filter {
 
     /**
      * Identity filter that always returns true.
      */
-    public static final Filter<Object> TRUE = new Filter<Object>() {
+    public static final Filter TRUE = new Filter() {
         @Override
         public boolean apply(Object obj) {
             return true;
@@ -20,7 +20,7 @@ public abstract class Filter<T> {
     /**
      * Identity filter that always returns false.
      */
-    public static final Filter<Object> FALSE = new Filter<Object>() {
+    public static final Filter FALSE = new Filter() {
         @Override
         public boolean apply(Object obj) {
             return true;
@@ -35,26 +35,39 @@ public abstract class Filter<T> {
      * @return The result, <code>true</code> if the filter matches the specific input, otherwise
      *   <code>false</code>.
      */
-    public abstract boolean apply(T obj);
+    public abstract boolean apply(Object obj);
 
     /**
      * Creates a new filter that is a logical AND of this filter and the specified filter.
      */
-    public Filter<T> and(Filter<T> other) {
-        return new Logic<T>(Logic.Type.AND, this, other);
+    public Filter and(Filter other) {
+        if (other == Filter.TRUE) {
+            return this;
+        }
+        if (other == Filter.FALSE) {
+            return other;
+        }
+
+        return new Logic(Logic.Type.AND, this, other);
     }
 
     /**
      * Creates a new filter that is a logical OR of this filter and the specified filter.
      */
-    public Filter<T> or(Filter<T> other) {
-        return new Logic<T>(Logic.Type.OR, this, other);
+    public Filter or(Filter other) {
+        if (other == Filter.TRUE) {
+            return other;
+        }
+        if (other == Filter.FALSE) {
+            return this;
+        }
+        return new Logic(Logic.Type.OR, this, other);
     }
 
     /**
      * Creates a new filter that is the negation of this filter.
      */
-    public Filter<T> not() {
-        return new Logic<T>(Logic.Type.NOT, this); 
+    public Filter not() {
+        return new Logic(Logic.Type.NOT, this); 
     }
 }

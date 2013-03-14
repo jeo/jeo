@@ -5,10 +5,10 @@ package org.jeo.filter;
  *  
  * @author Justin Deoliveira, OpenGeo
  */
-public interface Expression<T> {
+public interface Expression {
 
     /**
      * Returns the value of the given expression for the specified input.
      */
-    T evaluate(Object obj);
+    Object evaluate(Object obj);
 }

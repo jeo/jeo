@@ -10,7 +10,7 @@ import com.vividsolutions.jts.geom.Geometry;
  * 
  * @author Justin Deoliveira, OpenGeo
  */
-public class Spatial<T> extends Filter<T> {
+public class Spatial extends Filter {
 
     /**
      * Spatial operator type.  
@@ -20,16 +20,16 @@ public class Spatial<T> extends Filter<T> {
     }
 
     Type type;
-    Expression<?> expr1, expr2;
+    Expression expr1, expr2;
 
-    public Spatial(Type type, Expression<?> expr1, Expression<?> expr2) {
+    public Spatial(Type type, Expression expr1, Expression expr2) {
         this.type = type;
         this.expr1 = expr1;
         this.expr2 = expr2;
     }
 
     @Override
-    public boolean apply(T obj) {
+    public boolean apply(Object obj) {
         Object o1 = expr1.evaluate(obj);
         Object o2 = expr2.evaluate(obj);
 
@@ -94,7 +94,7 @@ public class Spatial<T> extends Filter<T> {
             return false;
         if (getClass() != obj.getClass())
             return false;
-        Spatial<?> other = (Spatial<?>) obj;
+        Spatial other = (Spatial) obj;
         if (expr1 == null) {
             if (other.expr1 != null)
                 return false;

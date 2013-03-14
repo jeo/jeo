@@ -58,6 +58,7 @@
 
   <build>
    <plugins>
+     <!-- set compiler compliance level -->
      <plugin>
        <artifactId>maven-compiler-plugin</artifactId>
        <configuration>
@@ -67,7 +68,9 @@
          <encoding>UTF-8</encoding>
        </configuration>
      </plugin>
-      <plugin>
+
+     <!-- attach source jars -->
+     <plugin>
         <artifactId>maven-source-plugin</artifactId>
         <configuration>
           <attach>true</attach>
@@ -80,7 +83,22 @@
             </goals>
           </execution>
         </executions>
-      </plugin>
+     </plugin>
+
+     <!-- attach test jars -->
+     <plugin>
+       <artifactId>maven-jar-plugin</artifactId>
+       <executions>
+         <execution>
+           <phase>package</phase>
+           <goals>
+             <goal>test-jar</goal>
+           </goals>
+         </execution>
+       </executions>
+     </plugin>
+
+     <!-- test configuration -->
      <plugin>
        <artifactId>maven-surefire-plugin</artifactId>
        <configuration>

@@ -22,7 +22,7 @@ public class CQLBuilder extends CQLParser {
         this.cql = cql;
     }
 
-    public Filter<Object> parse() throws ParseException {
+    public Filter parse() throws ParseException {
         FilterCompilationUnit();
         return builder.filter();
     }
@@ -45,7 +45,7 @@ public class CQLBuilder extends CQLParser {
             //return  this.builder.buildLiteralDouble(getToken(0).image);
 
         case JJTSTRINGNODE:
-            builder.literal(getToken(0).image); return;
+            builder.literal(dequote(getToken(0).image)); return;
             //return this.builder.buildLiteralString(getToken(0).image);
             // ----------------------------------------
             // Identifier
@@ -296,10 +296,10 @@ public class CQLBuilder extends CQLParser {
 
     };
 
-    Comparison<Object> newComparison(Comparison.Type type) {
-        Expression<Object> e1 = (Expression<Object>) stack.pop();
-        Expression<Object> e2 = (Expression<Object>) stack.pop();
-        return new Comparison<Object>(type, e2, e1);
+    Comparison newComparison(Comparison.Type type) {
+        Expression e1 = (Expression) stack.pop();
+        Expression e2 = (Expression) stack.pop();
+        return new Comparison(type, e2, e1);
     }
 
     String scan(final Token t) {
@@ -311,6 +311,12 @@ public class CQLBuilder extends CQLParser {
         }
 
         return cql.substring(t.beginColumn -1, end.endColumn);
+    }
 
+    String dequote(String str) {
+        if (str.startsWith("'") && str.endsWith("'")) {
+            str = str.substring(1, str.length()-1);
+        }
+        return str.replaceAll("''", "'");
     }
 }

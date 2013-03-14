@@ -9,7 +9,7 @@ import org.jeo.filter.Filter;
  */
 public class CQL {
 
-    public static Filter<Object> parse(String cql) throws ParseException {
+    public static Filter parse(String cql) throws ParseException {
         return new CQLBuilder(cql).parse();
     }
 }

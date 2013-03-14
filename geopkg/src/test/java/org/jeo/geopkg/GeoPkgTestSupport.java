@@ -9,6 +9,7 @@ import java.util.zip.ZipInputStream;
 
 import jsqlite.Database;
 
+import org.jeo.Tests;
 import org.junit.Assume;
 import org.junit.BeforeClass;
 import org.junit.Rule;
@@ -35,29 +36,6 @@ public class GeoPkgTestSupport {
     @Rule public TestName name = new TestName();
 
     protected File newTmpDir() throws IOException {
-        File dir = File.createTempFile("geopkg", name.getMethodName(), new File("target"));
-        dir.delete();
-        dir.mkdirs();
-        return dir;
-    }
-
-    protected File unzip(final InputStream archive, final File dir) 
-        throws ZipException, IOException {
-
-        ZipInputStream zipin = new ZipInputStream(archive);
-        ZipEntry zipEntry = null;
-
-        while((zipEntry = zipin.getNextEntry()) != null) {
-            if (zipEntry.isDirectory())
-                continue;
-
-            final File targetFile = new File(dir, zipEntry.getName());
-            Files.createParentDirs(targetFile);
-
-            ByteStreams.copy(zipin, Files.newOutputStreamSupplier(targetFile).getOutput());
-        }
-
-        zipin.close();
-        return dir;
+        return Tests.newTmpDir("geopkg", name.getMethodName());
     }
 }

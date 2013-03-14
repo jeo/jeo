@@ -11,24 +11,16 @@ import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferInt;
 import java.awt.image.Raster;
 import java.awt.image.SinglePixelPackedSampleModel;
-import java.io.File;
-import java.io.IOException;
 
-import javax.imageio.ImageIO;
-
-import org.jeo.geom.GeometryBuilder;
 import org.jeo.map.Map;
 import org.jeo.map.MapBuilder;
-import org.jeo.map.RGB;
-import org.jeo.map.Rule;
+import org.jeo.map.StyleBuilder;
+import org.jeo.map.Stylesheet;
+import org.jeo.shp.ShpData;
 import org.junit.Assume;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.rules.TestName;
-
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.LineString;
-import com.vividsolutions.jts.geom.Polygon;
 
 public class AggTest {
 
@@ -49,32 +41,107 @@ public class AggTest {
     
         Assume.assumeNoException(caught);
     }
+
     @Test
-    public void test() throws IOException {
-        Map map = new MapBuilder().size(500, 256).map();
+    public void testSimple() throws Exception {
+        Stylesheet style = new StyleBuilder()
+            .rule().select("Map").set("background-color", "#b8dee6").endRule()
+            .rule().select("#states")
+                .rule().select("::outline")
+                    .set("line-color", "#85c5d3")
+                    .set("line-width", 2)
+                    .set("line-join", "round")
+                .endRule()
+                .set("polygon-fill", "#fff")
+
+            .endRule()
+            .style();
+
+        Map map = new MapBuilder().size(500,500).layer(ShpData.states()).style(style).map();
+
         AggRenderer r = new AggRenderer();
         r.init(map);
+        r.render();
 
-        GeometryBuilder gb = new GeometryBuilder();
+        show(img(r, map));
+    }
 
-        Polygon poly = (Polygon) gb.point(0,0).buffer(50);
-        LineString line = gb.lineString(-75,-75,75,75); 
+    @Test
+    public void testThematic() throws Exception {
+        Stylesheet style = new StyleBuilder()
+            .rule().select("#states").select("::glow-outer")
+                .set("line-color", "#226688")
+                .set("line-opacity", 0.1)
+                .set("line-join", "round")
+                .set("line-width", 5)
+            .endRule()
+            .rule().select("#states").select("::glow-inner")
+                .set("line-color", "#226688")
+                .set("line-opacity", 0.8)
+                .set("line-join", "round")
+                .set("line-width", 2.4)
+            .endRule()
+            .rule().select("#states")
+                .rule().filter("STATE_ABBR = 'IL'").set("polygon-fill", "#40e0d0").endRule()
+                .rule().filter("STATE_ABBR = 'IL'").set("polygon-fill", "#f3c1d3").endRule()
+                .rule().filter("STATE_ABBR = 'DC'").set("polygon-fill", "#a3cec5").endRule()
+                .rule().filter("STATE_ABBR = 'DE'").set("polygon-fill", "#fae364").endRule()
+                .rule().filter("STATE_ABBR = 'WV'").set("polygon-fill", "#aadb78").endRule()
+                .rule().filter("STATE_ABBR = 'MD'").set("polygon-fill", "#ceb5cf").endRule()
+                .rule().filter("STATE_ABBR = 'CO'").set("polygon-fill", "#f0f8ff").endRule()
+                .rule().filter("STATE_ABBR = 'KY'").set("polygon-fill", "#f0f8ff").endRule()
+                .rule().filter("STATE_ABBR = 'KS'").set("polygon-fill", "#f3c1d3").endRule()
+                .rule().filter("STATE_ABBR = 'VA'").set("polygon-fill", "#fdaf6b").endRule()
+                .rule().filter("STATE_ABBR = 'MO'").set("polygon-fill", "#a3cec5").endRule()
+                .rule().filter("STATE_ABBR = 'AZ'").set("polygon-fill", "#d3e46f").endRule()
+                .rule().filter("STATE_ABBR = 'OK'").set("polygon-fill", "#fae364").endRule()
+                .rule().filter("STATE_ABBR = 'NC'").set("polygon-fill", "#ceb5cf").endRule()
+                .rule().filter("STATE_ABBR = 'TN'").set("polygon-fill", "#f3c1d3").endRule()
+                .rule().filter("STATE_ABBR = 'TX'").set("polygon-fill", "#d3e46f").endRule()
+                .rule().filter("STATE_ABBR = 'NM'").set("polygon-fill", "#ceb5cf").endRule()
+                .rule().filter("STATE_ABBR = 'AL'").set("polygon-fill", "#a3cec5").endRule()
+                .rule().filter("STATE_ABBR = 'MS'").set("polygon-fill", "#fdc663").endRule()
+                .rule().filter("STATE_ABBR = 'GA'").set("polygon-fill", "#f3c1d3").endRule()
+                .rule().filter("STATE_ABBR = 'SC'").set("polygon-fill", "#a3cec5").endRule()
+                .rule().filter("STATE_ABBR = 'AR'").set("polygon-fill", "#a3cec5").endRule()
+                .rule().filter("STATE_ABBR = 'LA'").set("polygon-fill", "#fae364").endRule()
+                .rule().filter("STATE_ABBR = 'FL'").set("polygon-fill", "#a3cec5").endRule()
+                .rule().filter("STATE_ABBR = 'MI'").set("polygon-fill", "#a3cec5").endRule()
+                .rule().filter("STATE_ABBR = 'MT'").set("polygon-fill", "#d3e46f").endRule()
+                .rule().filter("STATE_ABBR = 'ME'").set("polygon-fill", "#a3cec5").endRule()
+                .rule().filter("STATE_ABBR = 'ND'").set("polygon-fill", "#f3c1d3").endRule()
+                .rule().filter("STATE_ABBR = 'SD'").set("polygon-fill", "#fdc663").endRule()
+                .rule().filter("STATE_ABBR = 'WY'").set("polygon-fill", "#ceb5cf").endRule()
+                .rule().filter("STATE_ABBR = 'WI'").set("polygon-fill", "#ceb5cf").endRule()
+                .rule().filter("STATE_ABBR = 'ID'").set("polygon-fill", "#fae364").endRule()
+                .rule().filter("STATE_ABBR = 'VT'").set("polygon-fill", "#f0f8ff").endRule()
+                .rule().filter("STATE_ABBR = 'MN'").set("polygon-fill", "#ceb5cf").endRule()
+                .rule().filter("STATE_ABBR = 'OR'").set("polygon-fill", "#f3c1d3").endRule()
+                .rule().filter("STATE_ABBR = 'NH'").set("polygon-fill", "#a3cec5").endRule()
+                .rule().filter("STATE_ABBR = 'IA'").set("polygon-fill", "#aadb78").endRule()
+                .rule().filter("STATE_ABBR = 'MA'").set("polygon-fill", "#f3c1d3").endRule()
+                .rule().filter("STATE_ABBR = 'NE'").set("polygon-fill", "#aadb78").endRule()
+                .rule().filter("STATE_ABBR = 'NY'").set("polygon-fill", "#f0f8ff").endRule()
+                .rule().filter("STATE_ABBR = 'PA'").set("polygon-fill", "#ceb5cf").endRule()
+                .rule().filter("STATE_ABBR = 'CT'").set("polygon-fill", "#f0f8ff").endRule()
+                .rule().filter("STATE_ABBR = 'RI'").set("polygon-fill", "#fdaf6b").endRule()
+                .rule().filter("STATE_ABBR = 'NJ'").set("polygon-fill", "#f3c1d3").endRule()
+                .rule().filter("STATE_ABBR = 'IN'").set("polygon-fill", "#fdaf6b").endRule()
+                .rule().filter("STATE_ABBR = 'NV'").set("polygon-fill", "#f3c1d3").endRule()
+                .rule().filter("STATE_ABBR = 'UT'").set("polygon-fill", "#f3c1d3").endRule()
+                .rule().filter("STATE_ABBR = 'CA'").set("polygon-fill", "#fdaf6b").endRule()
+                .rule().filter("STATE_ABBR = 'OH'").set("polygon-fill", "#f0f8ff").endRule()
+                .rule().filter("STATE_ABBR = 'WA'").set("polygon-fill", "#aadb78").endRule()
+            .endRule()
+            .style();
 
-        Rule rule = new Rule();
-        rule.put("line-width", 2);
-        rule.put("line-color", RGB.Green);
-        rule.put("polygon-fill", RGB.Gray);
-        r.drawPolygon(poly, null, rule);
+        Map map = new MapBuilder().size(500,500).layer(ShpData.states()).style(style).map();
 
-        rule.put("line-width", 2);
-        rule.put("line-color", RGB.Black);
-        rule.put("comp-op", "color-burn");
-        r.drawLine(line,  null, rule);
-        
-        BufferedImage img = img(r, map); 
-        //ImageIO.write(img, "PNG", new File("/Users/jdeolive/foo.png"));
-        //r.writePPM("/Users/jdeolive/foo.ppm");
-        show(img);
+        AggRenderer r = new AggRenderer();
+        r.init(map);
+        r.render();
+
+        show(img(r, map));
     }
 
     BufferedImage img(AggRenderer r, Map map) {

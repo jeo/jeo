@@ -14,8 +14,7 @@ enum GammaMethod {
 struct Style {
   agg::comp_op_e comp_op;
 
-  Style(): comp_op(agg::comp_op_src_over) {
-  }
+  Style(): comp_op(agg::comp_op_src) {}
 };
 
 struct LineStyle: Style {
@@ -24,16 +23,12 @@ struct LineStyle: Style {
   agg::line_join_e join;
   agg::line_cap_e cap;
   std::list<double> dash_array;
-  float gamma;   
-  GammaMethod gamma_method;
 };
 
 struct PolyStyle: Style {
-  agg::rgba8 fill_color;
+  agg::rgba8 *fill_color;
+  LineStyle *line;
 
-  float gamma;   
-  GammaMethod gamma_method;
-
-  LineStyle line;
+  PolyStyle(): line(0), fill_color(0) {}
 };
 

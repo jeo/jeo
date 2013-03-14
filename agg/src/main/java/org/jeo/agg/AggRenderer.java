@@ -1,14 +1,31 @@
 package org.jeo.agg;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
+
+import org.jeo.data.Vector;
 import org.jeo.feature.Feature;
+import org.jeo.geom.Geom;
+import org.jeo.map.Layer;
 import org.jeo.map.Map;
 import org.jeo.map.RGB;
 import org.jeo.map.Rule;
+import org.jeo.map.RuleSet;
+import org.jeo.map.Selector;
 import org.jeo.map.Stylesheet;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.vividsolutions.jts.geom.Geometry;
 
 public class AggRenderer {
+
+    static Logger LOG = LoggerFactory.getLogger(AggRenderer.class);
 
     static class LineCap {
         static byte BUTT = 0;
@@ -36,27 +53,179 @@ public class AggRenderer {
         static byte BEVEL = 3;
     }
 
+    Map map;
     long rp;
+    long rb;
 
     public void init(Map map) {
-        rp = createRenderingPipeline(map.getWidth(), map.getHeight());
+        this.map = map;
+
+        rb = createRenderingBuffer(map.getWidth(), map.getHeight());
+        rp = createRenderingPipeline();
 
         setTransform(rp, map.scaleX(), -1*map.scaleY(), map.translateX(), map.translateY());
 
         Stylesheet style = map.getStyle();
-        RGB bg = (RGB) style.get("background-color", null);
-        if (bg != null) {
-            setBackground(rp, color(bg));
+
+        Rule rule = style.selectByName("Map").first();
+        if (rule != null) {
+            RGB bg = rule.color("background-color", null);
+            setBackground(rb, color(bg));
         }
     }
 
-    private native long createRenderingPipeline(int width, int height);
+    private native long createRenderingBuffer(int width, int height);
 
-    private native void setTransform(long handle, double scx, double scy, double tx, double ty);
+    private native long createRenderingPipeline();
+    
+    private native void setTransform(long rph, double scx, double scy, double tx, double ty);
 
-    private native void setBackground(long handle, float[] color);
+    public void render() {
+        // Overall algorithm:
+        //
+        // for each layer l
+        //   - find all matching rules
+        //   - flatten the rules
+        //   - group rules by attachment / z-index
+        //   - sort the rules and collapse where possible
+        //   - render the features
+        //   - composite the rendering buffer into previous
 
-    void drawLine(Geometry g, Feature f, Rule rule) {
+        for (Layer l : map.getLayers()) {
+            List<RuleSet> rules = zgroup(flatten(match(l, map.getStyle())));
+
+            //allocate the buffers
+            for (RuleSet ruleSet : rules) {
+                long buf = createRenderingBuffer(map.getWidth(), map.getHeight());
+                render((Vector) l.getData(), ruleSet, buf);
+                //render((Vector) l.getData(), new FeatureStyle(rule), rb);
+
+                composite(rb, buf, ruleSet);
+                dispose(buf);
+            }
+        }
+    }
+
+    void render(Vector l, RuleSet ruleSet, long buf) {
+        try {
+            for (Feature f : l.read(map.getBounds())) {
+                Rule r = ruleSet.match(f).collapse();
+                if (r != null) {
+                    draw(f, r, buf);
+                }
+            }
+        } catch (IOException e) {
+            LOG.error("Error querying layer " + l.getName(), e);
+        }
+    }
+
+    void composite(long dstRb, long srcRb, RuleSet rules) {
+        composite(dstRb, srcRb, "src");
+    }
+
+    private native void composite(long dstRb, long srcRb, String mode);
+
+    private native void dispose(long rbh);
+
+    RuleSet match(Layer layer, Stylesheet style) {
+        return style.selectById(layer.getName());
+    }
+
+    RuleSet flatten(RuleSet rules) {
+        List<Rule> flat = new ArrayList<Rule>();
+        for (Rule r : rules) {
+            flat.addAll(r.flatten());
+        }
+        return new RuleSet(flat);
+    }
+
+    List<RuleSet> zgroup(RuleSet rules) {
+        LinkedHashMap<String, List<Rule>> z = new LinkedHashMap<String, List<Rule>>();
+        for (Rule r : rules) {
+            String att = null;
+            for (Iterator<Selector> it = r.getSelectors().iterator(); it.hasNext() && att == null;) {
+                att = it.next().getAttachment();
+            }
+
+            List<Rule> list = z.get(att);
+            if (list == null) {
+                list = new ArrayList<Rule>();
+                z.put(att, list);
+            }
+            list.add(r);
+        }
+
+        List<RuleSet> grouped = new ArrayList<RuleSet>();
+        for (List<Rule> l : z.values()) {
+            grouped.add(new RuleSet(l));
+        }
+        return grouped;
+    }
+
+    List<Rule> sortAndMerge(List<Rule> rules) {
+        //TODO: merge
+        //sort rules based on how specific they are
+        Collections.sort(rules, new Comparator<Rule>() {
+            @Override
+            public int compare(Rule r1, Rule r2) {
+                return -1*Integer.valueOf(specificity(r1)).compareTo(specificity(r2));
+            }
+        });
+        return rules;
+    }
+
+    int specificity(Rule r) {
+        int value = 0;
+        for (Selector s : r.getSelectors()) {
+            value = Math.max(value, specificity(s));
+        }
+        return value;
+    }
+
+    int specificity(Selector s) {
+        //based on:
+        // 
+        int value = 0;
+        if (s.getId() != null) {
+            value += 100;
+        }
+        if (s.getAttachment() != null) {
+            value += 10;
+        }
+
+        value += 10 * s.getClasses().size();
+
+        if (s.getName() != null) {
+            value += 1;
+        }
+
+        return value;
+    }
+
+    private native void setBackground(long rbh, float[] color);
+
+    void draw(Feature f, Rule rule, long buf) {
+        Geometry g = f.geometry();
+        if (g == null) {
+            return;
+        }
+
+        switch(Geom.Type.from(g)) {
+        case LINESTRING:
+        case MULTILINESTRING:
+            drawLine(g, f, rule, buf);
+            return;
+        case POLYGON:
+        case MULTIPOLYGON:
+            drawPolygon(g, f, rule, buf);
+            return;
+        default:
+            throw new UnsupportedOperationException();
+        }
+
+    }
+
+    void drawLine(Geometry g, Feature f, Rule rule, long buf) {
         RGB color = (RGB) rule.get("line-color", RGB.black);
         float width = rule.number("line-width", 1f);
 
@@ -72,42 +241,48 @@ public class AggRenderer {
         }
 
         String compOp = rule.string("comp-op", null);
-        drawLine(rp, new VertexSource(g), color(color), width, join, cap, dash, compOp);
+        drawLine(rp, buf, new VertexSource(g), color(color), width, join, cap, dash, compOp);
     }
 
-    private native void drawLine(long handle, VertexSource g, float[] color, float width, byte join,
-        byte cap, double[] dash, String compOp);
+    private native void drawLine(long rph, long rbh, VertexSource g, float[] color, float width, 
+        byte join, byte cap, double[] dash, String compOp);
 
-    void drawPolygon(Geometry g, Feature f, Rule rule) {
-        RGB polyFill = (RGB) rule.get("polygon-fill", RGB.gray);
-        polyFill = polyFill.alpha(rule.number("polygon-opacity", 1f));
-        
-        RGB lineColor = (RGB) rule.get("line-color", RGB.black);
-        lineColor = lineColor.alpha(rule.number("line-opacity", 1f));
+    void drawPolygon(Geometry g, Feature f, Rule rule, long buf) {
+        RGB polyFill = rule.color("polygon-fill", null);
+        if (polyFill != null) {
+            polyFill = polyFill.alpha(rule.number("polygon-opacity", 1f));
+        }
 
-        float lineWidth = ((Number)rule.get("line-width", 1f)).floatValue();
+        RGB lineColor = rule.color("line-color", null);
+        if (lineColor != null) {
+            lineColor = lineColor.alpha(rule.number("line-opacity", 1f));
+        }
+
+        float lineWidth = rule.number("line-width", 1f);
         String compOp = rule.string("comp-op", null);
 
-        drawPolygon(rp, new VertexSource(g), color(polyFill), color(lineColor), lineWidth, compOp);
+        drawPolygon(rp, buf, new VertexSource(g), color(polyFill), color(lineColor), lineWidth, compOp);
     }
 
-    private native void drawPolygon(long handle, VertexSource g, float[] fillColor, 
+    private native void drawPolygon(long rph, long rbh, VertexSource g, float[] fillColor, 
             float[] lineColor, float lineWidth, String compOp);
 
     public void writePPM(String path) {
-        writePPM(rp, path);
+        writePPM(rb, path);
     }
 
     private native void writePPM(long handle, String path);
 
     public int[] data() {
-        return data(rp);
+        return data(rb);
     }
 
     private native int[] data(long handle);
 
     private float[] color(RGB rgb) {
+        if (rgb == null) {
+            return null;
+        }
         return new float[]{rgb.getRed(), rgb.getGreen(), rgb.getBlue(), rgb.getAlpha()};
     }
-
 }

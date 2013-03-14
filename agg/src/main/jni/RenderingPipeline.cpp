@@ -17,14 +17,8 @@
 #include "RenderingPipeline.h"
 #include "VertexSource.h"
 
-template<class V> RenderingPipeline<V>::RenderingPipeline (
-    unsigned w, unsigned h) : depth(4) {
-
-  unsigned char* buffer = new unsigned char[w * h * depth];
-  //memset(buffer, 255, w * h * depth);
-
-  rbuf.attach(buffer, w, h, w * depth);
-  at = agg::trans_affine();
+template<class V> RenderingPipeline<V>::RenderingPipeline()
+   : at(agg::trans_affine()) {
 }
 
 template<class V> void RenderingPipeline<V>::set_transform(
@@ -32,19 +26,8 @@ template<class V> void RenderingPipeline<V>::set_transform(
   at = agg::trans_affine(scx, 0, 0, scy, tx, ty);
 }
 
-template<class V> void RenderingPipeline<V>::set_background(agg::rgba8 color) {
-   unsigned n = rbuf.width() * rbuf.height() * 4;
-   unsigned char *p = rbuf.buf();
-   for(int i = 0; i < n; i+=4) {
-     *p++ = color.r;
-     *p++ = color.g; 
-     *p++ = color.b; 
-     *p++ = color.a; 
-   }
-}
-
 template<class V> void RenderingPipeline<V>::draw_line(
-    V line, const LineStyle &style) {
+    V line, const LineStyle &style, RenderingBuffer *rb) {
 
   typedef agg::conv_transform<V> LineType;
 
@@ -64,11 +47,11 @@ template<class V> void RenderingPipeline<V>::draw_line(
   typedef agg::pixfmt_custom_blend_rgba<BlenderType, agg::rendering_buffer> PixfmtCompType;
   typedef agg::renderer_base<PixfmtCompType> RendererType;
 
-  PixfmtCompType pixf(rbuf);
+  PixfmtCompType pixf(rb->rbuf);
   pixf.comp_op(style.comp_op);
 
-  agg::renderer_base<PixfmtCompType> rb(pixf);
-  agg::renderer_scanline_aa_solid<RendererType> renderer(rb);
+  agg::renderer_base<PixfmtCompType> renderer_base(pixf);
+  agg::renderer_scanline_aa_solid<RendererType> renderer(renderer_base);
   renderer.color(style.color);
 
   // create the rasterizer
@@ -101,18 +84,19 @@ template<class V> void RenderingPipeline<V>::draw_line(
 }
 
 template<class V> void RenderingPipeline<V>::draw_polygon(
-    V poly, const PolyStyle &style) {
+    V poly, const PolyStyle &style, RenderingBuffer *rb) {
 
   typedef agg::rgba8 ColorType;
   typedef agg::order_rgba OrderType;
   typedef agg::comp_op_adaptor_rgba_pre<ColorType, OrderType> BlenderType;
-  typedef agg::pixfmt_custom_blend_rgba<BlenderType, agg::rendering_buffer> PixfmtCompType;
-  typedef agg::renderer_base<PixfmtCompType> RendererType;
+  typedef agg::pixfmt_custom_blend_rgba<BlenderType, agg::rendering_buffer> PixfmtType;
+  //typedef agg::pixfmt_rgba32 PixfmtType;
+  typedef agg::renderer_base<PixfmtType> RendererType;
 
-  PixfmtCompType pixf(rbuf);
+  PixfmtType pixf(rb->rbuf);
   pixf.comp_op(style.comp_op);
 
-  agg::renderer_base<PixfmtCompType> rb(pixf);
+  agg::renderer_base<PixfmtType> renderer_base(pixf);
 
   agg::rasterizer_scanline_aa<> rasterizer;
   rasterizer.reset();
@@ -120,23 +104,28 @@ template<class V> void RenderingPipeline<V>::draw_polygon(
   typedef agg::conv_transform<V> PolyType;
   PolyType tx_poly(poly, at);
 
-  typedef agg::conv_curve<PolyType> CurveType;
-  CurveType curve(tx_poly);
-
-  typedef agg::conv_stroke<CurveType> StrokeType;
-  StrokeType stroke(curve);
-  stroke.width(style.line.width);
-
-  agg::renderer_scanline_aa_solid<RendererType> renderer(rb);
+  agg::renderer_scanline_aa_solid<RendererType> renderer(renderer_base);
   agg::scanline_p8 scanline;
 
-  rasterizer.add_path(curve);
-  renderer.color(style.fill_color);
-  agg::render_scanlines(rasterizer, scanline, renderer);
+  typedef agg::conv_curve<PolyType> CurveType;
+  typedef agg::conv_stroke<CurveType> StrokeType;
 
-  rasterizer.add_path(stroke);
-  renderer.color(style.line.color);
-  agg::render_scanlines(rasterizer, scanline, renderer);
+  CurveType curve(tx_poly);
+  StrokeType stroke(curve);
+
+  if (style.fill_color) {
+    rasterizer.add_path(curve);
+    renderer.color(*style.fill_color);
+    agg::render_scanlines(rasterizer, scanline, renderer);
+  }
+
+  if (style.line) {
+    stroke.width(style.line->width);
+
+    rasterizer.add_path(stroke);
+    renderer.color(style.line->color);
+    agg::render_scanlines(rasterizer, scanline, renderer);
+  }
 }
 
 template class RenderingPipeline<VertexSource>;

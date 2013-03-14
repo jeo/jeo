@@ -28,24 +28,39 @@ void color(agg::rgba8 *rgb, const jfloatArray arr, JNIEnv *env) {
   env->ReleaseFloatArrayElements(arr, f, 0);
 }
 
-void compop(Style* style, jstring comp_op, JNIEnv *env) {
-  const char* c = env->GetStringUTFChars(comp_op, JNI_FALSE);
-  std::string str = c;
+agg::comp_op_e compop(jstring comp_op, JNIEnv *env) {
+  agg::comp_op_e op = CompOp::map["src"];
+  if (comp_op) {
+    const char* c = env->GetStringUTFChars(comp_op, JNI_FALSE);
+    std::string str = c;
+  
+    if (CompOp::map.count(str) > 0) {
+      op = CompOp::map[str];
+    }
 
-  style->comp_op = CompOp::map[str];
-  env->ReleaseStringUTFChars(comp_op, c); 
+    env->ReleaseStringUTFChars(comp_op, c); 
+  }
+
+  return op; 
 }
 
 RenderingPipeline<VertexSource> * get_rp(jlong h) {
   return (RenderingPipeline<VertexSource> *) h;
 }
 
-JNIEXPORT jlong JNICALL Java_org_jeo_agg_AggRenderer_createRenderingPipeline
-  (JNIEnv *env, jobject obj, jint width, jint height) {
+RenderingBuffer * get_rb(jlong h) {
+  return (RenderingBuffer *) h;
+}
 
-  RenderingPipeline<VertexSource> *rp = 
-      new RenderingPipeline<VertexSource>(width, height);
-  return (jlong) rp;
+JNIEXPORT jlong JNICALL Java_org_jeo_agg_AggRenderer_createRenderingBuffer
+  (JNIEnv *env, jobject obj, jint width, jint height) {
+  return (jlong) new RenderingBuffer(width, height, 4); 
+}
+
+JNIEXPORT jlong JNICALL Java_org_jeo_agg_AggRenderer_createRenderingPipeline
+  (JNIEnv *env, jobject obj) {
+
+  return (jlong) new RenderingPipeline<VertexSource>();
 }
 
 JNIEXPORT void JNICALL Java_org_jeo_agg_AggRenderer_setTransform
@@ -57,17 +72,46 @@ JNIEXPORT void JNICALL Java_org_jeo_agg_AggRenderer_setTransform
 }
 
 JNIEXPORT void JNICALL Java_org_jeo_agg_AggRenderer_setBackground
-  (JNIEnv *env, jobject obj, jlong rph, jfloatArray bgcolor) {
+  (JNIEnv *env, jobject obj, jlong rbh, jfloatArray bgcolor) {
 
   agg::rgba8 bgcol;
   color(&bgcol, bgcolor, env);
 
-  RenderingPipeline<VertexSource> *rp = get_rp(rph); 
-  rp->set_background(bgcol);
+  RenderingBuffer *rb = get_rb(rbh); 
+  rb->set_background(bgcol);
+}
+
+JNIEXPORT void JNICALL Java_org_jeo_agg_AggRenderer_composite
+  (JNIEnv *env, jobject obj, jlong dst_rbh, jlong src_rbh, jstring comp_op) {
+
+  float opacity = 1.0;
+  
+  RenderingBuffer *dst = get_rb(dst_rbh);
+  RenderingBuffer *src = get_rb(src_rbh);
+
+  typedef agg::comp_op_adaptor_rgba_pre<agg::rgba8, agg::order_rgba> BlenderType;
+  typedef agg::pixfmt_custom_blend_rgba<BlenderType, agg::rendering_buffer> PixfmtType;
+  typedef agg::renderer_base<PixfmtType> RendererType;
+
+  PixfmtType pixf(dst->rbuf);
+  pixf.comp_op(compop(comp_op, env));
+    
+  agg::pixfmt_rgba32 pixf_mask(src->rbuf);
+  //if (premultiply_src)  pixf_mask.premultiply();
+
+  RendererType ren(pixf);
+  ren.blend_from(pixf_mask,0,0,0,unsigned(255*opacity));
+}
+
+JNIEXPORT void JNICALL Java_org_jeo_agg_AggRenderer_dispose
+  (JNIEnv *env, jobject obj, jlong rbh) {
+  
+  RenderingBuffer *dst = get_rb(rbh);
+  delete dst;
 }
 
 JNIEXPORT void JNICALL Java_org_jeo_agg_AggRenderer_drawLine
-  (JNIEnv *env, jobject obj, jlong rph, jobject line, 
+  (JNIEnv *env, jobject obj, jlong rph, jlong rbh, jobject line, 
   jfloatArray line_color, jfloat width, jbyte join, jbyte cap, 
   jdoubleArray dash, jstring comp_op) {
 
@@ -78,7 +122,7 @@ JNIEXPORT void JNICALL Java_org_jeo_agg_AggRenderer_drawLine
   style.cap = (agg::line_cap_e) join;
 
   if (comp_op) {
-    compop(&style, comp_op, env);
+    style.comp_op = compop(comp_op, env);
   }
 
   if (dash) {
@@ -92,43 +136,57 @@ JNIEXPORT void JNICALL Java_org_jeo_agg_AggRenderer_drawLine
   }
 
   VertexSource source(env, line);
+
+  RenderingBuffer *rb = get_rb(rbh);
   RenderingPipeline<VertexSource> *rp = get_rp(rph);
-  rp->draw_line(source, style);
+  rp->draw_line(source, style, rb);
 }
 
 JNIEXPORT void JNICALL Java_org_jeo_agg_AggRenderer_drawPolygon
-  (JNIEnv *env, jobject obj, jlong rph, jobject poly, 
+  (JNIEnv *env, jobject obj, jlong rph, jlong rbh, jobject poly, 
   jfloatArray fill_color, jfloatArray line_color, jfloat line_width,
   jstring comp_op) {
 
   PolyStyle style;
-  color(&style.fill_color, fill_color, env);
+  if (fill_color) {
+    agg::rgba8 col; 
+    color(&col, fill_color, env);
+    style.fill_color = &col;
+  }
+  //color(&style.fill_color, fill_color, env);
 
-  style.line.width = line_width;
-  color(&style.line.color, line_color, env);
+  if (line_color) {
+    LineStyle line_style; 
+    color(&line_style.color, line_color, env);
+    line_style.width = line_width;
+    style.line = &line_style;
+  }
 
   if (comp_op) {
-    compop(&style, comp_op, env);
+    style.comp_op = compop(comp_op, env);
   }
+
   VertexSource source(env, poly);
+
+  RenderingBuffer *rb = get_rb(rbh);
   RenderingPipeline<VertexSource> *rp = get_rp(rph);
-  rp->draw_polygon(source, style);
+  rp->draw_polygon(source, style, rb);
 }
 
 JNIEXPORT void JNICALL Java_org_jeo_agg_AggRenderer_writePPM
-  (JNIEnv *env, jobject obj, jlong rph, jstring path) {
+  (JNIEnv *env, jobject obj, jlong rbh, jstring path) {
 
-  RenderingPipeline<VertexSource> *rp = get_rp(rph); 
+  RenderingBuffer *rb = get_rb(rbh); 
 
   const char *filename = env->GetStringUTFChars(path, 0);
   FILE* fd = fopen(filename, "wb");
   if(fd)
   {
-    int w = rp->rbuf.width();
-    int h = rp->rbuf.height();
+    int w = rb->rbuf.width();
+    int h = rb->rbuf.height();
         
     fprintf(fd, "P6 %d %d 255 ", w, h);
-    fwrite(rp->rbuf.buf(), 1, w * h * rp->depth, fd);
+    fwrite(rb->rbuf.buf(), 1, w * h * rb->depth, fd);
     fclose(fd);
   }
 
@@ -136,10 +194,10 @@ JNIEXPORT void JNICALL Java_org_jeo_agg_AggRenderer_writePPM
 }
 
 JNIEXPORT jintArray JNICALL Java_org_jeo_agg_AggRenderer_data
-  (JNIEnv *env, jobject obj, jlong rph) {
+  (JNIEnv *env, jobject obj, jlong rbh) {
 
-  RenderingPipeline<VertexSource> *rp = get_rp(rph);
-  agg::rendering_buffer rbuf = rp->rbuf;
+  RenderingBuffer *rb = get_rb(rbh);
+  agg::rendering_buffer rbuf = rb->rbuf;
 
   int size = rbuf.height()*rbuf.width();
   int fill[size];

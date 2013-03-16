@@ -2,6 +2,7 @@ package org.jeo.data;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.util.Iterator;
 
 /**
  * An iterator like object used to read contents of {@link Dataset} objects. 
@@ -39,12 +40,12 @@ import java.io.IOException;
  * can be called multiple times safely.   
  * </p>
  */
-public interface Cursor<T> extends Closeable, Iterable<T> {
+public abstract class Cursor<T> implements Closeable, Iterable<T> {
 
     /**
      * Returns <true> if the cursor has more elements.
      */
-    boolean hasNext() throws IOException;
+    public abstract boolean hasNext() throws IOException;
 
     /**
      * Returns the next object in the cursor.
@@ -56,5 +57,11 @@ public interface Cursor<T> extends Closeable, Iterable<T> {
      * has been exhaused. 
      * </p>
      */
-    T next() throws IOException;
+    public abstract T next() throws IOException;
+
+    @Override
+    public Iterator<T> iterator() {
+        return Cursors.iterator(this);
+    }
+
 }

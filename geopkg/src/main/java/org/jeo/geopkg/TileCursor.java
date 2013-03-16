@@ -9,7 +9,7 @@ import org.jeo.data.Cursor;
 import org.jeo.data.Cursors;
 import org.jeo.data.Tile;
 
-public class TileCursor implements Cursor<Tile> {
+public class TileCursor extends Cursor<Tile> {
 
     Stmt stmt;
     Boolean next;
@@ -58,10 +58,5 @@ public class TileCursor implements Cursor<Tile> {
         } catch (Exception e) {
             throw new IOException(e);
         }
-    }
-
-    @Override
-    public Iterator<Tile> iterator() {
-        return Cursors.iterator(this);
     }
 }

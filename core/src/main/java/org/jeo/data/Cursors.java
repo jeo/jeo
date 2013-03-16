@@ -88,7 +88,7 @@ public class Cursors {
         return new SingleCursor<T>(obj);
     }
 
-    private static class SingleCursor<T> implements Cursor<T> {
+    private static class SingleCursor<T> extends Cursor<T> {
 
         T obj;
 
@@ -114,11 +114,6 @@ public class Cursors {
         @Override
         public void close() throws IOException {
         }
-
-        @Override
-        public Iterator<T> iterator() {
-            return Cursors.iterator(this);
-        }
     }
 
     /**
@@ -135,7 +130,7 @@ public class Cursors {
         return new IteratorCursor<T>(it);
     }
 
-    private static class IteratorCursor<T> implements Cursor<T> {
+    private static class IteratorCursor<T> extends Cursor<T> {
         Iterator<T> it;
 
         IteratorCursor(Iterator<T> it) {
@@ -159,7 +154,6 @@ public class Cursors {
 
         @Override
         public void close() throws IOException {
-            // TODO Auto-generated method stub
         }
     }
 }

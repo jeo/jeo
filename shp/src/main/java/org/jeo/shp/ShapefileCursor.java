@@ -2,11 +2,9 @@ package org.jeo.shp;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import org.jeo.data.Cursor;
-import org.jeo.data.Cursors;
 import org.jeo.feature.Feature;
 import org.jeo.feature.ListFeature;
 import org.jeo.feature.Schema;
@@ -16,7 +14,7 @@ import org.jeo.shp.shp.ShapefileReader.Record;
 
 import com.vividsolutions.jts.geom.Envelope;
 
-public class ShapefileCursor implements Cursor<Feature> {
+public class ShapefileCursor extends Cursor<Feature> {
 
     ShapefileReader shpReader;
     DbaseFileReader dbfReader;
@@ -53,6 +51,7 @@ public class ShapefileCursor implements Cursor<Feature> {
         List<Object> values = new ArrayList<Object>();
 
         values.add(next.shape());
+
         if (dbfReader.hasNext()) {
             for (Object o : dbfReader.readEntry()) {
                 values.add(o);
@@ -70,11 +69,4 @@ public class ShapefileCursor implements Cursor<Feature> {
         if (shpReader != null) shpReader.close();
         if (dbfReader != null) dbfReader.close();
     }
-
-
-    @Override
-    public Iterator<Feature> iterator() {
-        return Cursors.iterator(this);
-    }
-
 }

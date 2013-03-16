@@ -17,7 +17,7 @@ import org.jeo.feature.Schema;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.io.WKBReader;
 
-public class FeatureCursor implements Cursor<Feature> {
+public class FeatureCursor extends Cursor<Feature> {
 
     Stmt stmt;
     Schema schema;
@@ -81,10 +81,5 @@ public class FeatureCursor implements Cursor<Feature> {
         } catch (Exception e) {
             throw new IOException(e);
         }
-    }
-
-    @Override
-    public Iterator<Feature> iterator() {
-        return Cursors.iterator(this);
     }
 }

@@ -18,6 +18,8 @@
 #include "VertexSource.h"
 #include "CompOp.h"
 
+typedef RenderingPipeline<agg::path_storage> RenderingPipelineType;
+
 void color(agg::rgba8 *rgb, const jfloatArray arr, JNIEnv *env) {
   jfloat *f = env->GetFloatArrayElements(arr, JNI_FALSE);
   rgb->r = *f;
@@ -44,8 +46,8 @@ agg::comp_op_e compop(jstring comp_op, JNIEnv *env) {
   return op; 
 }
 
-RenderingPipeline<VertexSource> * get_rp(jlong h) {
-  return (RenderingPipeline<VertexSource> *) h;
+RenderingPipelineType * get_rp(jlong h) {
+  return (RenderingPipelineType *) h;
 }
 
 RenderingBuffer * get_rb(jlong h) {
@@ -60,14 +62,14 @@ JNIEXPORT jlong JNICALL Java_org_jeo_agg_AggRenderer_createRenderingBuffer
 JNIEXPORT jlong JNICALL Java_org_jeo_agg_AggRenderer_createRenderingPipeline
   (JNIEnv *env, jobject obj) {
 
-  return (jlong) new RenderingPipeline<VertexSource>();
+  return (jlong) new RenderingPipelineType();
 }
 
 JNIEXPORT void JNICALL Java_org_jeo_agg_AggRenderer_setTransform
   (JNIEnv *env, jobject obj, jlong rph, jdouble scx, jdouble scy, 
   jdouble tx, jdouble ty) {
 
-  RenderingPipeline<VertexSource> *rp = get_rp(rph); 
+  RenderingPipelineType *rp = get_rp(rph); 
   rp->set_transform(scx, scy, tx, ty);
 }
 
@@ -103,11 +105,18 @@ JNIEXPORT void JNICALL Java_org_jeo_agg_AggRenderer_composite
   ren.blend_from(pixf_mask,0,0,0,unsigned(255*opacity));
 }
 
-JNIEXPORT void JNICALL Java_org_jeo_agg_AggRenderer_dispose
+JNIEXPORT void JNICALL Java_org_jeo_agg_AggRenderer_disposeBuffer
   (JNIEnv *env, jobject obj, jlong rbh) {
   
   RenderingBuffer *dst = get_rb(rbh);
   delete dst;
+}
+
+JNIEXPORT void JNICALL Java_org_jeo_agg_AggRenderer_disposePipeline
+  (JNIEnv *env, jobject obj, jlong rph) {
+
+  RenderingPipelineType *rp = get_rp(rph);
+  delete rp;
 }
 
 JNIEXPORT void JNICALL Java_org_jeo_agg_AggRenderer_drawLine
@@ -135,11 +144,14 @@ JNIEXPORT void JNICALL Java_org_jeo_agg_AggRenderer_drawLine
     env->ReleaseDoubleArrayElements(dash, d, 0);
   }
 
-  VertexSource source(env, line);
+  char *p = (char *)env->GetDirectBufferAddress(line);
+  agg::path_storage path;
 
   RenderingBuffer *rb = get_rb(rbh);
-  RenderingPipeline<VertexSource> *rp = get_rp(rph);
-  rp->draw_line(source, style, rb);
+  RenderingPipelineType *rp = get_rp(rph);
+
+  rp->fill_path(&path, p);
+  rp->draw_line(&path, style, rb);
 }
 
 JNIEXPORT void JNICALL Java_org_jeo_agg_AggRenderer_drawPolygon
@@ -166,11 +178,14 @@ JNIEXPORT void JNICALL Java_org_jeo_agg_AggRenderer_drawPolygon
     style.comp_op = compop(comp_op, env);
   }
 
-  VertexSource source(env, poly);
+  char *p = (char *)env->GetDirectBufferAddress(poly);
+  agg::path_storage path;
 
   RenderingBuffer *rb = get_rb(rbh);
-  RenderingPipeline<VertexSource> *rp = get_rp(rph);
-  rp->draw_polygon(source, style, rb);
+  RenderingPipelineType *rp = get_rp(rph);
+
+  rp->fill_path(&path, p);
+  rp->draw_polygon(&path, style, rb);
 }
 
 JNIEXPORT void JNICALL Java_org_jeo_agg_AggRenderer_writePPM

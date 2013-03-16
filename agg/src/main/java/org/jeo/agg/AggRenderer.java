@@ -1,6 +1,7 @@
 package org.jeo.agg;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -8,8 +9,10 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 
+import org.jeo.data.Cursor;
 import org.jeo.data.Vector;
 import org.jeo.feature.Feature;
+import org.jeo.geom.CoordinatePath;
 import org.jeo.geom.Geom;
 import org.jeo.map.Layer;
 import org.jeo.map.Map;
@@ -57,8 +60,14 @@ public class AggRenderer {
     long rp;
     long rb;
 
+    VertexPathBuffer vpb;
+
+    public AggRenderer() {
+    }
+
     public void init(Map map) {
         this.map = map;
+        vpb = new VertexPathBuffer();
 
         rb = createRenderingBuffer(map.getWidth(), map.getHeight());
         rp = createRenderingPipeline();
@@ -101,8 +110,20 @@ public class AggRenderer {
                 //render((Vector) l.getData(), new FeatureStyle(rule), rb);
 
                 composite(rb, buf, ruleSet);
-                dispose(buf);
+                disposeBuffer(buf);
             }
+        }
+    }
+
+    public void dispose() {
+        if (rp != 0) {
+            disposePipeline(rp);
+            rp = 0;
+        }
+
+        if (rb != 0) {
+            disposeBuffer(rb);
+            rb = 0;
         }
     }
 
@@ -125,7 +146,9 @@ public class AggRenderer {
 
     private native void composite(long dstRb, long srcRb, String mode);
 
-    private native void dispose(long rbh);
+    private native void disposeBuffer(long rbh);
+
+    private native void disposePipeline(long rph);
 
     RuleSet match(Layer layer, Stylesheet style) {
         return style.selectById(layer.getName());
@@ -210,22 +233,24 @@ public class AggRenderer {
             return;
         }
 
+        vpb.reset();
+        vpb.fill( CoordinatePath.create(g, true, map.iscaleX()*0.5, map.iscaleY()*0.5));
+
         switch(Geom.Type.from(g)) {
         case LINESTRING:
         case MULTILINESTRING:
-            drawLine(g, f, rule, buf);
+            drawLine(f, rule, buf);
             return;
         case POLYGON:
         case MULTIPOLYGON:
-            drawPolygon(g, f, rule, buf);
+            drawPolygon(f, rule, buf);
             return;
         default:
             throw new UnsupportedOperationException();
         }
-
     }
 
-    void drawLine(Geometry g, Feature f, Rule rule, long buf) {
+    void drawLine(Feature f, Rule rule, long buf) {
         RGB color = (RGB) rule.get("line-color", RGB.black);
         float width = rule.number("line-width", 1f);
 
@@ -241,13 +266,13 @@ public class AggRenderer {
         }
 
         String compOp = rule.string("comp-op", null);
-        drawLine(rp, buf, new VertexSource(g), color(color), width, join, cap, dash, compOp);
+        drawLine(rp, buf, vpb.buffer(), color(color), width, join, cap, dash, compOp);
     }
 
-    private native void drawLine(long rph, long rbh, VertexSource g, float[] color, float width, 
+    private native void drawLine(long rph, long rbh, ByteBuffer path, float[] color, float width, 
         byte join, byte cap, double[] dash, String compOp);
 
-    void drawPolygon(Geometry g, Feature f, Rule rule, long buf) {
+    void drawPolygon(Feature f, Rule rule, long buf) {
         RGB polyFill = rule.color("polygon-fill", null);
         if (polyFill != null) {
             polyFill = polyFill.alpha(rule.number("polygon-opacity", 1f));
@@ -261,11 +286,11 @@ public class AggRenderer {
         float lineWidth = rule.number("line-width", 1f);
         String compOp = rule.string("comp-op", null);
 
-        drawPolygon(rp, buf, new VertexSource(g), color(polyFill), color(lineColor), lineWidth, compOp);
+        drawPolygon(rp, buf, vpb.buffer(), color(polyFill), color(lineColor), lineWidth, compOp);
     }
 
-    private native void drawPolygon(long rph, long rbh, VertexSource g, float[] fillColor, 
-            float[] lineColor, float lineWidth, String compOp);
+    private native void drawPolygon(long rph, long rbh, ByteBuffer path, float[] fillColor, 
+        float[] lineColor, float lineWidth, String compOp);
 
     public void writePPM(String path) {
         writePPM(rb, path);

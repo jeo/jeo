@@ -41,10 +41,18 @@ JNIEXPORT void JNICALL Java_org_jeo_agg_AggRenderer_composite
 
 /*
  * Class:     org_jeo_agg_AggRenderer
- * Method:    dispose
+ * Method:    disposeBuffer
  * Signature: (J)V
  */
-JNIEXPORT void JNICALL Java_org_jeo_agg_AggRenderer_dispose
+JNIEXPORT void JNICALL Java_org_jeo_agg_AggRenderer_disposeBuffer
+  (JNIEnv *, jobject, jlong);
+
+/*
+ * Class:     org_jeo_agg_AggRenderer
+ * Method:    disposePipeline
+ * Signature: (J)V
+ */
+JNIEXPORT void JNICALL Java_org_jeo_agg_AggRenderer_disposePipeline
   (JNIEnv *, jobject, jlong);
 
 /*
@@ -58,7 +66,7 @@ JNIEXPORT void JNICALL Java_org_jeo_agg_AggRenderer_setBackground
 /*
  * Class:     org_jeo_agg_AggRenderer
  * Method:    drawLine
- * Signature: (JJLorg/jeo/agg/VertexSource;[FFBB[DLjava/lang/String;)V
+ * Signature: (JJLjava/nio/ByteBuffer;[FFBB[DLjava/lang/String;)V
  */
 JNIEXPORT void JNICALL Java_org_jeo_agg_AggRenderer_drawLine
   (JNIEnv *, jobject, jlong, jlong, jobject, jfloatArray, jfloat, jbyte, jbyte, jdoubleArray, jstring);
@@ -66,7 +74,7 @@ JNIEXPORT void JNICALL Java_org_jeo_agg_AggRenderer_drawLine
 /*
  * Class:     org_jeo_agg_AggRenderer
  * Method:    drawPolygon
- * Signature: (JJLorg/jeo/agg/VertexSource;[F[FFLjava/lang/String;)V
+ * Signature: (JJLjava/nio/ByteBuffer;[F[FFLjava/lang/String;)V
  */
 JNIEXPORT void JNICALL Java_org_jeo_agg_AggRenderer_drawPolygon
   (JNIEnv *, jobject, jlong, jlong, jobject, jfloatArray, jfloatArray, jfloat, jstring);

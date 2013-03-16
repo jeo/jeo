@@ -26,13 +26,37 @@ template<class V> void RenderingPipeline<V>::set_transform(
   at = agg::trans_affine(scx, 0, 0, scy, tx, ty);
 }
 
+template<class V> void RenderingPipeline<V>::fill_path(V *path, char *p) {
+
+  while (*p != agg::path_cmd_stop) {
+    switch(*p++) {
+      case agg::path_cmd_move_to:
+        path->move_to(*((float*)p), *((float*)(p+4))); 
+        p += 8;
+        break;
+
+      case agg::path_cmd_line_to:
+        path->line_to(*((float*)p), *((float*)(p+4))); 
+        p += 8;
+        break;
+
+      case agg::path_cmd_end_poly:
+        path->close_polygon(); 
+        break;
+
+      case agg::path_cmd_stop:
+        return;
+    }
+  }
+}
+
 template<class V> void RenderingPipeline<V>::draw_line(
-    V line, const LineStyle &style, RenderingBuffer *rb) {
+    V *line, const LineStyle &style, RenderingBuffer *rb) {
 
   typedef agg::conv_transform<V> LineType;
 
   // apply transform to line
-  LineType tx_line(line, at);
+  LineType tx_line(*line, at);
 
   // create base stroke
   typedef agg::conv_stroke<LineType> StrokeType;
@@ -84,7 +108,7 @@ template<class V> void RenderingPipeline<V>::draw_line(
 }
 
 template<class V> void RenderingPipeline<V>::draw_polygon(
-    V poly, const PolyStyle &style, RenderingBuffer *rb) {
+    V *poly, const PolyStyle &style, RenderingBuffer *rb) {
 
   typedef agg::rgba8 ColorType;
   typedef agg::order_rgba OrderType;
@@ -101,8 +125,10 @@ template<class V> void RenderingPipeline<V>::draw_polygon(
   agg::rasterizer_scanline_aa<> rasterizer;
   rasterizer.reset();
 
-  typedef agg::conv_transform<V> PolyType;
-  PolyType tx_poly(poly, at);
+  //typedef agg::conv_transform<V> PolyType;
+  //PolyType tx_poly(poly, at);
+  typedef agg::conv_transform<agg::path_storage> PolyType;
+  PolyType tx_poly(*poly, at);
 
   agg::renderer_scanline_aa_solid<RendererType> renderer(renderer_base);
   agg::scanline_p8 scanline;
@@ -128,4 +154,4 @@ template<class V> void RenderingPipeline<V>::draw_polygon(
   }
 }
 
-template class RenderingPipeline<VertexSource>;
+template class RenderingPipeline<agg::path_storage>;

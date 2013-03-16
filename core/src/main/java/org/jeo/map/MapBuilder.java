@@ -37,6 +37,10 @@ public class MapBuilder {
         return this;
     }
 
+    public MapBuilder bounds(double x1, double y1, double x2, double y2) {
+        return bounds(new Envelope(x1,x2,y1,y2));
+    }
+
     public MapBuilder crs(CoordinateReferenceSystem crs) {
         map.setCRS(crs);
         this.crs = true;

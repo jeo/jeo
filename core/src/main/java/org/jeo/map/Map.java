@@ -129,11 +129,27 @@ public class Map implements Disposable {
     }
 
     /**
+     * The horizontal scaling factor of the affine transform that maps points rendering space to  
+     * points in world space, defined as <pre>bounds.width / map.width</pre>.
+     */
+    public double iscaleX() {
+        return bounds.getWidth() / (double) getWidth();
+    }
+
+    /**
      * The vertical scaling factor of the affine transform that maps points in world space to 
      * points in rendering space, defined as <pre>map.height / bounds.height</pre>.
      */
     public double scaleY() {
         return getHeight() / bounds.getHeight();
+    }
+
+    /**
+     * The vertical scaling factor of the affine transform that maps points rendering space to  
+     * points in world space, defined as <pre>bounds.height / map.height</pre>.
+     */
+    public double iscaleY() {
+        return bounds.getHeight() / (double) getHeight();
     }
 
     /**

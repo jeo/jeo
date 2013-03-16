@@ -31,7 +31,7 @@ public interface Vector extends Dataset {
      * Reads data from the layer. 
      * 
      * @param bbox A bounding box filter used to constrain results, or <code>null</code> to specify
-     * no constraint.
+     * no constraint and query all features.
      */
     Cursor<Feature> read(Envelope bbox) throws IOException;
 

@@ -118,6 +118,14 @@ public class Rule {
             return d;
         }
     
+        String s = obj.toString();
+        if (s.contains(" ")) {
+            return toDoubles(s, " ");
+        }
+        else if (s.contains(",")) {
+            return toDoubles(s, ",");
+        }
+
         //TODO: attempt to convert from string delimiated by ' ', or ',' 
         throw new IllegalArgumentException("Unable to convert " + obj + " to array");
     }
@@ -130,6 +138,7 @@ public class Rule {
 
         return props;
     }
+
     protected double toDouble(Object obj) {
         if (obj == null) {
             return Double.NaN;
@@ -142,6 +151,16 @@ public class Rule {
         return Double.parseDouble(obj.toString());
     }
 
+    protected double[] toDoubles(String s, String delim) {
+        String[] split = s.split(delim);
+        double[] d = new double[split.length];
+        
+        for (int i = 0; i < d.length; i++) {
+            d[i] = toDouble(split[i].trim());
+        }
+        return d;
+    }
+    
     protected RGB toRGB(Object obj) {
         if (obj == null) {
             return null;

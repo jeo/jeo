@@ -31,7 +31,6 @@ public class MapBuilder {
     }
 
     public MapBuilder bounds(Envelope bounds) {
-        //TODO: set size based on bbox aspect ratio
         map.setBounds(bounds);
         this.bounds = true;
         return this;

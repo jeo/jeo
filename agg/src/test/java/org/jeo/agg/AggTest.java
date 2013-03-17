@@ -12,8 +12,10 @@ import java.awt.image.DataBufferInt;
 import java.awt.image.Raster;
 import java.awt.image.SinglePixelPackedSampleModel;
 
+import org.jeo.data.Vector;
 import org.jeo.map.Map;
 import org.jeo.map.MapBuilder;
+import org.jeo.map.RGB;
 import org.jeo.map.StyleBuilder;
 import org.jeo.map.Stylesheet;
 import org.jeo.shp.ShpData;
@@ -24,7 +26,7 @@ import org.junit.rules.TestName;
 
 public class AggTest {
 
-    int TIMEOUT = 5000;
+    int TIMEOUT = 2000;
     
     @org.junit.Rule
     public TestName testName = new TestName();
@@ -43,6 +45,39 @@ public class AggTest {
     }
 
     @Test
+    public void testLine() throws Exception {
+        Stylesheet style = new StyleBuilder().select("*")
+            .set("line-color", RGB.black)
+            .set("line-width", 2.5)
+            .style();
+        render(ShpData.line(), style);
+    }
+
+    @Test
+    public void testLineCased() throws Exception {
+        Stylesheet style = new StyleBuilder().select("*")
+            .set("line-color", RGB.black)
+            .set("line-width", 5)
+            .rule().select("::outer")
+                .set("line-color", RGB.white)
+                .set("line-width", 3)
+            .endRule()
+            
+            .style();
+        render(ShpData.line(), style);
+    }
+
+    @Test
+    public void testLineDashed() throws Exception {
+        Stylesheet style = new StyleBuilder().select("*")
+            .set("line-color", RGB.blue)
+            .set("line-width", 3)
+            .set("line-dasharray", "5 2")
+            .style();
+        render(ShpData.line(), style);
+    }
+
+    @Test
     public void testSimple() throws Exception {
         Stylesheet style = new StyleBuilder()
             .rule().select("Map").set("background-color", "#b8dee6").endRule()
@@ -57,13 +92,7 @@ public class AggTest {
             .endRule()
             .style();
 
-        Map map = new MapBuilder().size(500,500).layer(ShpData.states()).style(style).map();
-
-        AggRenderer r = new AggRenderer();
-        r.init(map);
-        r.render();
-
-        show(img(r, map));
+        render(ShpData.states(), style);
     }
 
     @Test
@@ -135,7 +164,12 @@ public class AggTest {
             .endRule()
             .style();
 
-        Map map = new MapBuilder().size(500,500).layer(ShpData.states()).style(style).map();
+        render(ShpData.states(), style);
+    }
+
+    void render(Vector l, Stylesheet s) {
+        
+        Map map = new MapBuilder().layer(l).style(s).map();
 
         AggRenderer r = new AggRenderer();
         r.init(map);

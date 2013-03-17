@@ -7,8 +7,6 @@
 
 template <class V> class RenderingPipeline {
 
-  agg::trans_affine at;
-
  public:
     
   RenderingPipeline();
@@ -20,6 +18,10 @@ template <class V> class RenderingPipeline {
   void draw_line(V *line, const LineStyle &style, RenderingBuffer *rb);
 
   void draw_polygon(V *poly, const PolyStyle &style, RenderingBuffer *rb);
+
+ private:
+
+  agg::trans_affine at;
 
 };
 

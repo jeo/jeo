@@ -107,7 +107,7 @@ public class AggRenderer {
             for (RuleSet ruleSet : rules) {
                 long buf = createRenderingBuffer(map.getWidth(), map.getHeight());
                 render((Vector) l.getData(), ruleSet, buf);
-                //render((Vector) l.getData(), new FeatureStyle(rule), rb);
+                //render((Vector) l.getData(), ruleSet, rb);
 
                 composite(rb, buf, ruleSet);
                 disposeBuffer(buf);
@@ -151,7 +151,7 @@ public class AggRenderer {
     private native void disposePipeline(long rph);
 
     RuleSet match(Layer layer, Stylesheet style) {
-        return style.selectById(layer.getName());
+        return style.selectById(layer.getName(), true);
     }
 
     RuleSet flatten(RuleSet rules) {

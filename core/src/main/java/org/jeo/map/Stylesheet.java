@@ -77,10 +77,14 @@ public class Stylesheet {
         return new RuleSet(match);
     }
 
-    public RuleSet selectById(final String id) {
+    public RuleSet selectById(final String id, final boolean wildcard) {
         return select(new SelectorVisitor() {
             @Override
             public boolean visit(Selector selector, Rule rule, Stylesheet style) {
+                if (wildcard && selector.isWildcard()) {
+                    return true;
+                }
+
                 return id == null && selector.getId() == null || id.equals(selector.getId());
             }
         });

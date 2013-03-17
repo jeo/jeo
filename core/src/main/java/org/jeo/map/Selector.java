@@ -10,6 +10,7 @@ public class Selector {
     String id;
     String name;
     String attachment;
+    boolean wildcard = false;
     List<String> classes = new ArrayList<String>();
     Filter filter;
     
@@ -36,7 +37,15 @@ public class Selector {
     public void setAttachment(String attachment) {
         this.attachment = attachment;
     }
-    
+
+    public boolean isWildcard() {
+        return wildcard;
+    }
+
+    public void setWildcard(boolean wildcard) {
+        this.wildcard = wildcard;
+    }
+
     public List<String> getClasses() {
         return classes;
     }

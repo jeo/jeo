@@ -43,7 +43,10 @@ public class StyleBuilder {
     public StyleBuilder select(String name) {
         Selector s = lastSelector();
         if (name != null) {
-            if (name.startsWith("#")) {
+            if (name.equals("*")) {
+                s.setWildcard(true);
+            }
+            else if (name.startsWith("#")) {
                 s.setId(name.substring(1));
             }
             else if (name.startsWith(".")) {
@@ -81,8 +84,9 @@ public class StyleBuilder {
 
     Rule lastRule() {
         if (ruleStack.isEmpty()) {
-            throw new IllegalStateException(
-                    "No rule on the stack, call the rule() method before this method");
+            rule();
+            //throw new IllegalStateException(
+            //        "No rule on the stack, call the rule() method before this method");
         }
         return ruleStack.peek();
     }

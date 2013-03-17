@@ -16,6 +16,6 @@ public class StylesheetTest {
         assertEquals(2, style.getRules().size());
 
         assertEquals(1, style.selectByName("Map").list().size());
-        assertEquals(1, style.selectById("widgets").list().size());
+        assertEquals(1, style.selectById("widgets", false).list().size());
     }
 }

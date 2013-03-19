@@ -17,6 +17,7 @@
 #include "RenderingPipeline.h"
 #include "VertexSource.h"
 #include "CompOp.h"
+#include "Marker.h"
 
 typedef RenderingPipeline<agg::path_storage> RenderingPipelineType;
 
@@ -44,6 +45,21 @@ agg::comp_op_e compop(jstring comp_op, JNIEnv *env) {
   }
 
   return op; 
+}
+
+agg::marker_e marker(jstring marker, JNIEnv *env) {
+  agg::marker_e m = Marker::map["circle"];
+  if (marker) {
+    const char* c = env->GetStringUTFChars(marker, JNI_FALSE);
+    std::string str = c;
+
+    if (Marker::map.count(str) > 0) {
+      m = Marker::map[str];
+    }
+
+    env->ReleaseStringUTFChars(marker, c);
+  }
+  return m;
 }
 
 RenderingPipelineType * get_rp(jlong h) {
@@ -117,6 +133,34 @@ JNIEXPORT void JNICALL Java_org_jeo_agg_AggRenderer_disposePipeline
 
   RenderingPipelineType *rp = get_rp(rph);
   delete rp;
+}
+
+JNIEXPORT void JNICALL Java_org_jeo_agg_AggRenderer_drawPoint
+  (JNIEnv *env, jobject obj, jlong rph, jlong rbh, jobject point, 
+   jstring shape, jfloatArray fill_color, jfloat width, jfloat height, 
+   jfloatArray line_color, jstring comp_op) {
+
+  PointStyle style;
+  color(&style.color, fill_color, env);
+  style.width = width;
+  style.height = height;
+  style.marker = marker(shape, env);
+   
+  if (line_color) {
+    LineStyle line_style; 
+    color(&line_style.color, line_color, env);
+    style.line = &line_style;
+  }
+
+  char *p = (char *)env->GetDirectBufferAddress(point);
+
+  agg::path_storage path;
+
+  RenderingBuffer *rb = get_rb(rbh);
+  RenderingPipelineType *rp = get_rp(rph);
+
+  rp->fill_path(&path, p);
+  rp->draw_point(&path, style, rb);
 }
 
 JNIEXPORT void JNICALL Java_org_jeo_agg_AggRenderer_drawLine

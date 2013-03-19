@@ -1,7 +1,7 @@
 #include "CompOp.h"
 #include "agg_pixfmt_rgba.h"
 
-std::map<std::string, agg::comp_op_e> init_map() {
+std::map<std::string, agg::comp_op_e> init_compop_map() {
   std::map<std::string, agg::comp_op_e> m;
   m["clear"] = agg::comp_op_clear;
   m["color-burn"] = agg::comp_op_color_burn;
@@ -34,4 +34,4 @@ std::map<std::string, agg::comp_op_e> init_map() {
   return m;
 }
 
-std::map<std::string, agg::comp_op_e> CompOp::map = init_map();
+std::map<std::string, agg::comp_op_e> CompOp::map = init_compop_map();

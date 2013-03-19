@@ -1,4 +1,5 @@
 #include <jni.h>
+#include <cmath>
 #include "agg_array.h"
 #include "agg_rendering_buffer.h"
 #include "agg_pixfmt_rgb.h"
@@ -6,6 +7,7 @@
 #include "agg_basics.h"
 #include "agg_renderer_base.h"
 #include "agg_renderer_scanline.h"
+#include "agg_renderer_markers.h"
 #include "agg_rasterizer_scanline_aa.h"
 #include "agg_scanline_p.h"
 #include "agg_scanline_u.h"
@@ -16,6 +18,15 @@
 #include "agg_conv_transform.h"
 #include "RenderingPipeline.h"
 #include "VertexSource.h"
+
+
+typedef agg::rgba8 ColorType;
+typedef agg::order_rgba OrderType;
+typedef agg::pixel32_type PixelType;
+typedef agg::comp_op_adaptor_rgba_pre<ColorType, OrderType> BlenderType;
+typedef agg::pixfmt_custom_blend_rgba<BlenderType, agg::rendering_buffer> PixfmtType;
+  //typedef agg::pixfmt_rgba32 PixfmtType;
+typedef agg::renderer_base<PixfmtType> RendererType;
 
 template<class V> RenderingPipeline<V>::RenderingPipeline()
    : at(agg::trans_affine()) {
@@ -51,17 +62,33 @@ template<class V> void RenderingPipeline<V>::fill_path(V *path, char *p) {
 }
 
 
+template<class V> void RenderingPipeline<V>::draw_point(
+    V *point, const PointStyle &style, RenderingBuffer *rb) {
+
+  PixfmtType pixf(rb->rbuf);
+  pixf.comp_op(style.comp_op);
+
+  agg::renderer_base<PixfmtType> renderer_base(pixf);
+  agg::renderer_markers<RendererType> renderer(renderer_base);
+  renderer.fill_color(style.color);
+
+  if (style.line) {
+    renderer.line_color(style.line->color);
+  }
+  agg::conv_transform<V> tx_point(*point, at);
+
+  int r = (int)sqrt(style.width*style.width+style.height*style.height)*0.5;
+  double x;
+  double y;
+
+  unsigned cmd;
+  while (!agg::is_stop(tx_point.vertex(&x, &y))) {
+     renderer.marker((int)x, (int)y, r, style.marker);
+  }
+}
+
 template<class V> void RenderingPipeline<V>::draw_line(
     V *line, const LineStyle &style, RenderingBuffer *rb) {
-
-  // create the renderer
-  typedef agg::rgba8 ColorType;
-  typedef agg::order_rgba OrderType;
-  typedef agg::pixel32_type PixelType;
-  typedef agg::comp_op_adaptor_rgba_pre<ColorType, OrderType> BlenderType;
-  typedef agg::pixfmt_custom_blend_rgba<BlenderType, agg::rendering_buffer> PixfmtType;
-  //typedef agg::pixfmt_rgba32 PixfmtType;
-  typedef agg::renderer_base<PixfmtType> RendererType;
 
   PixfmtType pixf(rb->rbuf);
   pixf.comp_op(style.comp_op);
@@ -111,13 +138,6 @@ template<class V> void RenderingPipeline<V>::draw_line(
 
 template<class V> void RenderingPipeline<V>::draw_polygon(
     V *poly, const PolyStyle &style, RenderingBuffer *rb) {
-
-  typedef agg::rgba8 ColorType;
-  typedef agg::order_rgba OrderType;
-  typedef agg::comp_op_adaptor_rgba_pre<ColorType, OrderType> BlenderType;
-  typedef agg::pixfmt_custom_blend_rgba<BlenderType, agg::rendering_buffer> PixfmtType;
-  //typedef agg::pixfmt_rgba32 PixfmtType;
-  typedef agg::renderer_base<PixfmtType> RendererType;
 
   PixfmtType pixf(rb->rbuf);
   pixf.comp_op(style.comp_op);

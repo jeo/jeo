@@ -2,6 +2,7 @@
 #include "agg_color_rgba.h"
 #include "agg_pixfmt_rgba.h"
 #include "agg_math_stroke.h"
+#include "agg_renderer_markers.h"
 
 enum GammaMethod {
   none, 
@@ -25,10 +26,20 @@ struct LineStyle: Style {
   std::list<double> dash_array;
 };
 
+struct PointStyle: Style {
+  agg::marker_e marker;
+  agg::rgba8 color;
+  int width;
+  int height;
+  LineStyle *line;
+
+  PointStyle(): Style(), width(5), height(5), line(0) {}
+};
+
 struct PolyStyle: Style {
   agg::rgba8 *fill_color;
   LineStyle *line;
 
-  PolyStyle(): line(0), fill_color(0) {}
+  PolyStyle(): Style(), line(0), fill_color(0) {}
 };
 

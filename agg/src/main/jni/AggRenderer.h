@@ -65,6 +65,14 @@ JNIEXPORT void JNICALL Java_org_jeo_agg_AggRenderer_setBackground
 
 /*
  * Class:     org_jeo_agg_AggRenderer
+ * Method:    drawPoint
+ * Signature: (JJLjava/nio/ByteBuffer;Ljava/lang/String;[FFF[FFLjava/lang/String;)V
+ */
+JNIEXPORT void JNICALL Java_org_jeo_agg_AggRenderer_drawPoint
+  (JNIEnv *, jobject, jlong, jlong, jobject, jstring, jfloatArray, jfloat, jfloat, jfloatArray, jstring);
+
+/*
+ * Class:     org_jeo_agg_AggRenderer
  * Method:    drawLine
  * Signature: (JJLjava/nio/ByteBuffer;[FFBB[DLjava/lang/String;)V
  */

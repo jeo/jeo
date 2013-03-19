@@ -32,7 +32,7 @@ public class AggTest {
     public TestName testName = new TestName();
 
     @BeforeClass
-    public static void checkdb() {
+    public static void checkagg() {
         Throwable caught = null;
         try {
             System.loadLibrary("jeoagg");
@@ -42,6 +42,17 @@ public class AggTest {
         }
     
         Assume.assumeNoException(caught);
+    }
+
+    @Test
+    public void testPoint() throws Exception {
+        Stylesheet style = new StyleBuilder().select("*")
+            .set("marker-fill", RGB.blue)
+            .set("marker-type", "circle")
+            .set("marker-width", 20)
+            .set("marker-line-color", RGB.black)
+            .style();
+        render(ShpData.point(), style);
     }
 
     @Test

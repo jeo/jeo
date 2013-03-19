@@ -237,6 +237,9 @@ public class AggRenderer {
         vpb.fill( CoordinatePath.create(g, true, map.iscaleX()*0.5, map.iscaleY()*0.5));
 
         switch(Geom.Type.from(g)) {
+        case POINT:
+        case MULTIPOINT:
+            drawPoint(f, rule, buf);
         case LINESTRING:
         case MULTILINESTRING:
             drawLine(f, rule, buf);
@@ -249,6 +252,23 @@ public class AggRenderer {
             throw new UnsupportedOperationException();
         }
     }
+
+    void drawPoint(Feature f, Rule rule, long buf) {
+        String type = rule.string("marker-type", "circle");
+        RGB fillColor = rule.color("marker-fill", RGB.black);
+        float width = rule.number("marker-width", 10);
+        float height = rule.number("marker-height", width);
+
+        RGB lineColor = rule.color("marker-line-color", null);
+        
+        String compOp = rule.string("comp-op", null);
+
+        drawPoint(rp, buf, vpb.buffer(), type, color(fillColor), width, height, 
+            color(lineColor), compOp);
+    }
+
+    private native void drawPoint(long rph, long rbh, ByteBuffer path, String type, 
+        float[] fillColor, float width, float height, float[] lineColor, String compOp);
 
     void drawLine(Feature f, Rule rule, long buf) {
         RGB color = (RGB) rule.get("line-color", RGB.black);

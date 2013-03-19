@@ -11,7 +11,7 @@ CC=g++
 CFLAGS=-g -O0 -I$(JAVA_HOME)/include -I$(AGG)/include/agg2
 LDFLAGS=-dynamiclib -L$(AGG)/lib -lagg
 
-OBJS=$(BUILD)/AggRenderer.o $(BUILD)/RenderingBuffer.o $(BUILD)/RenderingPipeline.o $(BUILD)/VertexSource.o $(BUILD)/CompOp.o
+OBJS=$(BUILD)/AggRenderer.o $(BUILD)/RenderingBuffer.o $(BUILD)/RenderingPipeline.o $(BUILD)/VertexSource.o $(BUILD)/CompOp.o $(BUILD)/Marker.o
 HDRS=$(JNI)/AggRenderer.h
 
 TARGET=$(BUILD)/libjeoagg.jnilib

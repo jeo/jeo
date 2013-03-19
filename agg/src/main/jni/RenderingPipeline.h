@@ -15,6 +15,8 @@ template <class V> class RenderingPipeline {
 
   void fill_path(V *path, char *p);
 
+  void draw_point(V *point, const PointStyle &style, RenderingBuffer *rb);
+
   void draw_line(V *line, const LineStyle &style, RenderingBuffer *rb);
 
   void draw_polygon(V *poly, const PolyStyle &style, RenderingBuffer *rb);

@@ -256,11 +256,16 @@ public class AggRenderer {
     void drawPoint(Feature f, Rule rule, long buf) {
         String type = rule.string("marker-type", "circle");
         RGB fillColor = rule.color("marker-fill", RGB.black);
+        if (fillColor != null) {
+            fillColor = fillColor.alpha(rule.number("marker-fill-opacity", 1f));
+        }
         float width = rule.number("marker-width", 10);
         float height = rule.number("marker-height", width);
 
         RGB lineColor = rule.color("marker-line-color", null);
-        
+        if (lineColor != null) {
+            lineColor = lineColor.alpha(rule.number("marker-line-opacity", 1f));
+        }
         String compOp = rule.string("comp-op", null);
 
         drawPoint(rp, buf, vpb.buffer(), type, color(fillColor), width, height, 

@@ -9,7 +9,6 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 
-import org.jeo.data.Cursor;
 import org.jeo.data.Vector;
 import org.jeo.feature.Feature;
 import org.jeo.geom.CoordinatePath;
@@ -29,6 +28,26 @@ import com.vividsolutions.jts.geom.Geometry;
 public class AggRenderer {
 
     static Logger LOG = LoggerFactory.getLogger(AggRenderer.class);
+
+    static final Throwable libError;
+    static {
+        libError = loadLibJeoagg();
+    }
+
+    static Throwable loadLibJeoagg() {
+        Throwable caught = null;
+        try {
+            System.loadLibrary("jeoagg");
+        }
+        catch(Throwable t) {
+            caught = t;
+        }
+        return caught;
+    }
+
+    public static boolean available() {
+        return libError == null;
+    }
 
     static class LineCap {
         static byte BUTT = 0;
@@ -63,6 +82,9 @@ public class AggRenderer {
     VertexPathBuffer vpb;
 
     public AggRenderer() {
+        if (!available()) {
+            throw (RuntimeException) new RuntimeException("Could not log agg").initCause(libError);
+        }
     }
 
     public void init(Map map) {
@@ -141,7 +163,15 @@ public class AggRenderer {
     }
 
     void composite(long dstRb, long srcRb, RuleSet rules) {
-        composite(dstRb, srcRb, "src");
+        String compOp = null;
+        for (Rule r : rules) {
+            compOp = r.string("comp-op", null);
+            if (compOp != null) {
+                break;
+            }
+        }
+        
+        composite(dstRb, srcRb, compOp != null ? compOp : "src-over");
     }
 
     private native void composite(long dstRb, long srcRb, String mode);

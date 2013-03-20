@@ -27,7 +27,7 @@ void color(agg::rgba8 *rgb, const jfloatArray arr, JNIEnv *env) {
   rgb->g = *(f+1);
   rgb->b = *(f+2);
   rgb->a = *(f+3);
-
+  rgb->premultiply();
   env->ReleaseFloatArrayElements(arr, f, 0);
 }
 

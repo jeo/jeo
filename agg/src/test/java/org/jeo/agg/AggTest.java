@@ -13,6 +13,7 @@ import java.awt.image.Raster;
 import java.awt.image.SinglePixelPackedSampleModel;
 
 import org.jeo.data.Vector;
+import org.jeo.java2d.Java2D;
 import org.jeo.map.Map;
 import org.jeo.map.MapBuilder;
 import org.jeo.map.RGB;
@@ -33,15 +34,7 @@ public class AggTest {
 
     @BeforeClass
     public static void checkagg() {
-        Throwable caught = null;
-        try {
-            System.loadLibrary("jeoagg");
-        }
-        catch(Throwable t) {
-            caught = t;
-        }
-    
-        Assume.assumeNoException(caught);
+        Assume.assumeTrue(AggRenderer.available());
     }
 
     @Test
@@ -179,7 +172,6 @@ public class AggTest {
     }
 
     void render(Vector l, Stylesheet s) {
-        
         Map map = new MapBuilder().layer(l).style(s).map();
 
         AggRenderer r = new AggRenderer();
@@ -187,46 +179,17 @@ public class AggTest {
         r.render();
 
         show(img(r, map));
+        r.dispose();
     }
 
     BufferedImage img(AggRenderer r, Map map) {
-        int[] data = r.data();
-
-        DataBufferInt buf = new DataBufferInt(data, data.length);
-        
-        SinglePixelPackedSampleModel sampleModel = 
-            new SinglePixelPackedSampleModel( DataBufferInt.TYPE_INT, map.getWidth(), map.getHeight(), 
-            new int[]{0xff000000, 0x00ff0000, 0x0000ff00,0x000000ff});
-        Raster raster = Raster.createRaster(sampleModel, buf, null);
-
-        BufferedImage img = new BufferedImage(map.getWidth(), map.getHeight(), BufferedImage.TYPE_INT_ARGB);
-        img.setData(raster);
-        return img;
+        return Java2D.packedImageARGB(r.data(), map.getWidth(), map.getHeight());
     }
+
     void show(final BufferedImage img) {
         if (!Boolean.getBoolean("java.awt.headless")) {
             try {
-                Frame frame = new Frame(testName.getMethodName());
-                frame.addWindowListener(new WindowAdapter() {
-                    public void windowClosing(WindowEvent e) {
-                        e.getWindow().dispose();
-                    }
-                });
-    
-                Panel p = new Panel() {
-                    {
-                        setPreferredSize(new Dimension(img.getWidth(), img.getHeight()));
-                    }
-    
-                    public void paint(Graphics g) {
-                        g.drawImage(img, 0, 0, this);
-                    }
-                };
-    
-                frame.add(p);
-                frame.pack();
-                frame.setVisible(true);
-    
+                Frame frame = Java2D.window(img, testName.getMethodName());
                 Thread.sleep(TIMEOUT);
                 frame.dispose();
             } catch (HeadlessException exception) {

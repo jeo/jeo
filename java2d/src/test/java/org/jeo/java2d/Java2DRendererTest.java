@@ -7,18 +7,14 @@ import java.awt.HeadlessException;
 import java.awt.Panel;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
-
-import javax.swing.JFrame;
 
 import org.jeo.data.Memory;
 import org.jeo.data.Vector;
 import org.jeo.feature.Features;
 import org.jeo.feature.Schema;
 import org.jeo.geom.GeometryBuilder;
-import org.jeo.java2d.Java2DRenderer;
 import org.jeo.map.Map;
 import org.jeo.map.MapBuilder;
 import org.jeo.map.RGB;
@@ -28,8 +24,6 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestName;
-
-import static org.easymock.classextension.EasyMock.*;
 
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
@@ -62,7 +56,8 @@ public class Java2DRendererTest {
     @Test
     public void testSimple() throws Exception {
 
-        Stylesheet style = new StyleBuilder().rule().set("line-width", 2).set("line-color",RGB.Red)
+        Stylesheet style = new StyleBuilder().rule().select("*").
+            set("line-width", 2).set("line-color",RGB.red)
             .style();
         Map map = new MapBuilder().size(500, 250).bounds(new Envelope(-180,180,-90,90))
             .layer(widgets).style(style).map();

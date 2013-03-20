@@ -56,7 +56,7 @@ public class Java2DRenderer {
         Stylesheet style = map.getStyle();
 
         //draw background
-        context.setColor(color((RGB)style.get("background-color", RGB.White)));
+        context.setColor(color((RGB)style.get("background-color", RGB.white)));
         context.fillRect(0, 0, map.getWidth(), map.getHeight());
 
         for (Layer layer : map.getLayers()) {
@@ -81,7 +81,7 @@ public class Java2DRenderer {
             return;
         }
 
-        Rule rule = map.getStyle().apply(layer, f);
+        Rule rule = map.getStyle().selectById(layer.getName(), true).first();
 
         switch(Geom.Type.from(g)) {
         case POINT:
@@ -107,11 +107,11 @@ public class Java2DRenderer {
         LiteShape shp = new LiteShape(g, toScreenTx, false);
 
         //render the fill
-        context.setColor(color(rule, "polygon-fill", "polygon-opacity", RGB.Gray));
+        context.setColor(color(rule, "polygon-fill", "polygon-opacity", RGB.gray));
         context.fill(shp);
 
         //render the outline
-        context.setColor(color(rule, "line-color", "line-opacity", RGB.Black));
+        context.setColor(color(rule, "line-color", "line-opacity", RGB.black));
         context.setStroke(stroke(rule));
         context.draw(shp);
     }

@@ -1,21 +1,16 @@
 #include <list>
+#include <string>
 #include "agg_color_rgba.h"
 #include "agg_pixfmt_rgba.h"
 #include "agg_math_stroke.h"
 #include "agg_renderer_markers.h"
 
-enum GammaMethod {
-  none, 
-  power, 
-  linear, 
-  threshold, 
-  multiply
-};
-
 struct Style {
   agg::comp_op_e comp_op;
+  float gamma;
+  std::string gamma_method; 
 
-  Style(): comp_op(agg::comp_op_src) {}
+  Style(): comp_op(agg::comp_op_src), gamma(1) {}
 };
 
 struct LineStyle: Style {

@@ -19,7 +19,6 @@
 #include "RenderingPipeline.h"
 #include "VertexSource.h"
 
-
 typedef agg::rgba8 ColorType;
 typedef agg::order_rgba OrderType;
 typedef agg::pixel32_type PixelType;
@@ -27,6 +26,31 @@ typedef agg::comp_op_adaptor_rgba_pre<ColorType, OrderType> BlenderType;
 typedef agg::pixfmt_custom_blend_rgba<BlenderType, agg::rendering_buffer> PixfmtType;
   //typedef agg::pixfmt_rgba32 PixfmtType;
 typedef agg::renderer_base<PixfmtType> RendererType;
+
+  
+void set_gamma(
+    agg::rasterizer_scanline_aa<> *ras, std::string method, float g) {
+  
+  if (method.empty()) {
+    method = "power";
+  }
+
+  if (method.compare("linear") == 0) {
+    ras->gamma(g > -1 ? agg::gamma_power(g) : agg::gamma_power());
+  }
+  else if (method.compare("threshold") == 0) {
+    ras->gamma(g > -1 ? agg::gamma_threshold(g) : agg::gamma_threshold());
+  }
+  else if (method.compare("multiply") == 0) {
+    ras->gamma(g > -1 ? agg::gamma_multiply(g) : agg::gamma_multiply());
+  }
+  else if (method.compare("none") == 0) {
+    ras->gamma(agg::gamma_none());
+  }
+  else {
+    ras->gamma(g > -1 ? agg::gamma_power(g) : agg::gamma_power());
+  }
+}
 
 template<class V> RenderingPipeline<V>::RenderingPipeline()
    : at(agg::trans_affine()) {
@@ -60,7 +84,6 @@ template<class V> void RenderingPipeline<V>::fill_path(V *path, char *p) {
     }
   }
 }
-
 
 template<class V> void RenderingPipeline<V>::draw_point(
     V *point, const PointStyle &style, RenderingBuffer *rb) {
@@ -99,6 +122,7 @@ template<class V> void RenderingPipeline<V>::draw_line(
 
   // create the rasterizer
   agg::rasterizer_scanline_aa<> rasterizer;
+  set_gamma(&rasterizer, style.gamma_method, style.gamma);
   rasterizer.reset();
 
   if (style.dash_array.size() > 0) {
@@ -145,6 +169,7 @@ template<class V> void RenderingPipeline<V>::draw_polygon(
   agg::renderer_base<PixfmtType> renderer_base(pixf);
 
   agg::rasterizer_scanline_aa<> rasterizer;
+  set_gamma(&rasterizer, style.gamma_method, style.gamma);
   rasterizer.reset();
 
   //typedef agg::conv_transform<V> PolyType;

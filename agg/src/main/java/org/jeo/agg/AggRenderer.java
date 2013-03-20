@@ -290,12 +290,16 @@ public class AggRenderer {
             throw new IllegalArgumentException("line-dasharray pattern must be even length");
         }
 
+        float gamma = rule.number("line-gamma", 1f);
+        String gammaMethod = rule.string("line-gamma-method", "power");
+
         String compOp = rule.string("comp-op", null);
-        drawLine(rp, buf, vpb.buffer(), color(color), width, join, cap, dash, compOp);
+        drawLine(rp, buf, vpb.buffer(), color(color), width, join, cap, dash, gamma, gammaMethod, 
+            compOp);
     }
 
     private native void drawLine(long rph, long rbh, ByteBuffer path, float[] color, float width, 
-        byte join, byte cap, double[] dash, String compOp);
+        byte join, byte cap, double[] dash, float gamma, String gammaMethod, String compOp);
 
     void drawPolygon(Feature f, Rule rule, long buf) {
         RGB polyFill = rule.color("polygon-fill", null);
@@ -303,19 +307,27 @@ public class AggRenderer {
             polyFill = polyFill.alpha(rule.number("polygon-opacity", 1f));
         }
 
+        float gamma = rule.number("polygon-gamma", 1f);
+        String gammaMethod = rule.string("polygon-gamma-method", "power");
+
         RGB lineColor = rule.color("line-color", null);
         if (lineColor != null) {
             lineColor = lineColor.alpha(rule.number("line-opacity", 1f));
         }
 
         float lineWidth = rule.number("line-width", 1f);
+        float lineGamma = rule.number("line-gamma", 1f);
+        String lineGammaMethod = rule.string("line-gamma-method", "power");
+
         String compOp = rule.string("comp-op", null);
 
-        drawPolygon(rp, buf, vpb.buffer(), color(polyFill), color(lineColor), lineWidth, compOp);
+        drawPolygon(rp, buf, vpb.buffer(), color(polyFill), gamma, gammaMethod, color(lineColor), 
+            lineWidth, lineGamma, lineGammaMethod, compOp);
     }
 
     private native void drawPolygon(long rph, long rbh, ByteBuffer path, float[] fillColor, 
-        float[] lineColor, float lineWidth, String compOp);
+        float gamma, String gammaMethod, float[] lineColor, float lineWidth, float lineGamma, 
+        String lineGammaMethod, String compOp);
 
     public void writePPM(String path) {
         writePPM(rb, path);

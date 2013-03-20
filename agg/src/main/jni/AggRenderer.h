@@ -66,7 +66,7 @@ JNIEXPORT void JNICALL Java_org_jeo_agg_AggRenderer_setBackground
 /*
  * Class:     org_jeo_agg_AggRenderer
  * Method:    drawPoint
- * Signature: (JJLjava/nio/ByteBuffer;Ljava/lang/String;[FFF[FFLjava/lang/String;)V
+ * Signature: (JJLjava/nio/ByteBuffer;Ljava/lang/String;[FFF[FLjava/lang/String;)V
  */
 JNIEXPORT void JNICALL Java_org_jeo_agg_AggRenderer_drawPoint
   (JNIEnv *, jobject, jlong, jlong, jobject, jstring, jfloatArray, jfloat, jfloat, jfloatArray, jstring);
@@ -74,18 +74,18 @@ JNIEXPORT void JNICALL Java_org_jeo_agg_AggRenderer_drawPoint
 /*
  * Class:     org_jeo_agg_AggRenderer
  * Method:    drawLine
- * Signature: (JJLjava/nio/ByteBuffer;[FFBB[DLjava/lang/String;)V
+ * Signature: (JJLjava/nio/ByteBuffer;[FFBB[DFLjava/lang/String;Ljava/lang/String;)V
  */
 JNIEXPORT void JNICALL Java_org_jeo_agg_AggRenderer_drawLine
-  (JNIEnv *, jobject, jlong, jlong, jobject, jfloatArray, jfloat, jbyte, jbyte, jdoubleArray, jstring);
+  (JNIEnv *, jobject, jlong, jlong, jobject, jfloatArray, jfloat, jbyte, jbyte, jdoubleArray, jfloat, jstring, jstring);
 
 /*
  * Class:     org_jeo_agg_AggRenderer
  * Method:    drawPolygon
- * Signature: (JJLjava/nio/ByteBuffer;[F[FFLjava/lang/String;)V
+ * Signature: (JJLjava/nio/ByteBuffer;[FFLjava/lang/String;[FFFLjava/lang/String;Ljava/lang/String;)V
  */
 JNIEXPORT void JNICALL Java_org_jeo_agg_AggRenderer_drawPolygon
-  (JNIEnv *, jobject, jlong, jlong, jobject, jfloatArray, jfloatArray, jfloat, jstring);
+  (JNIEnv *, jobject, jlong, jlong, jobject, jfloatArray, jfloat, jstring, jfloatArray, jfloat, jfloat, jstring, jstring);
 
 /*
  * Class:     org_jeo_agg_AggRenderer

@@ -62,6 +62,16 @@ agg::marker_e marker(jstring marker, JNIEnv *env) {
   return m;
 }
 
+void set_gamma_method(jstring gamma_method, std::string *str, JNIEnv *env) {
+  if (gamma_method) {
+    const char *c = env->GetStringUTFChars(gamma_method, JNI_FALSE);
+
+    *str = c;
+
+    env->ReleaseStringUTFChars(gamma_method, c);
+  }
+}
+
 RenderingPipelineType * get_rp(jlong h) {
   return (RenderingPipelineType *) h;
 }
@@ -166,13 +176,15 @@ JNIEXPORT void JNICALL Java_org_jeo_agg_AggRenderer_drawPoint
 JNIEXPORT void JNICALL Java_org_jeo_agg_AggRenderer_drawLine
   (JNIEnv *env, jobject obj, jlong rph, jlong rbh, jobject line, 
   jfloatArray line_color, jfloat width, jbyte join, jbyte cap, 
-  jdoubleArray dash, jstring comp_op) {
+  jdoubleArray dash, jfloat gamma, jstring gamma_method, jstring comp_op) {
 
   LineStyle style;
   color(&style.color, line_color, env);
   style.width = width; 
   style.join = (agg::line_join_e) join;
   style.cap = (agg::line_cap_e) join;
+  style.gamma = gamma;
+  set_gamma_method(gamma_method, &style.gamma_method, env);
 
   if (comp_op) {
     style.comp_op = compop(comp_op, env);
@@ -200,14 +212,17 @@ JNIEXPORT void JNICALL Java_org_jeo_agg_AggRenderer_drawLine
 
 JNIEXPORT void JNICALL Java_org_jeo_agg_AggRenderer_drawPolygon
   (JNIEnv *env, jobject obj, jlong rph, jlong rbh, jobject poly, 
-  jfloatArray fill_color, jfloatArray line_color, jfloat line_width,
-  jstring comp_op) {
+  jfloatArray fill_color, jfloat gamma, jstring gamma_method, 
+  jfloatArray line_color, jfloat line_width, jfloat line_gamma, 
+  jstring line_gamma_method, jstring comp_op) {
 
   PolyStyle style;
   if (fill_color) {
     agg::rgba8 col; 
     color(&col, fill_color, env);
     style.fill_color = &col;
+    style.gamma = gamma;
+    set_gamma_method(gamma_method, &style.gamma_method, env);
   }
   //color(&style.fill_color, fill_color, env);
 
@@ -216,6 +231,8 @@ JNIEXPORT void JNICALL Java_org_jeo_agg_AggRenderer_drawPolygon
     color(&line_style.color, line_color, env);
     line_style.width = line_width;
     style.line = &line_style;
+    style.gamma = line_gamma;
+    set_gamma_method(line_gamma_method, &style.gamma_method, env);
   }
 
   if (comp_op) {

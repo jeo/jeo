@@ -117,6 +117,7 @@
     <module>gmaps</module>
     <module>shp</module>
     <module>geotools</module>
+    <module>geogit</module>
   </modules>
 
   <properties>

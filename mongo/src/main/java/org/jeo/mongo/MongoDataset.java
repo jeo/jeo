@@ -15,6 +15,7 @@ import org.osgeo.proj4j.CoordinateReferenceSystem;
 import com.mongodb.BasicDBObject;
 import com.mongodb.BasicDBObjectBuilder;
 import com.mongodb.DBCollection;
+import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
 import com.mongodb.util.JSON;
 import com.vividsolutions.jts.geom.Envelope;
@@ -24,11 +25,13 @@ import com.vividsolutions.jts.geom.Polygon;
 public class MongoDataset implements Vector {
 
     DBCollection dbcol;
+    MongoMapper mapper;
     Schema schema;
 
     MongoDataset(DBCollection dbcol) {
         this.dbcol = dbcol;
-        this.schema = Features.schema(dbcol.getName(), "loc", Geometry.class);
+        this.schema = Features.schema(dbcol.getName(), "geometry", Geometry.class);
+        this.mapper = new GeoJSONMapper();
     }
     
     @Override
@@ -64,25 +67,26 @@ public class MongoDataset implements Vector {
 
     @Override
     public long count(Envelope bbox) throws IOException {
-        if (bbox == null) {
-            return dbcol.getCount();
-        }
-
-
-        Polygon p = Geom.toPolygon(bbox);
-        DBObject q = BasicDBObjectBuilder.start().push("loc")
-            .append("$geoIntersects", JSON.parse(GeoJSON.toString(p))).get();
-
-        return dbcol.getCount(q);
+        return bbox != null ? dbcol.count(query(bbox)) : dbcol.count();
     }
 
     @Override
     public Cursor<Feature> read(Envelope bbox) throws IOException {
-        return null;
+        DBCursor dbCursor = bbox != null ? dbcol.find(query(bbox)) : dbcol.find();
+        return new MongoCursor(dbCursor, mapper);
+    }
+
+    DBObject query(Envelope bbox) {
+        Polygon p = Geom.toPolygon(bbox);
+        return BasicDBObjectBuilder.start().push("geometry").push("$geoIntersects")
+            .append("$geometry", JSON.parse(GeoJSON.toString(p))).get();
     }
 
     @Override
     public void add(Feature f) throws IOException {
+        BasicDBObject obj = new BasicDBObject();
+        mapper.feature(obj, f);
+        dbcol.insert(obj);
     }
 
 }

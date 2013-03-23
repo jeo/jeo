@@ -19,6 +19,11 @@
       <version>${project.version}</version>
     </dependency>
     <dependency>
+      <groupId>org.jeo</groupId>
+      <artifactId>jeo-geotools</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
       <groupId>org.geogit</groupId>
       <artifactId>geogit-core</artifactId>
       <version>${geogit.version}</version>

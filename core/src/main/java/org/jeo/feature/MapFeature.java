@@ -10,8 +10,14 @@ import com.vividsolutions.jts.geom.Geometry;
 
 public class MapFeature extends Feature {
 
-    public static MapFeature build(Object... kv) {
+    public static MapFeature create(Object... kv) {
+        if (kv.length % 2 != 0) {
+            throw new IllegalArgumentException("Odd number of argumets");
+        }
         LinkedHashMap<String, Object> map = new LinkedHashMap<String, Object>();
+        for (int i = 0; i < kv.length; i+=2) {
+            map.put(kv[i].toString(), kv[i+1]);
+        }
         return new MapFeature(map);
     }
 

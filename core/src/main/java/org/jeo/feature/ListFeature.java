@@ -18,12 +18,12 @@ public class ListFeature extends Feature {
 
     List<Object> values;
 
-    public ListFeature(List<Object> values) {
-        this(values, null);
+    public ListFeature(String id, List<Object> values) {
+        this(id, values, null);
     }
 
-    public ListFeature(List<Object> values, Schema schema) {
-        super(schema);
+    public ListFeature(String id, List<Object> values, Schema schema) {
+        super(id, schema);
         this.values = pad(values, schema);
     }
 

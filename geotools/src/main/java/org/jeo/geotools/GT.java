@@ -1,11 +1,15 @@
 package org.jeo.geotools;
 
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import org.geotools.feature.simple.SimpleFeatureImpl;
 import org.geotools.feature.simple.SimpleFeatureTypeBuilder;
+import org.geotools.filter.identity.FeatureIdImpl;
 import org.geotools.referencing.CRS;
+import org.jeo.data.Cursor;
 import org.jeo.feature.Feature;
 import org.jeo.feature.Field;
 import org.jeo.feature.Schema;
@@ -35,7 +39,7 @@ public class GT {
     }
 
     public static SimpleFeature feature(Feature feature, SimpleFeatureType featureType) {
-        return new SimpleFeatureImpl(feature.list(), featureType, null);
+        return new SimpleFeatureImpl(feature.list(), featureType, new FeatureIdImpl(feature.getId()));
     }
 
     public static Schema schema(SimpleFeatureType featureType) {
@@ -69,12 +73,48 @@ public class GT {
         if (schema.crs() != null) {
             b.setSRS("EPSG:" + Proj.epsgCode(schema.crs()));
         }
+        else {
+            b.setCRS(null);
+        }
 
         for (Field f : schema) {
             b.add(f.getName(), f.getType());
         }
 
         return b.buildFeatureType();
+    }
+
+    public static Iterator<SimpleFeature> iterator(final Cursor<Feature> cursor) {
+        return new Iterator<SimpleFeature>() {
+
+            @Override
+            public boolean hasNext() {
+                try {
+                    boolean next = cursor.hasNext();
+                    if (!next) {
+                        cursor.close();
+                    }
+                    return next;
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+
+            @Override
+            public SimpleFeature next() {
+                try {
+                    return GT.feature(cursor.next());
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+
+            @Override
+            public void remove() {
+                throw new UnsupportedOperationException();
+            }
+            
+        };
     }
 }
 

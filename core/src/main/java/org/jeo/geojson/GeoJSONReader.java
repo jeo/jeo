@@ -265,8 +265,8 @@ public class GeoJSONReader {
                     map.put(key, props.get(key));
                 }
             }
-            
-            MapFeature f = new MapFeature(map);
+            MapFeature f = new MapFeature(obj.optString("id"), map);
+
             if (obj.has("crs")) {
                 f.setCRS(readCRS(obj.getJSONObject("crs")));
             }

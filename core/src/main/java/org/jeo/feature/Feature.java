@@ -2,6 +2,7 @@ package org.jeo.feature;
 
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import org.osgeo.proj4j.CoordinateReferenceSystem;
 
@@ -18,6 +19,11 @@ import com.vividsolutions.jts.geom.Geometry;
 public abstract class Feature {
 
     /**
+     * feature identifier
+     */
+    protected String id;
+
+    /**
      * Feature schema.
      */
     protected Schema schema;
@@ -30,15 +36,30 @@ public abstract class Feature {
     /**
      * Constructor for Feature not taking a schema object.
      */
-    protected Feature() {
-        this(null);
+    protected Feature(String id) {
+        this(id, null);
     }
    
     /**
      * Constructor for Feature taking an explicit schema.
      */
-    protected Feature(Schema schema) {
+    protected Feature(String id, Schema schema) {
+        this.id = id != null ? id : newId();
         this.schema = schema;
+    }
+
+    /**
+     * Generates a new feature id.
+     */
+    protected String newId() {
+        return UUID.randomUUID().toString();
+    }
+
+    /**
+     * Feature identifier.
+     */
+    public String getId() {
+        return id;
     }
 
     /**

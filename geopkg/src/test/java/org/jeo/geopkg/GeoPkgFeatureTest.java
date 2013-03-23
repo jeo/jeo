@@ -103,7 +103,7 @@ public class GeoPkgFeatureTest extends GeoPkgTestSupport {
         Schema schema = geopkg.schema(entry);
 
         Geometry g = new GeometryBuilder().point(0,0).buffer(1);
-        Feature f = new ListFeature(null, schema);
+        Feature f = new ListFeature(null, null, schema);
         f.put(schema.geometry().getName(), g);
         f.put("STATE_NAME", "JEOLAND");
         geopkg.add(entry, f);
@@ -128,7 +128,7 @@ public class GeoPkgFeatureTest extends GeoPkgTestSupport {
         geopkg.create(entry, schema);
 
         GeometryBuilder gb = new GeometryBuilder();
-        geopkg.add(entry, Features.create(schema, gb.point(1,2), "anvil", 10.99));
+        geopkg.add(entry, Features.create(null, schema, gb.point(1,2), "anvil", 10.99));
 
         Cursor<Feature> c = geopkg.read(entry, null);
         try {

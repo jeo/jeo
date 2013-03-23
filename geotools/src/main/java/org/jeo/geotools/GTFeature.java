@@ -16,7 +16,7 @@ public class GTFeature extends Feature {
     SimpleFeature feature;
 
     public GTFeature(SimpleFeature feature, Schema schema) {
-        super(schema);
+        super(feature.getID(), schema);
         this.feature = feature;
     }
 

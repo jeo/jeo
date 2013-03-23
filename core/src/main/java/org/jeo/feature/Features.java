@@ -31,37 +31,21 @@ public class Features {
             values.add(feature.get(f.getName()));
         }
 
-        return new ListFeature(values, schema);
-    }
-
-    /**
-     * Creates a feature object from a map.
-     */
-    public static MapFeature create(Map<String, Object> map) {
-        return create(null, map);
+        return new ListFeature(feature.getId(), values, schema);
     }
 
     /**
      * Creates a feature object from a map with an explicit schema.
      */
-    public static MapFeature create(Schema schema, Map<String, Object> map) {
-        return new MapFeature(map, schema);
+    public static MapFeature create(String id, Schema schema, Map<String, Object> map) {
+        return new MapFeature(id, map, schema);
     }
 
     /**
      * Creates a feature object from a list with an explicit schema.
      */
-    public static ListFeature create(Schema schema, Object... values) {
-        return new ListFeature(Arrays.asList(values), schema);
-    }
-
-    /**
-     * Creates a schema object consisting of a single geometry field named "geometry". 
-     * 
-     * @param name The schema name.
-     */
-    public static Schema schema(String name) {
-        return schema(name, "geometry", Geometry.class);
+    public static ListFeature create(String id, Schema schema, Object... values) {
+        return new ListFeature(id, Arrays.asList(values), schema);
     }
 
     /**

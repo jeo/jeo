@@ -6,7 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.jeo.feature.Feature;
-import org.jeo.feature.Features;
+import org.jeo.feature.MapFeature;
 import org.junit.Test;
 
 public class FilterTest {
@@ -23,7 +23,7 @@ public class FilterTest {
         map.put("foo", "bar");
 
         Property p = new Property("foo");
-        assertEquals("bar", p.evaluate(Features.create(map)));
+        assertEquals("bar", p.evaluate(MapFeature.create(map)));
     }
 
     @Test
@@ -32,7 +32,7 @@ public class FilterTest {
         map.put("str", "one");
         map.put("int", 1);
 
-        Feature f = Features.create(map);
+        Feature f = MapFeature.create(map);
 
         Comparison c = new Comparison(Comparison.Type.EQUAL, 
             new Property("str"), new Literal("one"));
@@ -65,7 +65,7 @@ public class FilterTest {
         map.put("str", "one");
         map.put("int", 1);
 
-        Feature f = Features.create(map);
+        Feature f = MapFeature.create(map);
 
         Comparison c1 = new Comparison(Comparison.Type.EQUAL, 
                 new Property("str"), new Literal("one"));

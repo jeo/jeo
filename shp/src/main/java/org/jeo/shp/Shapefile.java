@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.jeo.data.Cursor;
+import org.jeo.data.Disposable;
 import org.jeo.data.Vector;
 import org.jeo.feature.Feature;
 import org.jeo.feature.Field;
@@ -31,7 +32,7 @@ import com.vividsolutions.jts.geom.MultiPoint;
 import com.vividsolutions.jts.geom.MultiPolygon;
 import com.vividsolutions.jts.geom.Point;
 
-public class Shapefile implements Vector {
+public class Shapefile implements Vector, Disposable {
 
     ShpFiles shp;
     Schema schema;
@@ -220,6 +221,10 @@ public class Shapefile implements Vector {
         throw new UnsupportedOperationException();
     }
 
+    public void dispose() {
+        shp.dispose();
+    };
+    
     ShapefileReader newShpReader() throws IOException {
         return new ShapefileReader(shp, false, false);
     }

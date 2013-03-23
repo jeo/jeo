@@ -91,7 +91,7 @@ public class GeoJSONWriterTest {
         Schema schema = Features.schema("widget", 
             "geometry", Geometry.class, "name", String.class, "cost", Double.class);
 
-        Feature f = Features.create(schema, new GeometryBuilder().point(0,0), "anvil", 10.99);
+        Feature f = Features.create(null, schema, new GeometryBuilder().point(0,0), "anvil", 10.99);
         w.feature(f);
         assertJSON("{'type':'Feature','geometry':{'type':'Point','coordinates':[0,0]}," +
             "'properties':{'name':'anvil','cost':10.99}}");
@@ -105,9 +105,9 @@ public class GeoJSONWriterTest {
         GeometryBuilder b = new GeometryBuilder();
 
         w.featureCollection();
-        w.feature(Features.create(schema, b.point(0,0), "anvil", 10.99));
-        w.feature(Features.create(schema, b.point(1,1), "dynamite", 2.99));
-        w.feature(Features.create(schema, b.point(2,2), "bomb", 7.99));
+        w.feature(Features.create(null, schema, b.point(0,0), "anvil", 10.99));
+        w.feature(Features.create(null, schema, b.point(1,1), "dynamite", 2.99));
+        w.feature(Features.create(null, schema, b.point(2,2), "bomb", 7.99));
 
         w.endFeatureCollection();
         assertJSON("{'type':'FeatureCollection','features':[" +

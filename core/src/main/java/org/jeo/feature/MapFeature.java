@@ -10,6 +10,13 @@ import com.vividsolutions.jts.geom.Geometry;
 
 public class MapFeature extends Feature {
 
+    /**
+     * Creates a feature object from a map.
+     */
+    public static MapFeature create(Map<String, Object> map) {
+        return new MapFeature(null, map);
+    }
+
     public static MapFeature create(Object... kv) {
         if (kv.length % 2 != 0) {
             throw new IllegalArgumentException("Odd number of argumets");
@@ -18,17 +25,17 @@ public class MapFeature extends Feature {
         for (int i = 0; i < kv.length; i+=2) {
             map.put(kv[i].toString(), kv[i+1]);
         }
-        return new MapFeature(map);
+        return new MapFeature(null, map);
     }
 
     Map<String,Object> values;
 
-    public MapFeature(Map<String,Object> values) {
-        this(values, null);
+    public MapFeature(String id, Map<String,Object> values) {
+        this(id, values, null);
     }
 
-    public MapFeature(Map<String,Object> values, Schema schema) {
-        super(schema);
+    public MapFeature(String id, Map<String,Object> values, Schema schema) {
+        super(id, schema);
         this.values = values;
     }
 

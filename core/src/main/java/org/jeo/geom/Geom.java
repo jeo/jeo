@@ -240,4 +240,8 @@ public class Geom {
         return new GeometryBuilder().polygon(e.getMinX(), e.getMinY(), e.getMaxX(), e.getMinY(), 
             e.getMaxX(), e.getMaxY(), e.getMinX(), e.getMaxY(), e.getMinX(), e.getMinY());
     }
+
+    public static boolean isNull(Envelope e) {
+        return e == null || e.isNull();
+    }
 }

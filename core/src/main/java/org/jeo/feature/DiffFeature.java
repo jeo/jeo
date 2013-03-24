@@ -1,35 +1,20 @@
 package org.jeo.feature;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-
-import org.osgeo.proj4j.CoordinateReferenceSystem;
-
-import com.vividsolutions.jts.geom.Geometry;
 
 /**
  * Feature wrapper that tracks changes to an underlying Feature object.
- * <p>
- * This class is used by 
- * </p>
+ *
  * @author Justin Deoliveira, OpenGeo
  */
-public class DiffFeature implements Feature {
+public class DiffFeature extends FeatureWrapper {
 
-    Feature feature;
     Map<String,Object> changed;
 
     public DiffFeature(Feature feature) {
-        this.feature = feature;
+        super(feature);
         changed = new HashMap<String, Object>();
-    }
-
-    /**
-     * The underlying feature object.
-     */
-    public Feature getFeature() {
-        return feature;
     }
 
     /**
@@ -39,20 +24,14 @@ public class DiffFeature implements Feature {
         return changed;
     }
 
-    public String getId() {
-        return feature.getId();
-    }
-
-    public CoordinateReferenceSystem getCRS() {
-        return feature.getCRS();
-    }
-
-    public void setCRS(CoordinateReferenceSystem crs) {
-        feature.setCRS(crs);
-    }
-
-    public CoordinateReferenceSystem crs() {
-        return feature.crs();
+    /**
+     * Applies the changes made to the underlying feature.
+     */
+    public void apply() {
+        for (Map.Entry<String, Object> e: changed.entrySet()) {
+            delegate.put(e.getKey(), e.getValue());
+        }
+        changed.clear();
     }
 
     public Object get(String key) {
@@ -60,28 +39,10 @@ public class DiffFeature implements Feature {
             return changed.get(key);
         }
 
-        return feature.get(key);
+        return delegate.get(key);
     }
 
     public void put(String key, Object val) {
         changed.put(key, val);
-        feature.put(key, val);
     }
-
-    public Geometry geometry() {
-        return feature.geometry();
-    }
-
-    public Schema schema() {
-        return feature.schema();
-    }
-
-    public List<Object> list() {
-        return feature.list();
-    }
-
-    public Map<String, Object> map() {
-        return feature.map();
-    }
-
 }

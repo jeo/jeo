@@ -12,6 +12,7 @@ import static org.junit.Assert.assertTrue;
 import java.util.List;
 
 import org.jeo.data.Cursors;
+import org.jeo.data.Query;
 import org.jeo.data.Registry;
 import org.jeo.data.Vector;
 import org.jeo.data.Workspace;
@@ -28,7 +29,7 @@ public class FeatureHandlerTest extends HandlerTestSupport {
     @Test
     public void testGet() throws Exception {
         Vector layer = createMock(Vector.class);
-        expect(layer.read(new Envelope(-180,180,-90,90)))
+        expect(layer.cursor(new Query().bounds(new Envelope(-180,180,-90,90)), null))
             .andReturn(Cursors.empty(Feature.class)).once();
         replay(layer);
 

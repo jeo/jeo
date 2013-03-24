@@ -55,6 +55,14 @@ public abstract class Cursor<T> implements Closeable, Iterable<T> {
      */
     protected Mode mode;
 
+    protected Cursor() {
+        this(Mode.READ);
+    }
+
+    protected Cursor(Mode mode) {
+        this.mode = mode;
+    }
+
     /**
      * The mode of the cursor.
      */
@@ -73,8 +81,8 @@ public abstract class Cursor<T> implements Closeable, Iterable<T> {
      * Application code should always check {@link #hasNext()} before calling this method.
      * </p>
      * <p>
-     * Implementations should safely return <code>null</code> from this method when the curssor
-     * has been exhaused. 
+     * Implementations should safely return <code>null</code> from this method when the cursor
+     * has been exhausted. 
      * </p>
      */
     public abstract T next() throws IOException;

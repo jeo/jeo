@@ -21,6 +21,7 @@ import java.util.regex.Pattern;
 
 import org.jeo.data.Cursor;
 import org.jeo.data.Dataset;
+import org.jeo.data.Query;
 import org.jeo.data.Registry;
 import org.jeo.data.Vector;
 import org.jeo.data.Workspace;
@@ -91,7 +92,7 @@ public class FeatureHandler extends Handler {
 
         GeoJSONWriter w = new GeoJSONWriter();
 
-        Cursor<Feature> c = layer.read(bbox);
+        Cursor<Feature> c = layer.cursor(new Query().bounds(bbox), null);
 
         w.featureCollection();
         while(c.hasNext()) {

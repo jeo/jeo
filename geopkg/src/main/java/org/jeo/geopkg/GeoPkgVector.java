@@ -3,7 +3,9 @@ package org.jeo.geopkg;
 import java.io.IOException;
 
 import org.jeo.data.Cursor;
+import org.jeo.data.Query;
 import org.jeo.data.Vector;
+import org.jeo.data.Cursor.Mode;
 import org.jeo.feature.Feature;
 import org.jeo.feature.Schema;
 import org.jeo.proj.Proj;
@@ -53,13 +55,18 @@ public class GeoPkgVector implements Vector {
     }
 
     @Override
-    public long count(Envelope bbox) throws IOException {
-        return geopkg.count(entry, bbox);
+    public long count(Query q) throws IOException {
+        return geopkg.count(entry, q);
     }
 
     @Override
-    public Cursor<Feature> read(Envelope bbox) throws IOException {
-        return geopkg.read(entry, bbox);
+    public boolean supports(Mode mode) {
+        return mode == Cursor.READ;
+    }
+
+    @Override
+    public Cursor<Feature> cursor(Query q, Cursor.Mode mode) throws IOException {
+        return geopkg.cursor(entry, q, mode);
     }
 
     @Override

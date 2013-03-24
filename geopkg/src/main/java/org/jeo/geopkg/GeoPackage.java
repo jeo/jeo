@@ -23,8 +23,10 @@ import jsqlite.Stmt;
 import jsqlite.TableResult;
 
 import org.jeo.data.Cursor;
+import org.jeo.data.Cursors;
 import org.jeo.data.FileWorkspaceFactory;
 import org.jeo.data.Dataset;
+import org.jeo.data.Query;
 import org.jeo.data.Tile;
 import org.jeo.data.TileGrid;
 import org.jeo.data.Workspace;
@@ -33,6 +35,7 @@ import org.jeo.feature.Feature;
 import org.jeo.feature.Features;
 import org.jeo.feature.Field;
 import org.jeo.feature.Schema;
+import org.jeo.filter.Filter;
 import org.jeo.geom.Geom;
 import org.jeo.geopkg.Entry.DataType;
 import org.jeo.proj.Proj;
@@ -245,29 +248,42 @@ public class GeoPackage implements Workspace {
         return null;
     }
 
-    public long count(FeatureEntry entry, Envelope bbox) throws IOException {
-        try {
-            SQLBuilder sql = new SQLBuilder("SELECT COUNT(*) FROM ").name(entry.getTableName());
-            if (bbox != null) {
-                sql.add(" WHERE ");
-                encodeBBOX(sql, entry.getSchema(), bbox);
-            }
-
-            Stmt st = db.prepare(log(sql.toString()));
-            st.step();
+    public long count(FeatureEntry entry, Query q) throws IOException {
+        //TODO: handle filters natively
+        Filter f = q != null ? q.get(Query.FILTER) : null;
+        if (Filter.isTrueOrNull(f)) {
+            //optimize
+            Envelope bbox = q != null ? q.getBounds() : null;
             try {
-                return st.column_long(0);
+                SQLBuilder sql = new SQLBuilder("SELECT COUNT(*) FROM ").name(entry.getTableName());
+                if (!Geom.isNull(bbox)) {
+                    sql.add(" WHERE ");
+                    encodeBBOX(sql, entry.getSchema(), bbox);
+                }
+
+                Stmt st = db.prepare(log(sql.toString()));
+                st.step();
+                try {
+                    return st.column_long(0);
+                }
+                finally {
+                    st.close();
+                }
             }
-            finally {
-                st.close();
+            catch(Exception e) {
+                throw new IOException(e);
             }
         }
-        catch(Exception e) {
-            throw new IOException(e);
+        else {
+            //fall back on cursor
+            Cursor<Feature> c = cursor(entry, null, null);
+            return Cursors.size(q.apply(c));
         }
     }
 
-    public Cursor<Feature> read(FeatureEntry entry, Envelope bbox) throws IOException {
+    public Cursor<Feature> cursor(FeatureEntry entry, Query q, Cursor.Mode mode) throws IOException {
+        //TODO: handle filters natively
+        //TODO: use selected property names
         try {
             Schema schema = schema(entry);
             Field geom = schema.geometry();
@@ -285,12 +301,14 @@ public class GeoPackage implements Workspace {
             sql.trim(1);
             sql.add("FROM ").name(entry.getTableName());
 
+            Envelope bbox = q != null ? q.getBounds() : null;
             if (bbox != null) {
                 sql.add(" WHERE ");
                 encodeBBOX(sql, schema, bbox);
             }
     
-            return new FeatureCursor(db.prepare(log(sql.toString())), schema);
+            FeatureCursor c = new FeatureCursor(db.prepare(log(sql.toString())), schema);
+            return q != null ? q.apply(c) : c;
         }
         catch(Exception e) {
             throw new IOException(e);

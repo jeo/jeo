@@ -46,7 +46,7 @@ public class ShapefileTest {
 
     @Test
     public void testRead() throws IOException {
-        Cursor<Feature> c = shp.read(null);
+        Cursor<Feature> c = shp.cursor(null, null);
         
         assertNotNull(c);
         for (int i = 0; i < 49; i++) {

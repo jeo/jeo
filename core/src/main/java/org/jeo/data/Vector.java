@@ -5,8 +5,6 @@ import java.io.IOException;
 import org.jeo.feature.Feature;
 import org.jeo.feature.Schema;
 
-import com.vividsolutions.jts.geom.Envelope;
-
 /**
  * A layer consisting of vector geometry objects, or {@link Feature} objects. 
  *
@@ -22,18 +20,28 @@ public interface Vector extends Dataset {
     /**
      * Counts features in the layer.
      * 
-     * @param bbox A bounding box filter used to constrain results, or <code>null</code> to specify
-     * no constraint.
+     * @param q Query used to constrain results, or <code>null</code> to specify no constraint 
+     * and count all features.
     */
-    long count(Envelope bbox) throws IOException ;
+    long count(Query q) throws IOException ;
 
     /**
-     * Reads data from the layer. 
-     * 
-     * @param bbox A bounding box filter used to constrain results, or <code>null</code> to specify
-     * no constraint and query all features.
+     * Determines if the vector dataset supports the specified cursor mode.
      */
-    Cursor<Feature> read(Envelope bbox) throws IOException;
+    boolean supports(Cursor.Mode mode);
+
+    /**
+     * Returns a feature cursor for the layer. 
+     * <p>
+     * The <tt>mode</tt> is used to control whether the cursor is read or write. All implementations
+     * must support {@link Cursor.Mode#READ}. The {@link #supports(org.jeo.data.Cursor.Mode)} method
+     * is used to determine if other modes are supported.
+     * </p>
+     * @param q A query used to constrain results, or <code>null</code> to specify no constraint and 
+     * query all features.
+     * @param mode The cursor mode, <code>null</code> is interpreted as {@link Cursor.Mode#READ}. 
+     */
+    Cursor<Feature> cursor(Query q, Cursor.Mode mode) throws IOException;
 
     /**
      * Adds a feature to the layer.

@@ -30,7 +30,7 @@ public class GT {
         return feature(feature, schema(feature.getType()));
     }
 
-    public static Feature feature(SimpleFeature feature, Schema schema) {
+    public static GTFeature feature(SimpleFeature feature, Schema schema) {
         return new GTFeature(feature, schema);
     }
 

@@ -20,6 +20,10 @@ public class GTFeature extends AbstractFeature {
         this.feature = feature;
     }
 
+    public SimpleFeature getFeature() {
+        return feature;
+    }
+
     @Override
     public Object get(String key) {
         return feature.getAttribute(key); 

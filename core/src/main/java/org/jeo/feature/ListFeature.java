@@ -14,7 +14,7 @@ import com.vividsolutions.jts.geom.Geometry;
  * </p>
  * @author Justin Deoliveira, OpenGeo
  */
-public class ListFeature extends Feature {
+public class ListFeature extends AbstractFeature {
 
     List<Object> values;
 

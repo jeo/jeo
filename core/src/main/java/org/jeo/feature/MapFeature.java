@@ -8,7 +8,7 @@ import java.util.Map;
 
 import com.vividsolutions.jts.geom.Geometry;
 
-public class MapFeature extends Feature {
+public class MapFeature extends AbstractFeature {
 
     /**
      * Creates a feature object from a map.

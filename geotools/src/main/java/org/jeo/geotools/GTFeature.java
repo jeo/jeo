@@ -4,14 +4,14 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.jeo.feature.Feature;
+import org.jeo.feature.AbstractFeature;
 import org.jeo.feature.Schema;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.type.AttributeDescriptor;
 
 import com.vividsolutions.jts.geom.Geometry;
 
-public class GTFeature extends Feature {
+public class GTFeature extends AbstractFeature {
 
     SimpleFeature feature;
 

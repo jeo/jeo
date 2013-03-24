@@ -20,18 +20,30 @@ public class Spatial extends Filter {
     }
 
     Type type;
-    Expression expr1, expr2;
+    Expression left, right;
 
-    public Spatial(Type type, Expression expr1, Expression expr2) {
+    public Spatial(Type type, Expression left, Expression right) {
         this.type = type;
-        this.expr1 = expr1;
-        this.expr2 = expr2;
+        this.left = left;
+        this.right = right;
+    }
+
+    public Type getType() {
+        return type;
+    }
+
+    public Expression getLeft() {
+        return left;
+    }
+
+    public Expression getRight() {
+        return right;
     }
 
     @Override
     public boolean apply(Object obj) {
-        Object o1 = expr1.evaluate(obj);
-        Object o2 = expr2.evaluate(obj);
+        Object o1 = left.evaluate(obj);
+        Object o2 = right.evaluate(obj);
 
         return compare(o1, o2);
     }
@@ -75,13 +87,17 @@ public class Spatial extends Filter {
         throw new IllegalArgumentException("Unable to convert " + o + " to geometry");
     }
 
-    
+    @Override
+    public Object accept(FilterVisitor v, Object obj) {
+        return v.visit(this, obj);
+    }
+
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((expr1 == null) ? 0 : expr1.hashCode());
-        result = prime * result + ((expr2 == null) ? 0 : expr2.hashCode());
+        result = prime * result + ((left == null) ? 0 : left.hashCode());
+        result = prime * result + ((right == null) ? 0 : right.hashCode());
         result = prime * result + ((type == null) ? 0 : type.hashCode());
         return result;
     }
@@ -95,15 +111,15 @@ public class Spatial extends Filter {
         if (getClass() != obj.getClass())
             return false;
         Spatial other = (Spatial) obj;
-        if (expr1 == null) {
-            if (other.expr1 != null)
+        if (left == null) {
+            if (other.left != null)
                 return false;
-        } else if (!expr1.equals(other.expr1))
+        } else if (!left.equals(other.left))
             return false;
-        if (expr2 == null) {
-            if (other.expr2 != null)
+        if (right == null) {
+            if (other.right != null)
                 return false;
-        } else if (!expr2.equals(other.expr2))
+        } else if (!right.equals(other.right))
             return false;
         if (type != other.type)
             return false;
@@ -112,7 +128,7 @@ public class Spatial extends Filter {
 
     @Override
     public String toString() {
-        return new StringBuilder().append(expr1).append(" ").append(type).append(" ").append(expr2)
+        return new StringBuilder().append(left).append(" ").append(type).append(" ").append(right)
             .toString();
     }
 }

@@ -8,24 +8,28 @@ package org.jeo.filter;
 public abstract class Filter {
 
     /**
+     * Returns true if the filter is <tt>null</tt> or equal to {@link #TRUE}.
+     */
+    public static boolean isTrueOrNull(Filter f) {
+        return f == TRUE || f == null;
+    }
+
+    /**
+     * Returns true if the filter is <tt>null</tt> or equal to {@link #FALSE}.
+     */
+    public static boolean isFalseOrNull(Filter f) {
+        return f == FALSE || f == null;
+    }
+
+    /**
      * Identity filter that always returns true.
      */
-    public static final Filter TRUE = new Filter() {
-        @Override
-        public boolean apply(Object obj) {
-            return true;
-        }
-    };
+    public static final Filter TRUE = new All();
 
     /**
      * Identity filter that always returns false.
      */
-    public static final Filter FALSE = new Filter() {
-        @Override
-        public boolean apply(Object obj) {
-            return true;
-        }
-    };
+    public static final Filter FALSE = new None();
 
     /**
      * Applies the filter to the specified input.
@@ -70,4 +74,9 @@ public abstract class Filter {
     public Filter not() {
         return new Logic(Logic.Type.NOT, this); 
     }
+
+    /**
+     * Applies a visitor to the filter.
+     */
+    public abstract Object accept(FilterVisitor v, Object obj);
 }

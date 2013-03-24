@@ -81,7 +81,11 @@ public class Logic extends Filter {
         return result;
     }
 
-    
+    @Override
+    public Object accept(FilterVisitor v, Object obj) {
+        return v.visit(this, obj);
+    }
+
     @Override
     public int hashCode() {
         final int prime = 31;

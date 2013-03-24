@@ -78,7 +78,7 @@ public class GeoGitDataset implements Vector {
     }
 
     @Override
-    public Cursor<Feature> read(final Envelope bbox) throws IOException {
+    public GeoGitCursor read(final Envelope bbox) throws IOException {
         LsTreeOp ls = geogit.getGeoGIT().command(LsTreeOp.class)
             .setStrategy(Strategy.FEATURES_ONLY).setReference(ref().path());
 

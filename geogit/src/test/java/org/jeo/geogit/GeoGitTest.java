@@ -3,14 +3,18 @@ package org.jeo.geogit;
 import static org.junit.Assert.*;
 
 import java.io.IOException;
+import java.util.Iterator;
 import java.util.Set;
 
 import org.apache.commons.io.FileUtils;
 import org.geogit.api.GeoGIT;
+import org.geogit.api.RevCommit;
+import org.geogit.api.plumbing.diff.DiffEntry;
 import org.geogit.api.porcelain.AddOp;
 import org.geogit.api.porcelain.CommitOp;
 import org.geogit.api.porcelain.ConfigOp;
 import org.geogit.api.porcelain.ConfigOp.ConfigAction;
+import org.geogit.api.porcelain.LogOp;
 import org.geogit.di.GeogitModule;
 import org.geogit.repository.Repository;
 import org.geogit.storage.bdbje.JEStorageModule;
@@ -106,7 +110,7 @@ public class GeoGitTest {
 
     @Test
     public void testReadAll() throws Exception {
-        Set<String> stateNames = Sets.newHashSet(Iterables.transform(ShpData.states().read(null), 
+        Set<String> names = Sets.newHashSet(Iterables.transform(ShpData.states().read(null), 
             new Function<Feature, String>() {
                 @Override
                 public String apply(Feature input) {
@@ -114,11 +118,41 @@ public class GeoGitTest {
                 }
             }));
 
-        assertEquals(49, stateNames.size());
+        assertEquals(49, names.size());
         for (Feature f : ws.get("states").read(null)) {
-            stateNames.remove(f.get("STATE_NAME"));
+            names.remove(f.get("STATE_NAME"));
         }
 
-        assertTrue(stateNames.isEmpty());
+        assertTrue(names.isEmpty());
+    }
+
+    @Test
+    public void testWrite() throws Exception {
+        GeoGitDataset states = ws.get("states");
+        Set<String> abbrs = Sets.newHashSet(Iterables.transform(states.read(null),
+            new Function<Feature, String>() {
+                @Override
+                public String apply(Feature input) {
+                    String abbr = (String) input.get("STATE_ABBR");
+                    assertNotNull(abbr);
+                    assertNotEquals(abbr, abbr.toLowerCase());
+
+                    return abbr.toLowerCase();
+                }
+            }));
+
+        Cursor<Feature> c = states.read(null);
+        for (Feature f : c) {
+            f.put("STATE_ABBR", ((String)f.get("STATE_ABBR")).toLowerCase());
+            c.write();
+        }
+
+        //commit();
+        assertEquals(49, abbrs.size());
+        for (Feature f : ws.get("states").read(null)) {
+            abbrs.remove(f.get("STATE_ABBR"));
+        }
+
+        assertTrue(abbrs.isEmpty());
     }
 }

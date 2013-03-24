@@ -6,11 +6,11 @@ import java.util.Iterator;
 import org.geogit.api.FeatureBuilder;
 import org.geogit.api.NodeRef;
 import org.geogit.api.RevFeature;
-import org.geogit.api.RevFeatureType;
 import org.geogit.api.plumbing.RevObjectParse;
 import org.jeo.data.Cursor;
 import org.jeo.feature.Feature;
 import org.jeo.geotools.GT;
+import org.jeo.geotools.GTFeature;
 import org.opengis.feature.simple.SimpleFeature;
 
 import com.google.common.base.Optional;
@@ -21,11 +21,13 @@ public class GeoGitCursor extends Cursor<Feature> {
     Iterator<NodeRef> nodeit;
     GeoGitDataset dataset;
 
-    
     RevObjectParse parseOp;
     FeatureBuilder featureBuilder;
-    
+
+    GTFeature curr;
+
     GeoGitCursor(Iterator<NodeRef> nodeit, GeoGitDataset dataset) {
+        this.mode = Cursor.UPDATE;
         this.nodeit = nodeit;
         this.dataset = dataset;
 
@@ -46,13 +48,26 @@ public class GeoGitCursor extends Cursor<Feature> {
         Optional<RevFeature> f = parseOp.call(RevFeature.class);
         Preconditions.checkState(f.isPresent());
 
-        return GT.feature(
+        curr = GT.feature(
             (SimpleFeature)featureBuilder.build(ref.name(), f.get()), dataset.getSchema());
+        return curr;
     }
-    
+
+    @Override
+    protected void doWrite() throws IOException {
+        Preconditions.checkNotNull(curr, "next() has not been called");
+        dataset.getGeoGIT().getRepository().getWorkingTree()
+            .insert(dataset.ref().path(), curr.getFeature());
+    }
+
+    @Override
+    protected void doRemove() throws IOException {
+        Preconditions.checkNotNull(curr, "next() has not been called");
+        dataset.getGeoGIT().getRepository().getWorkingTree()
+            .delete(dataset.ref().path(), curr.getId());
+    }
+
     @Override
     public void close() throws IOException {
     }
-
-
 }

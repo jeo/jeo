@@ -60,6 +60,9 @@ public abstract class Cursor<T> implements Closeable, Iterable<T> {
     }
 
     protected Cursor(Mode mode) {
+        if (mode == null) {
+            throw new NullPointerException("mode must not be null");
+        }
         this.mode = mode;
     }
 

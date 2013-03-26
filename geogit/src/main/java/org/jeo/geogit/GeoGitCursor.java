@@ -25,11 +25,13 @@ public class GeoGitCursor extends Cursor<Feature> {
     FeatureBuilder featureBuilder;
 
     GTFeature curr;
+    GeoGitTransaction tx;
 
-    GeoGitCursor(Iterator<NodeRef> nodeit, GeoGitDataset dataset) {
-        this.mode = Cursor.UPDATE;
+    GeoGitCursor(Mode mode, Iterator<NodeRef> nodeit, GeoGitDataset dataset, GeoGitTransaction tx) {
+        super(mode);
         this.nodeit = nodeit;
         this.dataset = dataset;
+        this.tx = tx;
 
         featureBuilder = new FeatureBuilder(dataset.featureType());
         parseOp = dataset.getGeoGIT().command(RevObjectParse.class);
@@ -56,15 +58,13 @@ public class GeoGitCursor extends Cursor<Feature> {
     @Override
     protected void doWrite() throws IOException {
         Preconditions.checkNotNull(curr, "next() has not been called");
-        dataset.getGeoGIT().getRepository().getWorkingTree()
-            .insert(dataset.ref().path(), curr.getFeature());
+        dataset.insert(curr.getFeature(), tx);
     }
 
     @Override
     protected void doRemove() throws IOException {
         Preconditions.checkNotNull(curr, "next() has not been called");
-        dataset.getGeoGIT().getRepository().getWorkingTree()
-            .delete(dataset.ref().path(), curr.getId());
+        dataset.delete(curr.getId(), tx);
     }
 
     @Override

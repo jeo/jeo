@@ -26,6 +26,7 @@ import org.jeo.data.Registry;
 import org.jeo.data.Vector;
 import org.jeo.data.Workspace;
 import org.jeo.feature.Feature;
+import org.jeo.feature.Features;
 import org.jeo.feature.Schema;
 import org.jeo.geojson.GeoJSON;
 import org.jeo.geojson.GeoJSONWriter;
@@ -92,7 +93,7 @@ public class FeatureHandler extends Handler {
 
         GeoJSONWriter w = new GeoJSONWriter();
 
-        Cursor<Feature> c = layer.cursor(new Query().bounds(bbox), null);
+        Cursor<Feature> c = layer.cursor(new Query().bounds(bbox));
 
         w.featureCollection();
         while(c.hasNext()) {
@@ -136,12 +137,16 @@ public class FeatureHandler extends Handler {
 
         Object obj = GeoJSON.read(body);
 
+        Cursor<Feature> c = layer.cursor(new Query().append());
+
         if (obj instanceof Feature) {
-            layer.add((Feature)obj);
+            Features.copy((Feature)obj, c.next());
+            c.write();
         }
         else if (obj instanceof List) {
             for (Feature f : (List<Feature>)obj) {
-                layer.add(f);
+                Features.copy(f, c.next());
+                c.write();
             }
         }
 

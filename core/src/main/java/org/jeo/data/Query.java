@@ -17,6 +17,11 @@ import org.slf4j.LoggerFactory;
 
 import com.vividsolutions.jts.geom.Envelope;
 
+/**
+ * Describes a query against a {@link Vector} dataset. 
+ *  
+ * @author Justin Deoliveira, OpenGeo
+ */
 public class Query {
 
     /** logger */
@@ -64,40 +69,87 @@ public class Query {
     Envelope bounds;
 
     /**
+     * Transaction associated with the query
+     */
+    Transaction transaction;
+
+    /**
+     * Cursor mode
+     */
+    Cursor.Mode mode = Cursor.READ;
+
+    /**
      * Query options.
      */
     Map<String,Object> options = new HashMap<String,Object>();
 
+    /**
+     * New query instance.
+     */
     public Query() {
     }
 
+    /**
+     * List of Feature properties to query, an empty list means all properties.
+     *
+     */
     public List<String> getProperties() {
         return properties;
     }
 
+    /**
+     * Bounds constraints on the query, may be <code>null</code> meaning no bounds constraint.
+     */
     public Envelope getBounds() {
         return bounds;
     }
 
+    /**
+     * The mode of cursor to return when handling this query.
+     */
+    public Cursor.Mode getMode() {
+        return mode;
+    }
+
+    /**
+     * Transaction of the query, may be <code>null</code>.
+     */
+    public Transaction getTransaction() {
+        return transaction;
+    }
+
+    /**
+     * Additional query options.
+     */
     public Map<String, Object> getOptions() {
         return options;
     }
 
+    /**
+     * Sets the property list of the query.
+     * 
+     * @return This object.
+     */
     public Query properties(String... properties) {
         return properties(Arrays.asList(properties));
     }
 
+    /**
+     * Sets the property list of the query.
+     * 
+     * @return This object.
+     */
     public Query properties(List<String> properties) {
         properties.clear();
         properties.addAll(properties);
         return this;
     }
 
-    public Query filter(Filter filter) {
-        set(FILTER, filter);
-        return this;
-    }
-
+    /**
+     * Sets the filter of the query from a CQL string.
+     * 
+     * @return This object.
+     */
     public Query filter(String cql) {
         try {
             set(FILTER, CQL.parse(cql));
@@ -107,21 +159,51 @@ public class Query {
         return this;
     }
 
+    /**
+     * Sets the filter of the query.
+     * 
+     * @return This object.
+     */
+    public Query filter(Filter filter) {
+        set(FILTER, filter);
+        return this;
+    }
+
+    /**
+     * Sets the bounds constraint of the query.
+     * 
+     * @return This object.
+     */
     public Query bounds(Envelope bounds) {
         this.bounds = bounds;
         return this;
     }
 
+    /**
+     * Sets the limit on the number of results to return from the query.
+     * 
+     * @return This object.
+     */
     public Query limit(Integer limit) {
         set(LIMIT, limit);
         return this;
     }
 
+    /**
+     * Sets the number of results to skip over from the query.
+     * 
+     * @return This object.
+     */
     public Query offset(Integer offset) {
         set(OFFSET, offset);
         return this;
     }
 
+    /**
+     * Sets the properties to sort results by.
+     *
+     * @return This object.
+     */
     public Query sort(String... sort) {
         List<Sort> list = new ArrayList<Sort>();
         for (String s : sort) {
@@ -131,6 +213,11 @@ public class Query {
         return this;
     }
 
+    /**
+     * Sets the srs to re-project query results to. 
+     * 
+     * @return This object.
+     */
     public Query reproject(String srs) {
         CoordinateReferenceSystem crs = Proj.crs(srs);
         if (crs == null) {
@@ -139,24 +226,79 @@ public class Query {
         return reproject(crs);
     }
 
+    /**
+     * Sets the crs to re-project query results to. 
+     * 
+     * @return This object.
+     */
     public Query reproject(CoordinateReferenceSystem crs) {
         set(REPROJECT, crs);
         return this;
     }
 
+    /**
+     * Sets the tolerance with which to simplify geometry of query results.   
+     * 
+     * @return This object.
+     */
     public Query simplify(Double tolerance) {
         set(SIMPLIFY, tolerance);
         return this;
     }
 
+    /**
+     * Sets the query to update mode, specifying that any returned cursor should be in mode 
+     * {@link Cursor#UPDATE}.
+     * 
+     * @return This object.
+     */
+    public Query update() {
+        mode = Cursor.UPDATE;
+        return this;
+    }
+
+    /**
+     * Sets the query to append mode, specifying that any returned cursor should be in mode 
+     * {@link Cursor#APPEND}.
+     * 
+     * @return This object.
+     */
+    public Query append() {
+        mode = Cursor.APPEND;
+        return this;
+    }
+
+    /**
+     * Sets the transaction of the query.
+     * 
+     * @return This object.
+     */
+    public Query transaction(Transaction tx) {
+        this.transaction = tx;
+        return this;
+    }
+
+    /**
+     * Sets a query option. 
+     */
     public <T> void set(Option<T> opt, T value) {
         options.put(opt.key, value);
     }
 
+    /**
+     * Gets a query option. 
+     */
     public <T> T get(Option<T> opt) {
         return (T) options.get(opt.key);
     }
 
+    /**
+     * Consumes a query option specifying a default value.
+     * <p>
+     * This method is called by datasets handling the query to handle options that can be handled
+     * natively by the dataset. 
+     * </p>
+     */
     public <T> T consume(Option<T> opt, T def) {
         if (options.containsKey(opt.key)) {
             return (T) options.remove(opt.key);
@@ -164,10 +306,16 @@ public class Query {
         return null;
     }
 
+    /**
+     * Determines if any of the query properties constrain the number of results in any way. 
+     */
     public boolean isAll() {
         return options.isEmpty() && Geom.isNull(bounds);
     }
 
+    /**
+     * Wraps the cursor based on the query properties that have not yet been consumed.
+     */
     public <T> Cursor<T> apply(Cursor<T> cursor) {
         Filter filter = consume(FILTER, null);
         if (filter != null) {

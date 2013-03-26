@@ -90,36 +90,15 @@ public class MemoryVector implements Vector {
     
         return Cursors.size(q.apply(cursor));
     }
-    
+
     @Override
-    public boolean supports(Mode mode) {
-        switch(mode) {
-        case READ:
-        case APPEND:
-        case UPDATE:
-            return true;
-        default:
-            return false;
-        }
-    }
-    
-    @Override
-    public Cursor<Feature> cursor(Query q, Mode mode) throws IOException {
-        Cursor<Feature> cursor = new MemoryCursor(mode, this);
-    
-        if (q == null) {
-            return cursor;
-        }
+    public Cursor<Feature> cursor(Query q) throws IOException {
+        Cursor<Feature> cursor = new MemoryCursor(q.getMode(), this);
     
         if (q.getBounds() != null && !q.getBounds().isNull()) {
             cursor = Cursors.intersects(cursor, q.getBounds());
         }
     
         return q.apply(cursor);
-    }
-    
-    @Override
-    public void add(Feature f) throws IOException {
-        features.add(f);
     }
 }

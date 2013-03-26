@@ -276,12 +276,11 @@ public class GeoPackage implements Workspace {
         }
         else {
             //fall back on cursor
-            Cursor<Feature> c = cursor(entry, null, null);
-            return Cursors.size(q.apply(c));
+            return Cursors.size(cursor(entry, q));
         }
     }
 
-    public Cursor<Feature> cursor(FeatureEntry entry, Query q, Cursor.Mode mode) throws IOException {
+    public Cursor<Feature> cursor(FeatureEntry entry, Query q) throws IOException {
         //TODO: handle filters natively
         //TODO: use selected property names
         try {
@@ -308,7 +307,7 @@ public class GeoPackage implements Workspace {
             }
     
             FeatureCursor c = new FeatureCursor(db.prepare(log(sql.toString())), schema);
-            return q != null ? q.apply(c) : c;
+            return q.apply(c);
         }
         catch(Exception e) {
             throw new IOException(e);

@@ -60,16 +60,10 @@ public class GeoPkgVector implements Vector {
     }
 
     @Override
-    public boolean supports(Mode mode) {
-        return mode == Cursor.READ;
+    public Cursor<Feature> cursor(Query q) throws IOException {
+        return geopkg.cursor(entry, q);
     }
 
-    @Override
-    public Cursor<Feature> cursor(Query q, Cursor.Mode mode) throws IOException {
-        return geopkg.cursor(entry, q, mode);
-    }
-
-    @Override
     public void add(Feature f) throws IOException {
         geopkg.add(entry, f);
     }

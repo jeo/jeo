@@ -80,7 +80,7 @@ public class GeoPkgFeatureTest extends GeoPkgTestSupport {
     @Test
     public void testRead() throws Exception {
         FeatureEntry entry = geopkg.feature("states");
-        Cursor<Feature> c = geopkg.cursor(entry, null, null);
+        Cursor<Feature> c = geopkg.cursor(entry, new Query());
         
         assertNotNull(c);
         for (int i = 0; i < 49; i++) {
@@ -111,7 +111,7 @@ public class GeoPkgFeatureTest extends GeoPkgTestSupport {
 
         assertEquals(50, geopkg.count(entry, null));
 
-        Cursor<Feature> c = geopkg.cursor(entry, new Query().bounds(g.getEnvelopeInternal()), null);
+        Cursor<Feature> c = geopkg.cursor(entry, new Query().bounds(g.getEnvelopeInternal()));
         assertTrue(c.hasNext());
 
         assertEquals("JEOLAND", c.next().get("STATE_NAME"));
@@ -131,7 +131,7 @@ public class GeoPkgFeatureTest extends GeoPkgTestSupport {
         GeometryBuilder gb = new GeometryBuilder();
         geopkg.add(entry, Features.create(null, schema, gb.point(1,2), "anvil", 10.99));
 
-        Cursor<Feature> c = geopkg.cursor(entry, null, null);
+        Cursor<Feature> c = geopkg.cursor(entry, new Query());
         try {
             assertTrue(c.hasNext());
     

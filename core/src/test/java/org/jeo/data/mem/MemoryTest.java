@@ -61,11 +61,11 @@ public class MemoryTest {
     @Test
     public void testCursorRead() throws IOException {
         MemoryVector widgets = (MemoryVector) mem.get("widgets");
-        assertCovered(widgets.cursor(null, null), 1, 2, 3);
-        assertCovered(widgets.cursor(new Query().limit(2), null), 1, 2);
-        assertCovered(widgets.cursor(new Query().bounds(new Envelope(-1,1,-1,1)), null), 1);
-        assertCovered(widgets.cursor(new Query().filter("cost < 12.0"), null), 1, 2);
-        assertCovered(widgets.cursor(new Query().filter("cost < 12.0").offset(1), null), 2);
+        assertCovered(widgets.cursor(new Query()), 1, 2, 3);
+        assertCovered(widgets.cursor(new Query().limit(2)), 1, 2);
+        assertCovered(widgets.cursor(new Query().bounds(new Envelope(-1,1,-1,1))), 1);
+        assertCovered(widgets.cursor(new Query().filter("cost < 12.0")), 1, 2);
+        assertCovered(widgets.cursor(new Query().filter("cost < 12.0").offset(1)), 2);
     }
 
     void assertCovered(Cursor<Feature> c, Integer... ids) {
@@ -81,7 +81,7 @@ public class MemoryTest {
         MemoryVector widgets = (MemoryVector) mem.get("widgets");
         assertEquals(0, widgets.count(new Query().filter("cost  > 13.0")));
 
-        Cursor<Feature> c = widgets.cursor(null, Cursor.UPDATE);
+        Cursor<Feature> c = widgets.cursor(new Query().update());
         for (Feature f : c) {
             f.put("cost", ((Double)f.get("cost"))*2);
             c.write();
@@ -89,7 +89,7 @@ public class MemoryTest {
 
         assertEquals(3, widgets.count(new Query().filter("cost  > 13.0")));
         
-        c = widgets.cursor(null, Cursor.APPEND);
+        c = widgets.cursor(new Query().append());
         assertTrue(c.hasNext());
 
         Feature f = c.next();
@@ -105,6 +105,6 @@ public class MemoryTest {
         c.write();
 
         assertEquals(5, widgets.count(null));
-        assertCovered(widgets.cursor(new Query().filter("cost < 3.0"), null), 4, 5);
+        assertCovered(widgets.cursor(new Query().filter("cost < 3.0")), 4, 5);
     }
 }

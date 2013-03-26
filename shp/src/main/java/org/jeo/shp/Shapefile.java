@@ -173,7 +173,7 @@ public class Shapefile implements Vector, Disposable {
         }
         else {
             //load and count the full cursor
-            return Cursors.size(cursor(q, null));
+            return Cursors.size(cursor(q));
         }
     }
 
@@ -221,23 +221,16 @@ public class Shapefile implements Vector, Disposable {
     }
 
     @Override
-    public boolean supports(Mode mode) {
-        return mode == Cursor.READ;
-    }
-
-    @Override
-    public Cursor<Feature> cursor(Query q, Mode mode) throws IOException {
-        if (q == null || q.isAll()) {
+    public Cursor<Feature> cursor(Query q) throws IOException {
+        if (q.getMode() != Cursor.READ) {
+            throw new IllegalArgumentException("Write cursor not supported"); 
+        }
+        if (q.isAll()) {
             return new ShapefileCursor(this, null);
         }
 
         //TODO: q.getProperties()
         return q.apply(new ShapefileCursor(this, q.getBounds()));
-    }
-    
-    @Override
-    public void add(Feature f) throws IOException {
-        throw new UnsupportedOperationException();
     }
 
     public void dispose() {

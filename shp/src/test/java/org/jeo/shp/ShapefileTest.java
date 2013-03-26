@@ -9,6 +9,7 @@ import static org.junit.Assert.assertTrue;
 import java.io.IOException;
 
 import org.jeo.data.Cursor;
+import org.jeo.data.Query;
 import org.jeo.feature.Feature;
 import org.junit.Before;
 import org.junit.Rule;
@@ -46,7 +47,7 @@ public class ShapefileTest {
 
     @Test
     public void testRead() throws IOException {
-        Cursor<Feature> c = shp.cursor(null, null);
+        Cursor<Feature> c = shp.cursor(new Query());
         
         assertNotNull(c);
         for (int i = 0; i < 49; i++) {

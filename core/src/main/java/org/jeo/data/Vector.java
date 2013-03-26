@@ -20,31 +20,18 @@ public interface Vector extends Dataset {
     /**
      * Counts features in the layer.
      * 
-     * @param q Query used to constrain results, or <code>null</code> to specify no constraint 
-     * and count all features.
+     * @param q Query used to constrain results, must not be <code>null</code>
     */
     long count(Query q) throws IOException ;
 
     /**
-     * Determines if the vector dataset supports the specified cursor mode.
-     */
-    boolean supports(Cursor.Mode mode);
-
-    /**
      * Returns a feature cursor for the layer. 
      * <p>
-     * The <tt>mode</tt> is used to control whether the cursor is read or write. All implementations
-     * must support {@link Cursor.Mode#READ}. The {@link #supports(org.jeo.data.Cursor.Mode)} method
-     * is used to determine if other modes are supported.
+     * {@link Query#getMode()} is used to control whether the cursor is read or write. All 
+     * implementations must support {@link Cursor.Mode#READ}.
      * </p>
-     * @param q A query used to constrain results, or <code>null</code> to specify no constraint and 
-     * query all features.
-     * @param mode The cursor mode, <code>null</code> is interpreted as {@link Cursor.Mode#READ}. 
+     * @param q A query used to constrain results, must not be <code>null</code>.
      */
-    Cursor<Feature> cursor(Query q, Cursor.Mode mode) throws IOException;
+    Cursor<Feature> cursor(Query q) throws IOException;
 
-    /**
-     * Adds a feature to the layer.
-     */
-    void add(Feature f) throws IOException;
 }

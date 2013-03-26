@@ -6,6 +6,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+import org.jeo.util.Util;
+
 /**
  * Extension of {@link WorkspaceFactory} for workspaces that are filed based. 
  * <p>
@@ -59,15 +61,7 @@ public abstract class FileWorkspaceFactory<T extends Workspace> implements Works
      * @return The object converted to {@link File}.
      */
     protected File toFile(Object object) {
-        if (object instanceof File) {
-            return (File) object;
-        }
-
-        if (object instanceof String) {
-            return new File((String)object);
-        }
-
-        return null;
+        return Util.toFile(object);
     }
 
     /**

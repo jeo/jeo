@@ -23,11 +23,11 @@ import org.geogit.api.porcelain.CommitOp;
 import org.geogit.api.porcelain.LogOp;
 import org.geogit.repository.Repository;
 import org.geogit.repository.WorkingTree;
-import org.jeo.data.Vector;
 import org.jeo.data.Workspace;
 import org.jeo.data.Workspaces;
 import org.jeo.feature.Schema;
 import org.jeo.geotools.GT;
+import org.jeo.util.Pair;
 import org.opengis.feature.simple.SimpleFeatureType;
 
 import com.google.common.base.Function;
@@ -73,8 +73,8 @@ public class GeoGit implements Workspace {
         return layers(branch());
     }
 
-    public Iterator<String> layers(String branch) throws IOException {
-        List<NodeRef> trees = typeRefs(branch);
+    public Iterator<String> layers(String rev) throws IOException {
+        List<NodeRef> trees = typeRefs(rev);
         return Iterators.transform(trees.iterator(), new Function<NodeRef, String>() {
             @Override
             public String apply(NodeRef input) {
@@ -83,48 +83,66 @@ public class GeoGit implements Workspace {
         });
     }
 
-    public Iterator<RevCommit> log(String branch) throws IOException {
-        return gg.command(LogOp.class).call();
+    public Iterator<RevCommit> log(String branch, String... layers) throws IOException {
+        LogOp log = gg.command(LogOp.class);
+        for (String l : layers) {
+            log.addPath(l);
+        }
+
+        return log.call();
     }
 
     @Override
     public GeoGitDataset get(String layer) throws IOException {
-        NodeRef ref = typeRef(layer);
+        Pair<NodeRef,RevCommit> ref = parseName(layer);
         if (ref == null) {
             return null;
         }
 
-        SimpleFeatureType featureType = featureType(ref);
+        SimpleFeatureType featureType = featureType(ref.first());
         if (featureType != null) {
-            return new GeoGitDataset(GT.schema(featureType), this);
+            return new GeoGitDataset(ref, GT.schema(featureType), this);
         }
 
         throw new IllegalStateException("No schema for tree: " + layer); 
     }
 
-    String rootRef() {
-        Repository repo = gg.getRepository();
+    Pair<NodeRef,RevCommit> parseName(String name) {
+        String[] split = name.split("@");
 
-        //grab the head reference
-        Optional<Ref> head = repo.command(RefParse.class).setName(Ref.HEAD).call();
-        if (head.isPresent()) {
-            Ref ref = head.get();
-            if (ref instanceof SymRef) {
-                String target = ((SymRef) ref).getTarget();
-                if (target.startsWith(Ref.HEADS_PREFIX)) {
-                    return target.substring(Ref.HEADS_PREFIX.length());
-                }
-            }
+        final String type = split.length > 1 ? split[0] : name; 
+        final String rev = split.length > 1 ? split[1] : branch();
+
+        //parse the revision
+        Optional<RevCommit> commit = 
+            gg.command(RevObjectParse.class).setRefSpec(rev).call(RevCommit.class);
+        if (!commit.isPresent()) {
+            throw new IllegalArgumentException("No such commit: " + rev);
         }
 
-        return Ref.WORK_HEAD;
+        Collection<NodeRef> match =  Collections2.filter(typeRefs(rev), new Predicate<NodeRef>() {
+            @Override
+            public boolean apply(NodeRef input) {
+                return NodeRef.nodeFromPath(input.path()).equals(type);
+            }
+        }); 
+
+        if (match.isEmpty()) {
+            return null;
+        }
+
+        if (match.size() == 1) {
+            return new Pair<NodeRef,RevCommit>(match.iterator().next(), commit.get());
+        }
+
+        throw new IllegalArgumentException("Multiple trees for " + type);
     }
 
     /**
-     * Returns the branch name <tt>branch</tt> if not null, otherwise falls back to current branch.
+     * Returns the ref name <tt>ref</tt> if not null, otherwise falls back to name of current branch.
      */
-    String branch(String branch) {
-        return branch != null ? branch : branch();
+    String refOrBranch(String ref) {
+        return ref != null ? ref : branch();
     }
 
     /**
@@ -151,33 +169,11 @@ public class GeoGit implements Workspace {
     }
 
     /**
-     * Lists all the type references for the specified branch. 
+     * Lists all the type references for the specified branch/revision. 
      */
-    List<NodeRef> typeRefs(String branch) {
+    List<NodeRef> typeRefs(String rev) {
         Repository repo = gg.getRepository();
-        return repo.command(FindFeatureTypeTrees.class).setRootTreeRef(branch(branch)).call();
-    }
-
-    /**
-     * Returns a specific type ref.
-     */
-    NodeRef typeRef(final String name) {
-        Collection<NodeRef> match =  Collections2.filter(typeRefs(null), new Predicate<NodeRef>() {
-            @Override
-            public boolean apply(NodeRef input) {
-                return NodeRef.nodeFromPath(input.path()).equals(name);
-            }
-        }); 
-
-        if (match.isEmpty()) {
-            return null;
-        }
-
-        if (match.size() == 1) {
-            return match.iterator().next();
-        }
-
-        throw new IllegalArgumentException("Multiple tree matches for " + name);
+        return repo.command(FindFeatureTypeTrees.class).setRootTreeRef(refOrBranch(rev)).call();
     }
 
     SimpleFeatureType featureType(NodeRef ref) {

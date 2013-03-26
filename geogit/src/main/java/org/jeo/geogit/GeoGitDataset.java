@@ -7,8 +7,12 @@ import org.geogit.api.Bounded;
 import org.geogit.api.GeoGIT;
 import org.geogit.api.GeogitTransaction;
 import org.geogit.api.NodeRef;
+import org.geogit.api.ObjectId;
+import org.geogit.api.Ref;
+import org.geogit.api.RevCommit;
 import org.geogit.api.RevTree;
 import org.geogit.api.plumbing.LsTreeOp;
+import org.geogit.api.plumbing.RevParse;
 import org.geogit.api.plumbing.TransactionBegin;
 import org.geogit.api.plumbing.LsTreeOp.Strategy;
 import org.geogit.api.plumbing.RevObjectParse;
@@ -22,6 +26,7 @@ import org.jeo.data.Vector;
 import org.jeo.data.Cursor.Mode;
 import org.jeo.feature.Feature;
 import org.jeo.feature.Schema;
+import org.jeo.util.Pair;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.osgeo.proj4j.CoordinateReferenceSystem;
@@ -32,10 +37,12 @@ import com.vividsolutions.jts.geom.Envelope;
 
 public class GeoGitDataset implements Vector, Transactional {
 
+    Pair<NodeRef,RevCommit> ref;
     GeoGit geogit;
     Schema schema;
 
-    public GeoGitDataset(Schema schema, GeoGit geogit) {
+    public GeoGitDataset(Pair<NodeRef,RevCommit> ref, Schema schema, GeoGit geogit) {
+        this.ref = ref;
         this.schema = schema;
         this.geogit = geogit;
     }
@@ -84,15 +91,17 @@ public class GeoGitDataset implements Vector, Transactional {
     @Override
     public Envelope bounds() throws IOException {
         Envelope bounds = new Envelope();
-        ref().expand(bounds);
+        getRef().expand(bounds);
         return bounds;
     }
 
     @Override
     public Cursor<Feature> cursor(Query q) throws IOException {
+        //require a transaction for non read only 
         if (q.getMode() != Mode.READ && q.getTransaction() == null) {
             throw new IllegalArgumentException("Writable cursor requires a transaction");
         }
+
 
         GeoGitTransaction tx =  (GeoGitTransaction) q.getTransaction();
 
@@ -101,7 +110,7 @@ public class GeoGitDataset implements Vector, Transactional {
         }
 
         LsTreeOp ls = geogit.getGeoGIT().command(LsTreeOp.class)
-            .setStrategy(Strategy.FEATURES_ONLY).setReference(ref().path());
+            .setStrategy(Strategy.FEATURES_ONLY).setReference(getRef().path());
 
         final Envelope bbox = q != null ? q.getBounds() : null;
         if (bbox != null && !bbox.isNull()) {
@@ -123,27 +132,31 @@ public class GeoGitDataset implements Vector, Transactional {
         return new GeoGitTransaction(ggtx, this);
     };
 
-    NodeRef ref() {
-        return geogit.typeRef(getName());
+    NodeRef getRef() {
+        return ref.first();
+    }
+
+    RevCommit getRevision() {
+        return ref.second();
     }
 
     RevTree tree() {
-        String refspec = geogit.rootRef() + ":" + ref().path();
+        ObjectId id = getRef().objectId();
         Optional<RevTree> tree = 
-           geogit.getGeoGIT().command(RevObjectParse.class).setRefSpec(refspec).call(RevTree.class);
+            geogit.getGeoGIT().command(RevObjectParse.class).setObjectId(id).call(RevTree.class);
         return tree.get();
     }
 
     SimpleFeatureType featureType() {
-        return geogit.featureType(ref());
+        return geogit.featureType(getRef());
     }
 
     void insert(SimpleFeature feature, GeoGitTransaction tx) {
-        workingTree(tx).insert(ref().path(), feature);
+        workingTree(tx).insert(getRef().path(), feature);
     }
 
     void delete(String fid, GeoGitTransaction tx) {
-        workingTree(tx).delete(ref().path(), fid);
+        workingTree(tx).delete(getRef().path(), fid);
     }
 
     WorkingTree workingTree(GeoGitTransaction tx) {

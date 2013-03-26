@@ -3,6 +3,7 @@ package org.jeo.geogit;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
@@ -17,6 +18,7 @@ import org.geogit.api.porcelain.BranchCreateOp;
 import org.geogit.api.porcelain.CommitOp;
 import org.geogit.api.porcelain.ConfigOp;
 import org.geogit.api.porcelain.ConfigOp.ConfigAction;
+import org.geogit.api.porcelain.LogOp;
 import org.geogit.di.GeogitModule;
 import org.geogit.repository.Repository;
 import org.geogit.storage.bdbje.JEStorageModule;
@@ -38,6 +40,7 @@ import org.junit.Test;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Iterators;
 import com.google.common.collect.Sets;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -69,6 +72,12 @@ public class GeoGitTest {
 
         repo.command(BranchCreateOp.class).setName("scratch").call();
         ws = new GeoGit(gg);
+    }
+
+    void log(GeoGIT gg) {
+        for (Iterator<RevCommit> it = gg.command(LogOp.class).call(); it.hasNext();) {
+            System.out.println(it.next());
+        }
     }
 
     void addShp(Shapefile shp, Repository repo) throws IOException {
@@ -106,8 +115,8 @@ public class GeoGitTest {
         assertEquals(4, layers.size());
         assertTrue(layers.contains("states"));
         assertTrue(layers.contains("point"));
-        assertTrue(layers.contains("line"));
-        assertTrue(layers.contains("polygon"));
+        //assertTrue(layers.contains("line"));
+        //assertTrue(layers.contains("polygon"));
     }
 
     @Test
@@ -117,8 +126,39 @@ public class GeoGitTest {
     }
 
     @Test
+    public void testGetAtRevision() throws Exception {
+        Iterator<RevCommit> it = ws.log("master");
+        assertTrue(it.hasNext());
+        it.next();
+        assertTrue(it.hasNext());
+        
+        RevCommit second = it.next(); 
+        RevCommit last = Iterators.getLast(it);
+
+        assertNotNull(ws.get("point"));
+        assertNotNull(ws.get("point@" + second.getId().toString()));
+        assertNull(ws.get("point@" + last.getId().toString()));
+    }
+
+    @Test
     public void testCount() throws Exception {
-        assertEquals(49, ws.get("states").count(null));
+        assertEquals(49, ws.get("states").count(new Query()));
+    }
+
+    @Test
+    public void testCountAtRevision() throws Exception {
+        GeoGitDataset data = ws.get("point");
+        
+        long prevCount = data.count(new Query());
+        String prev = data.getRevision().getId().toString();
+
+        doAddPoints();
+
+        data = ws.get("point");
+        assertEquals(prevCount + 2, data.count(new Query()));
+
+        data = ws.get("point@" + prev);
+        assertEquals(prevCount, data.count(new Query()));
     }
 
     @Test
@@ -185,6 +225,18 @@ public class GeoGitTest {
         
         long count = points.count(new Query());
 
+        doAddPoints();
+
+        points = ws.get("point");
+        assertEquals(count+2, points.count(new Query()));
+
+        assertEquals(1, points.count(new Query().filter("name = 'Calgary'")));
+        assertEquals(1, points.count(new Query().filter("name = 'Vancouver'")));
+    }
+
+    void doAddPoints() throws Exception {
+        GeoGitDataset points = ws.get("point");
+
         Transaction tx = points.transaction(null);
         Cursor<Feature> c = points.cursor(new Query().append().transaction(tx));
 
@@ -201,12 +253,6 @@ public class GeoGitTest {
         c.write();
 
         tx.commit();
-
-        points = ws.get("point");
-        assertEquals(count+2, points.count(new Query()));
-
-        assertEquals(1, points.count(new Query().filter("name = 'Calgary'")));
-        assertEquals(1, points.count(new Query().filter("name = 'Vancouver'")));
     }
 
     @Test

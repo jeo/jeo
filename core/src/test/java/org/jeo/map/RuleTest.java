@@ -42,19 +42,11 @@ public class RuleTest {
         assertEquals(1,r.getSelectors().size());
         s = r.getSelectors().get(0);
         assertEquals("widgets", s.getId());
-        assertNull(s.getAttachment());
-        assertEquals(CQL.parse("cost > 12"), s.getFilter());
-        assertEquals("green", r.get("color"));
-
-        r = flat.get(1);
-        assertEquals(1,r.getSelectors().size());
-        s = r.getSelectors().get(0);
-        assertEquals("widgets", s.getId());
         assertEquals("costly", s.getAttachment());
         assertEquals(CQL.parse("cost > 12 AND cost > 20"), s.getFilter());
         assertEquals("yellow", r.get("color"));
 
-        r = flat.get(2);
+        r = flat.get(1);
         assertEquals(1,r.getSelectors().size());
         s = r.getSelectors().get(0);
         assertEquals("widgets", s.getId());
@@ -62,5 +54,12 @@ public class RuleTest {
         assertEquals(CQL.parse("cost > 12 AND cost > 30"), s.getFilter());
         assertEquals("red", r.get("color"));
 
+        r = flat.get(2);
+        assertEquals(1,r.getSelectors().size());
+        s = r.getSelectors().get(0);
+        assertEquals("widgets", s.getId());
+        assertNull(s.getAttachment());
+        assertEquals(CQL.parse("cost > 12"), s.getFilter());
+        assertEquals("green", r.get("color"));
     }
 }

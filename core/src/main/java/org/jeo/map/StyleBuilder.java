@@ -59,9 +59,6 @@ public class StyleBuilder {
                 s.setName(name);
             }
         }
-        Rule r = lastRule();
-        r.getSelectors().add(s);
-
         return this;
     }
 

@@ -48,21 +48,6 @@ public class Features {
     }
 
     /**
-     * Copies values from one feature to another.
-     * 
-     * @param from THe source feature.
-     * @param to The target feature.
-     * 
-     * @return The target feature.
-     */
-    public static Feature copy(Feature from, Feature to) {
-        for (Map.Entry<String, Object> kv : from.map().entrySet()) {
-            to.put(kv.getKey(), kv.getValue());
-        }
-        return to;
-    }
-
-    /**
      * Creates a feature object from a map with an explicit schema.
      */
     public static MapFeature create(String id, Schema schema, Map<String, Object> map) {

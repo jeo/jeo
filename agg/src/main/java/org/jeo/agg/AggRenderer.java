@@ -9,6 +9,7 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 
+import org.jeo.data.Query;
 import org.jeo.data.Vector;
 import org.jeo.feature.Feature;
 import org.jeo.geom.CoordinatePath;
@@ -151,7 +152,7 @@ public class AggRenderer {
 
     void render(Vector l, RuleSet ruleSet, long buf) {
         try {
-            for (Feature f : l.read(map.getBounds())) {
+            for (Feature f : l.cursor(new Query().bounds(map.getBounds()))) {
                 Rule r = ruleSet.match(f).collapse();
                 if (r != null) {
                     draw(f, r, buf);

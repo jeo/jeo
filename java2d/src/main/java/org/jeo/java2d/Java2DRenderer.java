@@ -10,6 +10,7 @@ import java.awt.geom.AffineTransform;
 import java.io.IOException;
 import java.util.List;
 
+import org.jeo.data.Query;
 import org.jeo.data.Vector;
 import org.jeo.feature.Feature;
 import org.jeo.geom.CoordinatePath;
@@ -70,7 +71,7 @@ public class Java2DRenderer {
         }
 
         Vector data = (Vector) layer.getData();
-        for (Feature f : data.read(map.getBounds())) {
+        for (Feature f : data.cursor(new Query().bounds(map.getBounds()))) {
             render(f, layer);
         }
     }

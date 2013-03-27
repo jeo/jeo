@@ -10,8 +10,11 @@ import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 
-import org.jeo.data.Memory;
+import org.jeo.data.Cursor;
+import org.jeo.data.Query;
 import org.jeo.data.Vector;
+import org.jeo.data.mem.Memory;
+import org.jeo.feature.Feature;
 import org.jeo.feature.Features;
 import org.jeo.feature.Schema;
 import org.jeo.geom.GeometryBuilder;
@@ -48,9 +51,20 @@ public class Java2DRendererTest {
         Schema schema = Features.schema(
             "widgets", "geo", Geometry.class, "name", String.class, "cost", Double.class);
         widgets = mem.create(schema);
-        widgets.add(Features.create(schema, gb.point(-45,-45).buffer(10), "bomb", 8.99));
-        widgets.add(Features.create(schema, gb.point(20,-60).buffer(5), "anvil", 9.99));
-        widgets.add(Features.create(schema, gb.point(0, 20).buffer(15), "bomb", 10.99));
+        Cursor<Feature> c = widgets.cursor(new Query().append());
+        
+        Features.copy(
+            Features.create(null, schema, gb.point(-45,-45).buffer(10), "bomb", 8.99), c.next());
+        c.write();
+
+        Features.copy(
+            Features.create(null, schema, gb.point(20,-60).buffer(5), "anvil", 9.99), c.next());
+        c.write();
+       
+        Features.copy(
+            Features.create(null, schema, gb.point(0, 20).buffer(15), "bomb", 10.99), c.next());
+        c.write();
+        c.close();
     }
 
     @Test

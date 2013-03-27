@@ -1,6 +1,7 @@
 package org.jeo.geogit;
 
 import java.io.IOException;
+import java.util.Date;
 import java.util.Iterator;
 
 import org.geogit.api.GeogitTransaction;
@@ -26,20 +27,24 @@ public class GeoGitTransaction implements Transaction {
 
     @Override
     public void commit() throws IOException {
-        commit(null);
+        commit(null, null, null);
     }
 
-    public void commit(String message) {
+    public void commit(String message, String author, Date timestamp) {
         Preconditions.checkState(ggtx != null);
 
         try {
             ggtx.command(AddOp.class).call();
 
             CommitOp commitOp = ggtx.command(CommitOp.class);
-//            if (author != null) {
-//                commitOp.setAuthor(author, null);
-//            }
             commitOp.setMessage(message != null ? message : autoMessage());
+            if (author != null) {
+                commitOp.setAuthor(author, null);
+            }
+            if (timestamp != null) {
+                commitOp.setAuthorTimestamp(timestamp.getTime());
+            }
+
             commitOp.call();
 
             dataset.getGeoGIT().command(TransactionEnd.class).setTransaction(ggtx).call();

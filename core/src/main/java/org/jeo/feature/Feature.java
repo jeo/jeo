@@ -15,31 +15,12 @@ import com.vividsolutions.jts.geom.Geometry;
  * 
  * @author Justin Deoliveira, OpenGeo
  */
-public abstract class Feature {
+public interface Feature {
 
     /**
-     * Feature schema.
+     * Feature identifier.
      */
-    protected Schema schema;
-
-    /**
-     * Coordinate reference system
-     */
-    protected CoordinateReferenceSystem crs;
-
-    /**
-     * Constructor for Feature not taking a schema object.
-     */
-    protected Feature() {
-        this(null);
-    }
-   
-    /**
-     * Constructor for Feature taking an explicit schema.
-     */
-    protected Feature(Schema schema) {
-        this.schema = schema;
-    }
+    String getId();
 
     /**
      * Coordinate reference system for the feature.
@@ -48,16 +29,12 @@ public abstract class Feature {
      * </p>
      * @return The crs, or <code>null</code> if none been set.
      */
-    public CoordinateReferenceSystem getCRS() {
-        return crs;
-    }
+    CoordinateReferenceSystem getCRS();
 
     /**
      * Sets the coordinate reference system for the feature.
      */
-    public void setCRS(CoordinateReferenceSystem crs) {
-        this.crs = crs;
-    }
+    void setCRS(CoordinateReferenceSystem crs);
 
     /**
      * The derived coordinate reference system for the feature.
@@ -68,17 +45,7 @@ public abstract class Feature {
      * </p>
      * @return The derived crs.
      */
-    public CoordinateReferenceSystem crs() {
-        if (crs != null) {
-            return crs;
-        }
-
-        if (schema != null) {
-            return schema.crs();
-        }
-
-        return null;
-    }
+    CoordinateReferenceSystem crs();
 
     /**
      * Gets a named attribute of the feature.
@@ -89,7 +56,7 @@ public abstract class Feature {
      * 
      * @return The attribute value or <code>null</code>.
      */
-    public abstract Object get(String key);
+    Object get(String key);
 
     /**
      * Sets a named attribute of the feature.
@@ -97,7 +64,7 @@ public abstract class Feature {
      * @param key The key or name of the attribute. 
      * @param val The new value of the attribute. 
      */
-    public abstract void put(String key, Object val);
+    void put(String key, Object val);
 
     /**
      * Derived geometry of the feature.
@@ -108,22 +75,7 @@ public abstract class Feature {
      * </p>
      * @return a {@link Geometry} object, or <code>null</code> if it could not be found.
      */
-    public Geometry geometry() {
-        if (schema != null) {
-            Field f = schema.geometry();
-            if (f != null) {
-                return (Geometry) get(f.getName());
-            }
-        }
-
-        return findGeometry();
-    }
-
-    /**
-     * Method for subclasses to implement in order to find a geometry object when no schema
-     * information is available.
-     */
-    protected abstract Geometry findGeometry();
+    Geometry geometry();
 
     /**
      * The lazily created schema for the feature. 
@@ -132,26 +84,15 @@ public abstract class Feature {
      * {@link #buildSchema()} is used to derive a schema for the feature.
      * </p>
      */
-    public Schema schema() {
-        if (schema == null) {
-            schema = buildSchema();
-        }
-        return schema;
-    }
-
-    /**
-     * Method for subclasses to implement to build a schema for the feature from its underlying
-     * attributes.
-     */
-    protected abstract Schema buildSchema();
+    Schema schema();
 
     /**
      * Returns an immutable list view of the feature
      */
-    public abstract List<Object> list();
+    abstract List<Object> list();
 
     /**
      * Returns an immutable map view of the feature.
      */
-    public abstract Map<String,Object> map();
+    abstract Map<String,Object> map();
 }

@@ -118,7 +118,10 @@ public class Proj {
     public static <T extends Geometry> T reproject(T g, CoordinateReferenceSystem from, 
         CoordinateReferenceSystem to) {
 
-        CoordinateTransform tx = findTransform(from, to);
+        return reproject(g, transform(from, to));
+    }
+    
+    public static <T extends Geometry> T reproject(T g, CoordinateTransform tx) {
         if (tx instanceof IdentityCoordinateTransform) {
             return g;
         }
@@ -147,7 +150,7 @@ public class Proj {
     public static Envelope reproject(Envelope e, CoordinateReferenceSystem from, 
         CoordinateReferenceSystem to) {
         
-        CoordinateTransform tx = findTransform(from, to);
+        CoordinateTransform tx = transform(from, to);
         if (tx instanceof IdentityCoordinateTransform) {
             return e;
         }
@@ -162,7 +165,7 @@ public class Proj {
         return new Envelope(c1.x, c2.x, c1.y, c2.y);
     }
 
-    private static CoordinateTransform findTransform(CoordinateReferenceSystem from, 
+    public static CoordinateTransform transform(CoordinateReferenceSystem from, 
         CoordinateReferenceSystem to) {
 
         if (from.equals(to)) {

@@ -8,10 +8,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.jeo.data.Cursor;
+import org.jeo.data.Cursors;
+import org.jeo.data.Disposable;
+import org.jeo.data.Query;
 import org.jeo.data.Vector;
+import org.jeo.data.Cursor.Mode;
 import org.jeo.feature.Feature;
 import org.jeo.feature.Field;
 import org.jeo.feature.Schema;
+import org.jeo.filter.Filter;
+import org.jeo.geom.Geom;
 import org.jeo.shp.dbf.DbaseFileHeader;
 import org.jeo.shp.dbf.DbaseFileReader;
 import org.jeo.shp.file.FileReader;
@@ -31,7 +37,7 @@ import com.vividsolutions.jts.geom.MultiPoint;
 import com.vividsolutions.jts.geom.MultiPolygon;
 import com.vividsolutions.jts.geom.Point;
 
-public class Shapefile implements Vector {
+public class Shapefile implements Vector, Disposable {
 
     ShpFiles shp;
     Schema schema;
@@ -147,23 +153,27 @@ public class Shapefile implements Vector {
     }
 
     @Override
-    public long count(Envelope bbox) throws IOException {
-        if (bbox == null) {
+    public long count(Query q) throws IOException {
+        //try to optimize the count
+        if (q == null || q.isAll()) {
             return countAll();
         }
 
-        ShapefileReader shpReader = new ShapefileReader(shp, false, false);
-        try {
-            long count = 0;
-            while(shpReader.hasNext()) {
-                shpReader.nextRecord();
-                count++;
-            }
+        if (Geom.isNull(q.getBounds()) && Filter.isTrueOrNull(q.get(Query.FILTER))) {
+            //count all and apply limit/offset
+            long count = countAll();
+
+            Integer offset = q.consume(Query.OFFSET, 0);
+            Integer limit = q.consume(Query.LIMIT, (int) count);
+
+            count = Math.max(0, count - offset);
+            count = Math.min(count, limit);
 
             return count;
         }
-        finally {
-            shpReader.close();
+        else {
+            //load and count the full cursor
+            return Cursors.size(cursor(q));
         }
     }
 
@@ -211,15 +221,22 @@ public class Shapefile implements Vector {
     }
 
     @Override
-    public Cursor<Feature> read(Envelope bbox) throws IOException {
-        return new ShapefileCursor(this, bbox);
-    }
-    
-    @Override
-    public void add(Feature f) throws IOException {
-        throw new UnsupportedOperationException();
+    public Cursor<Feature> cursor(Query q) throws IOException {
+        if (q.getMode() != Cursor.READ) {
+            throw new IllegalArgumentException("Write cursor not supported"); 
+        }
+        if (q.isAll()) {
+            return new ShapefileCursor(this, null);
+        }
+
+        //TODO: q.getProperties()
+        return q.apply(new ShapefileCursor(this, q.getBounds()));
     }
 
+    public void dispose() {
+        shp.dispose();
+    };
+    
     ShapefileReader newShpReader() throws IOException {
         return new ShapefileReader(shp, false, false);
     }

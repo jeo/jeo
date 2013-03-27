@@ -2,6 +2,7 @@ package org.jeo.nano;
 
 import static org.easymock.EasyMock.anyObject;
 import static org.easymock.EasyMock.createMock;
+import static org.easymock.EasyMock.createNiceMock;
 import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.expectLastCall;
 import static org.easymock.EasyMock.replay;
@@ -11,7 +12,9 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.List;
 
+import org.jeo.data.Cursor;
 import org.jeo.data.Cursors;
+import org.jeo.data.Query;
 import org.jeo.data.Registry;
 import org.jeo.data.Vector;
 import org.jeo.data.Workspace;
@@ -28,7 +31,7 @@ public class FeatureHandlerTest extends HandlerTestSupport {
     @Test
     public void testGet() throws Exception {
         Vector layer = createMock(Vector.class);
-        expect(layer.read(new Envelope(-180,180,-90,90)))
+        expect(layer.cursor(new Query().bounds(new Envelope(-180,180,-90,90))))
             .andReturn(Cursors.empty(Feature.class)).once();
         replay(layer);
 
@@ -56,9 +59,17 @@ public class FeatureHandlerTest extends HandlerTestSupport {
 
     @Test
     public void testPostAddFeatures() throws Exception {
-        Vector layer = createMock(Vector.class);
-        layer.add((Feature)anyObject());
+        Feature f = createNiceMock(Feature.class);
+        replay(f);
+
+        Cursor<Feature> c = createMock(Cursor.class);
+        expect(c.next()).andReturn(f).once();
+        c.write();
         expectLastCall().once();
+        replay(c);
+
+        Vector layer = createMock(Vector.class);
+        expect(layer.cursor((Query)anyObject())).andReturn(c).once();
         replay(layer);
 
         Workspace ws = createMock(Workspace.class);

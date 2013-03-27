@@ -93,7 +93,11 @@ public class Comparison extends Filter {
         throw new IllegalArgumentException("Unable to convert " + o + " to comparable");
     }
 
-    
+    @Override
+    public Object accept(FilterVisitor v, Object obj) {
+        return v.visit(this, obj);
+    }
+
     @Override
     public int hashCode() {
         final int prime = 31;

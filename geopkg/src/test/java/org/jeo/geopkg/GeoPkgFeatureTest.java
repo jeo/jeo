@@ -15,6 +15,7 @@ import jsqlite.Stmt;
 
 import org.apache.commons.io.FileUtils;
 import org.jeo.data.Cursor;
+import org.jeo.data.Query;
 import org.jeo.feature.Feature;
 import org.jeo.feature.Features;
 import org.jeo.feature.ListFeature;
@@ -79,7 +80,7 @@ public class GeoPkgFeatureTest extends GeoPkgTestSupport {
     @Test
     public void testRead() throws Exception {
         FeatureEntry entry = geopkg.feature("states");
-        Cursor<Feature> c = geopkg.read(entry, null);
+        Cursor<Feature> c = geopkg.cursor(entry, new Query());
         
         assertNotNull(c);
         for (int i = 0; i < 49; i++) {
@@ -103,14 +104,14 @@ public class GeoPkgFeatureTest extends GeoPkgTestSupport {
         Schema schema = geopkg.schema(entry);
 
         Geometry g = new GeometryBuilder().point(0,0).buffer(1);
-        Feature f = new ListFeature(null, schema);
+        Feature f = new ListFeature(null, null, schema);
         f.put(schema.geometry().getName(), g);
         f.put("STATE_NAME", "JEOLAND");
         geopkg.add(entry, f);
 
         assertEquals(50, geopkg.count(entry, null));
 
-        Cursor<Feature> c = geopkg.read(entry, g.getEnvelopeInternal());
+        Cursor<Feature> c = geopkg.cursor(entry, new Query().bounds(g.getEnvelopeInternal()));
         assertTrue(c.hasNext());
 
         assertEquals("JEOLAND", c.next().get("STATE_NAME"));
@@ -128,9 +129,9 @@ public class GeoPkgFeatureTest extends GeoPkgTestSupport {
         geopkg.create(entry, schema);
 
         GeometryBuilder gb = new GeometryBuilder();
-        geopkg.add(entry, Features.create(schema, gb.point(1,2), "anvil", 10.99));
+        geopkg.add(entry, Features.create(null, schema, gb.point(1,2), "anvil", 10.99));
 
-        Cursor<Feature> c = geopkg.read(entry, null);
+        Cursor<Feature> c = geopkg.cursor(entry, new Query());
         try {
             assertTrue(c.hasNext());
     

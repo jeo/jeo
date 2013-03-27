@@ -61,7 +61,8 @@ public class FeatureCursor extends Cursor<Feature> {
                         }
                     }
     
-                    return new ListFeature(values, schema);
+                    //TODO: feature id
+                    return new ListFeature(null, values, schema);
                 }
                 finally {
                     next = null;

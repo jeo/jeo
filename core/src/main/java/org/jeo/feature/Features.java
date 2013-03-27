@@ -5,8 +5,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-import com.vividsolutions.jts.geom.Geometry;
-
 /**
  * Feature utility class.
  * 
@@ -31,37 +29,36 @@ public class Features {
             values.add(feature.get(f.getName()));
         }
 
-        return new ListFeature(values, schema);
+        return new ListFeature(feature.getId(), values, schema);
     }
 
     /**
-     * Creates a feature object from a map.
+     * Copies values from one feature to another.
+     * 
+     * @param from THe source feature.
+     * @param to The target feature.
+     * 
+     * @return The target feature.
      */
-    public static MapFeature create(Map<String, Object> map) {
-        return create(null, map);
+    public static Feature copy(Feature from, Feature to) {
+        for (Map.Entry<String, Object> kv : from.map().entrySet()) {
+            to.put(kv.getKey(), kv.getValue());
+        }
+        return to;
     }
 
     /**
      * Creates a feature object from a map with an explicit schema.
      */
-    public static MapFeature create(Schema schema, Map<String, Object> map) {
-        return new MapFeature(map, schema);
+    public static MapFeature create(String id, Schema schema, Map<String, Object> map) {
+        return new MapFeature(id, map, schema);
     }
 
     /**
      * Creates a feature object from a list with an explicit schema.
      */
-    public static ListFeature create(Schema schema, Object... values) {
-        return new ListFeature(Arrays.asList(values), schema);
-    }
-
-    /**
-     * Creates a schema object consisting of a single geometry field named "geometry". 
-     * 
-     * @param name The schema name.
-     */
-    public static Schema schema(String name) {
-        return schema(name, "geometry", Geometry.class);
+    public static ListFeature create(String id, Schema schema, Object... values) {
+        return new ListFeature(id, Arrays.asList(values), schema);
     }
 
     /**

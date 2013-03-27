@@ -5,8 +5,6 @@ import java.io.IOException;
 import org.jeo.feature.Feature;
 import org.jeo.feature.Schema;
 
-import com.vividsolutions.jts.geom.Envelope;
-
 /**
  * A layer consisting of vector geometry objects, or {@link Feature} objects. 
  *
@@ -22,21 +20,18 @@ public interface Vector extends Dataset {
     /**
      * Counts features in the layer.
      * 
-     * @param bbox A bounding box filter used to constrain results, or <code>null</code> to specify
-     * no constraint.
+     * @param q Query used to constrain results, must not be <code>null</code>
     */
-    long count(Envelope bbox) throws IOException ;
+    long count(Query q) throws IOException ;
 
     /**
-     * Reads data from the layer. 
-     * 
-     * @param bbox A bounding box filter used to constrain results, or <code>null</code> to specify
-     * no constraint and query all features.
+     * Returns a feature cursor for the layer. 
+     * <p>
+     * {@link Query#getMode()} is used to control whether the cursor is read or write. All 
+     * implementations must support {@link Cursor.Mode#READ}.
+     * </p>
+     * @param q A query used to constrain results, must not be <code>null</code>.
      */
-    Cursor<Feature> read(Envelope bbox) throws IOException;
+    Cursor<Feature> cursor(Query q) throws IOException;
 
-    /**
-     * Adds a feature to the layer.
-     */
-    void add(Feature f) throws IOException;
 }

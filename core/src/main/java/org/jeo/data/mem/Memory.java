@@ -6,7 +6,6 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.jeo.data.Dataset;
-import org.jeo.data.Vector;
 import org.jeo.data.Workspace;
 import org.jeo.feature.Schema;
 
@@ -22,6 +21,10 @@ public class Memory implements Workspace {
     @Override
     public Dataset get(String layer) throws IOException {
         return data.get(layer);
+    }
+
+    public void put(String layer, Dataset dataset) {
+        data.put(layer, dataset);
     }
 
     @Override

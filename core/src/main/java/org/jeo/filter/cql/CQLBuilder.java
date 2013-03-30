@@ -112,7 +112,7 @@ public class CQLBuilder extends CQLParser {
             // between predicate actions
             // ----------------------------------------
         case JJTBETWEEN_NODE:
-            return;
+            builder.between();
             //return this.builder.buildBetween();
 
         case JJTNOT_BETWEEN_NODE:

@@ -152,6 +152,11 @@ public abstract class AbstractFeature implements Feature {
         return schema;
     }
     
+    @Override
+    public String toString() {
+        return new StringBuilder(id).append(id).append(map()).toString();
+    }
+
     /**
      * Method for subclasses to implement to build a schema for the feature from its underlying
      * attributes.

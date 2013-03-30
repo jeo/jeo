@@ -2,6 +2,11 @@ package org.jeo.map;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
+import org.jeo.util.Interpolate;
 
 /**
  * A color in RGBA color space.
@@ -198,6 +203,120 @@ public class RGB {
         return new RGB(r, g, b, alpha);
     }
 
+    /**
+     * Creates a new color from hue, saturation, lightness (HSL) values.
+     * 
+     * @param h The hue value.
+     * @param s The saturation value.
+     * @param l The lightness value.
+     * 
+     * @return The new color.
+     */
+    public static RGB fromHSL(double h, double s, double l) {
+        double r, g, b;
+
+        if (s == 0) {
+            //achromatic
+            r = g = b = l;
+        }
+        else {
+          double q = l < 0.5 ? l * (1+s) : l + s - l * s;
+          double p = 2 * l - q;
+
+          r = hueTorgb(p, q, h + 1/3.0);
+          g = hueTorgb(p, q, h);
+          b = hueTorgb(p, q, h - 1/3.0);
+        }
+
+        return new RGB((int)Math.round(255*r), (int)Math.round(255*g), (int)Math.round(255*b));
+    }
+
+    static double hueTorgb(double p, double q, double t) {
+        if (t < 0) {
+            t += 1;
+        }
+        if (t > 1) {
+            t -= 1;
+        }
+        if (t < 1/6.0) {
+            return p + (q - p) * 6 * t;
+        }
+        if (t < 1/2.0) {
+            return q;
+        }
+        if (t < 2/3.0) {
+             return p + (q - p) * (2/3.0 - t) * 6;
+        }
+        return p;
+    }
+
+    /**
+     * The hue, saturation, lightness (HSL) representation of the color.
+     */
+    public double[] hsl() {
+        double r = this.r / 255.0;
+        double g = this.g / 255.0;
+        double b = this.b / 255.0;
+        
+        double lo = Math.min(Math.min(r,g), b);
+        double hi = Math.max(Math.max(r,g), b);
+
+        double h,s,l;
+        h = s = l = (lo + hi) / 2.0;
+
+        if (lo == hi) {
+            // achromatic
+            h = s = 0;;
+        }
+        else {
+            double delta = hi - lo;
+            s = l > 0.5 ? delta / (2-hi-lo) : delta / (hi+lo);
+
+            if (hi == r) {
+                h = (g-b)/delta + (g < b ? 6 : 0);
+            }
+            else if (hi == g) {
+                h = (b-r) / delta + 2;
+            }
+            else {
+                h = (r-g) / delta + 4;
+            }
+
+            h /= 6.0;
+        }
+        return new double[]{h,s,l}; 
+    }
+
+    /**
+     * Interpolates a number of RGB values between this color and the specified color.
+     * 
+     * @param other The color to interpolate to.
+     * @param n The number of values to interpolate.
+     * @param method The interpolation method.
+     * 
+     * @return A set of <tt>n+1</tt> RGB values.
+     */
+    public List<RGB> interpolate(RGB other, int n, Interpolate.Method method) {
+        double[] hsl1 = hsl();
+        double[] hsl2 = other.hsl();
+        double[] dhsl = new double[3];
+        for (int i = 0; i < dhsl.length; i++) {
+            dhsl[i] = hsl2[i] - hsl1[i];
+        }
+
+        Iterator<Double> alphas = Interpolate.interpolate(a, other.a, n, method).iterator();
+        List<RGB> vals = new ArrayList<RGB>(n+1);
+        for (Double d : Interpolate.interpolate(0, n, n, method)) {
+            double h = hsl1[0] + (d/((float)n)) * dhsl[0];
+            double s = hsl1[1] + (d/((float)n)) * dhsl[1];
+            double l = hsl1[2] + (d/((float)n)) * dhsl[2];
+
+            vals.add(fromHSL(h, s, l).alpha(alphas.next().intValue()));
+        }
+
+        return vals;
+    }
+
     void parse(String rgb) {
         if (initFromName(rgb)) {
             return;
@@ -245,6 +364,12 @@ public class RGB {
         catch (Throwable t) {
         }
         return false;
+    }
+
+    @Override
+    public String toString() {
+        return new StringBuilder("RGB(").append(r).append(",").append(g).append(",").append(b)
+            .append(",").append(a).append(")").toString();
     }
 
     @Override

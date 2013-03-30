@@ -10,7 +10,7 @@ public class InterpolateTest {
 
     @Test
     public void testLinear() {
-        List<Integer> vals = Interpolate.linear(0, 10, 5);
+        List<Double> vals = Interpolate.linear(0, 10, 5);
         assertSequence(vals, 0,2,4,6,8,10);
     }
 

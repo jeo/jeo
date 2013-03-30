@@ -13,54 +13,6 @@ public class Interpolate {
     }
 
     /**
-     * Linear interpolation of integer values.
-     * 
-     * @param low The min value.
-     * @param high The max value.
-     * @param n The number of buckets.
-     * 
-     * @return A list of size <tt>n</tt> + 1.
-     */
-    public static List<Integer> linear(int low, int high, int n) {
-        return interpolate(low, high, n, Method.LINEAR);
-    }
-
-    /**
-     * Exponential interpolation of integer values.
-     * 
-     * @param low The min value.
-     * @param high The max value.
-     * @param n The number of buckets.
-     * 
-     * @return A list of size <tt>n</tt> + 1.
-     */
-    public static List<Integer> exp(int low, int high, int n) {
-        return interpolate(low, high, n, Method.EXP);
-    }
-
-    /**
-     * Logarithmic interpolation of integer values.
-     * 
-     * @param low The min value.
-     * @param high The max value.
-     * @param n The number of buckets.
-     * 
-     * @return A list of size <tt>n</tt> + 1.
-     */
-    public static List<Integer> log(int low, int high, int n) {
-        return interpolate(low, high, n, Method.LOG);
-    }
-
-    public static List<Integer> interpolate(int low, int high, int n, Method method) {
-        List<Double> vals = doInterpolate(low, high, n, method);
-        List<Integer> ints = new ArrayList<Integer>(vals.size());
-        for (Double v : vals) {
-            ints.add(v.intValue());
-        }
-        return ints;
-    }
-
-    /**
      * Linear interpolation of floating point values.
      * 
      * @param low The min value.

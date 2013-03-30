@@ -276,19 +276,21 @@ JNIEXPORT jintArray JNICALL Java_org_jeo_agg_AggRenderer_data
   agg::rendering_buffer rbuf = rb->rbuf;
 
   int size = rbuf.height()*rbuf.width();
-  int fill[size];
+  int *fill = (int*) malloc(sizeof(int) * size);
 
   unsigned char *b = rbuf.buf();
-  int buf_size = rbuf.height()*rbuf.stride_abs();
+  int *f = fill;
   for (int i = 0; i < size; i++) {
     int x = *b++;
     x = x << 8 | *b++;
     x = x << 8 | *b++;
     x = x << 8 | *b++;
-    fill[i] = x;
+    *f++ = x;
   }
 
   jintArray data = env->NewIntArray(size);
   env->SetIntArrayRegion(data, 0, size, fill);
+
+  free(fill);
   return data;
 }

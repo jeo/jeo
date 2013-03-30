@@ -1,16 +1,8 @@
 package org.jeo.agg;
 
-import java.awt.Dimension;
 import java.awt.Frame;
-import java.awt.Graphics;
 import java.awt.HeadlessException;
-import java.awt.Panel;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
-import java.awt.image.DataBufferInt;
-import java.awt.image.Raster;
-import java.awt.image.SinglePixelPackedSampleModel;
 
 import org.jeo.data.Vector;
 import org.jeo.java2d.Java2D;
@@ -183,7 +175,7 @@ public class AggTest {
     }
 
     BufferedImage img(AggRenderer r, Map map) {
-        return Java2D.packedImageARGB(r.data(), map.getWidth(), map.getHeight());
+        return Java2D.packedImage(r.data(), map.getWidth(), map.getHeight(), BufferedImage.TYPE_INT_ARGB);
     }
 
     void show(final BufferedImage img) {

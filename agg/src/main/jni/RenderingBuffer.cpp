@@ -4,6 +4,7 @@ RenderingBuffer::RenderingBuffer(int width, int height, int depth)
     : depth(depth) {
 
   unsigned char* buffer = new unsigned char[width * height * depth];
+  memset(buffer, 0, width * height * depth);
   rbuf.attach(buffer, width, height, width * depth);
 }
 

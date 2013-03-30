@@ -59,6 +59,16 @@ public class FilterBuilder {
         return cmp(Comparison.Type.GREATER_OR_EQUAL);
     }
 
+    public FilterBuilder between() {
+        Expression high = (Expression) stack.pop();
+        Expression low = (Expression) stack.pop();
+        Expression e = (Expression) stack.pop();
+
+        stack.push(new Comparison(Comparison.Type.GREATER_OR_EQUAL, e, low).
+            and(new Comparison(Comparison.Type.LESS_OR_EQUAL, e, high)));
+        return this;
+    }
+
     public FilterBuilder and() {
         return log(Logic.Type.AND);
     }

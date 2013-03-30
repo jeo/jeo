@@ -13,7 +13,7 @@ import java.awt.image.SinglePixelPackedSampleModel;
 
 public class Java2D {
 
-    public static BufferedImage packedImageARGB(int[] data, int width, int height) {
+    public static BufferedImage packedImage(int[] data, int width, int height, int type) {
         DataBufferInt buf = new DataBufferInt(data, data.length);
 
         SinglePixelPackedSampleModel sampleModel = 
@@ -21,7 +21,7 @@ public class Java2D {
             new int[]{0xff000000, 0x00ff0000, 0x0000ff00,0x000000ff});
         Raster raster = Raster.createRaster(sampleModel, buf, null);
 
-        BufferedImage img = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+        BufferedImage img = new BufferedImage(width, height, type);
         img.setData(raster);
         return img;
     }

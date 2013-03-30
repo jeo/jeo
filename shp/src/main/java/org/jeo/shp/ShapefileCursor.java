@@ -35,9 +35,16 @@ public class ShapefileCursor extends Cursor<Feature> {
     @Override
     public boolean hasNext() throws IOException {
         while (next == null && shpReader.hasNext()) {
+            //read next record and check if it intersects
             Record r = shpReader.nextRecord();
             if (bbox == null || bbox.intersects(r.envelope())) {
                 next = r;
+            }
+            else {
+                //does not intersect, skip the dbf row as well
+                if (dbfReader.hasNext()) {
+                    dbfReader.skip();
+                }
             }
         }
         return next != null;
@@ -51,7 +58,7 @@ public class ShapefileCursor extends Cursor<Feature> {
         List<Object> values = new ArrayList<Object>();
 
         values.add(next.shape());
-
+        
         if (dbfReader.hasNext()) {
             for (Object o : dbfReader.readEntry()) {
                 values.add(o);

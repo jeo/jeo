@@ -14,6 +14,10 @@ public class FilterVisitor {
         return obj;
     }
 
+    public Object visit(Id id, Object obj) {
+        return obj;
+    }
+
     public Object visit(Logic logic, Object obj) {
         for (Filter f : logic.getParts()) {
             f.accept(this, obj);

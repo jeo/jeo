@@ -117,7 +117,7 @@ public int jjtGetNumChildren() {
 /* (non-Javadoc)
  * @see org.geotools.filter.text.generated.parsers.Node#toString()
  */
-public String toString() { return CQLParserTreeConstants.jjtNodeName[id]; }
+public String toString() { return ECQLParserTreeConstants.jjtNodeName[id]; }
   /* (non-Javadoc)
  * @see org.geotools.filter.text.cql2.CQLNode#toString(java.lang.String)
  */

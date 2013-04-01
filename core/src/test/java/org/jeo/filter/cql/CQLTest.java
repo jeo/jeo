@@ -4,6 +4,7 @@ import static org.junit.Assert.*;
 
 import org.jeo.filter.Comparison;
 import org.jeo.filter.Filter;
+import org.jeo.filter.Id;
 import org.jeo.filter.Literal;
 import org.jeo.filter.Logic;
 import org.jeo.filter.Property;
@@ -56,4 +57,11 @@ public class CQLTest {
         Filter f = CQL.parse("INTERSECTS(the_geom, POINT(0 0))");
         assertTrue(f instanceof Spatial);
     }
+
+    @Test
+    public void testId() throws ParseException {
+        Filter f = CQL.parse("IN ('foo.1', 'foo.2')");
+        assertTrue(f instanceof Id);
+    }
+     
 }

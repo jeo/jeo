@@ -151,6 +151,11 @@ public class GeoJSONWriter extends JSONStringer {
             object();
 
             key("type").value("Feature");
+
+            if (f.getId() != null) {
+                key("id").value(f.getId());
+            }
+
             key("geometry");
             geometry(f.geometry());
 

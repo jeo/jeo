@@ -83,9 +83,9 @@ public class GeoGit implements Workspace {
         });
     }
 
-    public Iterator<RevCommit> log(String branch, String... layers) throws IOException {
+    public Iterator<RevCommit> log(String branch, String... paths) throws IOException {
         LogOp log = gg.command(LogOp.class);
-        for (String l : layers) {
+        for (String l : paths) {
             log.addPath(l);
         }
 

@@ -65,7 +65,7 @@ public class ShapefileCursor extends Cursor<Feature> {
             }
         }
 
-        ListFeature f = new ListFeature(String.valueOf(next.offset()), values, schema);
+        ListFeature f = new ListFeature(String.valueOf(next.number), values, schema);
         next = null;
 
         return f;

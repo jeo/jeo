@@ -1124,7 +1124,7 @@ void LineStringText() #LineStringText_Node:
 void PointTaggedText() #WKTNode:
 {} 
 {
-   <POINT> PointText()
+   jjtThis.token = <POINT> PointText()
 }
 /*
  * <Point Text> := EMPTY | <left paren> <Point> <right paren>
@@ -1138,7 +1138,7 @@ void PointText() #PointText_Node:
 void LineStringTaggedText() #WKTNode:
 {}
 {
-   <LINESTRING> LineStringText() 
+   jjtThis.token = <LINESTRING> LineStringText() 
 }
 /*
  * <Polygon Tagged Text> := POLYGON <Polygon Text>
@@ -1146,7 +1146,7 @@ void LineStringTaggedText() #WKTNode:
 void PolygonTaggedText() #WKTNode:
 {}
 {
-  <POLYGON> PolygonText()
+  jjtThis.token = <POLYGON> PolygonText()
 }
 
 
@@ -1166,7 +1166,7 @@ void PolygonText()#PolygonText_Node:
 void MultiPointTaggedText() #WKTNode:
 {}
 {
-  <MULTIPOINT> MultiPointText()
+  jjtThis.token = <MULTIPOINT> MultiPointText()
 }
 /*
  * <Multipoint Text> := EMPTY
@@ -1184,7 +1184,7 @@ void MultiPointText() #MultiPointText_Node:
 void MultiLineStringTaggedText() #WKTNode:
 {}
 {
-  <MULTILINESTRING> MultiLineStringText()
+  jjtThis.token = <MULTILINESTRING> MultiLineStringText()
 }
 /*
  * <MultiLineString Text> := 
@@ -1202,7 +1202,7 @@ void MultiLineStringText() #MultiLineStringText_Node:
 void MultiPolygonTaggedText() #WKTNode:
 {}
 {
-  <MULTIPOLYGON> MultiPolygonText()
+  jjtThis.token = <MULTIPOLYGON> MultiPolygonText()
 }
 /*
  * <MultiPolygon Text> := EMPTY
@@ -1217,7 +1217,7 @@ void MultiPolygonText() #MultiPolygonText_Node:
 void GeometryCollectionTaggedText() #WKTNode:
 {}
 {
-  <GEOMETRYCOLLECTION> GeometryCollectionText()
+  jjtThis.token = <GEOMETRYCOLLECTION> GeometryCollectionText()
 }
 
 /*

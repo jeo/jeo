@@ -1,8 +1,10 @@
 package org.jeo.filter;
 
 import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.Deque;
 import java.util.LinkedList;
+import java.util.List;
 
 /**
  * Builder for filters that can compose complex filter / expression trees. 
@@ -66,6 +68,15 @@ public class FilterBuilder {
 
         stack.push(new Comparison(Comparison.Type.GREATER_OR_EQUAL, e, low).
             and(new Comparison(Comparison.Type.LESS_OR_EQUAL, e, high)));
+        return this;
+    }
+
+    public FilterBuilder id() {
+        List<Expression> ids = new ArrayList<Expression>();
+        while(!stack.isEmpty() && stack.peek() instanceof Expression) {
+            ids.add((Expression) stack.pop());
+        }
+        stack.push(new Id(ids));
         return this;
     }
 

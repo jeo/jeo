@@ -11,7 +11,7 @@ import org.jeo.filter.FilterBuilder;
 
 import com.vividsolutions.jts.io.WKTReader;
 
-public class CQLBuilder extends CQLParser {
+public class CQLBuilder extends ECQLParser {
 
     FilterBuilder builder = new FilterBuilder(); 
     Deque<Object> stack = new ArrayDeque<Object>();
@@ -122,6 +122,14 @@ public class CQLBuilder extends CQLParser {
             // ----------------------------------------
             // Compare predicate actions
             // ----------------------------------------
+        case JJTFEATURE_ID_NODE:
+            builder.literal(dequote(getToken(0).image)); 
+            return;
+
+        case JJTID_PREDICATE_NODE:
+            builder.id(); 
+            return;
+            
         case JJTCOMPARISONPREDICATE_EQ_NODE:
             builder.eq();
             return;

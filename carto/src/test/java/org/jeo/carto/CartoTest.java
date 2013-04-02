@@ -178,6 +178,22 @@ public class CartoTest {
         assertEquals(Integer.valueOf(1), r.get("line-width"));
     }
 
+    @Test
+    public void testIdentifier() {
+        String css = 
+        "  #states {"+
+        "    polygon-fill: #888888;"+
+        "    polygon-opacity: 0.25;"+
+        "    comp-op: dst;"+
+        "  }";
+
+        Stylesheet result = new CartoParser().parse(css);
+        Rule r = result.getRules().get(0);
+        assertEquals("#888888", r.get("polygon-fill"));
+        assertEquals(0.25, r.get("polygon-opacity"));
+        assertEquals("dst", r.get("comp-op"));
+    }
+
     void dumpTokens(String css) {
       Tokenizer t = Utilities.open(css);
       t = new CondensingTokenizer(t, true);

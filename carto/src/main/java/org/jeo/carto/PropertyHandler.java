@@ -15,7 +15,12 @@ public class PropertyHandler extends TokenHandler {
             case Whitespace:
                 break;
             case Identifier:
-                stack.push(new Property(tok.getCleanText()));
+                if (stack.peek() instanceof Property) {
+                    ((Property)stack.peek()).setValue(tok.getCleanText());
+                }
+                else {
+                    stack.push(new Property(tok.getCleanText()));
+                }
                 break;
             case Delimiter:
                 String d = tok.getCleanText();
@@ -47,6 +52,7 @@ public class PropertyHandler extends TokenHandler {
                 }
                 ((Property)stack.peek()).setValue(value);
                 break;
+
             case HashName:
                 ((Property)stack.peek()).setValue(tok.getCleanText());
                 break;

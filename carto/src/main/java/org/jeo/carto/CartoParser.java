@@ -3,6 +3,7 @@ package org.jeo.carto;
 import java.util.ArrayDeque;
 import java.util.Deque;
 
+import org.jeo.map.StyleBuilder;
 import org.jeo.map.Stylesheet;
 
 import com.metaweb.lessen.Utilities;
@@ -20,10 +21,12 @@ public class CartoParser {
         //handler stack
         Deque<Object> handlers = new ArrayDeque<Object>();
 
-        //push root handler
-        RootHandler root = new RootHandler();
-        handlers.push(root);
+        //throw a style builder on stacl
+        expr.push(new StyleBuilder());
 
+        //push root handler
+        handlers.push(new RuleHandler());
+        
         //go until out of tokens or no more handlers
         while(t.getToken() != null && !handlers.isEmpty()) {
             TokenHandler h = (TokenHandler) handlers.peek();
@@ -40,6 +43,7 @@ public class CartoParser {
             throw new IllegalStateException();
         }
 
-        return root.getStylesheet();
+        StyleBuilder builder = (StyleBuilder) expr.pop();
+        return builder.style();
     }
 }

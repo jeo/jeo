@@ -23,6 +23,8 @@ public class PropertyHandler extends TokenHandler {
                 }
                 else if (";".equals(d)) {
                     //finished
+                    Property p = (Property) stack.pop();
+                    builder(stack).set(p.getKey(), p.getValue());
                     return null;
                 }
                 else {

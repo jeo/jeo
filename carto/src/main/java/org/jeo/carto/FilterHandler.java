@@ -2,9 +2,10 @@ package org.jeo.carto;
 
 import java.util.Deque;
 
-import org.jeo.cql.CQL;
-import org.jeo.cql.ParseException;
 import org.jeo.filter.Filter;
+import org.jeo.filter.cql.CQL;
+import org.jeo.filter.cql.ParseException;
+import org.jeo.map.Selector;
 
 import com.metaweb.lessen.tokenizers.Tokenizer;
 import com.metaweb.lessen.tokens.Token;
@@ -40,7 +41,7 @@ public class FilterHandler extends TokenHandler {
                     StringBuilder b = (StringBuilder) stack.pop();
                     
                     //parse the filter
-                    Filter<Object> f;
+                    Filter f;
                     try {
                         f = CQL.parse(b.toString());
                     } catch (ParseException e) {
@@ -48,15 +49,17 @@ public class FilterHandler extends TokenHandler {
                     }
                     
                     //check the top of the stack, if Filter exists combine them
+                    boolean or = false;
                     if (stack.peek() == OR) {
+                        or = true;
                         stack.pop();
-                        f = ((Filter)stack.pop()).or(f);
-                    }                    
-                    if (stack.peek() instanceof Filter) {
-                        f = ((Filter)stack.pop()).and(f);
                     }
 
-                    stack.push(f);
+                    Selector s = selector(stack);
+                    if (s.getFilter() != null) {
+                        f = or ? s.getFilter().or(f) : s.getFilter().and(f);
+                    }
+                    s.setFilter(f);
                 }
                 else if (",".equals(d)) {
                     //add the or marker to top of stack

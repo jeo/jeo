@@ -5,9 +5,10 @@ import static org.junit.Assert.assertNotNull;
 
 import java.util.List;
 
-import org.jeo.cql.CQL;
-import org.jeo.cql.ParseException;
+import org.jeo.filter.cql.CQL;
+import org.jeo.filter.cql.ParseException;
 import org.jeo.map.Rule;
+import org.jeo.map.Selector;
 import org.jeo.map.Stylesheet;
 import org.junit.Test;
 
@@ -30,7 +31,8 @@ public class CartoTest {
 
         assertEquals(1, result.getRules().size());
         Rule s = result.getRules().get(0);
-        assertEquals("#layer", s.getName());
+        assertEquals(1, s.getSelectors().size());
+        assertEquals("layer", s.getSelectors().get(0).getId());
 
         assertEquals("#c00", s.get("line-color"));
         assertEquals(1, s.get("line-width"));
@@ -47,13 +49,17 @@ public class CartoTest {
         Stylesheet  result = p.parse(css);
 
         assertEquals(1, result.getRules().size());
-        Rule s = result.getRules().get(0);
-        assertEquals("#layer", s.getName());
+
+        Rule r = result.getRules().get(0);
+        assertEquals(1, r.getSelectors().size());
+
+        Selector s = r.getSelectors().get(0);
+        assertEquals("layer", s.getId());
         assertNotNull(s.getFilter());
         assertEquals(CQL.parse("foo < 3"), s.getFilter());
 
-        assertEquals("#c00ffd", s.get("line-color"));
-        assertEquals(1, s.get("line-width"));
+        assertEquals("#c00ffd", r.get("line-color"));
+        assertEquals(1, r.get("line-width"));
     }
 
     @Test
@@ -66,7 +72,11 @@ public class CartoTest {
         Stylesheet result = p.parse(css);
 
         assertEquals(1, result.getRules().size());
-        Rule s = result.getRules().get(0);
+        
+        Rule r = result.getRules().get(0);
+        assertEquals(1, r.getSelectors().size());
+
+        Selector s = r.getSelectors().get(0);
         assertNotNull(s.getFilter());
         assertEquals(CQL.parse("foo < 3 AND bar >= 10"), s.getFilter());
     }
@@ -81,7 +91,11 @@ public class CartoTest {
         Stylesheet result = p.parse(css);
 
         assertEquals(1, result.getRules().size());
-        Rule s = result.getRules().get(0);
+
+        Rule r = result.getRules().get(0);
+        assertEquals(1, r.getSelectors().size());
+
+        Selector s = r.getSelectors().get(0);
         assertNotNull(s.getFilter());
         assertEquals(CQL.parse("foo < 3 OR bar >= 10"), s.getFilter());
     }
@@ -104,18 +118,23 @@ public class CartoTest {
 
         List<Rule> rules = result.getRules();
         assertEquals(1, rules.size());
-        assertEquals("#layer", rules.get(0).getName());
-        
-        assertEquals(1, rules.get(0).get("line-width"));
-        
-        assertEquals(2, rules.get(0).getNested().size());
 
-        Rule n1 = rules.get(0).getNested().get(0);
-        assertEquals(CQL.parse("foo < 3"), n1.getFilter());
+        Rule r = rules.get(0);
+        assertEquals(1, r.getSelectors().size());
+
+        Selector s = r.getSelectors().get(0);
+        assertEquals("layer", s.getId());
+        
+        assertEquals(1, r.get("line-width"));
+        
+        assertEquals(2, r.nested().size());
+
+        Rule n1 = rules.get(0).nested().get(0);
+        assertEquals(CQL.parse("foo < 3"), n1.getSelectors().get(0).getFilter());
         assertEquals("#aaa", n1.get("line-color"));
 
-        Rule n2 = rules.get(0).getNested().get(1);
-        assertEquals(CQL.parse("bar >= 10"), n2.getFilter());
+        Rule n2 = rules.get(0).nested().get(1);
+        assertEquals(CQL.parse("bar >= 10"), n2.getSelectors().get(0).getFilter());
         assertEquals("#bbb", n2.get("line-color"));
     }
 
@@ -131,15 +150,16 @@ public class CartoTest {
                 "}";
 
         Stylesheet result = new CartoParser().parse(css);
-        assertEquals("#ffffff", result.get("background-color"));
+        assertEquals(2, result.getRules().size());
 
-        assertEquals(1, result.getRules().size());
-        
-        Rule r = result.getRules().get(0);
-        assertEquals("#layer", r.getName());
-        assertEquals(Rule.Type.NAME, r.getType());
-        assertEquals("#c00", r.get("line-color"));
-        assertEquals(Integer.valueOf(1), r.get("line-width"));
+        Rule r1 = result.getRules().get(0);
+        assertEquals("Map", r1.getSelectors().get(0).getName());
+        assertEquals("#ffffff", r1.get("background-color"));
+
+        Rule r2 = result.getRules().get(1);
+        assertEquals("layer", r2.getSelectors().get(0).getId());
+        assertEquals("#c00", r2.get("line-color"));
+        assertEquals(Integer.valueOf(1), r2.get("line-width"));
     }
 
     @Test
@@ -152,8 +172,8 @@ public class CartoTest {
 
         Stylesheet result = new CartoParser().parse(css);
         Rule r = result.getRules().get(0);
-        assertEquals("class", r.getName());
-        assertEquals(Rule.Type.CLASS, r.getType());
+        assertEquals("class", r.getSelectors().get(0).getClasses().get(0));
+
         assertEquals("#c00", r.get("line-color"));
         assertEquals(Integer.valueOf(1), r.get("line-width"));
     }
@@ -163,7 +183,7 @@ public class CartoTest {
       t = new CondensingTokenizer(t, true);
       while(t.getToken() != null) {
           Token tok = t.getToken();
-          System.out.println(tok.type + ", " + tok.getCleanText());
+          System.out.println(tok.type + " " + tok.getCleanText());
           t.next();
       }
     }

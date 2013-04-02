@@ -25,6 +25,16 @@
     </dependency>
     <dependency>
       <groupId>org.jeo</groupId>
+      <artifactId>jeo-agg</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.jeo</groupId>
+      <artifactId>jeo-java2d</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.jeo</groupId>
       <artifactId>jeo-core</artifactId>
       <version>${project.version}</version>
       <classifier>tests</classifier>

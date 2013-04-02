@@ -99,6 +99,7 @@ public class GeoGit implements Workspace {
             return null;
         }
 
+        gg.command(CheckoutOp.class).setSource(ref.second().getId().toString()).call();
         SimpleFeatureType featureType = featureType(ref.first());
         if (featureType != null) {
             return new GeoGitDataset(ref, GT.schema(featureType), this);
@@ -164,8 +165,9 @@ public class GeoGit implements Workspace {
             }
         }
 
-        throw new IllegalStateException(
-            "Unable to determine current branch, repository in dettached head state");
+        return "master";
+        /*throw new IllegalStateException(
+            "Unable to determine current branch, repository in dettached head state");*/
     }
 
     /**

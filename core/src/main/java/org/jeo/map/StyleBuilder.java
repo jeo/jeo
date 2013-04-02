@@ -13,12 +13,12 @@ public class StyleBuilder {
     Stylesheet style = new Stylesheet();
 
     public StyleBuilder set(String key, Object value) {
-        if (style.getRules().isEmpty()) {
-            style.put(key, value);
-        }
-        else {
+//        if (style.getRules().isEmpty()) {
+//            style.put(key, value);
+//        }
+//        else {
             lastRule().put(key, value);
-        }
+//        }
         return this;
     }
 
@@ -59,6 +59,11 @@ public class StyleBuilder {
                 s.setName(name);
             }
         }
+        return this;
+    }
+
+    public StyleBuilder select(Selector selector) {
+        lastRule().getSelectors().add(selector);
         return this;
     }
 

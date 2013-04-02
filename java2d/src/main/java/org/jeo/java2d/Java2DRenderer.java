@@ -4,16 +4,13 @@ import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
-import java.awt.RenderingHints.Key;
 import java.awt.Stroke;
 import java.awt.geom.AffineTransform;
 import java.io.IOException;
-import java.util.List;
 
 import org.jeo.data.Query;
 import org.jeo.data.Vector;
 import org.jeo.feature.Feature;
-import org.jeo.geom.CoordinatePath;
 import org.jeo.geom.Geom;
 import org.jeo.map.Layer;
 import org.jeo.map.Map;
@@ -21,7 +18,6 @@ import org.jeo.map.RGB;
 import org.jeo.map.Rule;
 import org.jeo.map.Stylesheet;
 
-import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 
 public class Java2DRenderer {
@@ -57,8 +53,11 @@ public class Java2DRenderer {
         Stylesheet style = map.getStyle();
 
         //draw background
-        context.setColor(color((RGB)style.get("background-color", RGB.white)));
-        context.fillRect(0, 0, map.getWidth(), map.getHeight());
+        Rule rule = style.selectByName("Map").first();
+        if (rule != null) {
+            context.setColor(color((RGB)rule.get("background-color", RGB.white)));
+            context.fillRect(0, 0, map.getWidth(), map.getHeight());
+        }
 
         for (Layer layer : map.getLayers()) {
             render(layer);

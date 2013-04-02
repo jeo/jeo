@@ -118,6 +118,7 @@
     <module>shp</module>
     <module>geotools</module>
     <module>geogit</module>
+    <module>scala</module>
   </modules>
 
   <properties>

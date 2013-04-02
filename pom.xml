@@ -120,6 +120,7 @@
     <module>geogit</module>
     <module>java2d</module>
     <module>agg</module>
+    <module>scala</module>
   </modules>
 
   <properties>

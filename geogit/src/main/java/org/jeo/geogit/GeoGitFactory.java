@@ -5,7 +5,10 @@ import java.io.IOException;
 import java.util.Map;
 
 import org.geogit.api.GeoGIT;
+import org.geogit.api.porcelain.ConfigOp;
+import org.geogit.api.porcelain.ConfigOp.ConfigAction;
 import org.geogit.di.GeogitModule;
+import org.geogit.repository.Repository;
 import org.geogit.storage.bdbje.JEStorageModule;
 import org.jeo.data.WorkspaceFactory;
 import org.jeo.util.Util;
@@ -22,7 +25,19 @@ public class GeoGitFactory implements WorkspaceFactory<GeoGit> {
 
     public static final String CREATE = "create";
 
+    public static final String USER = "user.name";
+
+    public static final String EMAIL = "user.email";
+    
     static Logger LOGGER = LoggerFactory.getLogger(GeoGitFactory.class);
+
+    public GeoGit create(File dir, boolean create, String user, String email) {
+        GeoGIT gg = createGeoGIT(dir, create, user, email);
+        if (gg != null) {
+            return new GeoGit(gg);
+        }
+        return null;
+    }
 
     @Override
     public GeoGit create(Map<String, Object> map) throws IOException {
@@ -30,39 +45,48 @@ public class GeoGitFactory implements WorkspaceFactory<GeoGit> {
             File dir = Util.toFile(map.get(DIR));
             if (dir != null) {
 
-                if (!dir.canRead()) {
-                    return null;
-                }
-
                 Boolean create = map.containsKey(CREATE) ? Util.toBoolean(map.get(CREATE)) : false;
+                String user = map.containsKey(USER) ? map.get(USER).toString() : null;
+                String email = map.containsKey(EMAIL) ? map.get(EMAIL).toString() : null;
 
-                GeoGIT gg = createGeoGIT(dir, create);
-                if (gg != null) {
-                    return new GeoGit(gg);
-                }
+                return create(dir, create, user, email);
             }
 
         }
         return null;
     }
 
-    GeoGIT createGeoGIT(File dir, boolean create) {
+    GeoGIT createGeoGIT(File dir, boolean create, String user, String email) {
         if (!dir.exists() && create) {
             dir.mkdirs();
         }
 
+        GeoGIT gg = null;
         if (dir.exists() && dir.canRead()) {
             File f = new File(dir, ".geogit");
             if (f.exists() && f.isDirectory()) {
-                return newGeoGIT(dir);
+                gg = newGeoGIT(dir);
             }
             else if (create) {
-                GeoGIT gg = newGeoGIT(dir);
+                gg = newGeoGIT(dir);
                 gg.getOrCreateRepository();
-                return gg;
             }
         }
-        return null;
+
+        if (gg == null) {
+            return null;
+        }
+
+        user = user != null ? user : System.getProperty("user.name");
+        email = email != null ? email : user + "@localhost";
+
+        Repository repo = gg.getRepository();
+        repo.command(ConfigOp.class)
+            .setAction(ConfigAction.CONFIG_SET).setName("user.name").setValue(user).call();
+        repo.command(ConfigOp.class)
+            .setAction(ConfigAction.CONFIG_SET).setName("user.email").setValue(email).call();
+
+        return gg;
     }
 
     GeoGIT newGeoGIT(File dir) {

@@ -59,6 +59,7 @@ public class ShapefileTest {
             assertTrue(c.hasNext());
 
             Feature f = c.next();
+            assertEquals(new Integer(i+1), Integer.valueOf(f.getId()));
             assertNotNull(f);
 
             assertTrue(f.geometry() instanceof MultiPolygon);

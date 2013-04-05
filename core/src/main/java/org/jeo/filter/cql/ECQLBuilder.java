@@ -4,13 +4,13 @@ import java.io.StringReader;
 
 import org.jeo.filter.Filter;
 
-public class CQLBuilder extends CQLParser {
+public class ECQLBuilder extends ECQLParser {
 
     CQLHelper h;
 
-    public CQLBuilder(String cql) {
+    public ECQLBuilder(String cql) {
         super(new StringReader(cql));
-        h = new CQLHelper(cql);
+        this.h = new CQLHelper(cql);
     }
 
     public Filter parse() throws ParseException {
@@ -121,7 +121,14 @@ public class CQLBuilder extends CQLParser {
             // ----------------------------------------
             // Compare predicate actions
             // ----------------------------------------
+        case JJTFEATURE_ID_NODE:
+            h.fidLiteral(getToken(0));
+            return;
 
+        case JJTID_PREDICATE_NODE:
+            h.id(); 
+            return;
+            
         case JJTCOMPARISONPREDICATE_EQ_NODE:
             h.eq();
             return;
@@ -298,5 +305,4 @@ public class CQLBuilder extends CQLParser {
         }
 
     };
-
 }

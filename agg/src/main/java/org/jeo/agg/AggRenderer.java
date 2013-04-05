@@ -102,7 +102,9 @@ public class AggRenderer {
         Rule rule = style.selectByName("Map").first();
         if (rule != null) {
             RGB bg = rule.color("background-color", null);
-            setBackground(rb, color(bg));
+            if (bg != null) {
+                setBackground(rb, color(bg));
+            }
         }
     }
 

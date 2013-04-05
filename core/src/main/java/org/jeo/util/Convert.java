@@ -1,9 +1,6 @@
 package org.jeo.util;
 
 import java.lang.reflect.Array;
-import java.lang.reflect.Constructor;
-import java.math.BigInteger;
-import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;

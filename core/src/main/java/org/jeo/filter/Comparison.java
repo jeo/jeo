@@ -1,5 +1,7 @@
 package org.jeo.filter;
 
+import org.jeo.util.Convert;
+
 /**
  * Filter that applies a binary comparison operator to two expression operands.  
  * 
@@ -56,6 +58,14 @@ public class Comparison extends Filter {
     }
 
     protected boolean compare(Object o1, Object o2) {
+        if (o1 != null && !o1.getClass().isInstance(o2)) {
+            //attempt to convert 
+            Object converted = Convert.to(o2, o1.getClass());
+            if (converted != null) {
+                o2 = converted;
+            }
+        }
+
         if (type == Type.EQUAL) {
             return o1 != null ? o1.equals(o2) : o2 == null;
         }

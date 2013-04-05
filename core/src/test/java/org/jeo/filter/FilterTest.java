@@ -60,6 +60,16 @@ public class FilterTest {
     }
 
     @Test
+    public void testComparisonConversion() {
+        assertTrue(
+            new Comparison(Comparison.Type.EQUAL, new Literal(1), new Literal(1.0)).apply(null));
+        assertTrue(
+            new Comparison(Comparison.Type.EQUAL, new Literal("1"), new Literal(1)).apply(null));
+        assertTrue(
+            new Comparison(Comparison.Type.EQUAL, new Literal(1.0), new Literal("1")).apply(null));
+    }
+
+    @Test
     public void testLogic() {
         Map<String,Object> map = new HashMap<String, Object>();
         map.put("str", "one");

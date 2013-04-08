@@ -131,6 +131,7 @@
 
   <modules>
     <module>core</module>
+    <module>csv</module>
     <module>geopkg</module>
     <module>nano</module>
     <module>guava</module>

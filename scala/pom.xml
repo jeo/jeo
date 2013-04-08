@@ -25,6 +25,11 @@
     </dependency>
     <dependency>
       <groupId>org.jeo</groupId>
+      <artifactId>jeo-csv</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.jeo</groupId>
       <artifactId>jeo-agg</artifactId>
       <version>${project.version}</version>
     </dependency>

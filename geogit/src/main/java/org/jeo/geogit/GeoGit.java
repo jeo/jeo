@@ -16,10 +16,14 @@ import org.geogit.api.data.FindFeatureTypeTrees;
 import org.geogit.api.plumbing.RefParse;
 import org.geogit.api.plumbing.RevObjectParse;
 import org.geogit.api.plumbing.TransactionBegin;
+import org.geogit.api.plumbing.diff.DiffEntry;
+import org.geogit.api.plumbing.diff.Patch;
 import org.geogit.api.porcelain.AddOp;
 import org.geogit.api.porcelain.BranchListOp;
 import org.geogit.api.porcelain.CheckoutOp;
 import org.geogit.api.porcelain.CommitOp;
+import org.geogit.api.porcelain.CreatePatchOp;
+import org.geogit.api.porcelain.DiffOp;
 import org.geogit.api.porcelain.LogOp;
 import org.geogit.repository.Repository;
 import org.geogit.repository.WorkingTree;
@@ -83,13 +87,29 @@ public class GeoGit implements Workspace {
         });
     }
 
-    public Iterator<RevCommit> log(String branch, String... paths) throws IOException {
+    public LogOp log(String branch, String... paths) throws IOException {
+        gg.command(CheckoutOp.class).setSource(branch).call();
         LogOp log = gg.command(LogOp.class);
         for (String l : paths) {
             log.addPath(l);
         }
 
-        return log.call();
+        return log;
+    }
+
+    public Patch patch(String layer, String rev) throws IOException {
+        Pair<NodeRef,RevCommit> ref = parseName(layer + "@" + rev);
+        if (ref == null) {
+            return null;
+        }
+
+        RevCommit commit = ref.second();
+
+        Iterator<DiffEntry> diff = gg.command(DiffOp.class)/*.setFilter(ref.first().path())*/ 
+            .setOldVersion(commit.getParentIds().get(0).toString())
+            .setNewVersion(commit.getId().toString()).call();
+
+        return gg.command(CreatePatchOp.class).setDiffs(diff).call();
     }
 
     @Override
@@ -118,7 +138,8 @@ public class GeoGit implements Workspace {
         Optional<RevCommit> commit = 
             gg.command(RevObjectParse.class).setRefSpec(rev).call(RevCommit.class);
         if (!commit.isPresent()) {
-            throw new IllegalArgumentException("No such commit: " + rev);
+            return null;
+            //throw new IllegalArgumentException("No such commit: " + rev);
         }
 
         Collection<NodeRef> match =  Collections2.filter(typeRefs(rev), new Predicate<NodeRef>() {

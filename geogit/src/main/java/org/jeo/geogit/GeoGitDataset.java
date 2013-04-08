@@ -102,7 +102,6 @@ public class GeoGitDataset implements Vector, Transactional {
             throw new IllegalArgumentException("Writable cursor requires a transaction");
         }
 
-
         GeoGitTransaction tx =  (GeoGitTransaction) q.getTransaction();
 
         if (q.getMode() == Mode.APPEND) {

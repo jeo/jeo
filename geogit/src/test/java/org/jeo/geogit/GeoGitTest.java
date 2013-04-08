@@ -13,6 +13,7 @@ import java.util.Set;
 import org.apache.commons.io.FileUtils;
 import org.geogit.api.GeoGIT;
 import org.geogit.api.RevCommit;
+import org.geogit.api.plumbing.diff.Patch;
 import org.geogit.api.porcelain.AddOp;
 import org.geogit.api.porcelain.BranchCreateOp;
 import org.geogit.api.porcelain.CommitOp;
@@ -127,7 +128,7 @@ public class GeoGitTest {
 
     @Test
     public void testGetAtRevision() throws Exception {
-        Iterator<RevCommit> it = ws.log("master");
+        Iterator<RevCommit> it = ws.log("master").call();
         assertTrue(it.hasNext());
         it.next();
         assertTrue(it.hasNext());
@@ -159,6 +160,14 @@ public class GeoGitTest {
 
         data = ws.get("point@" + prev);
         assertEquals(prevCount, data.count(new Query()));
+    }
+
+    @Test
+    public void testPatch() throws Exception {
+        doAddPoints();
+
+        Patch p = ws.patch("point", ws.get("point").getRevision().getId().toString());
+        assertEquals(2, p.getAddedFeatures().size());
     }
 
     @Test

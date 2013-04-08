@@ -15,6 +15,16 @@
         <artifactId>guava</artifactId>
         <version>13.0</version>
       </dependency>
+      <dependency>
+        <groupId>joda-time</groupId>
+        <artifactId>joda-time</artifactId>
+        <version>2.1</version>
+      </dependency>
+      <dependency>
+        <groupId>org.joda</groupId>
+        <artifactId>joda-convert</artifactId>
+        <version>1.2</version>
+      </dependency>
     </dependencies>
   </dependencyManagement>
 
@@ -52,6 +62,16 @@
       <groupId>commons-io</groupId>
       <artifactId>commons-io</artifactId>
       <version>2.4</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>joda-time</groupId>
+      <artifactId>joda-time</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.joda</groupId>
+      <artifactId>joda-convert</artifactId>
       <scope>test</scope>
     </dependency>
   </dependencies>
@@ -111,6 +131,7 @@
 
   <modules>
     <module>core</module>
+    <module>csv</module>
     <module>geopkg</module>
     <module>nano</module>
     <module>guava</module>

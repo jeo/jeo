@@ -10,6 +10,20 @@ import org.jeo.filter.Filter;
 public class CQL {
 
     public static Filter parse(String cql) throws ParseException {
-        return new CQLBuilder(cql).parse();
+        try {
+            return new CQLBuilder(cql).parse();
+        }
+        catch(Exception orig) {
+            try {
+                return new ECQLBuilder(cql).parse();
+            }
+            catch(ParseException e) {
+                if (orig instanceof ParseException) {
+                    throw (ParseException) orig;
+                }
+                throw (ParseException) new ParseException("Parsing error").initCause(orig);
+            }
+        }
+
     }
 }

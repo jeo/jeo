@@ -154,7 +154,7 @@ public abstract class AbstractFeature implements Feature {
     
     @Override
     public String toString() {
-        return new StringBuilder(id).append(id).append(map()).toString();
+        return new StringBuilder(id).append(map()).toString();
     }
 
     /**

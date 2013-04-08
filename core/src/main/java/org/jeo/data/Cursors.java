@@ -23,6 +23,9 @@ import com.vividsolutions.jts.geom.Geometry;
  */
 public class Cursors {
 
+    /**
+     * Returns the number of results in the cursor.
+     */
     public static <T> int size(Cursor<T> cursor) throws IOException {
         int count = 0;
         while(cursor.hasNext()) {
@@ -30,6 +33,20 @@ public class Cursors {
             count++;
         }
         return count;
+    }
+
+    /**
+     * Returns the aggregated spatial extent of results in the cursor.
+     */
+    public static <T> Envelope extent(Cursor<T> cursor) throws IOException {
+        Envelope extent = new Envelope();
+        for (T obj : cursor) {
+            Envelope e = envelope(obj);
+            if (!e.isNull()) {
+                extent.expandToInclude(e);
+            }
+        }
+        return extent;
     }
 
     /**
@@ -375,15 +392,7 @@ public class Cursors {
         }
 
         boolean intersects(T obj) {
-            Geometry g = null;
-            if (obj instanceof Geometry) {
-                g = (Geometry) obj;
-            }
-            else if (obj instanceof Feature) {
-                g = ((Feature)obj).geometry();
-            }
-
-            return g != null && g.getEnvelopeInternal().intersects(bbox);
+            return envelope(obj).intersects(bbox);
         }
     }
 
@@ -419,6 +428,23 @@ public class Cursors {
             return obj;
         }
     
+    }
+
+    static Envelope envelope(Object obj) {
+        Geometry g = null;
+        if (obj instanceof Geometry) {
+            g = (Geometry) obj;
+        }
+        else if (obj instanceof Feature) {
+            g = ((Feature)obj).geometry();
+        }
+        if (g != null) {
+            return g.getEnvelopeInternal();
+        }
+
+        Envelope e = new Envelope();
+        e.setToNull();
+        return e;
     }
 }
 

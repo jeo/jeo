@@ -38,22 +38,24 @@ public class GeoGitTransaction implements Transaction {
 
             CommitOp commitOp = ggtx.command(CommitOp.class);
             commitOp.setMessage(message != null ? message : autoMessage());
+
             if (author != null) {
                 commitOp.setAuthor(author, null);
+                commitOp.setCommitter(author, null);
             }
             if (timestamp != null) {
                 commitOp.setAuthorTimestamp(timestamp.getTime());
+                commitOp.setCommitterTimestamp(timestamp.getTime());
             }
 
             commitOp.call();
+            ggtx.commit();
 
-            dataset.getGeoGIT().command(TransactionEnd.class).setTransaction(ggtx).call();
-            ggtx = null;
         } catch (NothingToCommitException nochanges) {
             // ok
         }
     }
-    
+
     @Override
     public void rollback() throws IOException {
         Preconditions.checkState(ggtx != null);

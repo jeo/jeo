@@ -9,6 +9,7 @@ import java.util.zip.ZipInputStream;
 
 import com.google.common.io.ByteStreams;
 import com.google.common.io.Files;
+import com.google.common.io.InputSupplier;
 
 /**
  * Test utility class.
@@ -27,6 +28,25 @@ public class Tests {
     }
 
     /**
+     * Creates a new temp file under the "target" directory of the calling module.
+     * 
+     * @return The handle to the file.
+     */
+    public static File newTmpFile() throws IOException {
+        return newTmpFile(null);
+    }
+
+    /**
+     * Creates a new temp file under the "target" directory of the calling module with the 
+     * specified contents.
+     * 
+     * @return The handle to the file.
+     */
+    public static File newTmpFile(InputStream contents) throws IOException {
+        return newTmpFile("jeo", "test", contents);
+    }
+
+    /**
      * Creates a new temp directory under the "target" directory of the calling module.
      * <p>
      * The <tt>prefix</tt> and <tt>suffix</tt> parameters are those as passed to 
@@ -40,6 +60,26 @@ public class Tests {
         dir.delete();
         dir.mkdirs();
         return dir;
+    }
+
+    /**
+     * Creates a new temp file under the "target" directory of the calling module with the specified
+     * prefix/suffix and contents.
+     * 
+     * @return The handle to the file.
+     */
+    public static File newTmpFile(String prefix, String suffix, final InputStream contents) 
+        throws IOException {
+        File file = File.createTempFile(prefix, suffix, new File("target"));
+        if (contents != null) {
+            Files.copy(new InputSupplier<InputStream>() {
+                @Override
+                public InputStream getInput() throws IOException {
+                    return contents;
+                }
+            }, file);
+        }
+        return file;
     }
 
     /**

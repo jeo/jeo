@@ -80,7 +80,7 @@ public class ListFeature extends AbstractFeature {
         boolean g = false;
         for (Object o : values) {
             if (o instanceof Geometry && !g) {
-                //first gometry
+                //first geometry
                 fields.add(new Field("geometry", o.getClass()));
                 g = true;
             }

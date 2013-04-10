@@ -294,7 +294,7 @@ public class Cursors {
     }
 
     public static <T> Cursor<T> reproject(Cursor<T> cursor, CoordinateReferenceSystem crs) {
-        return cursor;
+        return new ReprojectCursor(cursor, crs);
     }
 
     private static class ReprojectCursor<T extends Feature> extends CursorWrapper<T> {

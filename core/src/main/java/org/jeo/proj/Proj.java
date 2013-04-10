@@ -1,5 +1,9 @@
 package org.jeo.proj;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+
 import org.jeo.geom.GeometryBuilder;
 import org.osgeo.proj4j.CRSFactory;
 import org.osgeo.proj4j.CoordinateReferenceSystem;
@@ -7,7 +11,10 @@ import org.osgeo.proj4j.CoordinateTransform;
 import org.osgeo.proj4j.CoordinateTransformFactory;
 import org.osgeo.proj4j.Proj4jException;
 import org.osgeo.proj4j.ProjCoordinate;
+import org.osgeo.proj4j.io.Proj4FileReader;
 import org.osgeo.proj4j.proj.Projection;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.CoordinateSequenceFilter;
@@ -21,6 +28,8 @@ import com.vividsolutions.jts.geom.Point;
  * @author Justin Deoliveira, OpenGeo
  */
 public class Proj {
+
+    static Logger LOGGER = LoggerFactory.getLogger(Proj.class);
 
     /** 
      * The canonical geographic coordinate reference system.
@@ -52,7 +61,30 @@ public class Proj {
      * @return The matching crs object, or <code>null</code> if none found.
      */
     public static CoordinateReferenceSystem crs(String s) {
+        //hack for epsg:900913, we nweed to add this to proj4j
+        if ("epsg:900913".equalsIgnoreCase(s)) {
+            return createFromExtra("epsg", "900913");
+        }
         return csFactory.createFromName(s);
+    }
+
+    private static CoordinateReferenceSystem createFromExtra(String auth, String code) {
+        Proj4FileReader r = new Proj4FileReader();
+        BufferedReader in = new BufferedReader(
+            new InputStreamReader(Proj.class.getResourceAsStream("other.extra")));
+        try {
+            try {
+                return csFactory.createFromParameters(
+                    auth+":"+code, r.readParametersFromFile(code, in));
+            }
+            finally {
+               in.close();
+            }
+        }
+        catch(IOException e) {
+            LOGGER.debug(String.format("Failure creating crs %s:%s from extra", auth, code));
+            return null;
+        }
     }
 
     /**

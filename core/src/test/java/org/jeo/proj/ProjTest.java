@@ -48,4 +48,10 @@ public class ProjTest {
         assertEquals(49.27, e.getMinY(), 0.01);
         assertEquals(49.28, e.getMaxY(), 0.01);
     }
+
+    @Test
+    public void test900913() {
+        assertNotNull(Proj.crs("epsg:900913"));
+    }
+
 }

@@ -139,6 +139,10 @@ public class Selector {
             sb.append("::").append(attachment);
         }
 
+        if (isWildcard()) {
+            sb.append("*");
+        }
+
         return sb.toString();
     }
 

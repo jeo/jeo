@@ -65,4 +65,13 @@ public class Stylesheet {
             }
         });
     }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        for (Rule r : rules) {
+            sb.append(r).append("\n");
+        }
+        return sb.toString();
+    }
 }

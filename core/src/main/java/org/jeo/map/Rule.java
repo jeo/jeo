@@ -232,7 +232,7 @@ public class Rule {
         if (sb.length() > 0) {
             sb.setLength(sb.length()-1);
         }
-        sb.append(pad).append("{").append("\n");
+        sb.append(pad).append(" {").append("\n");
 
         for (Map.Entry<String, Object> e : properties().entrySet()) {
             sb.append(pad).append("  ").append(e.getKey()).append(": ").append(e.getValue()).append(";\n");

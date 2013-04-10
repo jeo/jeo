@@ -11,6 +11,10 @@ public class RuleHandler extends TokenHandler {
 
     private static Object CLASS = new Object();
 
+    private static Object COLON = new Object();
+
+    private static Object ATTACH = new Object();
+    
     @Override
     public TokenHandler handle(Tokenizer t, Deque<Object> stack) {
         while(t.getToken() != null) {
@@ -27,6 +31,9 @@ public class RuleHandler extends TokenHandler {
             case Operator:
                 if (".".equals(tok.getCleanText())) {
                     stack.push(CLASS);
+                }
+                if ("*".equals(tok.getCleanText())) {
+                    selector(stack).setWildcard(true);
                 }
                 break;
             case Delimiter: {
@@ -47,6 +54,16 @@ public class RuleHandler extends TokenHandler {
                 else if ("}".equals(d)) {
                     builder(stack).endRule();
                 }
+                else if (":".equals(d)) {
+                    if (stack.peek() == COLON) {
+                        //attachment
+                        stack.pop();
+                        stack.push(ATTACH);
+                    }
+                    else {
+                        stack.push(COLON);
+                    }
+                }
                 break;
             }
             case Identifier: {
@@ -56,6 +73,11 @@ public class RuleHandler extends TokenHandler {
                     break;
                 }
 
+                if (stack.peek() == ATTACH) {
+                    stack.pop();
+                    selector(stack).setAttachment(tok.getCleanText());
+                    break;
+                }
                 if ("map".equalsIgnoreCase(tok.getCleanText())) {
                     Selector s = new Selector();
                     s.setName(tok.getCleanText());

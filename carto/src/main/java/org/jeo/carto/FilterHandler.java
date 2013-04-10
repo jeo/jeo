@@ -76,6 +76,7 @@ public class FilterHandler extends TokenHandler {
             case Identifier:
             case Operator:
             case Number:
+            case String:
                 //append expression content to builder
                 ((StringBuilder) stack.peek()).append(tok.getCleanText());
                 break;

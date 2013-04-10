@@ -1,5 +1,6 @@
 package org.jeo.carto;
 
+import static org.junit.Assert.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
@@ -111,6 +112,9 @@ public class CartoTest {
                 "  [bar >= 10] {" +
                 "    line-color: #bbb;" +
                 "  }" +
+                "  [bam = 'xyz'] {" +
+                "    line-color: #ccc;" +
+                "  }" +
                 "}";
 
         CartoParser p = new CartoParser();
@@ -127,7 +131,7 @@ public class CartoTest {
         
         assertEquals(1, r.get("line-width"));
         
-        assertEquals(2, r.nested().size());
+        assertEquals(3, r.nested().size());
 
         Rule n1 = rules.get(0).nested().get(0);
         assertEquals(CQL.parse("foo < 3"), n1.getSelectors().get(0).getFilter());
@@ -136,6 +140,10 @@ public class CartoTest {
         Rule n2 = rules.get(0).nested().get(1);
         assertEquals(CQL.parse("bar >= 10"), n2.getSelectors().get(0).getFilter());
         assertEquals("#bbb", n2.get("line-color"));
+        
+        Rule n3 = rules.get(0).nested().get(2);
+        assertEquals(CQL.parse("bam = 'xyz'"), n3.getSelectors().get(0).getFilter());
+        assertEquals("#ccc", n3.get("line-color"));
     }
 
     @Test
@@ -192,6 +200,48 @@ public class CartoTest {
         assertEquals("#888888", r.get("polygon-fill"));
         assertEquals(0.25, r.get("polygon-opacity"));
         assertEquals("dst", r.get("comp-op"));
+    }
+
+    @Test
+    public void testAttachment() {
+        String css = 
+            "  #states::glow {"+
+            "    polygon-fill: #888888;"+
+            "    polygon-opacity: 0.25;"+
+            "    comp-op: dst;"+
+            "  }";
+
+        Stylesheet result = new CartoParser().parse(css);
+        System.out.println(result.toString());
+        
+        Rule r = result.getRules().get(0);
+
+        assertEquals("#888888", r.get("polygon-fill"));
+        assertEquals(0.25, r.get("polygon-opacity"));
+        assertEquals("dst", r.get("comp-op"));
+
+        assertEquals(1, r.getSelectors().size());
+        
+        Selector s = r.getSelectors().get(0);
+        assertEquals("states", s.getId());
+        assertEquals("glow", s.getAttachment());
+    }
+
+    @Test
+    public void testWildcard() throws Exception {
+        String css = 
+            "  * {"+
+            "    polygon-fill: #888888;"+
+            "  }";
+
+        Stylesheet result = new CartoParser().parse(css);
+        assertEquals(1, result.getRules().size());
+
+        Rule r = result.getRules().get(0);
+        assertEquals(1, r.getSelectors().size());
+
+        Selector s = r.getSelectors().get(0);
+        assertTrue(s.isWildcard());
     }
 
     void dumpTokens(String css) {

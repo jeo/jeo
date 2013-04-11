@@ -22,6 +22,7 @@ import org.jeo.shp.dbf.DbaseFileReader;
 import org.jeo.shp.file.FileReader;
 import org.jeo.shp.file.ShpFileType;
 import org.jeo.shp.file.ShpFiles;
+import org.jeo.shp.prj.PrjFileReader;
 import org.jeo.shp.shp.IndexFile;
 import org.jeo.shp.shp.ShapeType;
 import org.jeo.shp.shp.ShapefileHeader;
@@ -38,11 +39,23 @@ import com.vividsolutions.jts.geom.Point;
 public class Shapefile implements Vector, Disposable {
 
     ShpFiles shp;
+    CoordinateReferenceSystem crs;
     Schema schema;
 
     public Shapefile(File file) throws IOException {
-        shp = new ShpFiles(file); 
+        shp = new ShpFiles(file);
+        crs = readCRS();
         schema = readSchema();
+    }
+
+    CoordinateReferenceSystem readCRS() throws IOException {
+        PrjFileReader prj = newPrjReader();
+        try {
+            return prj.getCoodinateSystem();
+        }
+        finally {
+            prj.close();
+        }
     }
 
     Schema readSchema() throws IOException {
@@ -68,7 +81,7 @@ public class Shapefile implements Vector, Disposable {
                 geomType = MultiPolygon.class;
             }
     
-            fields.add(new Field("geometry", geomType));
+            fields.add(new Field("geometry", geomType, crs));
         } finally {
             shpReader.close();
         }
@@ -106,8 +119,7 @@ public class Shapefile implements Vector, Disposable {
     
     @Override
     public CoordinateReferenceSystem getCRS() {
-        //TODO, implement prj file reader
-        return null;
+        return crs;
     }
 
     @Override
@@ -241,5 +253,9 @@ public class Shapefile implements Vector, Disposable {
 
     DbaseFileReader newDbfReader() throws IOException {
         return new DbaseFileReader(shp, false);
+    }
+
+    PrjFileReader newPrjReader() throws IOException {
+        return new PrjFileReader(shp);
     }
 }

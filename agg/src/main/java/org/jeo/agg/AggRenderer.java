@@ -155,6 +155,11 @@ public class AggRenderer {
     void render(Vector l, RuleSet ruleSet, long buf) {
         try {
             for (Feature f : l.cursor(new Query().bounds(map.getBounds()))) {
+                RuleSet rs = ruleSet.match(f);
+                if (rs.isEmpty()) {
+                    continue;
+                }
+              
                 Rule r = ruleSet.match(f).collapse();
                 if (r != null) {
                     draw(f, r, buf);
@@ -309,7 +314,7 @@ public class AggRenderer {
         float[] fillColor, float width, float height, float[] lineColor, String compOp);
 
     void drawLine(Feature f, Rule rule, long buf) {
-        RGB color = (RGB) rule.get("line-color", RGB.black);
+        RGB color = rule.color("line-color", RGB.black);
         float width = rule.number("line-width", 1f);
 
         byte join = LineCap.value(rule.string("line-join", "miter"));

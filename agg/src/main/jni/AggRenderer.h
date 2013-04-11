@@ -107,10 +107,10 @@ JNIEXPORT jintArray JNICALL Java_org_jeo_agg_AggRenderer_data
 }
 #endif
 #endif
-/* Header for class org_jeo_agg_AggRenderer_LineCap */
+/* Header for class org_jeo_agg_AggRenderer_LineJoin */
 
-#ifndef _Included_org_jeo_agg_AggRenderer_LineCap
-#define _Included_org_jeo_agg_AggRenderer_LineCap
+#ifndef _Included_org_jeo_agg_AggRenderer_LineJoin
+#define _Included_org_jeo_agg_AggRenderer_LineJoin
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -118,10 +118,10 @@ extern "C" {
 }
 #endif
 #endif
-/* Header for class org_jeo_agg_AggRenderer_LineJoin */
+/* Header for class org_jeo_agg_AggRenderer_LineCap */
 
-#ifndef _Included_org_jeo_agg_AggRenderer_LineJoin
-#define _Included_org_jeo_agg_AggRenderer_LineJoin
+#ifndef _Included_org_jeo_agg_AggRenderer_LineCap
+#define _Included_org_jeo_agg_AggRenderer_LineCap
 #ifdef __cplusplus
 extern "C" {
 #endif

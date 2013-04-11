@@ -12,6 +12,10 @@ public class RuleSet implements Iterable<Rule>{
         this.rules = rules;
     }
 
+    public boolean isEmpty() {
+        return rules.isEmpty();
+    }
+
     public Rule first() {
         return !rules.isEmpty() ? rules.iterator().next() : null;
     }

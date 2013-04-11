@@ -35,4 +35,8 @@ public abstract class TokenHandler {
         stack.push(new Selector());
         return (Selector) stack.peek();
     }
+
+    protected void comment(Token tok) {
+        
+    }
 }

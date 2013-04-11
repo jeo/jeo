@@ -56,6 +56,9 @@ public class PropertyHandler extends TokenHandler {
             case HashName:
                 ((Property)stack.peek()).setValue(tok.getCleanText());
                 break;
+            case Comment:
+                comment(tok);
+                break;
             default:
                 throwUnexpectedToken(tok);
             }

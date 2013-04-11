@@ -87,7 +87,9 @@ public class RuleHandler extends TokenHandler {
 
                 return new PropertyHandler();
             }
-
+            case Comment:
+                comment(tok);
+                break;
             default:
                 throw new IllegalStateException("Unexpected token: " + tok);
             }

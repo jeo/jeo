@@ -1,9 +1,7 @@
 package org.jeo.carto;
 
 import static org.junit.Assert.*;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-
+    
 import java.util.List;
 
 import org.jeo.filter.cql.CQL;
@@ -212,7 +210,6 @@ public class CartoTest {
             "  }";
 
         Stylesheet result = new CartoParser().parse(css);
-        System.out.println(result.toString());
         
         Rule r = result.getRules().get(0);
 
@@ -244,6 +241,29 @@ public class CartoTest {
         assertTrue(s.isWildcard());
     }
 
+    @Test
+    public void testComments() throws Exception {
+        String css = 
+            "  /*" + 
+            "   * some comment " +
+            "   */" +
+            "  * {"+
+            "  /*" + 
+            "   * another comment " +
+            "   */" + 
+            "    polygon-fill: #888888;"+
+            "  }";
+
+        Stylesheet result = new CartoParser().parse(css);
+        assertEquals(1, result.getRules().size());
+
+        Rule r = result.getRules().get(0);
+        assertEquals(1, r.getSelectors().size());
+
+        Selector s = r.getSelectors().get(0);
+        assertTrue(s.isWildcard());
+    }
+    
     void dumpTokens(String css) {
       Tokenizer t = Utilities.open(css);
       t = new CondensingTokenizer(t, true);

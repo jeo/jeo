@@ -80,6 +80,9 @@ public class FilterHandler extends TokenHandler {
                 //append expression content to builder
                 ((StringBuilder) stack.peek()).append(tok.getCleanText());
                 break;
+            case Comment:
+                comment(tok);
+                break;
             default:
                 throwUnexpectedToken(tok);
             }

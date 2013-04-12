@@ -4,9 +4,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public abstract class Expression {
+public abstract class Expr {
 
-    public static class Simple extends Expression {
+    public static class Simple extends Expr {
         String value;
 
         public Simple(String value) {
@@ -23,30 +23,30 @@ public abstract class Expression {
         }
     }
 
-    public static class BinaryExpression extends Expression {
-        protected List<Expression> parts;
+    public static class BinaryExpression extends Expr {
+        protected List<Expr> parts;
 
-        BinaryExpression(Expression... e) {
-            parts = new ArrayList<Expression>(Arrays.asList(e));
+        BinaryExpression(Expr... e) {
+            parts = new ArrayList<Expr>(Arrays.asList(e));
         }
 
-        public List<Expression> getParts() {
+        public List<Expr> getParts() {
             return parts;
         }
 
-        public void append(Expression e) {
+        public void append(Expr e) {
             parts.add(e);
         }
     }
     public static class And extends BinaryExpression {
-        public And(Expression... e) {
+        public And(Expr... e) {
             super(e);
         }
 
         @Override
         public String toString() {
             StringBuilder b = new StringBuilder();
-            for (Expression e : parts) {
+            for (Expr e : parts) {
                 b.append(e);
             }
             return b.toString();
@@ -54,14 +54,14 @@ public abstract class Expression {
     }
 
     public static class Or extends BinaryExpression {
-        public Or(Expression... e) {
+        public Or(Expr... e) {
             super(e);
         }
 
         @Override
         public String toString() {
             StringBuilder b = new StringBuilder();
-            for (Expression e : parts) {
+            for (Expr e : parts) {
                 b.append(e).append(",");
             }
             if (b.length() > 0) {

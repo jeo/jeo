@@ -55,7 +55,7 @@ public class Java2DRenderer {
         //draw background
         Rule rule = style.selectByName("Map").first();
         if (rule != null) {
-            context.setColor(color((RGB)rule.get("background-color", RGB.white)));
+            context.setColor(color(rule.color(map, "background-color", RGB.white)));
             context.fillRect(0, 0, map.getWidth(), map.getHeight());
         }
 
@@ -129,8 +129,8 @@ public class Java2DRenderer {
     }
 
     Color color(Rule rule, String colorKey, String opacityKey, RGB def) {
-        RGB rgb = (RGB) rule.get(colorKey, def);
-        Number opacity = (Number) rule.get(opacityKey, null);
+        RGB rgb = rule.color(null, colorKey, def);
+        Number opacity = rule.number(null, opacityKey, 1f);
 
         if (opacity != null) {
             rgb = rgb.alpha(opacity.floatValue());
@@ -140,7 +140,7 @@ public class Java2DRenderer {
     }
 
     Stroke stroke(Rule rule) {
-        float width = ((Number)rule.get("line-width", 1.0)).floatValue();
+        float width = rule.number(null, "line-width", 1.0).floatValue();
         return new BasicStroke(width);
     }
 }

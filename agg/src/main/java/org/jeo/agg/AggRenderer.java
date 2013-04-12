@@ -101,7 +101,7 @@ public class AggRenderer {
 
         Rule rule = style.selectByName("Map").first();
         if (rule != null) {
-            RGB bg = rule.color("background-color", null);
+            RGB bg = rule.color(map, "background-color", null);
             if (bg != null) {
                 setBackground(rb, color(bg));
             }
@@ -173,7 +173,7 @@ public class AggRenderer {
     void composite(long dstRb, long srcRb, RuleSet rules) {
         String compOp = null;
         for (Rule r : rules) {
-            compOp = r.string("comp-op", null);
+            compOp = r.string(null, "comp-op", null);
             if (compOp != null) {
                 break;
             }
@@ -292,19 +292,19 @@ public class AggRenderer {
     }
 
     void drawPoint(Feature f, Rule rule, long buf) {
-        String type = rule.string("marker-type", "circle");
-        RGB fillColor = rule.color("marker-fill", RGB.black);
+        String type = rule.string(f, "marker-type", "circle");
+        RGB fillColor = rule.color(f, "marker-fill", RGB.black);
         if (fillColor != null) {
-            fillColor = fillColor.alpha(rule.number("marker-fill-opacity", 1f));
+            fillColor = fillColor.alpha(rule.number(f, "marker-fill-opacity", 1f));
         }
-        float width = rule.number("marker-width", 10);
-        float height = rule.number("marker-height", width);
+        float width = rule.number(f, "marker-width", 10f);
+        float height = rule.number(f, "marker-height", width);
 
-        RGB lineColor = rule.color("marker-line-color", null);
+        RGB lineColor = rule.color(f, "marker-line-color", null);
         if (lineColor != null) {
-            lineColor = lineColor.alpha(rule.number("marker-line-opacity", 1f));
+            lineColor = lineColor.alpha(rule.number(f, "marker-line-opacity", 1f));
         }
-        String compOp = rule.string("comp-op", null);
+        String compOp = rule.string(f, "comp-op", null);
 
         drawPoint(rp, buf, vpb.buffer(), type, color(fillColor), width, height, 
             color(lineColor), compOp);
@@ -314,24 +314,24 @@ public class AggRenderer {
         float[] fillColor, float width, float height, float[] lineColor, String compOp);
 
     void drawLine(Feature f, Rule rule, long buf) {
-        RGB color = rule.color("line-color", RGB.black);
-        float width = rule.number("line-width", 1f);
+        RGB color = rule.color(f, "line-color", RGB.black);
+        float width = rule.number(f, "line-width", 1f);
 
-        byte join = LineCap.value(rule.string("line-join", "miter"));
+        byte join = LineCap.value(rule.string(f, "line-join", "miter"));
         join = join != -1 ? join : LineJoin.MITER;
 
-        byte cap = LineCap.value(rule.string("line-cap", "butt"));
+        byte cap = LineCap.value(rule.string(f, "line-cap", "butt"));
         cap = cap != -1 ? cap : LineCap.BUTT;
 
-        double[] dash = rule.numbers("line-dasharray", null); 
+        double[] dash = null; /*rule.numbers("line-dasharray", null);*/ 
         if (dash != null && dash.length % 2 != 0) {
             throw new IllegalArgumentException("line-dasharray pattern must be even length");
         }
 
-        float gamma = rule.number("line-gamma", 1f);
-        String gammaMethod = rule.string("line-gamma-method", "power");
+        float gamma = rule.number(f, "line-gamma", 1f);
+        String gammaMethod = rule.string(f, "line-gamma-method", "power");
 
-        String compOp = rule.string("comp-op", null);
+        String compOp = rule.string(f, "comp-op", null);
         drawLine(rp, buf, vpb.buffer(), color(color), width, join, cap, dash, gamma, gammaMethod, 
             compOp);
     }
@@ -340,24 +340,24 @@ public class AggRenderer {
         byte join, byte cap, double[] dash, float gamma, String gammaMethod, String compOp);
 
     void drawPolygon(Feature f, Rule rule, long buf) {
-        RGB polyFill = rule.color("polygon-fill", null);
+        RGB polyFill = rule.color(f, "polygon-fill", null);
         if (polyFill != null) {
-            polyFill = polyFill.alpha(rule.number("polygon-opacity", 1f));
+            polyFill = polyFill.alpha(rule.number(f, "polygon-opacity", 1f));
         }
 
-        float gamma = rule.number("polygon-gamma", 1f);
-        String gammaMethod = rule.string("polygon-gamma-method", "power");
+        float gamma = rule.number(f, "polygon-gamma", 1f);
+        String gammaMethod = rule.string(f, "polygon-gamma-method", "power");
 
-        RGB lineColor = rule.color("line-color", null);
+        RGB lineColor = rule.color(f, "line-color", null);
         if (lineColor != null) {
-            lineColor = lineColor.alpha(rule.number("line-opacity", 1f));
+            lineColor = lineColor.alpha(rule.number(f, "line-opacity", 1f));
         }
 
-        float lineWidth = rule.number("line-width", 1f);
-        float lineGamma = rule.number("line-gamma", 1f);
-        String lineGammaMethod = rule.string("line-gamma-method", "power");
+        float lineWidth = rule.number(f, "line-width", 1f);
+        float lineGamma = rule.number(f, "line-gamma", 1f);
+        String lineGammaMethod = rule.string(f, "line-gamma-method", "power");
 
-        String compOp = rule.string("comp-op", null);
+        String compOp = rule.string(f, "comp-op", null);
 
         drawPolygon(rp, buf, vpb.buffer(), color(polyFill), gamma, gammaMethod, color(lineColor), 
             lineWidth, lineGamma, lineGammaMethod, compOp);

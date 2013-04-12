@@ -2,6 +2,9 @@ package org.jeo.carto;
 
 import java.util.Deque;
 
+import org.jeo.filter.Function;
+import org.jeo.filter.Property;
+
 import com.metaweb.lessen.tokenizers.Tokenizer;
 import com.metaweb.lessen.tokens.Token;
 
@@ -15,11 +18,11 @@ public class PropertyHandler extends TokenHandler {
             case Whitespace:
                 break;
             case Identifier:
-                if (stack.peek() instanceof Property) {
-                    ((Property)stack.peek()).setValue(tok.getCleanText());
+                if (stack.peek() instanceof Prop) {
+                    ((Prop)stack.peek()).setValue(expr(tok));
                 }
                 else {
-                    stack.push(new Property(tok.getCleanText()));
+                    stack.push(new Prop(tok.getCleanText()));
                 }
                 break;
             case Delimiter:
@@ -28,37 +31,51 @@ public class PropertyHandler extends TokenHandler {
                 }
                 else if (";".equals(d)) {
                     //finished
-                    Property p = (Property) stack.pop();
+                    Prop p = (Prop) stack.pop();
                     builder(stack).set(p.getKey(), p.getValue());
                     return null;
+                }
+                else if ("]".equals(d)) {
+                    //attribute reference end
+                    Property att = (Property) stack.pop();
+                    ((Prop)stack.peek()).setValue(att);
+                }
+                else if (")".equals(d) && stack.peek() instanceof Function) {
+                    Function f = (Function) stack.pop();
+                    ((Prop)stack.peek()).setValue(f);
                 }
                 else {
                     throwUnexpectedToken(tok);
                 }
                 break;
+            case String:
             case Number:
-                String text = tok.getCleanText();
-                Object value = text;
-                try {
-                    value = Integer.parseInt(text);
-                }
-                catch(NumberFormatException e) {
-                    try {
-                        value = Double.parseDouble(text);
-                    }
-                    catch(NumberFormatException e1) {
-                        
-                    }
-                }
-                ((Property)stack.peek()).setValue(value);
+            case HashName:
+            case Dimension:
+            case Color:
+//                String text = tok.getCleanText();
+//                Object value = text;
+//                try {
+//                    value = Integer.parseInt(text);
+//                }
+//                catch(NumberFormatException e) {
+//                    try {
+//                        value = Double.parseDouble(text);
+//                    }
+//                    catch(NumberFormatException e1) {
+//                        
+//                    }
+//                }
+                ((Prop)stack.peek()).setValue(expr(tok));
                 break;
 
-            case HashName:
-                ((Property)stack.peek()).setValue(tok.getCleanText());
-                break;
+            case Function:
+                return new FunctionHandler();
+
             case Comment:
                 comment(tok);
                 break;
+            
             default:
                 throwUnexpectedToken(tok);
             }
@@ -68,4 +85,5 @@ public class PropertyHandler extends TokenHandler {
         return null;
     }
 
+    
 }

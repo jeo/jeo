@@ -1,11 +1,13 @@
 package org.jeo.carto;
 
-public class Property {
+import org.jeo.filter.Expression;
+
+public class Prop {
 
     String key;
-    Object value;
+    Expression value;
 
-    public Property(String key) {
+    public Prop(String key) {
         this.key = key;
     }
 
@@ -13,11 +15,11 @@ public class Property {
         return key;
     }
 
-    public Object getValue() {
+    public Expression getValue() {
         return value;
     }
 
-    public void setValue(Object value) {
+    public void setValue(Expression value) {
         this.value = value;
     }
 }

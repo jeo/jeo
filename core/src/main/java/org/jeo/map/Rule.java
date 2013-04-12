@@ -1,11 +1,13 @@
 package org.jeo.map;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+
+import org.jeo.filter.Expression;
+import org.jeo.util.Convert;
 
 /**
  * A styling rule. 
@@ -52,18 +54,10 @@ public class Rule {
     }
 
     public Object get(String key) {
-        return get(key, null);
-    }
-    
-    public Object get(String key, Object def) {
-        if (props == null) {
-            return def;
-        }
-
         Map<String,Object> props = props();
-        return props.containsKey(key) ? props.get(key) : def;
+        return props.get(key);
     }
-    
+
     public void put(String key, Object val) {
         props().put(key,  val);
     }
@@ -80,25 +74,58 @@ public class Rule {
         parts.add(rule);
     }
 
-    public RGB color(String key, RGB def) {
-        Object obj = get(key, def);
-        return obj != null ? toRGB(obj) : null;
-    }
-
-    public String string(String key, String def) {
-        Object obj = get(key, def);
-        return obj != null ? obj.toString() : null;
-    }
-
-    public double number(String key, double def) {
-        return toDouble(get(key, def));
+    public <T> T eval(String key, Class<T> clazz) {
+        return eval(null, key, clazz, null);
     }
     
-    public float number(String key, float def) {
-        return (float) number(key, (double) def);
+    public <T> T eval(Object obj, String key, Class<T> clazz) {
+        return eval(obj, key, clazz, null);
+    }
+
+    public <T> T eval(Object obj, String key, Class<T> clazz, T def) {
+        if (!props.containsKey(key)) {
+            return def;
+        }
+
+        Object val = props.get(key);
+        if (val == null) {
+            return null;
+        }
+
+        Object result = val;
+        if (val instanceof Expression) {
+            result = ((Expression) val).evaluate(obj);
+        }
+
+        if (result != null) {
+            T converted = Convert.to(result, clazz, false);
+            if (converted == null) {
+                throw new IllegalArgumentException("Unable to convert " + result + " to " + clazz);
+            }
+
+            return converted;
+        }
+
+        return null;
+    }
+
+    public RGB color(Object obj, String key, RGB def) {
+        return eval(obj, key, RGB.class, def);
+    }
+
+    public String string(Object obj, String key, String def) {
+        return eval(obj, key, String.class, def);
+    }
+
+    public Double number(Object obj, String key, Double def) {
+        return eval(obj, key, Double.class, def);
     }
     
-    public double[] numbers(String key, double... def) {
+    public Float number(Object obj, String key, Float def) {
+        return eval(obj, key, Float.class, def);
+    }
+
+    /*public double[] numbers(String key, double... def) {
         Object obj = get(key, def);
         if (obj == null) {
             return null;
@@ -128,7 +155,7 @@ public class Rule {
 
         //TODO: attempt to convert from string delimiated by ' ', or ',' 
         throw new IllegalArgumentException("Unable to convert " + obj + " to array");
-    }
+    }*/
 
     protected Map<String,Object> props() {
         if (props == null) {
@@ -139,39 +166,39 @@ public class Rule {
         return props;
     }
 
-    protected double toDouble(Object obj) {
-        if (obj == null) {
-            return Double.NaN;
-        }
-    
-        if (obj instanceof Number) {
-            return ((Number)obj).doubleValue();
-        }
-    
-        return Double.parseDouble(obj.toString());
-    }
-
-    protected double[] toDoubles(String s, String delim) {
-        String[] split = s.split(delim);
-        double[] d = new double[split.length];
-        
-        for (int i = 0; i < d.length; i++) {
-            d[i] = toDouble(split[i].trim());
-        }
-        return d;
-    }
-    
-    protected RGB toRGB(Object obj) {
-        if (obj == null) {
-            return null;
-        }
-
-        if (obj instanceof RGB) {
-            return (RGB) obj;
-        }
-
-        return new RGB(obj.toString());
-    }
+//    protected double toDouble(Object obj) {
+//        if (obj == null) {
+//            return Double.NaN;
+//        }
+//    
+//        if (obj instanceof Number) {
+//            return ((Number)obj).doubleValue();
+//        }
+//    
+//        return Double.parseDouble(obj.toString());
+//    }
+//
+//    protected double[] toDoubles(String s, String delim) {
+//        String[] split = s.split(delim);
+//        double[] d = new double[split.length];
+//        
+//        for (int i = 0; i < d.length; i++) {
+//            d[i] = toDouble(split[i].trim());
+//        }
+//        return d;
+//    }
+//    
+//    protected RGB toRGB(Object obj) {
+//        if (obj == null) {
+//            return null;
+//        }
+//
+//        if (obj instanceof RGB) {
+//            return (RGB) obj;
+//        }
+//
+//        return new RGB(obj.toString());
+//    }
 
     /**
      * Flattens the rule by merging the top level rule with all nested rules.

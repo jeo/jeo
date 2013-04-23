@@ -75,7 +75,7 @@ public class Proj {
         try {
             try {
                 return csFactory.createFromParameters(
-                    auth+":"+code, r.readParametersFromFile(code, in));
+                    auth+":"+code, r.readParameters(code, in));
             }
             finally {
                in.close();

@@ -1,6 +1,7 @@
 package org.jeo.geogit;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.Iterator;
 
@@ -64,7 +65,8 @@ public class GeoGitTransaction implements Transaction {
     }
 
     String autoMessage() {
-        Iterator<DiffEntry> indexDiffs = ggtx.command(DiffIndex.class).setFilter(dataset.getName()).call();
+        Iterator<DiffEntry> indexDiffs = ggtx.command(DiffIndex.class)
+          .setFilter(Arrays.asList(dataset.getName())).call();
         int added = 0, removed = 0, modified = 0;
         StringBuilder msg = new StringBuilder();
         while (indexDiffs.hasNext()) {

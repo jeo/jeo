@@ -129,13 +129,21 @@
    </plugins>
   </build>
 
+  <profiles>
+    <profile>
+      <id>android</id>
+      <modules>
+        <module>gmaps</module>
+      </modules>
+    </profile>
+  </profiles>
+
   <modules>
     <module>core</module>
     <module>csv</module>
     <module>geopkg</module>
     <module>nano</module>
     <module>guava</module>
-    <module>gmaps</module>
     <module>shp</module>
     <module>geotools</module>
     <module>geogit</module>

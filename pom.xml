@@ -8,6 +8,14 @@
   <packaging>pom</packaging>
   <name>Java Geo Library</name>
 
+  <repositories>
+    <repository>
+      <id>opengeo</id>
+      <name>opengeo</name>
+      <url>http://repo.opengeo.org</url>
+    </repository>
+  </repositories>
+
   <dependencyManagement>
     <dependencies>
       <dependency>

@@ -1,6 +1,7 @@
 package org.jeo.data.mem;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.util.Set;
@@ -21,14 +22,14 @@ import com.vividsolutions.jts.geom.Geometry;
 
 public class MemoryTest {
 
-    Memory mem;
+    MemWorkspace mem;
 
     @Before
     public void setUp() throws IOException {
         GeometryBuilder gb = new GeometryBuilder();
 
-        mem = new Memory();
-        MemoryVector data = mem.create(Features.schema("widgets", "geometry", Geometry.class, 
+        mem = new MemWorkspace();
+        MemVector data = mem.create(Features.schema("widgets", "geometry", Geometry.class, 
             "id", Integer.class, "name", String.class, "cost", Double.class));
         data.getFeatures().add(Features.create(null, data.getSchema(), gb.point(0,0), 1, "anvil", 
             10.99));
@@ -50,7 +51,7 @@ public class MemoryTest {
 
     @Test
     public void testCount() throws IOException {
-        MemoryVector widgets = (MemoryVector) mem.get("widgets"); 
+        MemVector widgets = (MemVector) mem.get("widgets"); 
         assertEquals(3, widgets.count(null));
         assertEquals(2, widgets.count(new Query().limit(2)));
         assertEquals(1, widgets.count(new Query().bounds(new Envelope(-1,1,-1,1))));
@@ -60,7 +61,7 @@ public class MemoryTest {
 
     @Test
     public void testCursorRead() throws IOException {
-        MemoryVector widgets = (MemoryVector) mem.get("widgets");
+        MemVector widgets = (MemVector) mem.get("widgets");
         assertCovered(widgets.cursor(new Query()), 1, 2, 3);
         assertCovered(widgets.cursor(new Query().limit(2)), 1, 2);
         assertCovered(widgets.cursor(new Query().bounds(new Envelope(-1,1,-1,1))), 1);
@@ -78,7 +79,7 @@ public class MemoryTest {
 
     @Test
     public void testCursorWrite() throws IOException {
-        MemoryVector widgets = (MemoryVector) mem.get("widgets");
+        MemVector widgets = (MemVector) mem.get("widgets");
         assertEquals(0, widgets.count(new Query().filter("cost  > 13.0")));
 
         Cursor<Feature> c = widgets.cursor(new Query().update());

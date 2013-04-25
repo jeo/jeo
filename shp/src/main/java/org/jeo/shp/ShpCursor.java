@@ -14,7 +14,7 @@ import org.jeo.shp.shp.ShapefileReader.Record;
 
 import com.vividsolutions.jts.geom.Envelope;
 
-public class ShapefileCursor extends Cursor<Feature> {
+public class ShpCursor extends Cursor<Feature> {
 
     ShapefileReader shpReader;
     DbaseFileReader dbfReader;
@@ -24,7 +24,7 @@ public class ShapefileCursor extends Cursor<Feature> {
 
     Record next;
 
-    ShapefileCursor(Shapefile shp, Envelope bbox) throws IOException {
+    ShpCursor(ShpDataset shp, Envelope bbox) throws IOException {
         this.schema = shp.getSchema();
         this.shpReader = shp.newShpReader();
         this.dbfReader = shp.newDbfReader();

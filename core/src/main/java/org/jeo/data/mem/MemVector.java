@@ -8,7 +8,6 @@ import org.jeo.data.Cursor;
 import org.jeo.data.Cursors;
 import org.jeo.data.Query;
 import org.jeo.data.Vector;
-import org.jeo.data.Cursor.Mode;
 import org.jeo.feature.Feature;
 import org.jeo.feature.Schema;
 import org.osgeo.proj4j.CoordinateReferenceSystem;
@@ -16,12 +15,12 @@ import org.osgeo.proj4j.CoordinateReferenceSystem;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 
-public class MemoryVector implements Vector {
+public class MemVector implements Vector {
 
     Schema schema;
     List<Feature> features = new ArrayList<Feature>();
     
-    public MemoryVector(Schema schema) {
+    public MemVector(Schema schema) {
         this.schema = schema;
     }
 
@@ -93,12 +92,16 @@ public class MemoryVector implements Vector {
 
     @Override
     public Cursor<Feature> cursor(Query q) throws IOException {
-        Cursor<Feature> cursor = new MemoryCursor(q.getMode(), this);
+        Cursor<Feature> cursor = new MemCursor(q.getMode(), this);
     
         if (q.getBounds() != null && !q.getBounds().isNull()) {
             cursor = Cursors.intersects(cursor, q.getBounds());
         }
     
         return q.apply(cursor);
+    }
+
+    @Override
+    public void dispose() {
     }
 }

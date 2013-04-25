@@ -15,9 +15,9 @@ import com.vividsolutions.jts.geom.Envelope;
 public class GeoPkgTileSet implements TileSet {
 
     TileEntry entry;
-    GeoPackage geopkg;
+    GeoPkgWorkspace geopkg;
 
-    public GeoPkgTileSet(TileEntry entry, GeoPackage geopkg) {
+    public GeoPkgTileSet(TileEntry entry, GeoPkgWorkspace geopkg) {
         this.entry = entry;
         this.geopkg = geopkg;
     }
@@ -83,4 +83,7 @@ public class GeoPkgTileSet implements TileSet {
         return geopkg.read(entry, (int)z1, (int)z2, (int)x1, (int)x2, (int)y1, (int)y2);
     }
 
+    @Override
+    public void dispose() {
+    }
 }

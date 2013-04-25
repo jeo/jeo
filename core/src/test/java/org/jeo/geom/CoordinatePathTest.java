@@ -1,7 +1,12 @@
 package org.jeo.geom;
 
-import static org.junit.Assert.*;
-import static org.jeo.geom.CoordinatePath.PathStep.*;
+import static org.jeo.geom.CoordinatePath.PathStep.CLOSE;
+import static org.jeo.geom.CoordinatePath.PathStep.LINE_TO;
+import static org.jeo.geom.CoordinatePath.PathStep.MOVE_TO;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import org.jeo.geom.CoordinatePath.PathStep;
 import org.junit.Before;

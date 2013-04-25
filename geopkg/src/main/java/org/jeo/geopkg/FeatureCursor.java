@@ -2,13 +2,11 @@ package org.jeo.geopkg;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import jsqlite.Stmt;
 
 import org.jeo.data.Cursor;
-import org.jeo.data.Cursors;
 import org.jeo.feature.Feature;
 import org.jeo.feature.Field;
 import org.jeo.feature.ListFeature;

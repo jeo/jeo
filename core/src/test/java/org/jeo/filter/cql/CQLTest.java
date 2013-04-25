@@ -1,6 +1,7 @@
 package org.jeo.filter.cql;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import org.jeo.filter.Comparison;
 import org.jeo.filter.Filter;

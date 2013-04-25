@@ -1,10 +1,10 @@
 package org.jeo.map;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import java.util.List;
-import org.jeo.util.Interpolate.Method;
 
+import org.jeo.util.Interpolate.Method;
 import org.junit.Test;
 
 public class RGBTest {

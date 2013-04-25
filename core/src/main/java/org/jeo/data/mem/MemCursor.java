@@ -9,13 +9,13 @@ import org.jeo.feature.DiffFeature;
 import org.jeo.feature.Feature;
 import org.jeo.feature.ListFeature;
 
-public class MemoryCursor extends Cursor<Feature> {
+public class MemCursor extends Cursor<Feature> {
 
-    MemoryVector dataset;
+    MemVector dataset;
     Cursor<Feature> cursor;
     Feature curr;
 
-    MemoryCursor(Mode mode, MemoryVector dataset) {
+    MemCursor(Mode mode, MemVector dataset) {
         super(mode);
         this.dataset = dataset;
         cursor = Cursors.create(dataset.getFeatures());
@@ -33,7 +33,7 @@ public class MemoryCursor extends Cursor<Feature> {
     @Override
     public Feature next() throws IOException {
         if (mode == APPEND) {
-            curr = new ListFeature(null, new ArrayList(), dataset.getSchema());
+            curr = new ListFeature(null, new ArrayList<Object>(), dataset.getSchema());
         }
         else {
             curr = new DiffFeature(cursor.next()); 

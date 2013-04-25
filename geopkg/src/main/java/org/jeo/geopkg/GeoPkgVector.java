@@ -5,7 +5,6 @@ import java.io.IOException;
 import org.jeo.data.Cursor;
 import org.jeo.data.Query;
 import org.jeo.data.Vector;
-import org.jeo.data.Cursor.Mode;
 import org.jeo.feature.Feature;
 import org.jeo.feature.Schema;
 import org.jeo.proj.Proj;
@@ -16,9 +15,9 @@ import com.vividsolutions.jts.geom.Envelope;
 public class GeoPkgVector implements Vector {
 
     FeatureEntry entry;
-    GeoPackage geopkg;
+    GeoPkgWorkspace geopkg;
 
-    GeoPkgVector(FeatureEntry entry, GeoPackage geopkg) {
+    GeoPkgVector(FeatureEntry entry, GeoPkgWorkspace geopkg) {
         this.entry = entry;
         this.geopkg = geopkg;
     }
@@ -68,4 +67,7 @@ public class GeoPkgVector implements Vector {
         geopkg.add(entry, f);
     }
 
+    @Override
+    public void dispose() {
+    }
 }

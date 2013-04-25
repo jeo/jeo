@@ -1,5 +1,6 @@
 package org.jeo.util;
 
+import java.io.File;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -28,6 +29,12 @@ public class Convert {
         else if (Number.class.isAssignableFrom(clazz)) {
             return clazz.cast(toNumber(obj, (Class)clazz));
         }
+        else if (Boolean.class.isAssignableFrom(clazz)) {
+            return clazz.cast(toBoolean(obj));
+        }
+        else if (File.class.isAssignableFrom(clazz)) {
+            return clazz.cast(toFile(obj));
+        }
         else if (!safe && obj != null) {
             //constructor trick
             T converted = null;
@@ -48,7 +55,34 @@ public class Convert {
     }
 
     public static String toString(Object obj) {
-        return obj.toString();
+        if (obj != null) {
+            return obj.toString();
+        }
+        return null;
+    }
+
+    public static Boolean toBoolean(Object obj) {
+        if (obj instanceof Boolean) {
+            return (Boolean) obj;
+        }
+
+        if (obj instanceof String) {
+            return Boolean.parseBoolean((String)obj);
+        }
+
+        return null;
+    }
+
+    public static File toFile(Object obj) {
+        if (obj instanceof File) {
+            return (File) obj;
+        }
+
+        if (obj instanceof String) {
+            return new File((String)obj);
+        }
+
+        return null;
     }
 
     public static <T extends Number> T toNumber(Object obj, Class<T> clazz) {

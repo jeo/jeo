@@ -22,7 +22,7 @@ import java.util.Map;
 public interface Driver<T> {
 
     /**
-     * Name identififying the driver.
+     * Name identifying the driver.
      * <p>
      * This name should be no more than a few words (ideally one) and isn't meant to 
      * be a description.  

@@ -134,6 +134,11 @@ public class GeoPkgWorkspace implements Workspace {
         wkbWriter = new WKBWriter();
     }
 
+    @Override
+    public GeoPackage getDriver() {
+        return new GeoPackage();
+    }
+    
     File getFile() {
         return file;
     }

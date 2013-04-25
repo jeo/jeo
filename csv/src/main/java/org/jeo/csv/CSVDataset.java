@@ -47,6 +47,11 @@ public class CSVDataset implements Vector {
         init();
     }
 
+    @Override
+    public CSV getDriver() {
+        return new CSV();
+    }
+
     void init() throws IOException {
         List<Field> fields = new ArrayList<Field>();
         fields.add(new Field("geometry", Geometry.class));

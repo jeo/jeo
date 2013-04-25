@@ -13,6 +13,11 @@ import org.jeo.feature.Schema;
 public interface Workspace extends Disposable {
 
     /**
+     * The driver used to open the workspace.
+     */
+    Driver<?> getDriver();
+
+    /**
      * The names of all layers of the workspace.
      * 
      * @return Iterator over layer names.

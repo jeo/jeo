@@ -23,6 +23,11 @@ public class GeoPkgVector implements Vector {
     }
 
     @Override
+    public GeoPackage getDriver() {
+        return geopkg.getDriver();
+    }
+
+    @Override
     public String getName() {
         return entry.getTableName();
     }

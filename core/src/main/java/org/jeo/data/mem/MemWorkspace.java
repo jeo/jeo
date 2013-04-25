@@ -14,6 +14,11 @@ public class MemWorkspace implements Workspace {
     Map<String,Dataset> data = new LinkedHashMap<String, Dataset>();
 
     @Override
+    public Memory getDriver() {
+        return new Memory();
+    }
+
+    @Override
     public Iterator<String> layers() throws IOException {
         return data.keySet().iterator();
     }

@@ -45,6 +45,11 @@ public class GeoGitDataset implements Vector, Transactional {
         this.geogit = geogit;
     }
 
+    @Override
+    public GeoGit getDriver() {
+        return geogit.getDriver();
+    }
+
     public GeoGIT getGeoGIT() {
         return geogit.getGeoGIT();
     }

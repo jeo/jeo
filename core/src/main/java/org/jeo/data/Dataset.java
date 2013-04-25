@@ -17,6 +17,11 @@ import com.vividsolutions.jts.geom.Envelope;
 public interface Dataset extends Disposable {
 
     /**
+     * The driver used to open the dataset.
+     */
+    Driver<?> getDriver();
+
+    /**
      * Name of the layer.
      * <p>
      * The value used to look up a layer in a workspace.

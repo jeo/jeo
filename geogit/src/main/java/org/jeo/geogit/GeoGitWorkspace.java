@@ -50,6 +50,11 @@ public class GeoGitWorkspace implements Workspace {
         this.gg = gg;
     }
 
+    @Override
+    public GeoGit getDriver() {
+        return new GeoGit();
+    }
+
     /**
      * Underlying geogit repo.
      */

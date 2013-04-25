@@ -80,6 +80,11 @@ public class CachedRegistry implements Registry {
         }
 
         @Override
+        public Driver<?> getDriver() {
+            return ws.getDriver();
+        }
+
+        @Override
         public Vector create(Schema schema) throws IOException {
             return ws.create(schema);
         }

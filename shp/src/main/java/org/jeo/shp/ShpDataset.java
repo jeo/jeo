@@ -48,6 +48,11 @@ public class ShpDataset implements Vector, Disposable {
         schema = readSchema();
     }
 
+    @Override
+    public Shapefile getDriver() {
+        return new Shapefile();
+    }
+
     CoordinateReferenceSystem readCRS() throws IOException {
         PrjFileReader prj = newPrjReader();
         try {

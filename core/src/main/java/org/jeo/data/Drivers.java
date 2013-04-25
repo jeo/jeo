@@ -23,7 +23,7 @@ public class Drivers {
     static Logger LOG = LoggerFactory.getLogger(Drivers.class);
 
     /** list of registered drivers */
-    static Set<Class<Driver<?>>> drivers = new LinkedHashSet<Class<Driver<?>>>();
+    static Set<Class<? extends Driver<?>>> drivers = new LinkedHashSet<Class<? extends Driver<?>>>();
 
     /**
      * Lists all registered drivers.
@@ -36,14 +36,14 @@ public class Drivers {
      * Lists all registered drivers that extend from the specified class.
      */
     public static Iterator<Driver<?>> list(final Class<?> filter) {
-        final Iterator<Class<Driver<?>>> it = drivers.iterator();
+        final Iterator<Class<? extends Driver<?>>> it = drivers.iterator();
         return new Iterator<Driver<?>>() {
             Driver<?> next;
 
             @Override
             public boolean hasNext() {
                 while(next == null && it.hasNext()) {
-                    Class<Driver<?>> clazz = it.next();
+                    Class<? extends Driver<?>> clazz = it.next();
                     if (filter == null || filter.isAssignableFrom(clazz)) {
                         try {
                             next = clazz.newInstance();
@@ -77,7 +77,7 @@ public class Drivers {
     /**
      * Registers a driver.
      */
-    public static void register(Class<Driver<?>> d) {
+    public static void register(Class<? extends Driver<?>> d) {
         drivers.add(d);
     }
 

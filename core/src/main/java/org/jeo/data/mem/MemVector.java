@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.jeo.data.Cursor;
 import org.jeo.data.Cursors;
+import org.jeo.data.Driver;
 import org.jeo.data.Query;
 import org.jeo.data.Vector;
 import org.jeo.feature.Feature;
@@ -23,6 +24,10 @@ public class MemVector implements Vector {
     public MemVector(Schema schema) {
         this.schema = schema;
     }
+
+    public Memory getDriver() {
+        return new Memory();
+    };
 
     List<Feature> getFeatures() {
         return features;

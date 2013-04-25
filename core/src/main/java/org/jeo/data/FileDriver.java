@@ -26,7 +26,7 @@ public abstract class FileDriver<T> implements Driver<T> {
      */
     @Override
     public boolean canOpen(Map<?, Object> opts) {
-        if (!opts.containsKey(FILE)) {
+        if (!FILE.has(opts)) {
             return false;
         }
 

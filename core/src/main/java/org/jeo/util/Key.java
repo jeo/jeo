@@ -69,6 +69,13 @@ public class Key<T> {
         return Convert.to(obj, type);
     }
 
+    /**
+     * Determines if the key exists in a map.
+     */
+    public boolean has(Map<?,Object> map) {
+        return map.containsKey(this) || map.containsKey(name);
+    }
+
     @Override
     public int hashCode() {
         final int prime = 31;

@@ -1,41 +1,33 @@
 package org.jeo.data.mem;
 
 import java.io.IOException;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.Map;
 
-import org.jeo.data.Dataset;
-import org.jeo.data.Workspace;
-import org.jeo.feature.Schema;
+import org.jeo.data.Driver;
 
-public class Memory implements Workspace {
+public class Memory implements Driver<MemWorkspace> {
 
-    Map<String,Dataset> data = new LinkedHashMap<String, Dataset>();
-
-    @Override
-    public Iterator<String> layers() throws IOException {
-        return data.keySet().iterator();
+    public static MemWorkspace open() {
+        return new MemWorkspace();
     }
 
     @Override
-    public Dataset get(String layer) throws IOException {
-        return data.get(layer);
-    }
-
-    public void put(String layer, Dataset dataset) {
-        data.put(layer, dataset);
+    public String getName() {
+        return "Memory";
     }
 
     @Override
-    public MemoryVector create(Schema schema) throws IOException, UnsupportedOperationException {
-        MemoryVector v = new MemoryVector(schema);
-        data.put(schema.getName(), v);
-        return v;
+    public Class<MemWorkspace> getType() {
+        return MemWorkspace.class;
     }
 
     @Override
-    public void dispose() {
-        data.clear();
+    public boolean canOpen(Map<?, Object> opts) {
+        return opts.isEmpty();
+    }
+
+    @Override
+    public MemWorkspace open(Map<?, Object> opts) throws IOException {
+        return new MemWorkspace();
     }
 }

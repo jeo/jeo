@@ -16,11 +16,11 @@ import com.vividsolutions.jts.geom.Envelope;
 
 public class CSVTest {
 
-    CSV csv;
+    CSVDataset csv;
 
     @Before
     public void setUp() throws IOException {
-        csv = new CSV(Tests.newTmpFile("jeo", "csv", csv()), new CSVOptions().xy("lon", "lat"));
+        csv = new CSVDataset(Tests.newTmpFile("jeo", "csv", csv()), new CSVOptions().xy("lon", "lat"));
     }
 
     @Test

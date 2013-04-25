@@ -2,8 +2,8 @@ package org.jeo.csv;
 
 public class CSVOptions {
 
-    Delimiter delim = Delimiter.comma();
-    boolean header = true;
+    Delimiter delim = CSV.DELIM.getDefault();
+    boolean header = CSV.HEADER.getDefault();
 
     String xcol, ycol;
     Integer x, y;

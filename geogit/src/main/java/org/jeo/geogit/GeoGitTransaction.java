@@ -7,7 +7,6 @@ import java.util.Iterator;
 
 import org.geogit.api.GeogitTransaction;
 import org.geogit.api.plumbing.DiffIndex;
-import org.geogit.api.plumbing.TransactionEnd;
 import org.geogit.api.plumbing.diff.DiffEntry;
 import org.geogit.api.porcelain.AddOp;
 import org.geogit.api.porcelain.CommitOp;

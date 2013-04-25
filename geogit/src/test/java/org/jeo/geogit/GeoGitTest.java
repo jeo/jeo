@@ -26,8 +26,10 @@ import org.geogit.storage.bdbje.JEStorageModule;
 import org.geotools.util.NullProgressListener;
 import org.jeo.Tests;
 import org.jeo.data.Cursor;
+import org.jeo.data.Dataset;
 import org.jeo.data.Query;
 import org.jeo.data.Transaction;
+import org.jeo.data.Vector;
 import org.jeo.feature.Feature;
 import org.jeo.feature.Features;
 import org.jeo.feature.Schema;
@@ -51,7 +53,7 @@ import com.vividsolutions.jts.geom.Polygon;
 
 public class GeoGitTest {
 
-    GeoGit ws;
+    GeoGitWorkspace ws;
 
     @Before
     public void setUp() throws IOException {
@@ -72,7 +74,7 @@ public class GeoGitTest {
         addShp(ShpData.poly(), repo);
 
         repo.command(BranchCreateOp.class).setName("scratch").call();
-        ws = new GeoGit(gg);
+        ws = new GeoGitWorkspace(gg);
     }
 
     void log(GeoGIT gg) {
@@ -81,11 +83,11 @@ public class GeoGitTest {
         }
     }
 
-    void addShp(Shapefile shp, Repository repo) throws IOException {
-        String name = shp.getName();
-        repo.getWorkingTree().insert(name, GT.iterator(shp.cursor(new Query())), 
+    void addShp(Vector data, Repository repo) throws IOException {
+        String name = data.getName();
+        repo.getWorkingTree().insert(name, GT.iterator(data.cursor(new Query())), 
             new NullProgressListener(), null, null);
-        shp.dispose();
+        data.dispose();
 
         AddOp add = repo.command(AddOp.class);
         add.call();

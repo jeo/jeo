@@ -34,17 +34,17 @@ import com.vividsolutions.jts.geom.Point;
 
 public class GeoPkgFeatureTest extends GeoPkgTestSupport {
 
-    GeoPackage geopkg;
+    GeoPkgWorkspace geopkg;
 
     @Before
     public void setUp() throws Exception {
         File dir = unzip(getClass().getResourceAsStream("states.db.zip"), newTmpDir());
-        geopkg = new GeoPackage(new File(dir, "states.db"));
+        geopkg = new GeoPkgWorkspace(new File(dir, "states.db"));
     }
 
     @After
     public void tearDown() throws Exception {
-        geopkg.close();
+        geopkg.dispose();
         FileUtils.deleteQuietly(geopkg.getFile().getParentFile());
     }
 

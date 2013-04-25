@@ -5,8 +5,6 @@ import static org.junit.Assert.*;
 import java.io.File;
 import java.io.IOException;
 
-import org.jeo.data.Workspaces;
-
 import org.junit.Before;
 import org.junit.Test;
 
@@ -15,13 +13,13 @@ public class GeoPkgTest extends GeoPkgTestSupport {
 
     @Before
     public void setUp() throws ClassNotFoundException {
-        Class.forName(GeoPackage.class.getCanonicalName());
+        Class.forName(GeoPkgWorkspace.class.getCanonicalName());
     }
 
     @Test
-    public void testCreateFromFactory() throws Exception {
-        assertNull(Workspaces.create(newFile("foo.bar")));
-        assertNotNull(Workspaces.create(newFile("foo.geopkg")));
+    public void testCreateFromDriver() throws Exception {
+        assertNull(GeoPackage.open(newFile("foo.bar")));
+        assertNotNull(GeoPackage.open(newFile("foo.geopkg")));
     }
 
     File newFile(String name) throws IOException {

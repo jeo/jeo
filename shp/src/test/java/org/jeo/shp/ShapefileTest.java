@@ -18,8 +18,6 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestName;
 
-import com.google.common.base.Function;
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.MultiPolygon;
@@ -28,7 +26,7 @@ public class ShapefileTest {
 
     @Rule public TestName name = new TestName();
 
-    Shapefile shp;
+    ShpDataset shp;
 
     @Before
     public void setUp() throws Exception {

@@ -4,8 +4,8 @@ import java.io.IOException;
 import java.util.Iterator;
 
 import org.jeo.data.Dataset;
+import org.jeo.data.Drivers;
 import org.jeo.data.Workspace;
-import org.jeo.data.Workspaces;
 import org.osgeo.proj4j.CoordinateReferenceSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -71,7 +71,7 @@ public class MapBuilder {
     public MapBuilder layer(String name, String title, java.util.Map<String,Object> params) 
         throws IOException {
 
-        Workspace ws = Workspaces.create(params);
+        Workspace ws = Drivers.open(params, Workspace.class);
         if (ws == null) {
             throw new IllegalArgumentException("Unable to obtqin workspace: " + params);
         }

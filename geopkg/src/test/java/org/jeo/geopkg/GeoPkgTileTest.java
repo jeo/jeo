@@ -18,17 +18,17 @@ import org.junit.Before;
 import org.junit.Test;
 
 public class GeoPkgTileTest extends GeoPkgTestSupport {
-    GeoPackage geopkg;
+    GeoPkgWorkspace geopkg;
 
     @Before
     public void setUp() throws Exception {
         File dir = unzip(getClass().getResourceAsStream("ne.db.zip"), newTmpDir());
-        geopkg = new GeoPackage(new File(dir, "ne.db"));
+        geopkg = new GeoPkgWorkspace(new File(dir, "ne.db"));
     }
 
     @After
     public void tearDown() throws Exception {
-        geopkg.close();
+        geopkg.dispose();
         FileUtils.deleteQuietly(geopkg.getFile().getParentFile());
     }
 

@@ -14,7 +14,7 @@ import com.vividsolutions.jts.geom.Envelope;
  * @see Vector
  * @see TileSet
  */
-public interface Dataset {
+public interface Dataset extends Disposable {
 
     /**
      * Name of the layer.

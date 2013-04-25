@@ -51,59 +51,53 @@ public class TileHandler extends Handler {
             throw new IllegalStateException("No matcher");
         }
 
-        Workspace ws = reg.get(m.group(1));
-        if (ws == null) {
-            //no such layer
-            return new Response(HTTP_NOTFOUND, MIME_PLAINTEXT, "No such workspace: " + m.group(1));
-        }
-
-        Dataset l;
         try {
-            l = ws.get(m.group(2));
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        if (l == null) {
-            //no such layer
-            return new Response(HTTP_NOTFOUND, MIME_PLAINTEXT, "No such layer: " + m.group(2));
-        }
-
-        if (!(l instanceof TileSet)) {
-            // not a tile set
-            return new Response(HTTP_BADREQUEST, MIME_PLAINTEXT, 
-                "Layer " + m.group(2) + " not a tile set");
-        }
-
-        TileSet ts = (TileSet) l;
-
-        //get teh tile index
-        long z = Long.parseLong(m.group(3));
-        long x = Long.parseLong(m.group(4));
-        long y = Long.parseLong(m.group(5));
-
-        //check for flipy flag
-        Properties q = request.getParms();
-        if (q != null && q.containsKey("flipy") && Boolean.valueOf(q.getProperty("flipy"))) {
-            TileGrid g =  ts.grid(z);
-            if (g == null) {
-                return new Response(HTTP_INTERNALERROR, MIME_PLAINTEXT, "No tile grid for zoom level " + z);
+            Workspace ws = reg.get(m.group(1));
+            if (ws == null) {
+                //no such layer
+                return new Response(HTTP_NOTFOUND, MIME_PLAINTEXT, "No such workspace: " + m.group(1));
             }
-            y = g.getHeight() - (y+1);
+    
+            Dataset l = ws.get(m.group(2));
+            if (l == null) {
+                //no such layer
+                return new Response(HTTP_NOTFOUND, MIME_PLAINTEXT, "No such layer: " + m.group(2));
+            }
+    
+            if (!(l instanceof TileSet)) {
+                // not a tile set
+                return new Response(HTTP_BADREQUEST, MIME_PLAINTEXT, 
+                    "Layer " + m.group(2) + " not a tile set");
+            }
+    
+            TileSet ts = (TileSet) l;
+    
+            //get teh tile index
+            long z = Long.parseLong(m.group(3));
+            long x = Long.parseLong(m.group(4));
+            long y = Long.parseLong(m.group(5));
+    
+            //check for flipy flag
+            Properties q = request.getParms();
+            if (q != null && q.containsKey("flipy") && Boolean.valueOf(q.getProperty("flipy"))) {
+                TileGrid g =  ts.grid(z);
+                if (g == null) {
+                    return new Response(HTTP_INTERNALERROR, MIME_PLAINTEXT, "No tile grid for zoom level " + z);
+                }
+                y = g.getHeight() - (y+1);
+            }
+    
+            Tile t = ts.read(z, x, y);
+            if (t == null) {
+                return new Response(HTTP_NOTFOUND, MIME_PLAINTEXT, 
+                    String.format("No such tile z = %d, x = %d, y = %d", z, x, y));
+            }
+    
+            return new Response(HTTP_OK, t.getMimeType(), new ByteArrayInputStream(t.getData()));
         }
-
-        Tile t = null;
-        try {
-            t = ts.read(z, x, y);
-        } catch (IOException e) {
+        catch(IOException e) {
             return new Response(HTTP_INTERNALERROR, MIME_PLAINTEXT, e.getLocalizedMessage());
         }
-
-        if (t == null) {
-            return new Response(HTTP_NOTFOUND, MIME_PLAINTEXT, 
-                String.format("No such tile z = %d, x = %d, y = %d", z, x, y));
-        }
-
-        return new Response(HTTP_OK, t.getMimeType(), new ByteArrayInputStream(t.getData()));
     }
 
 }

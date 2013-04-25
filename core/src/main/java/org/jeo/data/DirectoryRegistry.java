@@ -2,6 +2,7 @@ package org.jeo.data;
 
 import java.io.File;
 import java.io.FilenameFilter;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
@@ -59,7 +60,7 @@ public class DirectoryRegistry implements Registry {
     }
 
     @Override
-    public Workspace get(final String key) {
+    public Workspace get(final String key) throws IOException {
         if (exts == null) {
             //search for any file with this base name
             String[] files = baseDir.list(new FilenameFilter() {
@@ -69,7 +70,7 @@ public class DirectoryRegistry implements Registry {
                 }
             });
             for (String file : files) {
-                Workspace ws = Workspaces.create(new File(baseDir, file));
+                Workspace ws = Drivers.open(new File(baseDir, file), Workspace.class);
                 if (ws != null) {
                     return ws;
                 }
@@ -80,7 +81,7 @@ public class DirectoryRegistry implements Registry {
             for (String ext : exts) {
                 File f = new File(baseDir, key + "." + ext);
                 if (f.exists()) {
-                    Workspace ws = Workspaces.create(f);
+                    Workspace ws = Drivers.open(f, Workspace.class);
                     if (ws != null) {
                         return ws;
                     }

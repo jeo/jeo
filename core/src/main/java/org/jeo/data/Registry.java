@@ -1,5 +1,6 @@
 package org.jeo.data;
 
+import java.io.IOException;
 import java.util.Iterator;
 
 /**
@@ -21,7 +22,7 @@ public interface Registry {
      * 
      * @return The workspace or <code>null</code> if so such workspaces matching the key exists.
      */
-    Workspace get(String key);
+    Workspace get(String key) throws IOException;
 
     /**
      * Disposes the registry.

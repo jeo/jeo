@@ -1,246 +1,69 @@
 package org.jeo.geogit;
 
+import java.io.File;
 import java.io.IOException;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
+import java.util.Map;
 
 import org.geogit.api.GeoGIT;
-import org.geogit.api.GeogitTransaction;
-import org.geogit.api.NodeRef;
-import org.geogit.api.Ref;
-import org.geogit.api.RevCommit;
-import org.geogit.api.RevFeatureType;
-import org.geogit.api.SymRef;
-import org.geogit.api.data.FindFeatureTypeTrees;
-import org.geogit.api.plumbing.RefParse;
-import org.geogit.api.plumbing.RevObjectParse;
-import org.geogit.api.plumbing.TransactionBegin;
-import org.geogit.api.plumbing.diff.DiffEntry;
-import org.geogit.api.plumbing.diff.Patch;
-import org.geogit.api.porcelain.AddOp;
-import org.geogit.api.porcelain.BranchListOp;
-import org.geogit.api.porcelain.CheckoutOp;
-import org.geogit.api.porcelain.CommitOp;
-import org.geogit.api.porcelain.CreatePatchOp;
-import org.geogit.api.porcelain.DiffOp;
-import org.geogit.api.porcelain.LogOp;
+import org.geogit.api.porcelain.ConfigOp;
+import org.geogit.api.porcelain.ConfigOp.ConfigAction;
+import org.geogit.di.GeogitModule;
 import org.geogit.repository.Repository;
-import org.geogit.repository.WorkingTree;
-import org.jeo.data.Workspace;
-import org.jeo.data.Workspaces;
-import org.jeo.feature.Schema;
-import org.jeo.geotools.GT;
-import org.jeo.util.Pair;
-import org.opengis.feature.simple.SimpleFeatureType;
+import org.geogit.storage.bdbje.JEStorageModule;
+import org.jeo.data.FileDriver;
+import org.jeo.util.Key;
 
-import com.google.common.base.Function;
-import com.google.common.base.Optional;
-import com.google.common.base.Predicate;
-import com.google.common.base.Throwables;
-import com.google.common.collect.Collections2;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Iterators;
+import com.google.inject.Guice;
+import com.google.inject.Injector;
+import com.google.inject.util.Modules;
 
-public class GeoGit implements Workspace {
+public class GeoGit extends FileDriver<GeoGitWorkspace> {
 
-    static {
-        Workspaces.registerWorkspaceFactory(new GeoGitFactory());
-    }
+    public static final Key<Boolean> CREATE = new Key<Boolean>("create", Boolean.class, true);
 
-    /** underlying geogit repo */
-    GeoGIT gg;
+    public static final Key<String> USER = 
+        new Key<String>("user.name", String.class, System.getProperty("user.name"));
 
-    public GeoGit(GeoGIT gg) {
-        this.gg = gg;
-    }
+    public static final Key<String> EMAIL = 
+        new Key<String>("user.email", String.class, USER.getDefault() + "@localhost");
 
-    /**
-     * Underlying geogit repo.
-     */
-    public GeoGIT getGeoGIT() {
-        return gg;
-    }
-
-    public Iterator<String> branches() {
-        ImmutableList<Ref> heads = gg.command(BranchListOp.class).call();
-        return Collections2.transform(heads, new Function<Ref,String>() {
-            @Override
-            public String apply(Ref ref) {
-                return ref.getName().substring(Ref.HEADS_PREFIX.length());
-            }
-        }).iterator();
+    @Override
+    public String getName() {
+        return "GeoGIT";
     }
 
     @Override
-    public Iterator<String> layers() throws IOException {
-        return layers(branch());
-    }
-
-    public Iterator<String> layers(String rev) throws IOException {
-        List<NodeRef> trees = typeRefs(rev);
-        return Iterators.transform(trees.iterator(), new Function<NodeRef, String>() {
-            @Override
-            public String apply(NodeRef input) {
-                return NodeRef.nodeFromPath(input.path());
-            }
-        });
-    }
-
-    public LogOp log(String branch, String... paths) throws IOException {
-        gg.command(CheckoutOp.class).setSource(branch).call();
-        LogOp log = gg.command(LogOp.class);
-        for (String l : paths) {
-            log.addPath(l);
+    public boolean canOpen(File file, Map<?,Object> opts) {
+        boolean create = CREATE.get(opts);
+        if (!create) {
+            return super.canOpen(file, opts) && file.isDirectory();
         }
-
-        return log;
-    }
-
-    public Patch patch(String layer, String rev) throws IOException {
-        Pair<NodeRef,RevCommit> ref = parseName(layer + "@" + rev);
-        if (ref == null) {
-            return null;
-        }
-
-        RevCommit commit = ref.second();
-
-        Iterator<DiffEntry> diff = gg.command(DiffOp.class)/*.setFilter(ref.first().path())*/ 
-            .setOldVersion(commit.getParentIds().get(0).toString())
-            .setNewVersion(commit.getId().toString()).call();
-
-        return gg.command(CreatePatchOp.class).setDiffs(diff).call();
+        return true;
     }
 
     @Override
-    public GeoGitDataset get(String layer) throws IOException {
-        Pair<NodeRef,RevCommit> ref = parseName(layer);
-        if (ref == null) {
-            return null;
-        }
-
-        gg.command(CheckoutOp.class).setSource(ref.second().getId().toString()).call();
-        SimpleFeatureType featureType = featureType(ref.first());
-        if (featureType != null) {
-            return new GeoGitDataset(ref, GT.schema(featureType), this);
-        }
-
-        throw new IllegalStateException("No schema for tree: " + layer); 
+    public Class<GeoGitWorkspace> getType() {
+        return GeoGitWorkspace.class;
     }
 
-    Pair<NodeRef,RevCommit> parseName(String name) {
-        String[] split = name.split("@");
+    @Override
+    public GeoGitWorkspace open(File file, Map<?, Object> opts) throws IOException {
+        GeoGIT gg = newGeoGIT(file);
+        gg.getOrCreateRepository();
 
-        final String type = split.length > 1 ? split[0] : name; 
-        final String rev = split.length > 1 ? split[1] : branch();
-
-        //parse the revision
-        Optional<RevCommit> commit = 
-            gg.command(RevObjectParse.class).setRefSpec(rev).call(RevCommit.class);
-        if (!commit.isPresent()) {
-            return null;
-            //throw new IllegalArgumentException("No such commit: " + rev);
-        }
-
-        Collection<NodeRef> match =  Collections2.filter(typeRefs(rev), new Predicate<NodeRef>() {
-            @Override
-            public boolean apply(NodeRef input) {
-                return NodeRef.nodeFromPath(input.path()).equals(type);
-            }
-        }); 
-
-        if (match.isEmpty()) {
-            return null;
-        }
-
-        if (match.size() == 1) {
-            return new Pair<NodeRef,RevCommit>(match.iterator().next(), commit.get());
-        }
-
-        throw new IllegalArgumentException("Multiple trees for " + type);
-    }
-
-    /**
-     * Returns the ref name <tt>ref</tt> if not null, otherwise falls back to name of current branch.
-     */
-    String refOrBranch(String ref) {
-        return ref != null ? ref : branch();
-    }
-
-    /**
-     * Determines the "current" branch by parsing the HEAD reference.
-     */
-    String branch() {
-        //grab the current branch
         Repository repo = gg.getRepository();
+        repo.command(ConfigOp.class).setAction(ConfigAction.CONFIG_SET)
+            .setName("user.name").setValue(USER.get(opts)).call();
+        repo.command(ConfigOp.class).setAction(ConfigAction.CONFIG_SET)
+            .setName("user.email").setValue(EMAIL.get(opts)).call();
 
-        //grab the head reference
-        Optional<Ref> head = repo.command(RefParse.class).setName(Ref.HEAD).call();
-        if (head.isPresent()) {
-            Ref ref = head.get();
-            if (ref instanceof SymRef) {
-                String target = ((SymRef) ref).getTarget();
-                if (target.startsWith(Ref.HEADS_PREFIX)) {
-                    return target.substring(Ref.HEADS_PREFIX.length());
-                }
-            }
-        }
-
-        return "master";
-        /*throw new IllegalStateException(
-            "Unable to determine current branch, repository in dettached head state");*/
+        return new GeoGitWorkspace(gg);
     }
 
-    /**
-     * Lists all the type references for the specified branch/revision. 
-     */
-    List<NodeRef> typeRefs(String rev) {
-        Repository repo = gg.getRepository();
-        return repo.command(FindFeatureTypeTrees.class).setRootTreeRef(refOrBranch(rev)).call();
-    }
-
-    SimpleFeatureType featureType(NodeRef ref) {
-        Optional<RevFeatureType> type = gg.command(RevObjectParse.class)
-            .setObjectId(ref.getMetadataId()).call(RevFeatureType.class);
-        return (SimpleFeatureType) (type.isPresent() ? type.get().type() : null);
-    }
-
-    @Override
-    public GeoGitDataset create(Schema schema) throws IOException {
-        GeogitTransaction tx = gg.command(TransactionBegin.class).call();
-        boolean abort = false;
-        try {
-            String treePath = schema.getName();
-            String branch = branch();
-            
-            // check out the datastore branch on the transaction space
-            tx.command(CheckoutOp.class).setForce(true).setSource(branch).call();
-
-            // now we can use the transaction working tree with the correct branch checked out
-            WorkingTree workingTree = tx.getWorkingTree();
-            workingTree.createTypeTree(treePath, GT.featureType(schema));
-
-            tx.command(AddOp.class).addPattern(treePath).call();
-            tx.command(CommitOp.class).setMessage("Created type tree " + treePath).call();
-            tx.commit();
-
-            return get(schema.getName());
-        } catch (IllegalArgumentException alreadyExists) {
-            abort = true;
-            throw new IOException(alreadyExists.getMessage(), alreadyExists);
-        } catch (Exception e) {
-            abort = true;
-            throw Throwables.propagate(e);
-        } finally {
-            if (abort) {
-                tx.abort();
-            }
-        }
-    }
-
-    @Override
-    public void dispose() {
-        // TODO Auto-generated method stub
-        
+    GeoGIT newGeoGIT(File file) {
+        //TODO: something about this
+        Injector i = Guice.createInjector(
+            Modules.override(new GeogitModule()).with(new JEStorageModule()));
+        return new GeoGIT(i, file);
     }
 }

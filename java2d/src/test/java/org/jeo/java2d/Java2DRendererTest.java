@@ -13,7 +13,7 @@ import java.io.IOException;
 import org.jeo.data.Cursor;
 import org.jeo.data.Query;
 import org.jeo.data.Vector;
-import org.jeo.data.mem.Memory;
+import org.jeo.data.mem.MemWorkspace;
 import org.jeo.feature.Feature;
 import org.jeo.feature.Features;
 import org.jeo.feature.Schema;
@@ -39,12 +39,12 @@ public class Java2DRendererTest {
     @Rule
     public TestName testName = new TestName();
 
-    Memory mem;
+    MemWorkspace mem;
     Vector widgets;
 
     @Before
     public void setUp() throws IOException {
-        mem = new Memory();
+        mem = new MemWorkspace();
 
         GeometryBuilder gb = new GeometryBuilder();
 

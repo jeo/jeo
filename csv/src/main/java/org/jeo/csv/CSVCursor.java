@@ -9,12 +9,12 @@ import org.jeo.feature.Feature;
 
 public class CSVCursor extends Cursor<Feature> {
 
-    CSV csv;
+    CSVDataset csv;
     BufferedReader reader;
     String next;
     int i;
 
-    public CSVCursor(BufferedReader reader, CSV csv) throws FileNotFoundException {
+    public CSVCursor(BufferedReader reader, CSVDataset csv) throws FileNotFoundException {
         this.reader = reader;
         this.csv = csv;
         next = null;

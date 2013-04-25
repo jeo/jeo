@@ -10,7 +10,7 @@ import org.junit.Test;
 public class CachedRegistryTest {
 
     @Test
-    public void testWorkspace() {
+    public void testWorkspace() throws IOException {
         Workspace ws = createMock(Workspace.class);
 
         Registry reg = createMock(Registry.class);

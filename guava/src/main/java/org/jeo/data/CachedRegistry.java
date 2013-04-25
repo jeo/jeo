@@ -48,7 +48,7 @@ public class CachedRegistry implements Registry {
     }
 
     @Override
-    public Workspace get(String key) {
+    public Workspace get(String key) throws IOException {
         try {
             return wsCache.get(key);
         } catch (ExecutionException e) {

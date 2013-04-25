@@ -8,22 +8,20 @@ import org.geogit.api.GeoGIT;
 import org.geogit.api.GeogitTransaction;
 import org.geogit.api.NodeRef;
 import org.geogit.api.ObjectId;
-import org.geogit.api.Ref;
 import org.geogit.api.RevCommit;
 import org.geogit.api.RevTree;
 import org.geogit.api.plumbing.LsTreeOp;
-import org.geogit.api.plumbing.RevParse;
-import org.geogit.api.plumbing.TransactionBegin;
 import org.geogit.api.plumbing.LsTreeOp.Strategy;
 import org.geogit.api.plumbing.RevObjectParse;
+import org.geogit.api.plumbing.TransactionBegin;
 import org.geogit.api.porcelain.CheckoutOp;
 import org.geogit.repository.WorkingTree;
 import org.jeo.data.Cursor;
+import org.jeo.data.Cursor.Mode;
 import org.jeo.data.Cursors;
 import org.jeo.data.Query;
 import org.jeo.data.Transactional;
 import org.jeo.data.Vector;
-import org.jeo.data.Cursor.Mode;
 import org.jeo.feature.Feature;
 import org.jeo.feature.Schema;
 import org.jeo.util.Pair;
@@ -38,10 +36,10 @@ import com.vividsolutions.jts.geom.Envelope;
 public class GeoGitDataset implements Vector, Transactional {
 
     Pair<NodeRef,RevCommit> ref;
-    GeoGit geogit;
+    GeoGitWorkspace geogit;
     Schema schema;
 
-    public GeoGitDataset(Pair<NodeRef,RevCommit> ref, Schema schema, GeoGit geogit) {
+    public GeoGitDataset(Pair<NodeRef,RevCommit> ref, Schema schema, GeoGitWorkspace geogit) {
         this.ref = ref;
         this.schema = schema;
         this.geogit = geogit;
@@ -129,7 +127,11 @@ public class GeoGitDataset implements Vector, Transactional {
         ggtx.command(CheckoutOp.class).setSource(geogit.branch()).call();
 
         return new GeoGitTransaction(ggtx, this);
-    };
+    }
+
+    @Override
+    public void dispose() {
+    }
 
     NodeRef getRef() {
         return ref.first();

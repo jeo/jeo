@@ -85,7 +85,7 @@ public class CachedRegistry implements Registry {
         }
 
         @Override
-        public Vector create(Schema schema) throws IOException {
+        public VectorData create(Schema schema) throws IOException {
             return ws.create(schema);
         }
 

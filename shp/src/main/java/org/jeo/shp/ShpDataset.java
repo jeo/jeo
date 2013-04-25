@@ -11,7 +11,7 @@ import org.jeo.data.Cursor;
 import org.jeo.data.Cursors;
 import org.jeo.data.Disposable;
 import org.jeo.data.Query;
-import org.jeo.data.Vector;
+import org.jeo.data.VectorData;
 import org.jeo.feature.Feature;
 import org.jeo.feature.Field;
 import org.jeo.feature.Schema;
@@ -36,7 +36,7 @@ import com.vividsolutions.jts.geom.MultiPoint;
 import com.vividsolutions.jts.geom.MultiPolygon;
 import com.vividsolutions.jts.geom.Point;
 
-public class ShpDataset implements Vector, Disposable {
+public class ShpDataset implements VectorData, Disposable {
 
     ShpFiles shp;
     CoordinateReferenceSystem crs;

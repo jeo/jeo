@@ -23,7 +23,7 @@ import org.jeo.data.Cursor;
 import org.jeo.data.Dataset;
 import org.jeo.data.Query;
 import org.jeo.data.Registry;
-import org.jeo.data.Vector;
+import org.jeo.data.VectorData;
 import org.jeo.data.Workspace;
 import org.jeo.feature.Feature;
 import org.jeo.feature.Features;
@@ -81,7 +81,7 @@ public class FeatureHandler extends Handler {
     }
 
     Response handleGet(Request request) throws IOException {
-        Vector layer = findVectorLayer(request);
+        VectorData layer = findVectorLayer(request);
 
         //parse the bbox
         Properties q = request.getParms();
@@ -133,7 +133,7 @@ public class FeatureHandler extends Handler {
     }
 
     Response handlePostAddFeatures(Request request, InputStream body) throws IOException {
-        Vector layer = findVectorLayer(request);
+        VectorData layer = findVectorLayer(request);
 
         Object obj = GeoJSON.read(body);
 
@@ -154,17 +154,17 @@ public class FeatureHandler extends Handler {
         return new Response(HTTP_CREATED, MIME_PLAINTEXT, "");
     }
 
-    Vector findVectorLayer(Request request) throws IOException {
+    VectorData findVectorLayer(Request request) throws IOException {
         Workspace ws = findWorkspace(request);
 
         Matcher m = (Matcher) request.getContext().get(Matcher.class);
         Dataset l = ws.get(m.group(2));
-        if (l == null || !(l instanceof Vector)) {
+        if (l == null || !(l instanceof VectorData)) {
             //no such layer
             throw new HttpException(HTTP_NOTFOUND, "No such feature layer: " + m.group(0));
         }
 
-        return (Vector) l;
+        return (VectorData) l;
     }
 
     Workspace findWorkspace(Request request) throws IOException {

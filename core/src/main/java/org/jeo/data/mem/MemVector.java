@@ -8,7 +8,7 @@ import org.jeo.data.Cursor;
 import org.jeo.data.Cursors;
 import org.jeo.data.Driver;
 import org.jeo.data.Query;
-import org.jeo.data.Vector;
+import org.jeo.data.VectorData;
 import org.jeo.feature.Feature;
 import org.jeo.feature.Schema;
 import org.osgeo.proj4j.CoordinateReferenceSystem;
@@ -16,7 +16,7 @@ import org.osgeo.proj4j.CoordinateReferenceSystem;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 
-public class MemVector implements Vector {
+public class MemVector implements VectorData {
 
     Schema schema;
     List<Feature> features = new ArrayList<Feature>();

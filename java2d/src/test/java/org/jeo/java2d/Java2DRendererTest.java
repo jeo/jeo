@@ -12,7 +12,7 @@ import java.io.IOException;
 
 import org.jeo.data.Cursor;
 import org.jeo.data.Query;
-import org.jeo.data.Vector;
+import org.jeo.data.VectorData;
 import org.jeo.data.mem.MemWorkspace;
 import org.jeo.feature.Feature;
 import org.jeo.feature.Features;
@@ -40,7 +40,7 @@ public class Java2DRendererTest {
     public TestName testName = new TestName();
 
     MemWorkspace mem;
-    Vector widgets;
+    VectorData widgets;
 
     @Before
     public void setUp() throws IOException {

@@ -11,7 +11,7 @@ import com.vividsolutions.jts.geom.Envelope;
  * 
  * @author Justin Deoliveira, OpenGeo
  *
- * @see Vector
+ * @see VectorData
  * @see TileSet
  */
 public interface Dataset extends Disposable {

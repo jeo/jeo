@@ -12,7 +12,7 @@ import java.util.List;
 import org.jeo.data.Cursor;
 import org.jeo.data.Cursors;
 import org.jeo.data.Query;
-import org.jeo.data.Vector;
+import org.jeo.data.VectorData;
 import org.jeo.feature.Feature;
 import org.jeo.feature.Field;
 import org.jeo.feature.ListFeature;
@@ -22,7 +22,7 @@ import org.osgeo.proj4j.CoordinateReferenceSystem;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 
-public class CSVDataset implements Vector {
+public class CSVDataset implements VectorData {
 
     /** the csv file */
     File file;

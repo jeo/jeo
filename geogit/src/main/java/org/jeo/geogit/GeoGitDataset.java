@@ -21,7 +21,7 @@ import org.jeo.data.Cursor.Mode;
 import org.jeo.data.Cursors;
 import org.jeo.data.Query;
 import org.jeo.data.Transactional;
-import org.jeo.data.Vector;
+import org.jeo.data.VectorData;
 import org.jeo.feature.Feature;
 import org.jeo.feature.Schema;
 import org.jeo.util.Pair;
@@ -33,7 +33,7 @@ import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.vividsolutions.jts.geom.Envelope;
 
-public class GeoGitDataset implements Vector, Transactional {
+public class GeoGitDataset implements VectorData, Transactional {
 
     Pair<NodeRef,RevCommit> ref;
     GeoGitWorkspace geogit;

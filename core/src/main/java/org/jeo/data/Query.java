@@ -18,7 +18,7 @@ import org.slf4j.LoggerFactory;
 import com.vividsolutions.jts.geom.Envelope;
 
 /**
- * Describes a query against a {@link Vector} dataset. 
+ * Describes a query against a {@link VectorData} dataset. 
  *  
  * @author Justin Deoliveira, OpenGeo
  */

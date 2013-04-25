@@ -29,7 +29,7 @@ import org.jeo.data.Cursor;
 import org.jeo.data.Dataset;
 import org.jeo.data.Query;
 import org.jeo.data.Transaction;
-import org.jeo.data.Vector;
+import org.jeo.data.VectorData;
 import org.jeo.feature.Feature;
 import org.jeo.feature.Features;
 import org.jeo.feature.Schema;
@@ -83,7 +83,7 @@ public class GeoGitTest {
         }
     }
 
-    void addShp(Vector data, Repository repo) throws IOException {
+    void addShp(VectorData data, Repository repo) throws IOException {
         String name = data.getName();
         repo.getWorkingTree().insert(name, GT.iterator(data.cursor(new Query())), 
             new NullProgressListener(), null, null);

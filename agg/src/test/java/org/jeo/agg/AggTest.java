@@ -4,7 +4,7 @@ import java.awt.Frame;
 import java.awt.HeadlessException;
 import java.awt.image.BufferedImage;
 
-import org.jeo.data.Vector;
+import org.jeo.data.VectorData;
 import org.jeo.java2d.Java2D;
 import org.jeo.map.Map;
 import org.jeo.map.MapBuilder;
@@ -163,7 +163,7 @@ public class AggTest {
         render(ShpData.states(), style);
     }
 
-    void render(Vector l, Stylesheet s) {
+    void render(VectorData l, Stylesheet s) {
         Map map = new MapBuilder().layer(l).style(s).map();
 
         AggRenderer r = new AggRenderer();

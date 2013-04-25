@@ -4,7 +4,7 @@ import java.io.IOException;
 
 import org.jeo.data.Cursor;
 import org.jeo.data.Query;
-import org.jeo.data.Vector;
+import org.jeo.data.VectorData;
 import org.jeo.feature.Feature;
 import org.jeo.feature.Schema;
 import org.jeo.proj.Proj;
@@ -12,7 +12,7 @@ import org.osgeo.proj4j.CoordinateReferenceSystem;
 
 import com.vividsolutions.jts.geom.Envelope;
 
-public class GeoPkgVector implements Vector {
+public class GeoPkgVector implements VectorData {
 
     FeatureEntry entry;
     GeoPkgWorkspace geopkg;

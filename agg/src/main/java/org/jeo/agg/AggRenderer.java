@@ -10,7 +10,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 
 import org.jeo.data.Query;
-import org.jeo.data.Vector;
+import org.jeo.data.VectorData;
 import org.jeo.feature.Feature;
 import org.jeo.geom.CoordinatePath;
 import org.jeo.geom.Geom;
@@ -131,7 +131,7 @@ public class AggRenderer {
             //allocate the buffers
             for (RuleSet ruleSet : rules) {
                 long buf = createRenderingBuffer(map.getWidth(), map.getHeight());
-                render((Vector) l.getData(), ruleSet, buf);
+                render((VectorData) l.getData(), ruleSet, buf);
                 //render((Vector) l.getData(), ruleSet, rb);
 
                 composite(rb, buf, ruleSet);
@@ -152,7 +152,7 @@ public class AggRenderer {
         }
     }
 
-    void render(Vector l, RuleSet ruleSet, long buf) {
+    void render(VectorData l, RuleSet ruleSet, long buf) {
         try {
             for (Feature f : l.cursor(new Query().bounds(map.getBounds()))) {
                 RuleSet rs = ruleSet.match(f);

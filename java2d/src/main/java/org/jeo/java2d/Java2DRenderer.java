@@ -9,7 +9,7 @@ import java.awt.geom.AffineTransform;
 import java.io.IOException;
 
 import org.jeo.data.Query;
-import org.jeo.data.Vector;
+import org.jeo.data.VectorData;
 import org.jeo.feature.Feature;
 import org.jeo.geom.Geom;
 import org.jeo.map.Layer;
@@ -65,11 +65,11 @@ public class Java2DRenderer {
     }
 
     public void render(Layer layer) throws IOException {
-        if (!(layer.getData() instanceof Vector)) {
+        if (!(layer.getData() instanceof VectorData)) {
             throw new UnsupportedOperationException("Only vector layers supported");
         }
 
-        Vector data = (Vector) layer.getData();
+        VectorData data = (VectorData) layer.getData();
         for (Feature f : data.cursor(new Query().bounds(map.getBounds()))) {
             render(f, layer);
         }

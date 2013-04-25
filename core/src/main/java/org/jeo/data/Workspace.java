@@ -42,7 +42,7 @@ public interface Workspace extends Disposable {
      * @param schema The schema of the vector layer.
      * 
      */
-    Vector create(Schema schema) throws IOException;
+    VectorData create(Schema schema) throws IOException;
 
     /**
      * Disposes the workspace.

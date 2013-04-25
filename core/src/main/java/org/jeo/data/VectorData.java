@@ -10,7 +10,7 @@ import org.jeo.feature.Schema;
  *
  * @author Justin Deoliveira, OpenGeo
  */
-public interface Vector extends Dataset {
+public interface VectorData extends Dataset {
 
     /**
      * The schema for the layer.

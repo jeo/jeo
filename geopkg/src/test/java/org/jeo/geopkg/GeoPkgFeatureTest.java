@@ -20,6 +20,7 @@ import org.jeo.feature.Feature;
 import org.jeo.feature.Features;
 import org.jeo.feature.ListFeature;
 import org.jeo.feature.Schema;
+import org.jeo.feature.SchemaBuilder;
 import org.jeo.geom.Geom;
 import org.jeo.geom.GeometryBuilder;
 import org.jeo.geopkg.Entry.DataType;
@@ -120,8 +121,8 @@ public class GeoPkgFeatureTest extends GeoPkgTestSupport {
 
     @Test
     public void testCreate() throws Exception {
-        Schema schema = Features.schema("widgets", 
-            "geometry", Point.class, "name", String.class, "cost", Double.class);
+        Schema schema = new SchemaBuilder("widgets").field("geometry", Point.class)
+            .field("name", String.class).field("cost", Double.class).schema();
 
         FeatureEntry entry = new FeatureEntry();
         entry.setSrid(4326);

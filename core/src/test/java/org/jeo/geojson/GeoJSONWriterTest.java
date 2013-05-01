@@ -7,6 +7,7 @@ import java.io.IOException;
 import org.jeo.feature.Feature;
 import org.jeo.feature.Features;
 import org.jeo.feature.Schema;
+import org.jeo.feature.SchemaBuilder;
 import org.jeo.geom.GeometryBuilder;
 import org.junit.Before;
 import org.junit.Test;
@@ -88,10 +89,7 @@ public class GeoJSONWriterTest {
 
     @Test
     public void testFeature() throws IOException {
-        Schema schema = Features.schema("widget", 
-            "geometry", Geometry.class, "name", String.class, "cost", Double.class);
-
-        Feature f = Features.create("1", schema, new GeometryBuilder().point(0,0), "anvil", 10.99);
+        Feature f = Features.create("1", schema(), new GeometryBuilder().point(0,0), "anvil", 10.99);
         w.feature(f);
         assertJSON("{'type':'Feature','id':'1','geometry':{'type':'Point','coordinates':[0,0]}," +
             "'properties':{'name':'anvil','cost':10.99}}");
@@ -99,9 +97,7 @@ public class GeoJSONWriterTest {
 
     @Test
     public void testFeatureCollection() throws IOException{
-        Schema schema = Features.schema("widget", 
-            "geometry", Geometry.class, "name", String.class, "cost", Double.class);
-
+        Schema schema = schema();
         GeometryBuilder b = new GeometryBuilder();
 
         w.featureCollection();
@@ -117,6 +113,11 @@ public class GeoJSONWriterTest {
             "'properties':{'name':'dynamite','cost':2.99}}," +
             "{'type':'Feature','id':'3','geometry':{'type':'Point','coordinates':[2,2]}," +
             "'properties':{'name':'bomb','cost':7.99}}]}");
+    }
+
+    Schema schema() {
+        return new SchemaBuilder("widget").field("geometry", Geometry.class)
+            .field("name", String.class).field("cost", Double.class).schema();
     }
 
     void print() {

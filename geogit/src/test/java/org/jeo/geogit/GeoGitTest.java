@@ -26,16 +26,14 @@ import org.geogit.storage.bdbje.JEStorageModule;
 import org.geotools.util.NullProgressListener;
 import org.jeo.Tests;
 import org.jeo.data.Cursor;
-import org.jeo.data.Dataset;
 import org.jeo.data.Query;
 import org.jeo.data.Transaction;
 import org.jeo.data.VectorData;
 import org.jeo.feature.Feature;
-import org.jeo.feature.Features;
 import org.jeo.feature.Schema;
+import org.jeo.feature.SchemaBuilder;
 import org.jeo.geom.GeometryBuilder;
 import org.jeo.geotools.GT;
-import org.jeo.shp.Shapefile;
 import org.jeo.shp.ShpData;
 import org.junit.After;
 import org.junit.Before;
@@ -268,8 +266,9 @@ public class GeoGitTest {
 
     @Test
     public void testCreate() throws Exception {
-        Schema widgets = Features.schema("widgets", "shape", Polygon.class, "name", String.class, 
-            "cost", Double.class);
+        Schema widgets = new SchemaBuilder("widgets").field("shape", Polygon.class)
+            .field("name", String.class).field("cost", Double.class).schema();
+
         GeoGitDataset data = ws.create(widgets);
         assertEquals(0, data.count(new Query()));
 

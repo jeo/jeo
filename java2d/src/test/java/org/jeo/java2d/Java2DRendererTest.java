@@ -17,6 +17,7 @@ import org.jeo.data.mem.MemWorkspace;
 import org.jeo.feature.Feature;
 import org.jeo.feature.Features;
 import org.jeo.feature.Schema;
+import org.jeo.feature.SchemaBuilder;
 import org.jeo.geom.GeometryBuilder;
 import org.jeo.map.Map;
 import org.jeo.map.MapBuilder;
@@ -29,7 +30,7 @@ import org.junit.Test;
 import org.junit.rules.TestName;
 
 import com.vividsolutions.jts.geom.Envelope;
-import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.Point;
 
 
 public class Java2DRendererTest {
@@ -47,9 +48,9 @@ public class Java2DRendererTest {
         mem = new MemWorkspace();
 
         GeometryBuilder gb = new GeometryBuilder();
-
-        Schema schema = Features.schema(
-            "widgets", "geo", Geometry.class, "name", String.class, "cost", Double.class);
+        
+        Schema schema = new SchemaBuilder("widgets").field("geo", Point.class)
+            .field("name", String.class).field("cost", Double.class).schema();
         widgets = mem.create(schema);
         Cursor<Feature> c = widgets.cursor(new Query().append());
         

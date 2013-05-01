@@ -10,6 +10,8 @@ import org.jeo.data.Cursor;
 import org.jeo.data.Query;
 import org.jeo.feature.Feature;
 import org.jeo.feature.Features;
+import org.jeo.feature.Schema;
+import org.jeo.feature.SchemaBuilder;
 import org.jeo.geom.GeometryBuilder;
 import org.junit.Before;
 import org.junit.Test;
@@ -29,8 +31,12 @@ public class MemoryTest {
         GeometryBuilder gb = new GeometryBuilder();
 
         mem = new MemWorkspace();
-        MemVector data = mem.create(Features.schema("widgets", "geometry", Geometry.class, 
-            "id", Integer.class, "name", String.class, "cost", Double.class));
+        Schema schema = new SchemaBuilder("widgets")
+            .field("geometry", Geometry.class)
+            .field("id", Integer.class)
+            .field("name", String.class)
+            .field("cost", Double.class).schema();
+        MemVector data = mem.create(schema);
         data.getFeatures().add(Features.create(null, data.getSchema(), gb.point(0,0), 1, "anvil", 
             10.99));
         data.getFeatures().add(Features.create(null, data.getSchema(), gb.lineString(10,10,20,20), 

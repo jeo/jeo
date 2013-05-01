@@ -4,9 +4,9 @@ import static org.junit.Assert.*;
 import org.geotools.feature.simple.SimpleFeatureBuilder;
 import org.geotools.feature.simple.SimpleFeatureTypeBuilder;
 import org.jeo.feature.Feature;
-import org.jeo.feature.Features;
 import org.jeo.feature.MapFeature;
 import org.jeo.feature.Schema;
+import org.jeo.feature.SchemaBuilder;
 import org.jeo.geom.GeometryBuilder;
 import org.jeo.proj.Proj;
 import org.junit.Test;
@@ -40,8 +40,10 @@ public class GTTest {
 
     @Test
     public void testFromSchema() {
-        Schema schema = Features.schema("widgets", "geometry", Point.class, "name", 
-            String.class, "id", Integer.class, "price", Double.class); 
+        Schema schema = new SchemaBuilder("widgets").field("geometry", Point.class)
+            .field("name", String.class).field("id", Integer.class).field("price", Double.class)
+            .schema();
+         
         SimpleFeatureType featureType = GT.featureType(schema);
 
         assertNotNull(featureType.getDescriptor("geometry"));

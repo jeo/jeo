@@ -60,29 +60,4 @@ public class Features {
     public static ListFeature create(String id, Schema schema, Object... values) {
         return new ListFeature(id, Arrays.asList(values), schema);
     }
-
-    /**
-     * Creates a schema object.
-     * <p>
-     * Example usage:
-     * <pre>
-     * Features.schema("cities", "loc", Point.class, "name", String.class, "pop", Integer.class)
-     * </pre>
-     * </p>
-     * 
-     * @param name The schema name.
-     * @param fields A list of alternating String, Class pairs. 
-     */
-    public static Schema schema(String name, Object... fields) {
-        if (fields.length % 2 != 0) {
-            throw new IllegalArgumentException("fields must be specified as String,Class pairs");
-        }
-
-        List<Field> flds = new ArrayList<Field>();
-        for (int i = 0; i < fields.length; i += 2) {
-            flds.add(new Field((String) fields[i], (Class<?>)fields[i+1]));
-        }
-
-        return new Schema(name, flds);
-    }
 }

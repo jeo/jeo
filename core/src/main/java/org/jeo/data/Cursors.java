@@ -27,26 +27,36 @@ public class Cursors {
      * Returns the number of results in the cursor.
      */
     public static <T> int size(Cursor<T> cursor) throws IOException {
-        int count = 0;
-        while(cursor.hasNext()) {
-            cursor.next();
-            count++;
+        try {
+            int count = 0;
+            while(cursor.hasNext()) {
+                cursor.next();
+                count++;
+            }
+            return count;
         }
-        return count;
+        finally {
+            cursor.close();
+        }
     }
 
     /**
      * Returns the aggregated spatial extent of results in the cursor.
      */
     public static <T> Envelope extent(Cursor<T> cursor) throws IOException {
-        Envelope extent = new Envelope();
-        for (T obj : cursor) {
-            Envelope e = envelope(obj);
-            if (!e.isNull()) {
-                extent.expandToInclude(e);
+        try {
+            Envelope extent = new Envelope();
+            for (T obj : cursor) {
+                Envelope e = envelope(obj);
+                if (!e.isNull()) {
+                    extent.expandToInclude(e);
+                }
             }
+            return extent;
         }
-        return extent;
+        finally {
+            cursor.close();
+        }
     }
 
     /**

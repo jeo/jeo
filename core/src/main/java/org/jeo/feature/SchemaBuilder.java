@@ -1,7 +1,9 @@
 package org.jeo.feature;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.jeo.proj.Proj;
 import org.osgeo.proj4j.CoordinateReferenceSystem;
@@ -24,6 +26,7 @@ public class SchemaBuilder {
 
     String name;
     List<Field> fields = new ArrayList<Field>();
+    Map<String,Object> props;
 
     /**
      * Creates a new builder object.
@@ -43,8 +46,7 @@ public class SchemaBuilder {
      * @return This builder.
      */
     public SchemaBuilder field(String name, Class<?> type) {
-        fields.add(new Field(name, type));
-        return this;
+        return field(name, (Class) type, (CoordinateReferenceSystem)null);
     }
 
     /**
@@ -70,7 +72,26 @@ public class SchemaBuilder {
      * @return This builder.
      */
     public SchemaBuilder field(String name, Class<? extends Geometry> type, CoordinateReferenceSystem crs) {
-        fields.add(new Field(name, type, crs));
+        fields.add(new Field(name, type, crs, props));
+        props = null;
+        return this;
+    }
+
+    /**
+     * Adds a property to be set on the next field.
+     * <p>
+     * This value is discarded after the next call to <tt>field()</tt>
+     * </p>
+     * @param key The property key.
+     * @param value The property value.
+     * 
+     * @see {@link Field#getProperty(String)}
+     */
+    public SchemaBuilder property(String key, Object value) {
+        if (props == null) {
+            props = new LinkedHashMap<String, Object>();
+        }
+        props.put(key, value);
         return this;
     }
 

@@ -1,5 +1,7 @@
 package org.jeo.feature;
 
+import java.util.Map;
+
 import org.osgeo.proj4j.CoordinateReferenceSystem;
 
 import com.vividsolutions.jts.geom.Geometry;
@@ -20,8 +22,15 @@ public class Field {
     /** field crs */
     CoordinateReferenceSystem crs;
 
+    /** additional properties */
+    Map<String,Object> props;
+
     public Field(String name, Class<?> type) {
-        this(name, type, null);
+        this(name, type, null, null);
+    }
+
+    public Field(String name, Class<?> type, Map<String,Object> props) {
+        this(name, type, null, props);
     }
 
     public Field(String name, Class<?> type, CoordinateReferenceSystem crs) {
@@ -30,6 +39,13 @@ public class Field {
         this.crs = crs;
     }
 
+    public Field(String name, Class<?> type, CoordinateReferenceSystem crs, Map<String,Object> props) {
+        this.name = name;
+        this.type = type != null ? type : Object.class;
+        this.crs = crs;
+        this.props = props;
+    }
+    
     /**
      * The name of the field.
      */
@@ -64,6 +80,21 @@ public class Field {
      */
     public CoordinateReferenceSystem getCRS() {
         return crs;
+    }
+
+    /**
+     * Gets an extended property of the field.
+     * <p>
+     * Typically extended properties are specific to a particular driver that needs to associate
+     * format specific information with a field.
+     * </p> 
+     * 
+     * @param key The property key.
+     * 
+     * @return The property value or <code>null</code> if no such property is defined.
+     */
+    public Object getProperty(String key) {
+        return props != null ? props.get(key) : null;
     }
 
     @Override

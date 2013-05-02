@@ -67,22 +67,14 @@ public interface Feature {
     void put(String key, Object val);
 
     /**
-     * Derived geometry of the feature.
-     * <p>
-     * If the feature object has a schema set then {@link Schema#geometry()} is used to locate 
-     * a geometry object. If unavailable the {@link #findGeometry()} is used to locate a geometry
-     * instance.
-     * </p>
-     * @return a {@link Geometry} object, or <code>null</code> if it could not be found.
+     * Geometry of the feature.
+     *
+     * @return a {@link Geometry} object, or <code>null</code> if the feature has no geometry.
      */
     Geometry geometry();
 
     /**
-     * The lazily created schema for the feature. 
-     * <p>
-     * If the {@link #schema} member is set for the feature it is returned. Otherwise the 
-     * {@link #buildSchema()} is used to derive a schema for the feature.
-     * </p>
+     * The created schema for the feature. 
      */
     Schema schema();
 

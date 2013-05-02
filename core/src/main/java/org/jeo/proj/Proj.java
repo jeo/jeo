@@ -2,9 +2,12 @@ package org.jeo.proj;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.text.ParseException;
 
 import org.jeo.geom.GeometryBuilder;
+import org.jeo.proj.wkt.ProjWKTParser;
 import org.osgeo.proj4j.CRSFactory;
 import org.osgeo.proj4j.CoordinateReferenceSystem;
 import org.osgeo.proj4j.CoordinateTransform;
@@ -70,8 +73,8 @@ public class Proj {
 
     private static CoordinateReferenceSystem createFromExtra(String auth, String code) {
         Proj4FileReader r = new Proj4FileReader();
-        BufferedReader in = new BufferedReader(
-            new InputStreamReader(Proj.class.getResourceAsStream("other.extra")));
+        InputStream in = Proj.class.getResourceAsStream("other.extra");
+        
         try {
             try {
                 return csFactory.createFromParameters(
@@ -227,6 +230,17 @@ public class Proj {
         public ProjCoordinate transform(ProjCoordinate src, ProjCoordinate tgt) throws Proj4jException {
             return src;
         }
-    
+    }
+
+    public static CoordinateReferenceSystem parseWKT(String wkt) {
+        try {
+            return new ProjWKTParser().parse(wkt);
+        } catch (ParseException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static String asWKT(CoordinateReferenceSystem crs) {
+        return null;
     }
 }

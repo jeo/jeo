@@ -2,8 +2,10 @@ package org.jeo.proj;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import org.jeo.geom.GeometryBuilder;
+import org.jeo.proj.wkt.ProjWKTParser;
 import org.junit.Test;
 import org.osgeo.proj4j.CoordinateReferenceSystem;
 
@@ -54,4 +56,34 @@ public class ProjTest {
         assertNotNull(Proj.crs("epsg:900913"));
     }
 
+    @Test
+    public void testParseWKT() throws Exception {
+        String wkt = dq("GEOGCS['GCS_WGS_1984'," +
+                        "DATUM['WGS_1984', " +
+                            "SPHEROID['WGS_1984',6378137,298.257223563]]," +
+                        "PRIMEM['Greenwich',0]," +
+                        "UNIT['Degree',0.017453292519943295]]");
+
+        CoordinateReferenceSystem crs1 = Proj.parseWKT(wkt);
+        CoordinateReferenceSystem crs2 = Proj.crs("epsg:4326");
+        CoordinateReferenceSystem crs3 = Proj.crs("epsg:3157");
+
+        Point p1 = new GeometryBuilder().point(-117, 63.15);
+        Point p2 = new GeometryBuilder().point(-117, 63.15);
+
+        p1 = Proj.reproject(p1, crs1, crs3);
+        p2 = Proj.reproject(p2, crs2, crs3);
+        assertTrue(p1.equals(p2));
+    }
+
+    @Test
+    public void testEncodeWKT() throws Exception {
+        CoordinateReferenceSystem crs = Proj.crs("epsg:4326");
+        System.out.println();
+    }
+    
+    String dq(String str) {
+        return str.replaceAll("'", "\"");
+    }
+    
 }

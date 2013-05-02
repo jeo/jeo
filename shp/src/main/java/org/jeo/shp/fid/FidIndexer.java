@@ -21,6 +21,7 @@ import static org.jeo.shp.file.ShpFileType.*;
 import java.io.IOException;
 import java.net.URL;
 
+import org.jeo.shp.Shapefile;
 import org.jeo.shp.file.ShpFiles;
 import org.jeo.shp.file.StorageFile;
 import org.jeo.shp.shp.IndexFile;
@@ -38,7 +39,7 @@ import org.slf4j.LoggerFactory;
  * @source $URL$
  */
 public class FidIndexer {
-    static Logger LOGGER = LoggerFactory.getLogger(FidIndexer.class);
+    static Logger LOGGER = LoggerFactory.getLogger(Shapefile.class);
 
     /**
      * Generates the FID index file for the shpFile

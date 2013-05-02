@@ -86,7 +86,7 @@ public class GeoPkgWorkspace implements Workspace {
         }
     }
 
-    Logger LOG = LoggerFactory.getLogger(GeoPkgWorkspace.class);
+    Logger LOG = LoggerFactory.getLogger(GeoPackage.class);
 
     /** name of geopackage contents table */
     static final String GEOPACKAGE_CONTENTS = "geopackage_contents";

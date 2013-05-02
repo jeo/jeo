@@ -21,6 +21,7 @@ import java.nio.DoubleBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.jeo.shp.Shapefile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,7 +46,7 @@ import com.vividsolutions.jts.geom.Polygon;
  * @version $Id$
  */
 public class PolygonHandler implements ShapeHandler {
-    protected static final Logger LOGGER = LoggerFactory.getLogger(PolygonHandler.class);
+    protected static final Logger LOGGER = LoggerFactory.getLogger(Shapefile.class);
     
     GeometryFactory geometryFactory;
 

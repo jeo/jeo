@@ -28,6 +28,7 @@ import java.util.Arrays;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+import org.jeo.shp.Shapefile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,7 +42,7 @@ import org.slf4j.LoggerFactory;
  * @source $URL$
  */
 public final class StorageFile implements Comparable<StorageFile>, FileWriter {
-    static final Logger LOGGER = LoggerFactory.getLogger(StorageFile.class);
+    static final Logger LOGGER = LoggerFactory.getLogger(Shapefile.class);
     
     private final ShpFiles shpFiles;
     private final File tempFile;

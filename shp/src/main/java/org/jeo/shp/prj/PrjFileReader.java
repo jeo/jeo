@@ -28,6 +28,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.jeo.proj.Proj;
+import org.jeo.shp.Shapefile;
 import org.jeo.shp.file.FileReader;
 import org.jeo.shp.file.NIOUtilities;
 import org.jeo.shp.file.ShpFileType;
@@ -44,7 +45,7 @@ import org.slf4j.LoggerFactory;
  */
 public class PrjFileReader implements FileReader {
 
-    static Logger LOGGER = LoggerFactory.getLogger(PrjFileReader.class);
+    static Logger LOGGER = LoggerFactory.getLogger(Shapefile.class);
 
     static Pattern EPSG_REGEX = Pattern.compile("\\[\"EPSG\",\"(\\d+)\"\\]");
     

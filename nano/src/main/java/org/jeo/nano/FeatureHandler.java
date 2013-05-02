@@ -40,7 +40,7 @@ import com.vividsolutions.jts.geom.Envelope;
 
 public class FeatureHandler extends Handler {
 
-    static final Logger LOG = LoggerFactory.getLogger(FeatureHandler.class);
+    static final Logger LOG = LoggerFactory.getLogger(NanoJeoServer.class);
 
     // /features/<workspace>[/<layer>]
     static final Pattern FEATURES_URI_RE = 

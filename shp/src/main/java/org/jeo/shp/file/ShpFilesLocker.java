@@ -20,11 +20,12 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 
+import org.jeo.shp.Shapefile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 class ShpFilesLocker {
-    static final Logger LOGGER = LoggerFactory.getLogger(ShpFilesLocker.class);
+    static final Logger LOGGER = LoggerFactory.getLogger(Shapefile.class);
     
     /**
      * When true, the stack trace that got a lock that wasn't released is recorded and then

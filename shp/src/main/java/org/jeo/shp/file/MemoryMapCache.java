@@ -25,6 +25,7 @@ import java.nio.channels.FileChannel.MapMode;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.jeo.shp.Shapefile;
 import org.jeo.shp.file.SoftValueHashMap.ValueCleaner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,7 +39,7 @@ import org.slf4j.LoggerFactory;
  */
 class MemoryMapCache {
 	
-	static final Logger LOGGER = LoggerFactory.getLogger(MemoryMapCache.class);
+	static final Logger LOGGER = LoggerFactory.getLogger(Shapefile.class);
 
     SoftValueHashMap<MappingKey, MappedByteBuffer> buffers = new SoftValueHashMap<MappingKey, MappedByteBuffer>(0, new BufferCleaner());
     

@@ -48,6 +48,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
+import org.jeo.shp.Shapefile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -74,7 +75,7 @@ import org.slf4j.LoggerFactory;
  */
 public class ShpFiles {
 
-    static final Logger LOGGER = LoggerFactory.getLogger(ShpFiles.class);
+    static final Logger LOGGER = LoggerFactory.getLogger(Shapefile.class);
 
     /**
      * The urls for each type of file that is associated with the shapefile. The key is the type of

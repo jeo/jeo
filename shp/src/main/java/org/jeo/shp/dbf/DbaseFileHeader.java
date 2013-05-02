@@ -32,6 +32,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
+import org.jeo.shp.Shapefile;
 import org.jeo.shp.file.NIOUtilities;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -70,7 +71,7 @@ public class DbaseFileHeader {
 
     private int largestFieldSize = 0;
 
-    private Logger logger = LoggerFactory.getLogger(DbaseFileHeader.class);
+    private Logger logger = LoggerFactory.getLogger(Shapefile.class);
 
     /**
      * Returns the number of millis at January 1st 4713 BC

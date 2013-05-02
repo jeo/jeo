@@ -16,6 +16,7 @@
  */
 package org.jeo.shp.file;
 
+import org.jeo.shp.Shapefile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,7 +26,7 @@ import org.slf4j.LoggerFactory;
  * @source $URL$
  */
 public class StreamLogging {
-    private static final Logger LOGGER = LoggerFactory.getLogger("org.geotools.data.shapefile");
+    private static final Logger LOGGER = LoggerFactory.getLogger(Shapefile.class);
 
     private String name;
     private int open = 0;

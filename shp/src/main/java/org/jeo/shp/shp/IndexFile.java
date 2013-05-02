@@ -24,6 +24,7 @@ import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.channels.ReadableByteChannel;
 
+import org.jeo.shp.Shapefile;
 import org.jeo.shp.file.FileReader;
 import org.jeo.shp.file.NIOUtilities;
 import org.jeo.shp.file.ShpFileType;
@@ -48,7 +49,7 @@ import org.slf4j.LoggerFactory;
  * @source $URL$
  */
 public class IndexFile implements FileReader {
-    private static final Logger LOGGER = LoggerFactory.getLogger(IndexFile.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(Shapefile.class);
 
     private static final int RECS_IN_BUFFER = 2000;
 

@@ -19,6 +19,7 @@ package org.jeo.shp.file;
 import java.lang.ref.Reference;
 import java.lang.ref.ReferenceQueue;
 
+import org.jeo.shp.Shapefile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,7 +40,7 @@ import org.slf4j.LoggerFactory;
  * @author Martin Desruisseaux (IRD)
  */
 public final class WeakCollectionCleaner extends Thread {
-    static final Logger LOGGER = LoggerFactory.getLogger(WeakCollectionCleaner.class);
+    static final Logger LOGGER = LoggerFactory.getLogger(Shapefile.class);
 
     /**
      * The default thread.

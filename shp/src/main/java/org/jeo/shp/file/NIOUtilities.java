@@ -28,6 +28,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 
+import org.jeo.shp.Shapefile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -293,7 +294,7 @@ public final class NIOUtilities {
         }
     }
 
-    final static Logger LOGGER = LoggerFactory.getLogger("org.geotools.io");
+    final static Logger LOGGER = LoggerFactory.getLogger(Shapefile.class);
     /**
      * Logs a warning message.
      */

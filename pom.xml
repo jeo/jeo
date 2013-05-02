@@ -155,6 +155,7 @@
     <module>shp</module>
     <module>geotools</module>
     <module>geogit</module>
+    <module>postgis</module>
     <module>java2d</module>
     <module>agg</module>
     <module>carto</module>

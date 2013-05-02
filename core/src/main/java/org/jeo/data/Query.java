@@ -11,6 +11,7 @@ import org.jeo.filter.cql.CQL;
 import org.jeo.filter.cql.ParseException;
 import org.jeo.geom.Geom;
 import org.jeo.proj.Proj;
+import org.jeo.util.Key;
 import org.osgeo.proj4j.CoordinateReferenceSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,38 +31,38 @@ public class Query {
     /**
      * Query option for filtering results returned. 
      */
-    public static final Option<Filter> FILTER = new Option<Filter>("filter");
+    public static final Key<Filter> FILTER = new Key<Filter>("filter", Filter.class);
     
     /**
      * Query option for limiting the number of results returned. 
      */
-    public static final Option<Integer> LIMIT = new Option<Integer>("limit");
+    public static final Key<Integer> LIMIT = new Key<Integer>("limit", Integer.class);
 
     /**
      * Query option for skipping over number of results. 
      */
-    public static final Option<Integer> OFFSET = new Option<Integer>("offset");
+    public static final Key<Integer> OFFSET = new Key<Integer>("offset", Integer.class);
 
     /**
      * Query option for sorting results.
      */
-    public static final Option<List<Sort>> SORT = new Option<List<Sort>>("sort");
+    public static final Key<List<Sort>> SORT = new Key<List<Sort>>("sort", (Class) List.class);
 
     /**
      * Query option for re-projecting results.
      */
-    public static final Option<CoordinateReferenceSystem> REPROJECT = 
-        new Option<CoordinateReferenceSystem>("reproject");
+    public static final Key<CoordinateReferenceSystem> REPROJECT = 
+        new Key<CoordinateReferenceSystem>("reproject", CoordinateReferenceSystem.class);
 
     /**
      * Query option for simplifying geometry of results.
      */
-    public static final Option<Double> SIMPLIFY = new Option<Double>("simplify");
+    public static final Key<Double> SIMPLIFY = new Key<Double>("simplify", Double.class);
 
     /**
-     * Properties to include in query.
+     * Fields to include in query.
      */
-    List<String> properties = new ArrayList<String>();
+    List<String> fields = new ArrayList<String>();
 
     /**
      * Spatial bounds of the query.
@@ -93,8 +94,8 @@ public class Query {
      * List of Feature properties to query, an empty list means all properties.
      *
      */
-    public List<String> getProperties() {
-        return properties;
+    public List<String> getFields() {
+        return fields;
     }
 
     /**
@@ -126,22 +127,22 @@ public class Query {
     }
 
     /**
-     * Sets the property list of the query.
+     * Sets the field list of the query.
      * 
      * @return This object.
      */
-    public Query properties(String... properties) {
-        return properties(Arrays.asList(properties));
+    public Query fields(String... properties) {
+        return fields(Arrays.asList(properties));
     }
 
     /**
-     * Sets the property list of the query.
+     * Sets the field list of the query.
      * 
      * @return This object.
      */
-    public Query properties(List<String> properties) {
-        properties.clear();
-        properties.addAll(properties);
+    public Query fields(List<String> fields) {
+        this.fields.clear();
+        this.fields.addAll(fields);
         return this;
     }
 
@@ -281,15 +282,15 @@ public class Query {
     /**
      * Sets a query option. 
      */
-    public <T> void set(Option<T> opt, T value) {
-        options.put(opt.key, value);
+    public <T> void set(Key<T> key, T value) {
+        options.put(key.getName(), value);
     }
 
     /**
      * Gets a query option. 
      */
-    public <T> T get(Option<T> opt) {
-        return (T) options.get(opt.key);
+    public <T> T get(Key<T> key) {
+        return (T) options.get(key.getName());
     }
 
     /**
@@ -299,9 +300,9 @@ public class Query {
      * natively by the dataset. 
      * </p>
      */
-    public <T> T consume(Option<T> opt, T def) {
-        if (options.containsKey(opt.key)) {
-            return (T) options.remove(opt.key);
+    public <T> T consume(Key<T> key, T def) {
+        if (options.containsKey(key.getName())) {
+            return (T) options.remove(key.getName());
         }
         return null;
     }
@@ -352,7 +353,7 @@ public class Query {
         result = prime * result + ((bounds == null) ? 0 : bounds.hashCode());
         result = prime * result + ((options == null) ? 0 : options.hashCode());
         result = prime * result
-                + ((properties == null) ? 0 : properties.hashCode());
+                + ((fields == null) ? 0 : fields.hashCode());
         return result;
     }
 
@@ -375,10 +376,10 @@ public class Query {
                 return false;
         } else if (!options.equals(other.options))
             return false;
-        if (properties == null) {
-            if (other.properties != null)
+        if (fields == null) {
+            if (other.fields != null)
                 return false;
-        } else if (!properties.equals(other.properties))
+        } else if (!fields.equals(other.fields))
             return false;
         return true;
     }

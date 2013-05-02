@@ -19,7 +19,6 @@ package org.jeo.shp.shp;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 
 import org.jeo.shp.file.NIOUtilities;

@@ -16,7 +16,7 @@
  */
 package org.jeo.shp.fid;
 
-import static org.jeo.shp.file.ShpFileType.*;
+import static org.jeo.shp.file.ShpFileType.FIX;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;

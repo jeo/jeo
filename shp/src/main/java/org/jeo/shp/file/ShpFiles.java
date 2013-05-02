@@ -16,7 +16,8 @@
  */
 package org.jeo.shp.file;
 
-import static org.jeo.shp.file.ShpFileType.*;
+import static org.jeo.shp.file.ShpFileType.DBF;
+import static org.jeo.shp.file.ShpFileType.SHP;
 
 import java.io.File;
 import java.io.FileNotFoundException;

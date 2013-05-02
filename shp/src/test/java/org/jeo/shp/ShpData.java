@@ -1,6 +1,8 @@
 package org.jeo.shp;
 
-import static org.jeo.Tests.*;
+import static org.jeo.Tests.newTmpDir;
+import static org.jeo.Tests.unzip;
+
 import java.io.File;
 import java.io.IOException;
 

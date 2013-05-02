@@ -16,7 +16,8 @@
  */
 package org.jeo.shp.fid;
 
-import static org.jeo.shp.file.ShpFileType.*;
+import static org.jeo.shp.file.ShpFileType.FIX;
+import static org.jeo.shp.file.ShpFileType.SHP;
 
 import java.io.IOException;
 import java.net.URL;

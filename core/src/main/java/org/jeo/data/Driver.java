@@ -27,13 +27,21 @@ public interface Driver<T> {
     /**
      * Name identifying the driver.
      * <p>
-     * This name should be no more than a few words (ideally one) and isn't meant to 
-     * be a description.  
+     * This name should be no more than a few words (ideally one). It isn't meant to be a 
+     * description but should be human readable. 
      * </p>
      */
     String getName();
 
-   /**
+    /**
+     * Secondary names identifying the driver.
+     * <p>
+     * Aliases are typically shorter abbreviations for {@link #getName()}  
+     * </p>
+     */
+    List<String> getAliases();
+
+    /**
      * Returns the class of object returned by the driver.
      */
     Class<T> getType();

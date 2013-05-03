@@ -3,6 +3,7 @@ package org.jeo.data;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -21,6 +22,11 @@ public abstract class FileDriver<T> implements Driver<T> {
      * Key specifying the file path.
      */
     public static final Key<File> FILE = new Key<File>("file", File.class);
+
+    @Override
+    public List<String> getAliases() {
+        return Collections.emptyList();
+    }
 
     @Override
     public List<Key<?>> getKeys() {

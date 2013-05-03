@@ -2,6 +2,8 @@ package org.jeo.shp;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 import org.jeo.data.FileDriver;
@@ -15,6 +17,11 @@ public class Shapefile extends FileDriver<ShpDataset> {
     @Override
     public String getName() {
         return "Shapefile";
+    }
+
+    @Override
+    public List<String> getAliases() {
+        return Arrays.asList("shp");
     }
 
     @Override

@@ -1,6 +1,7 @@
 package org.jeo.data.mem;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -17,6 +18,11 @@ public class Memory implements Driver<MemWorkspace> {
     @Override
     public String getName() {
         return "Memory";
+    }
+
+    @Override
+    public List<String> getAliases() {
+        return Arrays.asList("mem");
     }
 
     @Override

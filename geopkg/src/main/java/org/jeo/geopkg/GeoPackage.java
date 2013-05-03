@@ -2,6 +2,8 @@ package org.jeo.geopkg;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 import org.jeo.data.FileDriver;
@@ -15,6 +17,11 @@ public class GeoPackage extends FileDriver<GeoPkgWorkspace> {
     @Override
     public String getName() {
         return "GeoPackage";
+    }
+
+    @Override
+    public List<String> getAliases() {
+        return Arrays.asList("geopkg");
     }
 
     @Override

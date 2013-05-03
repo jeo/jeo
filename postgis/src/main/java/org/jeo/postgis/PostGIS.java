@@ -27,6 +27,11 @@ public class PostGIS implements Driver<PostGISWorkspace>{
     }
 
     @Override
+    public List<String> getAliases() {
+        return Arrays.asList("pg");
+    }
+
+    @Override
     public Class<PostGISWorkspace> getType() {
         return PostGISWorkspace.class;
     }

@@ -1,9 +1,12 @@
 package org.jeo.data.mem;
 
 import java.io.IOException;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 import org.jeo.data.Driver;
+import org.jeo.util.Key;
 
 public class Memory implements Driver<MemWorkspace> {
 
@@ -19,6 +22,11 @@ public class Memory implements Driver<MemWorkspace> {
     @Override
     public Class<MemWorkspace> getType() {
         return MemWorkspace.class;
+    }
+
+    @Override
+    public List<Key<?>> getKeys() {
+        return Collections.emptyList();
     }
 
     @Override

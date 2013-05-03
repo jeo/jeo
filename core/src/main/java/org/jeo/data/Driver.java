@@ -1,7 +1,10 @@
 package org.jeo.data;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
+
+import org.jeo.util.Key;
 
 /**
  * Format driver.
@@ -34,6 +37,11 @@ public interface Driver<T> {
      * Returns the class of object returned by the driver.
      */
     Class<T> getType();
+
+    /**
+     * Returns the keys supported by the driver.
+     */
+    List<Key<?>> getKeys();
 
     /**
      * Determines if this driver can open a connection to the data described by the specified

@@ -2,6 +2,8 @@ package org.jeo.geogit;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 import org.geogit.api.GeoGIT;
@@ -30,6 +32,11 @@ public class GeoGit extends FileDriver<GeoGitWorkspace> {
     @Override
     public String getName() {
         return "GeoGIT";
+    }
+
+    @Override
+    public List<Key<?>> getKeys() {
+        return (List) Arrays.asList(FILE, CREATE, USER, EMAIL);
     }
 
     @Override

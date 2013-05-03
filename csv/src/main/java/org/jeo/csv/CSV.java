@@ -2,6 +2,8 @@ package org.jeo.csv;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 import org.jeo.data.FileDriver;
@@ -25,6 +27,11 @@ public class CSV extends FileDriver<CSVDataset> {
     @Override
     public String getName() {
         return "CSV";
+    }
+
+    @Override
+    public List<Key<?>> getKeys() {
+        return (List) Arrays.asList(FILE, DELIM, HEADER, X, Y);
     }
 
     @Override

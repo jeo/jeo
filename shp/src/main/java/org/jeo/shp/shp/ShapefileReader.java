@@ -16,13 +16,13 @@
  */
 package org.jeo.shp.shp;
 
-import java.io.EOFException;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.channels.FileChannel;
 import java.nio.channels.ReadableByteChannel;
 
+import org.jeo.shp.Shapefile;
 import org.jeo.shp.file.FileReader;
 import org.jeo.shp.file.NIOUtilities;
 import org.jeo.shp.file.ShpFileType;
@@ -34,13 +34,9 @@ import org.slf4j.LoggerFactory;
 import com.vividsolutions.jts.geom.CoordinateSequence;
 import com.vividsolutions.jts.geom.CoordinateSequenceFactory;
 import com.vividsolutions.jts.geom.Envelope;
-import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.LinearRing;
-import com.vividsolutions.jts.geom.MultiLineString;
-import com.vividsolutions.jts.geom.MultiPoint;
-import com.vividsolutions.jts.geom.MultiPolygon;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
 
@@ -64,7 +60,7 @@ import com.vividsolutions.jts.geom.Polygon;
  * @source $URL$
  */
 public class ShapefileReader implements FileReader {
-    private static final Logger LOGGER = LoggerFactory.getLogger(ShapefileReader.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(Shapefile.class);
     
     /**
      *  Used to mark the current shape is not known, either because someone moved the reader

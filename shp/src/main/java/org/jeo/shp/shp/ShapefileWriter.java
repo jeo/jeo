@@ -191,9 +191,11 @@ public class ShapefileWriter {
      * the record section of the shapefile. The headers MUST be rewritten after
      * this operation, or the file may be corrupt...
      */
-    public void skipHeaders() throws IOException {
+    public void skipHeaders(ShapefileHeader header) throws IOException {
         if (shapeBuffer == null)
             allocateBuffers();
+        type = header.getShapeType();
+        handler = type.getShapeHandler(gf);
         shpChannel.position(100);
         shxChannel.position(100);
     }

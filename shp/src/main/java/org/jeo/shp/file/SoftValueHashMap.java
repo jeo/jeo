@@ -28,6 +28,7 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
 
+import org.jeo.shp.Shapefile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -58,7 +59,7 @@ import org.slf4j.LoggerFactory;
  * @author Martin Desruisseaux
  */
 public class SoftValueHashMap<K,V> extends AbstractMap<K,V> {
-    static final Logger LOGGER = LoggerFactory.getLogger(SoftValueHashMap.class);
+    static final Logger LOGGER = LoggerFactory.getLogger(Shapefile.class);
     
     /**
      * The default value for {@link #hardReferencesCount}.

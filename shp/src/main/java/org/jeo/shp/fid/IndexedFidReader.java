@@ -16,7 +16,7 @@
  */
 package org.jeo.shp.fid;
 
-import static org.jeo.shp.file.ShpFileType.*;
+import static org.jeo.shp.file.ShpFileType.FIX;
 
 import java.io.IOException;
 import java.net.URL;
@@ -25,6 +25,7 @@ import java.nio.channels.FileChannel;
 import java.nio.channels.ReadableByteChannel;
 import java.util.NoSuchElementException;
 
+import org.jeo.shp.Shapefile;
 import org.jeo.shp.file.FileReader;
 import org.jeo.shp.file.NIOUtilities;
 import org.jeo.shp.file.ShpFiles;
@@ -43,7 +44,7 @@ import org.slf4j.LoggerFactory;
  * @source $URL$
  */
 public class IndexedFidReader implements FileReader {
-    private static final Logger LOGGER = LoggerFactory.getLogger(IndexedFidReader.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(Shapefile.class);
     private ReadableByteChannel readChannel;
     private ByteBuffer buffer;
     private long count;

@@ -64,7 +64,7 @@ public class ProjTest {
                         "PRIMEM['Greenwich',0]," +
                         "UNIT['Degree',0.017453292519943295]]");
 
-        CoordinateReferenceSystem crs1 = Proj.parseWKT(wkt);
+        CoordinateReferenceSystem crs1 = Proj.fromWKT(wkt);
         CoordinateReferenceSystem crs2 = Proj.crs("epsg:4326");
         CoordinateReferenceSystem crs3 = Proj.crs("epsg:3157");
 
@@ -79,9 +79,8 @@ public class ProjTest {
     @Test
     public void testEncodeWKT() throws Exception {
         CoordinateReferenceSystem crs = Proj.crs("epsg:4326");
-        System.out.println();
     }
-    
+
     String dq(String str) {
         return str.replaceAll("'", "\"");
     }

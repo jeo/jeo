@@ -1,7 +1,5 @@
 package org.jeo.proj.wkt;
 
-import java.text.ParseException;
-
 import org.osgeo.proj4j.CoordinateReferenceSystem;
 import org.osgeo.proj4j.datum.Datum;
 import org.osgeo.proj4j.datum.Ellipsoid;
@@ -14,11 +12,11 @@ public class ProjWKTEncoder {
 
     private static String q = "\"";
 
-    public String encode(CoordinateReferenceSystem crs) throws ParseException {
+    public String encode(CoordinateReferenceSystem crs) {
         return encode(crs, true);
     }
     
-    public String encode(CoordinateReferenceSystem crs, boolean format) throws ParseException {
+    public String encode(CoordinateReferenceSystem crs, boolean format) {
         return encodeCRS(crs, new StringBuilder(), format ? 0 : -1);
     }
 

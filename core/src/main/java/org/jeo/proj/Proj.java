@@ -7,6 +7,7 @@ import java.io.InputStreamReader;
 import java.text.ParseException;
 
 import org.jeo.geom.GeometryBuilder;
+import org.jeo.proj.wkt.ProjWKTEncoder;
 import org.jeo.proj.wkt.ProjWKTParser;
 import org.osgeo.proj4j.CRSFactory;
 import org.osgeo.proj4j.CoordinateReferenceSystem;
@@ -232,7 +233,12 @@ public class Proj {
         }
     }
 
-    public static CoordinateReferenceSystem parseWKT(String wkt) {
+    /**
+     * Creates a crs from Well Known Text. 
+     * 
+     * @param wkt WKT representation of a CRS.
+     */
+    public static CoordinateReferenceSystem fromWKT(String wkt) {
         try {
             return new ProjWKTParser().parse(wkt);
         } catch (ParseException e) {
@@ -240,7 +246,14 @@ public class Proj {
         }
     }
 
-    public static String asWKT(CoordinateReferenceSystem crs) {
-        return null;
+    /**
+     * Encodes a crs as Well Known Text.
+     *  
+     * @param crs The coordinate reference system.
+     * @param format Whether to format the encoded result.
+     * 
+     */
+    public static String toWKT(CoordinateReferenceSystem crs, boolean format) {
+        return new ProjWKTEncoder().encode(crs, format);
     }
 }

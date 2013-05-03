@@ -2,6 +2,7 @@ package org.jeo.data;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -20,6 +21,11 @@ public abstract class FileDriver<T> implements Driver<T> {
      * Key specifying the file path.
      */
     public static final Key<File> FILE = new Key<File>("file", File.class);
+
+    @Override
+    public List<Key<?>> getKeys() {
+        return (List) Arrays.asList(FILE);
+    }
 
     /**
      * Checks for the existence of the {@link FileDriver#FILE} key and calls through to 

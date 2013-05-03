@@ -2,12 +2,12 @@ package org.jeo.data;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.LinkedHashSet;
 import java.util.Map;
-import java.util.Set;
 
+import org.jeo.feature.Schema;
 import org.jeo.util.Key;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,37 +20,46 @@ import org.slf4j.LoggerFactory;
 public class Drivers {
 
     /** logger */
-    static Logger LOG = LoggerFactory.getLogger(Drivers.class);
+    static final Logger LOG = LoggerFactory.getLogger(Drivers.class);
 
-    /** list of registered drivers */
-    static Set<Class<? extends Driver<?>>> drivers = new LinkedHashSet<Class<? extends Driver<?>>>();
+    /** driver registry */
+    static final DriverRegistry REGISTRY = new ServiceLoaderDriverRegistry();
 
     /**
      * Lists all registered drivers.
      */
     public static Iterator<Driver<?>> list() {
-        return list(Driver.class);
+        return list(REGISTRY);
+    }
+
+    /**
+     * Lists all registered drivers from the specified registry.
+     */
+    public static Iterator<Driver<?>> list(DriverRegistry registry) {
+        return list(Driver.class, registry);
     }
 
     /**
      * Lists all registered drivers that extend from the specified class.
      */
     public static Iterator<Driver<?>> list(final Class<?> filter) {
-        final Iterator<Class<? extends Driver<?>>> it = drivers.iterator();
+        return list(filter, REGISTRY);
+    }
+
+    /**
+     * Lists all registered drivers from the specified registry that extend from the specified class.
+     */
+    public static Iterator<Driver<?>> list(final Class<?> filter, DriverRegistry registry) {
+        final Iterator<? extends Driver<?>> it = registry.list();
         return new Iterator<Driver<?>>() {
             Driver<?> next;
 
             @Override
             public boolean hasNext() {
                 while(next == null && it.hasNext()) {
-                    Class<? extends Driver<?>> clazz = it.next();
-                    if (filter == null || filter.isAssignableFrom(clazz)) {
-                        try {
-                            next = clazz.newInstance();
-                            break;
-                        } catch (Exception e) {
-                            LOG.debug("Unable to instantiate driver class: " + clazz, e);
-                        }
+                    next = it.next();
+                    if (filter == null || !filter.isInstance(next)) {
+                        next = null;
                     }
                 }
 
@@ -75,10 +84,43 @@ public class Drivers {
     }
 
     /**
-     * Registers a driver.
+     * Looks up a driver by name.
+     *
+     * @see Drivers#find(String, DriverRegistry)
      */
-    public static void register(Class<? extends Driver<?>> d) {
-        drivers.add(d);
+    public static Driver<?> find(String name) {
+        return find(name, REGISTRY);
+    }
+
+    /**
+     * Looks up a driver by name from the specified registry.
+     * <p>
+     * This method does a case-insensitive comparison.
+     * </p>
+     * 
+     * @param name The driver name.
+     * 
+     * @return The matching driver, or <code>null</code> if no match was found.
+     * 
+     * @see Driver#getName()
+     */
+    public static Driver<?> find(String name, DriverRegistry registry) {
+        for (Iterator<Driver<?>> it = list(registry); it.hasNext();) {
+            Driver<?> d = it.next();
+            if (name.equalsIgnoreCase(d.getName())) {
+                return d;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Opens a connection to data specified by a file.
+     * 
+     * @see Drivers#open(File, Class, DriverRegistry)
+     */
+    public static <T> T open(File file, Class<T> clazz) throws IOException {
+        return open(file, clazz, REGISTRY);
     }
 
     /**
@@ -99,7 +141,7 @@ public class Drivers {
      * @throws IOException Any connection errors, such as a file system error or 
      *   database connection failure. 
      */
-    public static <T> T open(File file, Class<T> clazz) throws IOException {
+    public static <T> T open(File file, Class<T> clazz, DriverRegistry registry) throws IOException {
         Map<Key<?>,Object> opts = new HashMap<Key<?>,Object>();
         opts.put(FileDriver.FILE, file);
 
@@ -125,12 +167,108 @@ public class Drivers {
      *   database connection failure. 
      */
     public static <T> T open(Map<?, Object> opts, Class<T> clazz) throws IOException {
-        return open(opts, clazz, list());
+        return open(opts, clazz, REGISTRY);
+    }
+    
+    public static <T> T open(Map<?, Object> opts, Class<T> clazz, DriverRegistry registry) 
+        throws IOException {
+        return open(opts, clazz, list(registry));
+    }
+
+    public static <T> T open(URI uri, Class<T> clazz) throws IOException {
+        return open(uri, clazz, REGISTRY);
+    }
+    
+    public static <T> T open(URI uri, Class<T> clazz, DriverRegistry registry) throws IOException {
+        Driver<T> d = find(uri, clazz, registry);
+
+        Map<String,Object> opts = parseURI(uri, d);
+
+        if (!d.canOpen(opts)) {
+            throw new IllegalArgumentException(d.getName() + " driver can't open " + opts);
+        }
+
+        Object data = d.open(opts);
+        if (data instanceof Workspace && uri.getFragment() != null) {
+            data = ((Workspace)data).get(uri.getFragment()); 
+        }
+
+        return clazz.cast(data);
+    }
+
+    public static <T extends VectorData> T create(Schema schema, URI uri, Class<T> clazz) 
+        throws IOException {
+        return create(schema, uri, clazz, REGISTRY);
+    }
+
+    public static <T extends VectorData> T create(Schema schema, URI uri, Class<T> clazz, 
+        DriverRegistry registry) throws IOException {
+        
+        Driver<T> d = find(uri, clazz, registry);
+        if (!(d instanceof VectorDriver)) {
+            throw new IllegalArgumentException(d.getName() + " not a vector driver");
+        }
+
+        VectorDriver<T> vd = (VectorDriver<T>) d;
+        Map<String,Object> opts = parseURI(uri, d);
+
+        if (!vd.canCreate(opts)) {
+            throw new IllegalArgumentException(d.getName() + " driver can't open " + opts);
+        }
+
+        return vd.create(opts, schema);
+    }
+
+    static <T> Driver<T> find(URI uri, Class<T> clazz, DriverRegistry registry) {
+        String scheme = uri.getScheme();
+        if (scheme == null) {
+            throw new IllegalArgumentException("URI must have a scheme");
+        }
+
+        Driver<T> d = (Driver<T>) find(scheme, registry);
+        if (d == null) {
+            throw new IllegalArgumentException("No matching driver for " + scheme); 
+        }
+
+        if (clazz != null && !clazz.isAssignableFrom(d.getType())) {
+            throw new IllegalArgumentException(
+                scheme + " driver does not create objects of type " + clazz.getSimpleName());
+        }
+        return d;
+    }
+
+    static Map<String,Object> parseURI(URI uri, Driver<?> d) {
+        Map<String,Object> opts = new HashMap<String, Object>();
+        
+        // parse host 
+        if (uri.getHost() != null) {
+            //use the first key
+            if (d.getKeys().isEmpty()) {
+                throw new IllegalArgumentException(d.getName() + " declared no keys");
+            }
+
+            opts.put(d.getKeys().get(0).getName(), uri.getHost());
+        }
+
+        // parse query string
+        if (uri.getQuery() != null) {
+            String[] kvps = uri.getQuery().split("&");
+            for (String kvp : kvps) {
+                String[] kv = kvp.split("=");
+                if (kv.length != 2) {
+                    throw new IllegalArgumentException("Illegal key value pair: " + kvp);
+                }
+
+                opts.put(kv[0], kv[1]);
+            }
+        }
+
+        return opts;
     }
 
     static <T> T open(Map<?, Object> opts, Class<T> clazz, Iterator<Driver<?>> it) 
         throws IOException {
-        
+
         while (it.hasNext()) {
             Driver<?> drv = it.next();
             if (clazz != null && !clazz.isAssignableFrom(drv.getType())) {

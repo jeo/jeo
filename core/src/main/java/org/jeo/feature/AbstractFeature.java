@@ -111,7 +111,18 @@ public abstract class AbstractFeature implements Feature {
      * @param val The new value of the attribute. 
      */
     public abstract void put(String key, Object val);
-    
+
+    @Override
+    public void put(Geometry g) {
+        //TODO:optimize before triggering schema creation
+        Field gf = schema().geometry();
+        if (gf == null) {
+            throw new IllegalArgumentException("Feature schema has no geometry");
+        }
+
+        put(gf.getName(), g);
+    }
+
     /**
      * Derived geometry of the feature.
      * <p>

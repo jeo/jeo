@@ -43,6 +43,11 @@ public class FeatureWrapper implements Feature {
         delegate.put(key, val);
     }
 
+    @Override
+    public void put(Geometry g) {
+        delegate.put(g);
+    }
+
     public Geometry geometry() {
         return delegate.geometry();
     }

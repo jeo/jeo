@@ -59,6 +59,13 @@ public interface Feature {
     Object get(String key);
 
     /**
+     * Geometry of the feature.
+     *
+     * @return a {@link Geometry} object, or <code>null</code> if the feature has no geometry.
+     */
+    Geometry geometry();
+
+    /**
      * Sets a named attribute of the feature.
      *
      * @param key The key or name of the attribute. 
@@ -67,11 +74,9 @@ public interface Feature {
     void put(String key, Object val);
 
     /**
-     * Geometry of the feature.
-     *
-     * @return a {@link Geometry} object, or <code>null</code> if the feature has no geometry.
+     * Sets the geometry of the feature.
      */
-    Geometry geometry();
+    void put(Geometry g);
 
     /**
      * The created schema for the feature. 

@@ -5,6 +5,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+import com.vividsolutions.jts.geom.Geometry;
+
 /**
  * Feature utility class.
  * 
@@ -41,8 +43,17 @@ public class Features {
      * @return The target feature.
      */
     public static Feature copy(Feature from, Feature to) {
+        Field geom = from.schema().geometry();
         for (Map.Entry<String, Object> kv : from.map().entrySet()) {
-            to.put(kv.getKey(), kv.getValue());
+            String key = kv.getKey();
+            Object val = kv.getValue();
+
+            if (geom != null && geom.getName().equals(key)) {
+                to.put((Geometry)val);
+            }
+            else {
+                to.put(kv.getKey(), val);
+            }
         }
         return to;
     }

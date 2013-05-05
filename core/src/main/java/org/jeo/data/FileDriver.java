@@ -80,7 +80,18 @@ public abstract class FileDriver<T> implements Driver<T> {
      */
     public abstract T open(File file, Map<?,Object> opts) throws IOException;
 
-    File file(Map<?,Object> opts) {
+    /**
+     * Helper to pull file object out of option map.
+     */
+    protected File file(Map<?,Object> opts) {
         return FILE.get(opts);
+    }
+
+    /**
+     * Helper to get file extension (lower case). 
+     */
+    protected String ext(File f) {
+        int dot = f.getName().lastIndexOf('.');
+        return dot != -1 ? f.getName().substring(dot+1).toLowerCase() : null;
     }
 }

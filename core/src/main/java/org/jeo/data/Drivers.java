@@ -107,7 +107,7 @@ public class Drivers {
     public static Driver<?> find(String name, DriverRegistry registry) {
         for (Iterator<Driver<?>> it = list(registry); it.hasNext();) {
             Driver<?> d = it.next();
-            if (name.equalsIgnoreCase(d.getName())) {
+            if (name.equalsIgnoreCase(d.getName()) || d.getAliases().contains(name)) {
                 return d;
             }
         }
@@ -175,12 +175,16 @@ public class Drivers {
         return open(opts, clazz, list(registry));
     }
 
-    public static <T> T open(URI uri, Class<T> clazz) throws IOException {
-        return open(uri, clazz, REGISTRY);
+    public static Object open(URI uri) throws IOException {
+        return open(uri, REGISTRY);
     }
     
-    public static <T> T open(URI uri, Class<T> clazz, DriverRegistry registry) throws IOException {
-        Driver<T> d = find(uri, clazz, registry);
+    public static Object open(URI uri, DriverRegistry registry) throws IOException {
+        if ("file".equalsIgnoreCase(uri.getScheme())) {
+            return open(new File(uri), Object.class, registry);
+        }
+
+        Driver<?> d = find(uri, registry);
 
         Map<String,Object> opts = parseURI(uri, d);
 
@@ -193,7 +197,7 @@ public class Drivers {
             data = ((Workspace)data).get(uri.getFragment()); 
         }
 
-        return clazz.cast(data);
+        return data;
     }
 
     public static <T extends VectorData> T create(Schema schema, URI uri, Class<T> clazz) 
@@ -204,7 +208,7 @@ public class Drivers {
     public static <T extends VectorData> T create(Schema schema, URI uri, Class<T> clazz, 
         DriverRegistry registry) throws IOException {
         
-        Driver<T> d = find(uri, clazz, registry);
+        Driver<T> d = find(uri, registry);
         if (!(d instanceof VectorDriver)) {
             throw new IllegalArgumentException(d.getName() + " not a vector driver");
         }
@@ -219,7 +223,7 @@ public class Drivers {
         return vd.create(opts, schema);
     }
 
-    static <T> Driver<T> find(URI uri, Class<T> clazz, DriverRegistry registry) {
+    static <T> Driver<T> find(URI uri, DriverRegistry registry) {
         String scheme = uri.getScheme();
         if (scheme == null) {
             throw new IllegalArgumentException("URI must have a scheme");
@@ -230,10 +234,6 @@ public class Drivers {
             throw new IllegalArgumentException("No matching driver for " + scheme); 
         }
 
-        if (clazz != null && !clazz.isAssignableFrom(d.getType())) {
-            throw new IllegalArgumentException(
-                scheme + " driver does not create objects of type " + clazz.getSimpleName());
-        }
         return d;
     }
 

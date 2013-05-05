@@ -160,6 +160,7 @@
     <module>agg</module>
     <module>carto</module>
     <module>scala</module>
+    <module>cli</module>
   </modules>
 
   <properties>

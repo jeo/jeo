@@ -2,7 +2,8 @@ package org.jeo.cli;
 
 import java.io.IOException;
 import java.util.Set;
-import java.util.TreeSet;
+
+import jline.console.ConsoleReader;
 
 import org.jeo.cli.cmd.ConvertCmd;
 import org.jeo.cli.cmd.DriversCmd;
@@ -10,20 +11,12 @@ import org.jeo.cli.cmd.InfoCmd;
 import org.jeo.cli.cmd.JeoCmd;
 import org.jeo.cli.cmd.QueryCmd;
 import org.jeo.cli.conv.JeoCLIConverterFactory;
-import org.jeo.data.Drivers;
-import org.jeo.data.mem.Memory;
-import org.jeo.geogit.GeoGit;
-import org.jeo.shp.Shapefile;
 
 import com.beust.jcommander.JCommander;
 import com.google.common.base.Strings;
 import com.google.common.base.Throwables;
-import com.google.common.collect.Maps;
 import com.google.common.collect.Ordering;
-import com.google.common.collect.Sets;
 import com.google.common.primitives.Ints;
-
-import jline.console.ConsoleReader;
 
 public class JeoCLI {
 

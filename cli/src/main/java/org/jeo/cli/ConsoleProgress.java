@@ -1,11 +1,10 @@
 package org.jeo.cli;
 
-import java.io.IOException;
 import java.io.PrintStream;
 
-import com.google.common.base.Strings;
-
 import jline.console.ConsoleReader;
+
+import com.google.common.base.Strings;
 
 public class ConsoleProgress {
 

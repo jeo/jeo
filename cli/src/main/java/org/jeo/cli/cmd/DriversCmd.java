@@ -2,11 +2,11 @@ package org.jeo.cli.cmd;
 
 import java.util.Iterator;
 
+import jline.console.ConsoleReader;
+
 import org.jeo.cli.JeoCLI;
 import org.jeo.data.Driver;
 import org.jeo.data.Drivers;
-
-import jline.console.ConsoleReader;
 
 import com.beust.jcommander.Parameters;
 

@@ -24,8 +24,6 @@ import java.nio.channels.FileChannel;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.charset.Charset;
 import java.nio.charset.CharsetDecoder;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.jeo.proj.Proj;
 import org.jeo.shp.Shapefile;
@@ -47,8 +45,6 @@ public class PrjFileReader implements FileReader {
 
     static Logger LOGGER = LoggerFactory.getLogger(Shapefile.class);
 
-    static Pattern EPSG_REGEX = Pattern.compile("\\[\"EPSG\",\"(\\d+)\"\\]");
-    
     ByteBuffer buffer;
     ReadableByteChannel channel;
     CharBuffer charBuffer;
@@ -80,37 +76,8 @@ public class PrjFileReader implements FileReader {
         charBuffer.flip();
 
         String wkt = charBuffer.toString();
+        crs = Proj.fromWKT(wkt);
 
-        // start the hacking, just use a regex to parse out authority code
-        // TODO: add wkt parsing to proj4j
-
-        String last = null;
-        int i = 0;
-        while(true) {
-            Matcher m = EPSG_REGEX.matcher(wkt);
-            if (!m.find(i)) {
-                break;
-            }
-
-            last = m.group(1);
-            i = m.end();
-        }
-
-        if (last != null) {
-            try {
-                crs = Proj.crs(Integer.parseInt(last));
-            }
-            catch(Exception e) {
-                LOGGER.debug("Errpr parsing epsg code", e);
-            }
-        }
-
-        /*try {
-            crs = ReferencingFactoryFinder.getCRSFactory(null)
-                    .createFromWKT(wkt);
-        } catch (FactoryException e) {
-            crs = null;
-        }*/
     }
 
     public CoordinateReferenceSystem getCoodinateSystem() {

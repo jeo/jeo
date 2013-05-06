@@ -77,6 +77,43 @@ public class ProjTest {
     }
 
     @Test
+    public void testParseProjWKT() throws Exception {
+        String wkt = dq(
+            "PROJCS['NAD83 / UTM zone 10N', "+
+                    "  GEOGCS['NAD83', "+
+                    "    DATUM['North American Datum 1983', "+
+                    "      SPHEROID['GRS 1980', 6378137.0, 298.257222101, AUTHORITY['EPSG','7019']], "+
+                    "      TOWGS84[0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], "+
+                    "      AUTHORITY['EPSG','6269']], "+
+                    "    PRIMEM['Greenwich', 0.0, AUTHORITY['EPSG','8901']], "+
+                    "    UNIT['degree', 0.017453292519943295], "+
+                    "    AXIS['Geodetic longitude', EAST], "+
+                    "    AXIS['Geodetic latitude', NORTH], "+
+                    "    AUTHORITY['EPSG','4269']], "+
+                    "  PROJECTION['Transverse_Mercator', AUTHORITY['EPSG','9807']], "+
+                    "  PARAMETER['central_meridian', -123.0], "+
+                    "  PARAMETER['latitude_of_origin', 0.0], "+
+                    "  PARAMETER['scale_factor', 0.9996], "+
+                    "  PARAMETER['false_easting', 500000.0], "+
+                    "  PARAMETER['false_northing', 0.0], "+
+                    "  UNIT['m', 1.0], "+
+                    "  AXIS['Easting', EAST], "+
+                    "  AXIS['Northing', NORTH], "+
+                    "  AUTHORITY['EPSG','26910']]");
+
+        CoordinateReferenceSystem geo = Proj.EPSG_4326;
+        CoordinateReferenceSystem crs1 = Proj.fromWKT(wkt);
+        CoordinateReferenceSystem crs2 = Proj.crs("EPSG:26910");
+
+        Point p1 = new GeometryBuilder().point(-117, 63.15);
+        Point p2 = new GeometryBuilder().point(-117, 63.15);
+
+        p1 = Proj.reproject(p1, geo, crs1);
+        p2 = Proj.reproject(p2, geo, crs2);
+        assertTrue(p1.equals(p2));
+    }
+
+    @Test
     public void testEncodeWKT() throws Exception {
         CoordinateReferenceSystem crs = Proj.crs("epsg:4326");
     }

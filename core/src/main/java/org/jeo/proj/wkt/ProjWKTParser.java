@@ -1,20 +1,42 @@
 package org.jeo.proj.wkt;
 
+import java.io.IOException;
 import java.text.ParseException;
 import java.text.ParsePosition;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+import org.jeo.proj.Proj;
 import org.osgeo.proj4j.CoordinateReferenceSystem;
+import org.osgeo.proj4j.Registry;
 import org.osgeo.proj4j.datum.Datum;
 import org.osgeo.proj4j.datum.Ellipsoid;
+import org.osgeo.proj4j.parser.Proj4Keyword;
 import org.osgeo.proj4j.proj.LongLatProjection;
+import org.osgeo.proj4j.proj.Projection;
 import org.osgeo.proj4j.units.Unit;
 import org.osgeo.proj4j.units.Units;
 
+import static org.osgeo.proj4j.parser.Proj4Keyword.*;
+
 public class ProjWKTParser {
 
+    static enum Param {
+        central_meridian(lon_0), 
+        latitude_of_origin(lat_0), 
+        scale_factor(k_0), 
+        false_easting(x_0), 
+        false_northing(y_0);
+
+        String proj4;
+        Param(String proj4) {
+            this.proj4 = proj4;
+        }
+
+    }
     final static String NAME_KEY = "name";
     final static String IDENTIFIERS_KEY = "identifiers";
     
@@ -133,7 +155,6 @@ public class ProjWKTParser {
         final Map<String,?> properties = parseAuthority(element, name);
         element.close();
 
-        
         if (name != null) {
             Unit u = Units.findUnits(name.toLowerCase());
             if (u != null) {
@@ -224,16 +245,77 @@ public class ProjWKTParser {
         finally {
             element.close();    
         }
-
     }
-    
-    CoordinateReferenceSystem parseProjCS(Element e) throws ParseException {
-        // TODO Auto-generated method stub
+
+    void parseAxis(Element e) throws ParseException {
+        e.pullOptionalElement("AXIS");
+    }
+
+    String parseAuthCode(Element e) throws ParseException {
+        Element a = e.pullOptionalElement("AUTHORITY");
+        if (a != null) {
+            return a.pullString("name") + ":" + a.pullString("code");
+            
+        }
         return null;
+    }
+    CoordinateReferenceSystem parseProjCS(Element e) throws ParseException {
+        String authCode = parseAuthCode(e);
+        if (authCode != null) {
+            CoordinateReferenceSystem crs = Proj.crs(authCode);
+            if (crs != null) {
+                return crs;
+            }
+        }
+
+        //parse manually
+        String name = e.pullString("name");
+        CoordinateReferenceSystem geo = parseGeoGCS(e.pullElement("GEOGCS"));
+        
+        Projection proj = parseProjection(e);
+        String[] params = parseParameters(e);
+
+        //TODO:
+        /*
+        Unit unit = parseUnit(e, Units.METRES);
+        parseAxis(e);
+        parseAxis(e);
+        */
+        return new CoordinateReferenceSystem(name, params, geo.getDatum(), proj);
+    }
+
+    Projection parseProjection(Element e) throws ParseException {
+        Element p = e.pullElement("PROJECTION");
+        String name = p.pullString("name");
+
+        Projection proj = new Registry().getProjection(name);
+        if (proj == null) {
+            throw new IllegalArgumentException("Unsupported projection: " + name);
+        }
+
+        return proj;
+    }
+
+    String[] parseParameters(Element e) throws ParseException {
+        Element p = null;
+        List<String> params = new ArrayList<String>();
+        while ((p = e.pullOptionalElement("PARAMETER")) != null) {
+            String key = p.pullString("name");
+            Double val = p.pullDouble("value");
+
+            Param param = Param.valueOf(key);
+            if (param == null) {
+                throw new IllegalArgumentException("Unsupported projection parameter: " + key);
+            }
+
+            params.add(String.format("%s=%f", param.proj4, val));
+            
+        }
+
+        return params.toArray(new String[params.size()]);
     }
 
     CoordinateReferenceSystem parseGeoCCS(Element e)  throws ParseException {
-        // TODO Auto-generated method stub
-        return null;
+        throw new UnsupportedOperationException();
     }
 }

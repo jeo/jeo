@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import org.jeo.util.Util;
 import org.osgeo.proj4j.CoordinateReferenceSystem;
 
 import com.vividsolutions.jts.geom.Geometry;
@@ -36,17 +37,10 @@ public abstract class AbstractFeature implements Feature {
      * Constructor for Feature taking an explicit schema.
      */
     protected AbstractFeature(String id, Schema schema) {
-        this.id = id != null ? id : newId();
+        this.id = id != null ? id : Util.uuid();
         this.schema = schema;
     }
-    
-    /**
-     * Generates a new feature id.
-     */
-    protected String newId() {
-        return UUID.randomUUID().toString();
-    }
-    
+
     /**
      * Feature identifier.
      */

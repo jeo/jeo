@@ -93,8 +93,8 @@ public class Field {
      * 
      * @return The property value or <code>null</code> if no such property is defined.
      */
-    public Object getProperty(String key) {
-        return props != null ? props.get(key) : null;
+    public <T> T property(String key, Class<T> clazz) {
+        return props != null ? clazz.cast(props.get(key)) : null;
     }
 
     @Override

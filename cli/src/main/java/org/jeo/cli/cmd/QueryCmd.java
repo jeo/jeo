@@ -1,5 +1,6 @@
 package org.jeo.cli.cmd;
 
+import java.net.URI;
 import java.util.List;
 import java.util.Map;
 
@@ -45,51 +46,52 @@ public class QueryCmd extends JeoCmd {
         ConsoleReader console = cli.getConsole();
 
         for (String data : datas) {
-            Map<String,Object> map = new MapConverter().convert(data);
+            URI uri = parseDataURI(data);
 
-            VectorData dataset = Drivers.open(map, VectorData.class);
+            VectorData dataset = null;
             try {
-                if (dataset == null) {
-                    throw new IllegalArgumentException("Unable to open data source: " + data);
-                }
-    
-                Query q = new Query();
-                if (bbox != null) {
-                    q.bounds(bbox);
-                }
-                if (filter != null) {
-                    q.filter(filter);
-                }
-                if (count != null) {
-                    q.limit(count);
-                }
-    
-                Schema schema = dataset.getSchema();
-    
-                int size = new Ordering<Field>() {
-                    public int compare(Field left, Field right) {
-                        return Ints.compare(left.getName().length(), right.getName().length());
-                    };
-                }.max(schema.getFields()).getName().length() + 2;
+                dataset = open((VectorData)Drivers.open(uri));
+            }
+            catch(ClassCastException e) {
+                throw new IllegalArgumentException(data + " is not a vector dataset");
+            }
 
-                if (summary) {
-                    console.println(String.format("Query matched %d features", dataset.count(q)));
-                }
-                else {
-                    for (Feature f : dataset.cursor(q)) {
-                        console.println("Feature " + f.getId());
-                        for (Field fld : schema) {
-                            console.print(Strings.padStart(fld.getName(), size, ' '));
-                            console.println("\t=\t" + f.get(fld.getName()));
-                        }
-                        console.println();
+            if (dataset == null) {
+                throw new IllegalArgumentException("Unable to open data source: " + data);
+            }
+
+            Query q = new Query();
+            if (bbox != null) {
+                q.bounds(bbox);
+            }
+            if (filter != null) {
+                q.filter(filter);
+            }
+            if (count != null) {
+                q.limit(count);
+            }
+
+            Schema schema = dataset.getSchema();
+
+            int size = new Ordering<Field>() {
+                public int compare(Field left, Field right) {
+                    return Ints.compare(left.getName().length(), right.getName().length());
+                };
+            }.max(schema.getFields()).getName().length() + 2;
+
+            if (summary) {
+                console.println(String.format("Query matched %d features", dataset.count(q)));
+            }
+            else {
+                for (Feature f : dataset.cursor(q)) {
+                    console.println("Feature " + f.getId());
+                    for (Field fld : schema) {
+                        console.print(Strings.padStart(fld.getName(), size, ' '));
+                        console.println("\t=\t" + f.get(fld.getName()));
                     }
+                    console.println();
                 }
             }
-            finally {
-                dataset.dispose();
-            }
-            
         }
     }
 

@@ -8,6 +8,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.sql.Connection;
+import java.sql.Statement;
 import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.logging.ConsoleHandler;
@@ -18,19 +19,24 @@ import org.jeo.data.Cursor;
 import org.jeo.data.Query;
 import org.jeo.data.VectorData;
 import org.jeo.feature.Feature;
+import org.jeo.feature.ListFeature;
 import org.jeo.feature.Schema;
+import org.jeo.geom.GeometryBuilder;
 import org.junit.After;
 import org.junit.Assume;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.postgresql.ds.PGPoolingDataSource;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Predicates;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.Sets;
 import com.vividsolutions.jts.geom.Envelope;
+import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.MultiPolygon;
+import com.vividsolutions.jts.geom.Polygon;
 
 public class PostGISTest {
 
@@ -40,25 +46,39 @@ public class PostGISTest {
     @BeforeClass
     public static void logging() {
         //uncomment to view debug logs during test
-//        Logger log = Logger.getLogger(LoggerFactory.getLogger(PostGIS.class).getName());
-//        log.setLevel(Level.FINE);
-//
-//        ConsoleHandler h = new ConsoleHandler();
-//        h.setLevel(Level.FINE);
-//        log.addHandler(h);
+        Logger log = Logger.getLogger(LoggerFactory.getLogger(PostGIS.class).getName());
+        log.setLevel(Level.FINE);
+
+        ConsoleHandler h = new ConsoleHandler();
+        h.setLevel(Level.FINE);
+        log.addHandler(h);
     }
 
     @BeforeClass
     public static void connect()  {
         try {
-            Connection cx = 
-                PostGISWorkspace.createDataSource(new PostGISOpts("jeo")).getConnection();
+            PGPoolingDataSource ds = PostGISWorkspace.createDataSource(new PostGISOpts("jeo")); 
+            Connection cx = ds.getConnection();
             Assume.assumeNotNull(cx);
             cx.close();
+            ds.close();
         }
         catch(Exception e) {
             Assume.assumeTrue(false);
         }
+    }
+
+    @Before
+    public void rollback() throws Exception {
+        PGPoolingDataSource ds = PostGISWorkspace.createDataSource(new PostGISOpts("jeo")); 
+        Connection cx = ds.getConnection();
+        Statement st = cx.createStatement();
+        st.executeUpdate(
+            "DELETE FROM states WHERE \"STATE_NAME\" = 'JEOLAND' OR \"STATE_NAME\" is null");
+        st.executeUpdate("UPDATE states set \"STATE_ABBR\" = upper(\"STATE_ABBR\")");
+        st.close();
+        cx.close();
+        ds.close();
     }
 
     @Before
@@ -163,6 +183,55 @@ public class PostGISTest {
 
         assertFalse(c.hasNext());
         assertNull(c.next());
+        c.close();
+    }
+
+    @Test
+    public void testCursorUpdate() throws Exception {
+        VectorData states = pg.get("states");
+        
+        Cursor<Feature> c = states.cursor(new Query().update());
+        while(c.hasNext()) {
+            Feature f = c.next();
+
+            String abbr = f.get("STATE_ABBR").toString();
+            assertEquals(abbr, abbr.toUpperCase());
+
+            f.put("STATE_ABBR", f.get("STATE_ABBR").toString().toLowerCase());
+            c.write();
+        }
+        c.close();
+
+        for (Feature f : states.cursor(new Query())) {
+            String abbr = f.get("STATE_ABBR").toString();
+
+            assertEquals(abbr, abbr.toLowerCase());
+        }
+
+        c.close();
+    }
+
+    @Test
+    public void testCursorInsert() throws Exception {
+        VectorData states = pg.get("states");
+        Schema schema = states.getSchema();
+
+        Cursor<Feature> c = states.cursor(new Query().append());
+        Feature f = c.next();
+
+        GeometryBuilder gb = new GeometryBuilder();
+        Geometry g = gb.multiPolygon((Polygon)gb.point(0,0).buffer(1));
+        f.put(schema.geometry().getName(), g);
+        f.put("STATE_NAME", "JEOLAND");
+        c.write();
+        c.close();
+
+        assertEquals(50, states.count(new Query()));
+
+        c = states.cursor(new Query().bounds(g.getEnvelopeInternal()));
+        assertTrue(c.hasNext());
+
+        assertEquals("JEOLAND", c.next().get("STATE_NAME"));
         c.close();
     }
 }

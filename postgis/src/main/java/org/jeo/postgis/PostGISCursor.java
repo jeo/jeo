@@ -10,6 +10,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.jeo.data.Cursor;
+import org.jeo.feature.DiffFeature;
 import org.jeo.feature.Feature;
 import org.jeo.feature.MapFeature;
 
@@ -18,29 +19,33 @@ import com.vividsolutions.jts.io.WKBReader;
 public class PostGISCursor extends Cursor<Feature> {
 
     ResultSet rs;
+    Connection cx;
     PostGISDataset dataset;
-    Boolean next;
+    Boolean hasNext;
+    Feature next;
 
-    PostGISCursor(ResultSet rs, PostGISDataset dataset) {
+    PostGISCursor(ResultSet rs, Connection cx, Mode mode, PostGISDataset dataset) {
+        super(mode);
         this.rs = rs;
+        this.cx = cx;
         this.dataset = dataset;
     }
 
     @Override
     public boolean hasNext() throws IOException {
-        if (next == null) {
+        if (hasNext == null) {
             try {
-                next = rs.next();
+                hasNext = rs.next();
             } catch (SQLException e) {
                 handle(e);
             }
         }
-        return next;
+        return hasNext;
     }
 
     @Override
     public Feature next() throws IOException {
-        if (next != null && next.booleanValue()) {
+        if (hasNext != null && hasNext.booleanValue()) {
             try {
                 Map<String,Object> map = new LinkedHashMap<String, Object>();
                 ResultSetMetaData md = rs.getMetaData();
@@ -54,13 +59,22 @@ public class PostGISCursor extends Cursor<Feature> {
 
                     map.put(col, obj);
                 }
-                return new MapFeature(null, map, dataset.getSchema());
+
+                PrimaryKey key = dataset.getTable().getPrimaryKey();
+                StringBuilder sb = new StringBuilder();
+                for (PrimaryKeyColumn pkcol : key.getColumns()) {
+                    sb.append(map.get(pkcol.getName())).append(".");
+                }
+                sb.setLength(sb.length()-1);
+
+                next = new MapFeature(sb.toString(), map, dataset.getSchema());
+                return next = mode == Cursor.UPDATE ? new DiffFeature(next) : next;
             }
             catch(Exception e) {
                 handle(e);
             }
             finally {
-                next = null;
+                hasNext = null;
             }
         }
 
@@ -68,13 +82,20 @@ public class PostGISCursor extends Cursor<Feature> {
     }
 
     @Override
+    protected void doWrite() throws IOException {
+        dataset.doUpdate(next, ((DiffFeature) next).getChanged(), cx);
+    }
+
+    @Override
     public void close() throws IOException {
         if (rs != null) {
             Statement st = null;
-            Connection cx = null;
             try {
                 st = rs.getStatement();
-                cx = st.getConnection();
+            } catch (SQLException e) {}
+
+            try {
+                rs.close();
             } catch (SQLException e) {}
 
             if (st != null) {
@@ -87,9 +108,6 @@ public class PostGISCursor extends Cursor<Feature> {
                     cx.close();
                 } catch (SQLException e) {}
             }
-            try {
-                rs.close();
-            } catch (SQLException e) {}
         }
     }
 

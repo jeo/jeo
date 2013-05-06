@@ -76,9 +76,11 @@ public class ProjWKTEncoder {
 
     StringBuilder encodeUnit(Projection p, Unit base, StringBuilder buf, int indent) {
         Unit unit = p.getUnits();
-        double scale = Units.convert(1, unit, base);
-        doIndent(buf, indent).append("UNIT[").append(q).append(unit.name).append(q)
-            .append(", ").append(scale).append("]");
+        if (unit != null) {
+            double scale = Units.convert(1, unit, base);
+            doIndent(buf, indent).append("UNIT[").append(q).append(unit.name).append(q)
+                .append(", ").append(scale).append("]");
+        }
         return buf;
     }
     

@@ -31,7 +31,6 @@ import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Polygon;
 import com.vividsolutions.jts.io.WKBReader;
-import com.vividsolutions.jts.io.WKBWriter;
 import com.vividsolutions.jts.io.WKTWriter;
 
 public class PostGISDataset implements VectorData {
@@ -111,9 +110,9 @@ public class PostGISDataset implements VectorData {
                 SQL sql = new SQL("SELECT count(*) FROM ").name(getSchema().getName());
                 List<Pair<Object,Integer>> values = encodeQueryPredicate(sql, q);
 
-                logQuery(sql, values);
+                pg.logQuery(sql, values);
 
-                PreparedStatement ps = open(prepareStatement(sql, values, cx));
+                PreparedStatement ps = open(pg.prepareStatement(sql, values, cx));
                 
                 ResultSet rs = open(ps.executeQuery());
                 rs.next();
@@ -170,10 +169,10 @@ public class PostGISDataset implements VectorData {
             sql.add(" FROM ").name(schema.getName());
             
             List<Pair<Object,Integer>> values = encodeQueryPredicate(sql, q);
-            logQuery(sql, values);
+            pg.logQuery(sql, values);
 
             try {
-                PreparedStatement st = prepareStatement(sql, values, cx);
+                PreparedStatement st = pg.prepareStatement(sql, values, cx);
                 return q.apply(new PostGISCursor(st.executeQuery(), cx, q.getMode(), this));
             }
             catch(SQLException e) {
@@ -235,29 +234,7 @@ public class PostGISDataset implements VectorData {
         return values;
     }
 
-    void logQuery(SQL sql, List<Pair<Object,Integer>> values) {
-        if (LOG.isDebugEnabled()) {
-            StringBuilder msg = new StringBuilder(sql.toString()).append("; ");
-            for (int i = 0; i < values.size(); i++) {
-                msg.append(String.format("%d=%s", i+1, values.get(i).first()))
-                   .append(", ");
-            }
-            msg.setLength(msg.length()-2);
-            LOG.debug(msg.toString());
-        }
-    }
-
-    PreparedStatement prepareStatement(SQL sql, List<Pair<Object,Integer>> values, Connection cx) 
-            throws SQLException {
-
-        PreparedStatement ps = cx.prepareStatement(sql.toString());
-        for (int i = 0; i < values.size(); i++) {
-            Pair<Object,Integer> p = values.get(i);
-            ps.setObject(i+1, p.first(), p.second());
-        }
-        return ps;
-
-    }
+    
 
     void doUpdate(final Feature f, final Map<String,Object> changed, Connection cx) throws IOException {
         pg.run(new DbOP<Boolean>() {
@@ -286,9 +263,9 @@ public class PostGISDataset implements VectorData {
                 }
                 sql.trim(1);
 
-                logQuery(sql, values);
+                pg.logQuery(sql, values);
 
-                PreparedStatement ps = cx.prepareStatement(sql.toString());
+                PreparedStatement ps = open(cx.prepareStatement(sql.toString()));
                 for (int i = 0; i < values.size(); i++) {
                     Pair<Object,Integer> p = values.get(i);
                     ps.setObject(i+1, p.first(), p.second());
@@ -350,7 +327,7 @@ public class PostGISDataset implements VectorData {
                 vals.trim(1).add(")");
                 cols.trim(1).add(") ").add(vals.toString());
 
-                logQuery(cols, values);
+                pg.logQuery(cols, values);
 
                 PreparedStatement ps = cx.prepareStatement(cols.toString());
                 for (int i = 0; i < values.size(); i++) {

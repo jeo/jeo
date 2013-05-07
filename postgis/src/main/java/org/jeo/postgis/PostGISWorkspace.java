@@ -1,5 +1,7 @@
 package org.jeo.postgis;
 
+import static org.jeo.postgis.PostGISWorkspace.LOG;
+
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
@@ -8,6 +10,7 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -20,7 +23,9 @@ import org.jeo.data.Workspace;
 import org.jeo.feature.Field;
 import org.jeo.feature.Schema;
 import org.jeo.feature.SchemaBuilder;
+import org.jeo.geom.Geom;
 import org.jeo.proj.Proj;
+import org.jeo.util.Pair;
 import org.osgeo.proj4j.CoordinateReferenceSystem;
 import org.postgresql.ds.PGPoolingDataSource;
 import org.slf4j.Logger;
@@ -109,8 +114,115 @@ public class PostGISWorkspace implements Workspace {
     }
     
     @Override
-    public VectorData create(Schema schema) throws IOException {
-        // TODO Auto-generated method stub
+    public PostGISDataset create(final Schema schema) throws IOException {
+        run(new DbOP<Object>() {
+            @Override
+            protected Object doRun(Connection cx) throws Exception {
+                cx.setAutoCommit(false);
+
+                List<Pair<Field, Integer>> gcols = new ArrayList<Pair<Field,Integer>>();
+
+                SQL sql = new SQL("CREATE TABLE ").name(schema.getName())
+                    .add(" (").name(findIdColumnName(schema)).add(" SERIAL PRIMARY KEY, ");
+                
+                for (Field fld : schema) {
+                    String typename = TypeMappings.toName(fld.getType());
+                    if (typename == null) {
+                        Integer sqlType = TypeMappings.toSQL(fld.getType());
+                        if (sqlType != null) {
+                            typename = lookupTypeName(sqlType, cx);
+                        }
+                    }
+
+                    if (typename == null) {
+                        throw new IllegalArgumentException(
+                            "Unable to map field " + fld + " to database type"); 
+                    }
+
+                    sql.name(fld.getName()).add(" ");
+                    if (fld.isGeometry()) {
+                        Integer srid = fld.getCRS() != null ? Proj.epsgCode(fld.getCRS()) : null;
+                        srid = srid != null ? srid : -1;
+
+                        if (info.isAtLeastVersion2()) {
+                            //declare all info inline
+                            sql.add("Geometry(").add(Geom.Type.from(fld.getType()).getName())
+                               .add(", ").add(srid).add(")");
+                        }
+                        else {
+                            gcols.add(new Pair(fld, srid));
+                            sql.add("Geometry");
+                        }
+                    }
+                    else {
+                        sql.add(typename);
+                    }
+
+                    sql.add(", ");
+                }
+                sql.trim(2).add(")");
+
+                LOG.debug(sql.toString());
+
+                Statement st = open(cx.createStatement());
+                st.execute(sql.toString());
+
+                if (!info.isAtLeastVersion2()) {
+                    sql = new SQL("INSERT INTO geometry_columns (f_table_schema, f_table_name,")
+                        .add("f_geometry_column, coord_dimension, srid, type) VALUES (?,?,?,?,?,?)");
+
+                    //manually register geomtewry columns
+                    for (Pair<Field,Integer> p : gcols) {
+                        Field fld = p.first();
+
+                        List<Pair<Object,Integer>> values = new ArrayList<Pair<Object,Integer>>();
+                        values.add(new Pair("public", Types.VARCHAR));
+                        values.add(new Pair(schema.getName(), Types.VARCHAR));
+                        values.add(new Pair(fld.getName(), Types.VARCHAR));
+                        values.add(new Pair(2, Types.INTEGER));
+                        values.add(new Pair(p.second(), Types.INTEGER));
+                        values.add(new Pair(p.second(), Types.INTEGER));
+                        values.add(new Pair(Geom.Type.from(fld.getType()).getName(), Types.VARCHAR));
+
+                        logQuery(sql, values);
+                        open(prepareStatement(sql, values, cx)).execute();
+                    }
+                }
+
+                //TODO: create spatial index
+                cx.commit();
+                return null;
+            }
+        });
+
+        return get(schema.getName());
+    }
+
+    String findIdColumnName(Schema schema) {
+        String[] names = new String[]{"fid", "gid", "jid"};
+        String prefix = "";
+        for (int i = 0; i < 4; i++) {
+            for (String n : names) {
+                String name = prefix + n;
+                if (schema.field(name) == null) {
+                    return name;
+                }
+            }
+            prefix += "_";
+        }
+
+        throw new IllegalStateException("Unable to find unique name for id column");
+    }
+
+    String lookupTypeName(Integer sqlType, Connection cx) throws SQLException {
+        DatabaseMetaData md = cx.getMetaData();
+        ResultSet types = md.getTypeInfo();
+        while(types.next()) {
+            if (sqlType == types.getInt("DATA_TYPE")) {
+                return types.getString("TYPE_NAME");
+            }
+        }
+
         return null;
     }
 
@@ -177,7 +289,7 @@ public class PostGISWorkspace implements Workspace {
                         srid = lookupSRID(layer, name, cx);
 
                         CoordinateReferenceSystem crs = null;
-                        if (srid != null) {
+                        if (srid != null && srid > 0) {
                             sb.property("srid", srid);
                             crs = Proj.crs(srid);
                         }
@@ -240,75 +352,6 @@ public class PostGISWorkspace implements Workspace {
         });
     }
     
-//    Schema schema(final String layer) throws IOException {
-//        return run(new DbOP<Schema>() {
-//            @Override
-//            protected Schema doRun(Connection cx) throws Exception {
-//                String sql = new SQL("SELECT * FROM ").name(layer).add(" LIMIT 0").toString();
-//                LOG.debug(sql);
-//
-//                Statement st = open(cx.createStatement());
-//                st.setFetchSize(1);
-//
-//                ResultSet rs = null;
-//                try {
-//                    rs = open(st.executeQuery(sql));
-//                }
-//                catch(SQLException e) {
-//                    return null;
-//                }
-//
-//                SchemaBuilder sb  = new SchemaBuilder(layer);
-//                Integer srid = null;
-//
-//                ResultSetMetaData md = rs.getMetaData();
-//                for(int i = 1; i < md.getColumnCount() + 1; i++) {
-//                    String name = md.getColumnName(i);
-//                    String typeName = md.getColumnTypeName(i);
-//                    int sqlType = md.getColumnType(i);
-//
-//                    Class<?> binding = TypeMappings.fromName(typeName);
-//                    if (binding == null) {
-//                        binding = TypeMappings.fromSQL(sqlType);
-//                    }
-//                    if (binding == null) {
-//                        if (LOG.isDebugEnabled()) {
-//                            String msg = "Unable to map %s (%s, %d), falling back on Object";
-//                            LOG.debug(String.format(msg, name, typeName, sqlType));
-//                        }
-//                        binding = Object.class;
-//                    }
-//
-//                    if (Geometry.class.isAssignableFrom(binding)) {
-//                        // try to narrow geometry type by looking up in geometry/geography columns
-//                        Class<? extends Geometry> type = lookupGeomType(layer, name, cx);
-//                        if (type == null) {
-//                            type = (Class<? extends Geometry>) binding;
-//                        }
-//
-//                        srid = lookupSRID(layer, name, cx);
-//
-//                        CoordinateReferenceSystem crs = null;
-//                        if (srid != null) {
-//                            sb.property("srid", srid);
-//                            crs = Proj.crs(srid);
-//                        }
-//                        else {
-//                            sb.property("srid", -1);
-//                            LOG.debug(
-//                                String.format("Unable to determine srid for %s (%s)", layer, name));
-//                        }
-//
-//                        sb.field(name, type, crs);
-//                    }
-//                    else {
-//                        sb.field(name, binding);
-//                    }
-//                }
-//                return sb.schema();
-//            }
-//        });
-//    }
 
     Class<? extends Geometry> lookupGeomType(final String tbl, final String col, Connection cx) 
         throws IOException {
@@ -327,7 +370,7 @@ public class PostGISWorkspace implements Workspace {
                 if (rs.next()) {
                     return (Class<? extends Geometry>) TypeMappings.fromName(rs.getString(1));
                 }
-                else if (info.geography()) {
+                else if (info.hasGeography()) {
                     sql = "SELECT type FROM geography_columns" +
                         " WHERE f_table_name = ? and f_geometry_column = ?";
                     LOG.debug(String.format("%s; 1=%s, 2=%s", sql, tbl, col));
@@ -353,7 +396,7 @@ public class PostGISWorkspace implements Workspace {
                 SQL buf = new SQL("SELECT srid, f_table_name, f_geometry_column as column " +
                     "FROM geometry_columns");
 
-                if (info.geography()) {
+                if (info.hasGeography()) {
                     buf.add(" UNION ").add("SELECT srid, f_table_name, f_geography_column as column " +
                         "FROM geography_columns");
                 }
@@ -380,7 +423,31 @@ public class PostGISWorkspace implements Workspace {
             }
         }, cx);
     }
-    
+
+    void logQuery(SQL sql, List<Pair<Object,Integer>> values) {
+        if (LOG.isDebugEnabled()) {
+            StringBuilder msg = new StringBuilder(sql.toString()).append("; ");
+            for (int i = 0; i < values.size(); i++) {
+                msg.append(String.format("%d=%s", i+1, values.get(i).first()))
+                   .append(", ");
+            }
+            msg.setLength(msg.length()-2);
+            LOG.debug(msg.toString());
+        }
+    }
+
+    PreparedStatement prepareStatement(SQL sql, List<Pair<Object,Integer>> values, Connection cx) 
+            throws SQLException {
+
+        PreparedStatement ps = cx.prepareStatement(sql.toString());
+        for (int i = 0; i < values.size(); i++) {
+            Pair<Object,Integer> p = values.get(i);
+            ps.setObject(i+1, p.first(), p.second());
+        }
+        return ps;
+
+    }
+
     <T> T run(DbOP<T> op) throws IOException {
         return op.run(db);
     }

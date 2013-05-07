@@ -65,7 +65,9 @@ public class PostGISCursor extends Cursor<Feature> {
                 for (PrimaryKeyColumn pkcol : key.getColumns()) {
                     sb.append(map.get(pkcol.getName())).append(".");
                 }
-                sb.setLength(sb.length()-1);
+                if (!key.getColumns().isEmpty()) {
+                    sb.setLength(sb.length()-1);
+                }
 
                 next = new MapFeature(sb.toString(), map, dataset.getSchema());
                 return next = mode == Cursor.UPDATE ? new DiffFeature(next) : next;

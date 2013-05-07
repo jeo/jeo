@@ -37,8 +37,9 @@ public class TypeMappings {
         SQL.put(Types.BIGINT, Long.class);
 
         SQL.put(Types.REAL, Float.class);
-        SQL.put(Types.FLOAT, Double.class);
         SQL.put(Types.DOUBLE, Double.class);
+        SQL.put(Types.FLOAT, Double.class);
+        
 
         SQL.put(Types.DECIMAL, BigDecimal.class);
         SQL.put(Types.NUMERIC, BigDecimal.class);
@@ -81,5 +82,39 @@ public class TypeMappings {
 
     public static Class<?> fromName(String name) {
         return NAME.get(name.toUpperCase());
+    }
+
+    public static Integer toSQL(Class<?> clazz) {
+        for (Map.Entry<Integer,Class<?>> e : SQL.entrySet()) {
+            if (e.getValue() == clazz) {
+                return e.getKey();
+            }
+        }
+
+        //no match, do a loose match
+        for (Map.Entry<Integer,Class<?>> e : SQL.entrySet()) {
+            if (e.getValue().isAssignableFrom(clazz)) {
+                return e.getKey();
+            }
+        }
+
+        return null;
+    }
+
+    public static String toName(Class<?> clazz) {
+        for (Map.Entry<String,Class<?>> e : NAME.entrySet()) {
+            if (e.getValue() == clazz) {
+                return e.getKey();
+            }
+        }
+
+        //no match, do a loose match
+        for (Map.Entry<String,Class<?>> e : NAME.entrySet()) {
+            if (e.getValue().isAssignableFrom(clazz)) {
+                return e.getKey();
+            }
+        }
+
+        return null;
     }
 }

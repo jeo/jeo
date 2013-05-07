@@ -19,8 +19,8 @@ import org.jeo.data.Cursor;
 import org.jeo.data.Query;
 import org.jeo.data.VectorData;
 import org.jeo.feature.Feature;
-import org.jeo.feature.ListFeature;
 import org.jeo.feature.Schema;
+import org.jeo.feature.SchemaBuilder;
 import org.jeo.geom.GeometryBuilder;
 import org.junit.After;
 import org.junit.Assume;
@@ -76,6 +76,7 @@ public class PostGISTest {
         st.executeUpdate(
             "DELETE FROM states WHERE \"STATE_NAME\" = 'JEOLAND' OR \"STATE_NAME\" is null");
         st.executeUpdate("UPDATE states set \"STATE_ABBR\" = upper(\"STATE_ABBR\")");
+        st.executeUpdate("DROP TABLE IF EXISTS widgets");
         st.close();
         cx.close();
         ds.close();
@@ -233,5 +234,43 @@ public class PostGISTest {
 
         assertEquals("JEOLAND", c.next().get("STATE_NAME"));
         c.close();
+    }
+
+    @Test
+    public void testCreate() throws Exception {
+        Schema widgets = new SchemaBuilder("widgets").field("shape", Polygon.class)
+            .field("name", String.class).field("cost", Double.class).schema();
+
+        PostGISDataset data = pg.create(widgets);
+        assertEquals(0, data.count(new Query()));
+
+        GeometryBuilder gb = new GeometryBuilder();
+        Cursor<Feature> c = data.cursor(new Query().append());
+
+        Feature f = c.next();
+        f.put("shape", gb.point(0,0).buffer(10));
+        f.put("name", "bomb");
+        f.put("cost", 1.99);
+        c.write();
+
+        f = c.next();
+        f.put("shape", gb.lineString(0,0,1,1).buffer(1));
+        f.put("name", "dynamite");
+        f.put("cost", 2.99);
+        c.write();
+
+        f = c.next();
+        f.put("shape", gb.polygon(-5,5, 5,5, 2,-2, 3,-5, -3,-5, -2,-2, -5,5));
+        f.put("name", "anvil");
+        f.put("cost", 3.99);
+
+        c.write();
+
+        data = pg.get("widgets");
+        assertEquals(3, data.count(new Query()));
+
+        c = data.cursor(new Query().filter("name = 'bomb'"));
+        assertTrue(c.hasNext());
+        assertEquals(1.99, c.next().get("cost"));
     }
 }

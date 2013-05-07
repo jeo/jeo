@@ -32,7 +32,11 @@ public class PostGISInfo {
         postgres = p.second();
     }
 
-    public boolean geography() {
+    public boolean hasGeography() {
         return postgis.compareTo(new Version("1.5.0")) >= 1;
+    }
+
+    public boolean isAtLeastVersion2() {
+        return postgis.compareTo(new Version("2.0")) >= 1;
     }
 }

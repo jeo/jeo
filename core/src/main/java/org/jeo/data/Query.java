@@ -304,7 +304,7 @@ public class Query {
         if (options.containsKey(key.getName())) {
             return (T) options.remove(key.getName());
         }
-        return null;
+        return def;
     }
 
     /**

@@ -1,28 +1,46 @@
 package org.jeo.mongo;
 
-import java.io.ByteArrayInputStream;
+import static org.jeo.mongo.Functions.BBOX_MAP;
+import static org.jeo.mongo.Functions.BBOX_REDUCE;
 
-import org.bson.BSONObject;
 import org.jeo.feature.Feature;
-import org.jeo.geojson.GeoJSON;
 
+import com.mongodb.BasicDBList;
+import com.mongodb.BasicDBObject;
+import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
-import com.mongodb.util.JSON;
+import com.mongodb.MapReduceCommand;
+import com.mongodb.MapReduceCommand.OutputType;
+import com.vividsolutions.jts.geom.Envelope;
 
 public class GeoJSONMapper implements MongoMapper {
 
-    @Override
-    public Feature feature(DBObject obj) {
-        try {
-            return (Feature) GeoJSON.read(new ByteArrayInputStream(JSON.serialize(obj).getBytes()));
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+    MongoDataset dataset;
+
+    GeoJSONMapper(MongoDataset dataset) {
+        this.dataset = dataset;
     }
 
     @Override
-    public void feature(DBObject obj, Feature f) {
-        obj.putAll((BSONObject) JSON.parse(GeoJSON.toString(f)));
+    public Envelope bbox(DBCollection dbcol) {
+        MapReduceCommand mr = new MapReduceCommand(
+            dbcol, BBOX_MAP, BBOX_REDUCE, null, OutputType.INLINE, new BasicDBObject());
+
+        BasicDBList list = (BasicDBList) dbcol.mapReduce(mr).getCommandResult().get("results");
+        DBObject bbox = (DBObject) ((DBObject) list.get(0)).get("value");
+
+        return new Envelope((Double)bbox.get("x1"), (Double)bbox.get("x2"), 
+            (Double)bbox.get("y1"), (Double)bbox.get("y2"));
+    }
+
+    @Override
+    public Feature feature(DBObject obj) {
+        return new GeoJSONFeature(obj, dataset.getCollection().getName());
+    }
+
+    @Override
+    public DBObject object(Feature f) {
+        return ((GeoJSONFeature)f).obj;
     }
 
 }

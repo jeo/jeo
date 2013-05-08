@@ -3,16 +3,19 @@ package org.jeo.mongo;
 import java.io.IOException;
 
 import org.jeo.data.Cursor;
-import org.jeo.data.Vector;
+import org.jeo.data.Cursor.Mode;
+import org.jeo.data.Cursors;
+import org.jeo.data.Driver;
+import org.jeo.data.Query;
+import org.jeo.data.VectorData;
 import org.jeo.feature.Feature;
-import org.jeo.feature.Features;
 import org.jeo.feature.Schema;
+import org.jeo.feature.SchemaBuilder;
 import org.jeo.geojson.GeoJSON;
 import org.jeo.geom.Geom;
 import org.jeo.proj.Proj;
 import org.osgeo.proj4j.CoordinateReferenceSystem;
 
-import com.mongodb.BasicDBObject;
 import com.mongodb.BasicDBObjectBuilder;
 import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
@@ -22,18 +25,33 @@ import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Polygon;
 
-public class MongoDataset implements Vector {
+public class MongoDataset implements VectorData {
 
+    MongoWorkspace mongo;
     DBCollection dbcol;
     MongoMapper mapper;
     Schema schema;
 
-    MongoDataset(DBCollection dbcol) {
+    MongoDataset(DBCollection dbcol, MongoWorkspace mongo) {
         this.dbcol = dbcol;
-        this.schema = Features.schema(dbcol.getName(), "geometry", Geometry.class);
-        this.mapper = new GeoJSONMapper();
+        this.mongo = mongo;
+        this.schema = new SchemaBuilder(dbcol.getName()).field("geometry", Geometry.class).schema();
+        this.mapper = new GeoJSONMapper(this);
     }
-    
+
+    public MongoMapper getMapper() {
+        return mapper;
+    }
+
+    public DBCollection getCollection() {
+        return dbcol;
+    }
+
+    @Override
+    public Driver<?> getDriver() {
+        return mongo.getDriver();
+    }
+
     @Override
     public String getName() {
         return dbcol.getName();
@@ -56,8 +74,7 @@ public class MongoDataset implements Vector {
 
     @Override
     public Envelope bounds() throws IOException {
-        // TODO Auto-generated method stub
-        return null;
+        return mapper.bbox(dbcol);
     }
 
     @Override
@@ -66,27 +83,62 @@ public class MongoDataset implements Vector {
     }
 
     @Override
-    public long count(Envelope bbox) throws IOException {
-        return bbox != null ? dbcol.count(query(bbox)) : dbcol.count();
+    public long count(Query q) throws IOException {
+        if (q.isAll()) {
+            return dbcol.count();
+        }
+
+        if (Query.FILTER.has(q.getOptions())) {
+            // we can't optimize
+            return Cursors.size(q.apply(cursor(q)));
+        }
+
+        long count = 
+            q.getBounds() != null ? dbcol.count(encodeBboxQuery(q.getBounds())) : dbcol.count();
+        Integer offset = q.consume(Query.OFFSET, 0);
+        Integer limit = q.consume(Query.LIMIT, (int) count);
+
+        return Math.min(limit, count - offset);
     }
 
     @Override
-    public Cursor<Feature> read(Envelope bbox) throws IOException {
-        DBCursor dbCursor = bbox != null ? dbcol.find(query(bbox)) : dbcol.find();
-        return new MongoCursor(dbCursor, mapper);
+    public Cursor<Feature> cursor(Query q) throws IOException {
+        if (q.getMode() == Mode.APPEND) {
+            return new MongoCursor(q.getMode(), null, this);
+        }
+
+        //TODO: sorting
+        DBCursor dbCursor = 
+            q.getBounds() != null ? dbcol.find(encodeBboxQuery(q.getBounds())) : dbcol.find();
+
+        Integer skip = q.consume(Query.OFFSET, null);
+        if (skip != null) {
+            dbCursor.skip(skip);
+        }
+
+        Integer limit = q.consume(Query.LIMIT, null);
+        if (limit != null) {
+            dbCursor.limit(limit);
+        }
+
+        return q.apply(new MongoCursor(q.getMode(), dbCursor, this));
     }
 
-    DBObject query(Envelope bbox) {
+    DBObject encodeBboxQuery(Envelope bbox) {
         Polygon p = Geom.toPolygon(bbox);
         return BasicDBObjectBuilder.start().push("geometry").push("$geoIntersects")
             .append("$geometry", JSON.parse(GeoJSON.toString(p))).get();
     }
 
     @Override
-    public void add(Feature f) throws IOException {
-        BasicDBObject obj = new BasicDBObject();
-        mapper.feature(obj, f);
-        dbcol.insert(obj);
+    public void dispose() {
     }
+
+//    @Override
+//    public void add(Feature f) throws IOException {
+//        BasicDBObject obj = new BasicDBObject();
+//        mapper.feature(obj, f);
+//        dbcol.insert(obj);
+//    }
 
 }

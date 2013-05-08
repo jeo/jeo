@@ -5,19 +5,17 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Set;
 
 import org.jeo.data.Cursor;
+import org.jeo.data.Query;
 import org.jeo.feature.Feature;
-import org.jeo.feature.Features;
 import org.jeo.feature.Schema;
 import org.jeo.geojson.GeoJSON;
 import org.jeo.geom.Geom;
 import org.jeo.geom.GeometryBuilder;
-import org.jeo.shp.Shapefile;
 import org.jeo.shp.ShpData;
+import org.jeo.shp.ShpDataset;
 import org.junit.After;
 import org.junit.Assume;
 import org.junit.Before;
@@ -27,14 +25,12 @@ import org.junit.Test;
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
-import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.mongodb.BasicDBObject;
 import com.mongodb.BasicDBObjectBuilder;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
-import com.mongodb.Mongo;
 import com.mongodb.util.JSON;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
@@ -48,8 +44,7 @@ public class MongoTest {
     public static void connect() {
         Exception error = null;
         try {
-            Mongo mongo = new Mongo();
-            db = mongo.getDB("jeo");
+            db = new MongoOpts("jeo").connect();
             db.getCollectionNames();
         } catch (Exception e) {
             error = e;
@@ -59,7 +54,7 @@ public class MongoTest {
         Assume.assumeNotNull(db);
     }
 
-    MongoDB mongo;
+    MongoWorkspace mongo;
 
     @Before
     public void setUp() throws Exception {
@@ -68,14 +63,14 @@ public class MongoTest {
             states.remove(new BasicDBObject());
         }
 
-        Shapefile shp = ShpData.states();
-        for (Feature f : shp.read(null)) {
+        ShpDataset shp = ShpData.states();
+        for (Feature f : shp.cursor(new Query())) {
             f.put("geometry", Geom.iterate((MultiPolygon) f.geometry()).iterator().next());
             states.insert((DBObject) JSON.parse(GeoJSON.toString(f)));
         }
 
         states.ensureIndex(BasicDBObjectBuilder.start().add("geometry", "2dsphere").get());
-        mongo = new MongoDB(db);
+        mongo = new MongoWorkspace(db);
     }
 
     @After
@@ -93,9 +88,16 @@ public class MongoTest {
     }
 
     @Test
+    public void testBounds() throws Exception {
+        MongoDataset states = mongo.get("states");
+        Envelope bbox = states.bounds();
+        assertNotNull(bbox);
+    }
+
+    @Test
     public void testCount() throws Exception {
         MongoDataset states = mongo.get("states");
-        assertEquals(49, states.count(null));
+        assertEquals(49, states.count(new Query()));
     }
 
     @Test
@@ -103,15 +105,15 @@ public class MongoTest {
         MongoDataset states = mongo.get("states");
         Envelope bbox = new Envelope(-73.44, -71.51, 42.73, 45.01);
 
-        int match = Iterables.size(filter(states.read(null), bbox));
-        assertEquals(match, states.count(bbox));
+        int match = Iterables.size(filter(states.cursor(new Query()), bbox));
+        assertEquals(match, states.count(new Query().bounds(bbox)));
     }
 
     @Test
     public void testReadAll() throws Exception {
         MongoDataset states = mongo.get("states");
         int count = 0;
-        for (Feature f : states.read(null)) {
+        for (Feature f : states.cursor(new Query())) {
             count++;
             assertNotNull(f.geometry());
             assertNotNull(f.get("STATE_NAME"));
@@ -125,7 +127,8 @@ public class MongoTest {
         MongoDataset states = mongo.get("states");
         Envelope bbox = new Envelope(-73.44, -71.51, 42.73, 45.01);
 
-        Set<String> names = Sets.newHashSet(Iterables.transform(filter(states.read(null),bbox), 
+        Set<String> names = Sets.newHashSet(
+            Iterables.transform(filter(states.cursor(new Query()),bbox), 
             new Function<Feature,String>() {
                 @Override
                 public String apply(Feature input) {
@@ -134,31 +137,63 @@ public class MongoTest {
             }));
         assertFalse(names.isEmpty());
 
-        for (Feature f : states.read(bbox)) {
+        for (Feature f : states.cursor(new Query())) {
             names.remove(f.get("STATE_NAME"));
         }
         assertTrue(names.isEmpty());
     }
 
     @Test
-    public void testAdd() throws Exception {
+    public void testAppend() throws Exception {
         MongoDataset states = mongo.get("states");
-        Map<String,Object> map = new HashMap<String,Object>();
+        Cursor<Feature> c = states.cursor(new Query().append());
 
         Geometry g = new GeometryBuilder().point(0,0).buffer(1);
-        map.put("geometry", g);
-        map.put("STATE_NAME", "Nowhere");
-
-        states.add(Features.create(map));
-        assertEquals(50, states.count(null));
-
         
-        Cursor<Feature> c = states.read(g.getEnvelopeInternal());
-        assertTrue(c.hasNext());
         Feature f = c.next();
+        f.put("geometry", g);
+        f.put("STATE_NAME", "Nowhere");
+        c.write();
+
+        assertEquals(50, states.count(new Query()));
+
+        c = states.cursor(new Query().bounds(g.getEnvelopeInternal()));
+        assertTrue(c.hasNext());
+        f = c.next();
 
         assertTrue(g.equals(f.geometry()));
         assertEquals("Nowhere", f.get("STATE_NAME"));
+    }
+
+    @Test
+    public void testUpdate() throws Exception {
+        MongoDataset states = mongo.get("states");
+        
+        Geometry g = new GeometryBuilder().point(0,0).buffer(1);
+        assertEquals(0, states.count(new Query().bounds(g.getEnvelopeInternal())));
+        assertEquals(0, states.count(new Query().filter("STATE_NAME = 'foo'")));
+
+        Cursor<Feature> c = states.cursor(new Query().filter("STATE_ABBR = 'NY'").update());
+        assertTrue(c.hasNext());
+
+        Feature f = c.next();
+        f.put("geometry", g);
+        f.put("STATE_NAME", "foo");
+        c.write();
+        c.close();
+
+        assertEquals(0, states.count(new Query().filter("STATE_NAME = 'New York'")));
+        assertEquals(1, states.count(new Query().bounds(g.getEnvelopeInternal())));
+        assertEquals(1, states.count(new Query().filter("STATE_NAME = 'foo'")));
+
+        c = states.cursor(new Query().filter("STATE_NAME = 'foo'").update());
+        assertTrue(c.hasNext());
+        c.remove();
+        c.close();
+
+        assertEquals(48, states.count(new Query()));
+        assertEquals(0, states.count(new Query().filter("STATE_NAME = 'New York'")));
+        assertEquals(0, states.count(new Query().filter("STATE_NAME = 'foo'")));
     }
 
     Iterable<Feature> filter(Cursor<Feature> features, final Envelope bbox) {

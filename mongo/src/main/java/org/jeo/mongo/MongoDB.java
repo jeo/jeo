@@ -1,43 +1,60 @@
 package org.jeo.mongo;
 
 import java.io.IOException;
-import java.util.Iterator;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 
-import org.jeo.data.Vector;
-import org.jeo.data.Workspace;
-import org.jeo.feature.Schema;
+import org.jeo.data.Driver;
+import org.jeo.util.Key;
 
-import com.mongodb.BasicDBObject;
-import com.mongodb.DB;
-import com.mongodb.DBCollection;
+public class MongoDB implements Driver<MongoWorkspace> {
 
-public class MongoDB implements Workspace {
+    public static final Key<String> DB = new Key<String>("db", String.class);
+    
+    public static final Key<String> HOST = new Key<String>("host", String.class, "localhost");
+    
+    public static final Key<Integer> PORT = new Key<Integer>("port", Integer.class, 27017);
+    
+    public static final Key<String> USER = 
+            new Key<String>("user", String.class, System.getProperty("user.name"));
+    
+    public static final Key<String> PASSWD = new Key<String>("passwd", String.class);
 
-    DB db;
-
-    public MongoDB(DB db) {
-        this.db = db;
+    @Override
+    public String getName() {
+        return "MongoDB";
     }
 
     @Override
-    public Iterator<String> layers() throws IOException {
-        return db.getCollectionNames().iterator();
+    public List<String> getAliases() {
+        return Arrays.asList("mongo");
     }
 
     @Override
-    public MongoDataset get(String layer) throws IOException {
-        DBCollection col = db.getCollection(layer);
-        return col != null ? new MongoDataset(col) : null;
+    public Class<MongoWorkspace> getType() {
+        return MongoWorkspace.class;
     }
 
     @Override
-    public Vector create(Schema schema) throws IOException {
-        db.createCollection(schema.getName(), new BasicDBObject());
-        return get(schema.getName());
+    public List<Key<?>> getKeys() {
+        return (List) Arrays.asList(DB, HOST, PORT, USER, PASSWD);
     }
 
     @Override
-    public void dispose() {
+    public boolean canOpen(Map<?, Object> opts) {
+        return DB.has(opts);
+    }
+
+    @Override
+    public MongoWorkspace open(Map<?, Object> opts) throws IOException {
+        MongoOpts mopts = new MongoOpts(DB.get(opts));
+        mopts.host(HOST.get(opts))
+             .port(PORT.get(opts))
+             .user(USER.get(opts))
+             .passwd(PASSWD.get(opts));
+
+        return new MongoWorkspace(mopts);
     }
 
 }

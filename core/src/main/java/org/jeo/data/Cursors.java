@@ -1,9 +1,12 @@
 package org.jeo.data;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.jeo.feature.Feature;
@@ -304,7 +307,14 @@ public class Cursors {
     }
 
     public static <T> Cursor<T> reproject(Cursor<T> cursor, CoordinateReferenceSystem crs) {
-        return new ReprojectCursor(cursor, crs);
+        return reproject(cursor, null, crs);
+    }
+    
+    public static <T> Cursor<T> reproject(Cursor<T> cursor, CoordinateReferenceSystem from, 
+        CoordinateReferenceSystem to) {
+
+        return from != null ? 
+            new TransformCursor(cursor, from, to) : new ReprojectCursor(cursor, to);
     }
 
     private static class ReprojectCursor<T extends Feature> extends CursorWrapper<T> {
@@ -333,18 +343,33 @@ public class Cursors {
                     tx = Proj.transform(crs, target);
                     transforms.put(crs.getName(), tx);
                 }
-                return (T) new ReprojectFeature(next, tx);
+                return (T) new TransformFeature(next, tx);
             }
 
             return next;
         }
     }
 
-    private static class ReprojectFeature extends FeatureWrapper {
+    private static class TransformCursor<T extends Feature> extends CursorWrapper<T> {
+
+        CoordinateTransform tx;
+
+        TransformCursor(Cursor<T> delegate, CoordinateReferenceSystem from, CoordinateReferenceSystem to) {
+            super(delegate);
+            tx = Proj.transform(from, to);
+        }
+
+        @Override
+        public T next() throws IOException {
+            return (T) new TransformFeature(super.next(), tx);
+        }
+    }
+
+    private static class TransformFeature extends FeatureWrapper {
 
         CoordinateTransform transform;
 
-        ReprojectFeature(Feature delegate, CoordinateTransform transform) {
+        TransformFeature(Feature delegate, CoordinateTransform transform) {
             super(delegate);
             this.transform = transform;
         }
@@ -362,6 +387,28 @@ public class Cursors {
                 obj = reproject((Geometry)obj);
             }
             return obj;
+        }
+
+        public List<Object> list() {
+            List<Object> l = new ArrayList<Object>(delegate.list());
+            for (int i = 0; i < l.size(); i++) {
+                Object obj = l.get(i);
+                if (obj instanceof Geometry) {
+                    l.set(i, reproject((Geometry) obj));
+                }
+            }
+            return l;
+        }
+
+        public Map<String,Object> map() {
+            LinkedHashMap<String,Object> m = new LinkedHashMap<String,Object>(delegate.map());
+            for (Map.Entry<String, Object> e : m.entrySet()) {
+                Object obj = e.getValue();
+                if (obj instanceof Geometry) {
+                    e.setValue(reproject((Geometry)obj));
+                }
+            }
+            return m;
         }
 
         Geometry reproject(Geometry g) {

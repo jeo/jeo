@@ -12,6 +12,7 @@ import org.jeo.filter.cql.ParseException;
 import org.jeo.geom.Geom;
 import org.jeo.proj.Proj;
 import org.jeo.util.Key;
+import org.jeo.util.Pair;
 import org.osgeo.proj4j.CoordinateReferenceSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,8 +52,8 @@ public class Query {
     /**
      * Query option for re-projecting results.
      */
-    public static final Key<CoordinateReferenceSystem> REPROJECT = 
-        new Key<CoordinateReferenceSystem>("reproject", CoordinateReferenceSystem.class);
+    public static final Key<Pair<CoordinateReferenceSystem,CoordinateReferenceSystem>> REPROJECT = 
+        new Key<Pair<CoordinateReferenceSystem,CoordinateReferenceSystem>>("reproject", (Class) Pair.class);
 
     /**
      * Query option for simplifying geometry of results.
@@ -220,11 +221,25 @@ public class Query {
      * @return This object.
      */
     public Query reproject(String srs) {
-        CoordinateReferenceSystem crs = Proj.crs(srs);
-        if (crs == null) {
-            throw new IllegalArgumentException("Unknown crs: " + srs);
+        return reproject(null, srs);
+    }
+
+    /**
+     * Sets the srs to re-project query results to. 
+     * 
+     * @return This object.
+     */
+    public Query reproject(String from, String to) {
+        CoordinateReferenceSystem src = from != null ? Proj.crs(from) : null;
+        CoordinateReferenceSystem dst = to != null ? Proj.crs(to) : null;
+         
+        if (from != null && src == null) {
+            throw new IllegalArgumentException("Unknown crs: " + from);
         }
-        return reproject(crs);
+        if (to == null) {
+            throw new IllegalArgumentException("Unknown crs: " + to);
+        }
+        return reproject(src, dst);
     }
 
     /**
@@ -233,7 +248,16 @@ public class Query {
      * @return This object.
      */
     public Query reproject(CoordinateReferenceSystem crs) {
-        set(REPROJECT, crs);
+        return reproject(null, crs);
+    }
+
+    /**
+     * Sets the source/target crs to re-project query results from/to. 
+     * 
+     * @return This object.
+     */
+    public Query reproject(CoordinateReferenceSystem from, CoordinateReferenceSystem to) {
+        set(REPROJECT, new Pair<CoordinateReferenceSystem,CoordinateReferenceSystem>(from, to));
         return this;
     }
 
@@ -333,9 +357,9 @@ public class Query {
             cursor = Cursors.limit(cursor, limit);
         }
 
-        CoordinateReferenceSystem crs = consume(REPROJECT, null);
-        if (crs != null) {
-            cursor = Cursors.reproject(cursor, crs);
+        Pair<CoordinateReferenceSystem,CoordinateReferenceSystem> reproj = consume(REPROJECT, null);
+        if (reproj != null) {
+            cursor = Cursors.reproject(cursor, reproj.first(), reproj.second());
         }
 
         if (!options.isEmpty()) {

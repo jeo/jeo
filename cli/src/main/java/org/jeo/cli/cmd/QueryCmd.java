@@ -11,8 +11,6 @@ import org.jeo.data.Drivers;
 import org.jeo.data.Query;
 import org.jeo.data.VectorData;
 import org.jeo.feature.Feature;
-import org.jeo.feature.Field;
-import org.jeo.feature.Schema;
 import org.jeo.filter.Filter;
 
 import com.beust.jcommander.Parameter;

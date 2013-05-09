@@ -27,10 +27,10 @@ public class ConvertCmd extends JeoCmd {
     @Parameter(description="source target", arity = 2, required=true)
     List<String> datas;
 
-    @Parameter(names = "--from-crs", description="Source CRS override")
+    @Parameter(names = { "-fc", "--from-crs"}, description="Source CRS override")
     CoordinateReferenceSystem fromCRS;
 
-    @Parameter(names = "--to-crs", description="Target CRS")
+    @Parameter(names = { "-tc", "--to-crs"}, description="Target CRS")
     CoordinateReferenceSystem toCRS;
 
     @Override

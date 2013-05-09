@@ -55,6 +55,12 @@ public class GeoGit extends FileDriver<GeoGitWorkspace> {
 
     @Override
     public GeoGitWorkspace open(File file, Map<?, Object> opts) throws IOException {
+        if (!file.exists() && CREATE.get(opts)) {
+            if (!file.mkdirs()) {
+                throw new IOException("Unable to create directory: " + file.getPath());
+            }
+        }
+
         GeoGIT gg = newGeoGIT(file);
         gg.getOrCreateRepository();
 

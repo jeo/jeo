@@ -54,7 +54,10 @@ public class MongoCursor extends Cursor<Feature> {
 
     @Override
     public void close() throws IOException {
-        dbCursor.close();
+        if (dbCursor != null) {
+            dbCursor.close();
+            dbCursor = null;
+        }
     }
 
     

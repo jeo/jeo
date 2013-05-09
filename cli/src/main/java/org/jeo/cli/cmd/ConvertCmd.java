@@ -10,6 +10,8 @@ import org.jeo.data.Dataset;
 import org.jeo.data.Disposable;
 import org.jeo.data.Drivers;
 import org.jeo.data.Query;
+import org.jeo.data.Transaction;
+import org.jeo.data.Transactional;
 import org.jeo.data.VectorData;
 import org.jeo.data.Workspace;
 import org.jeo.feature.Feature;
@@ -50,7 +52,9 @@ public class ConvertCmd extends JeoCmd {
             to = open((Disposable)Drivers.open(uri));
         }
         catch(Exception e) {
-            //TODO: log
+            if (debug) {
+                print(e, cli);
+            }
         }
         if (to instanceof Dataset) {
             throw new IllegalArgumentException("Destination dataset already exists");
@@ -89,16 +93,32 @@ public class ConvertCmd extends JeoCmd {
                 q.reproject(fromCRS, toCRS);
             }
             o = orig.cursor(q);
-            d = dest.cursor(new Query().append());
-    
-            while(o.hasNext()) {
-                Feature a = o.next();
-                Feature b = d.next();
-    
-                Features.copy(a, b);
-                d.write();
 
-                progress.progress(1);
+            Transaction tx = null;
+            if (dest instanceof Transactional) {
+                tx = ((Transactional) dest).transaction(null);
+            }
+
+            d = dest.cursor(new Query().append().transaction(tx));
+
+            try {
+                while(o.hasNext()) {
+                    Feature a = o.next();
+                    Feature b = d.next();
+        
+                    Features.copy(a, b);
+                    d.write();
+    
+                    progress.progress(1);
+                }
+    
+                if (tx != null) {
+                    tx.commit();
+                }
+            }
+            catch(Exception e) {
+                if (tx != null) tx.rollback();
+                throw e;
             }
         }
         finally {

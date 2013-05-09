@@ -35,7 +35,7 @@ public abstract class JeoCmd {
         }
         catch(Exception e) {
             if (debug) {
-                e.printStackTrace(new PrintWriter(cli.getConsole().getOutput()));
+                print(e, cli);
             }
             else {
                 cli.getConsole().println(e.getMessage());
@@ -82,5 +82,9 @@ public abstract class JeoCmd {
             toDispose.push(obj);
         }
         return obj;
+    }
+
+    protected void print(Exception e, JeoCLI cli) {
+        e.printStackTrace(new PrintWriter(cli.getConsole().getOutput()));
     }
 }

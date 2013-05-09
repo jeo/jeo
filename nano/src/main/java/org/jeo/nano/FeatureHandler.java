@@ -28,7 +28,7 @@ import org.jeo.data.Workspace;
 import org.jeo.feature.Feature;
 import org.jeo.feature.Features;
 import org.jeo.feature.Schema;
-import org.jeo.geojson.GeoJSON;
+import org.jeo.geojson.GeoJSONReader;
 import org.jeo.geojson.GeoJSONWriter;
 import org.jeo.nano.NanoHTTPD.Response;
 import org.json.JSONException;
@@ -123,7 +123,7 @@ public class FeatureHandler extends Handler {
     }
 
     Response handlePostCreateLayer(Request request, InputStream body) throws IOException {
-        Schema schema = (Schema) GeoJSON.read(body);
+        Schema schema = (Schema) new GeoJSONReader().read(body);
 
         Workspace ws = findWorkspace(request);
         ws.create(schema);
@@ -135,7 +135,7 @@ public class FeatureHandler extends Handler {
     Response handlePostAddFeatures(Request request, InputStream body) throws IOException {
         VectorData layer = findVectorLayer(request);
 
-        Object obj = GeoJSON.read(body);
+        Object obj = new GeoJSONReader().read(body);
 
         Cursor<Feature> c = layer.cursor(new Query().append());
 

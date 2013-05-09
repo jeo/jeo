@@ -11,19 +11,14 @@ import org.jeo.data.VectorData;
 import org.jeo.feature.Feature;
 import org.jeo.feature.Schema;
 import org.jeo.feature.SchemaBuilder;
-import org.jeo.geojson.GeoJSON;
-import org.jeo.geom.Geom;
 import org.jeo.proj.Proj;
 import org.osgeo.proj4j.CoordinateReferenceSystem;
 
-import com.mongodb.BasicDBObjectBuilder;
 import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
-import com.mongodb.util.JSON;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.Polygon;
 
 public class MongoDataset implements VectorData {
 
@@ -125,20 +120,10 @@ public class MongoDataset implements VectorData {
     }
 
     DBObject encodeBboxQuery(Envelope bbox) {
-        Polygon p = Geom.toPolygon(bbox);
-        return BasicDBObjectBuilder.start().push("geometry").push("$geoIntersects")
-            .append("$geometry", JSON.parse(GeoJSON.toString(p))).get();
+        return mapper.query(bbox);
     }
 
     @Override
     public void dispose() {
     }
-
-//    @Override
-//    public void add(Feature f) throws IOException {
-//        BasicDBObject obj = new BasicDBObject();
-//        mapper.feature(obj, f);
-//        dbcol.insert(obj);
-//    }
-
 }

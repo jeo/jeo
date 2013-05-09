@@ -14,4 +14,5 @@ public interface MongoMapper {
 
     DBObject object(Feature f);
 
+    DBObject query(Envelope bbox);
 }

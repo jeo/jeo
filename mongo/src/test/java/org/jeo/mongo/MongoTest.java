@@ -11,7 +11,7 @@ import org.jeo.data.Cursor;
 import org.jeo.data.Query;
 import org.jeo.feature.Feature;
 import org.jeo.feature.Schema;
-import org.jeo.geojson.GeoJSON;
+import org.jeo.geojson.GeoJSONWriter;
 import org.jeo.geom.Geom;
 import org.jeo.geom.GeometryBuilder;
 import org.jeo.shp.ShpData;
@@ -66,7 +66,7 @@ public class MongoTest {
         ShpDataset shp = ShpData.states();
         for (Feature f : shp.cursor(new Query())) {
             f.put("geometry", Geom.iterate((MultiPolygon) f.geometry()).iterator().next());
-            states.insert((DBObject) JSON.parse(GeoJSON.toString(f)));
+            states.insert((DBObject) JSON.parse(GeoJSONWriter.toString(f)));
         }
 
         states.ensureIndex(BasicDBObjectBuilder.start().add("geometry", "2dsphere").get());

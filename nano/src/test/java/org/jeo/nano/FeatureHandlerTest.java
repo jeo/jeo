@@ -20,7 +20,7 @@ import org.jeo.data.VectorData;
 import org.jeo.data.Workspace;
 import org.jeo.feature.Feature;
 import org.jeo.feature.Schema;
-import org.jeo.geojson.GeoJSON;
+import org.jeo.geojson.GeoJSONReader;
 import org.jeo.nano.NanoHTTPD.Response;
 import org.junit.Test;
 
@@ -51,7 +51,7 @@ public class FeatureHandlerTest extends HandlerTestSupport {
         Response res = h.handle(req);
         assertEquals(NanoHTTPD.HTTP_OK, res.status);
         
-        List<Feature> features = (List<Feature>) GeoJSON.read(res.data);
+        List<Feature> features = (List<Feature>) new GeoJSONReader().read(res.data);
         assertTrue(features.isEmpty());
 
         verify(layer, ws, reg);

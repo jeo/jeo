@@ -4,14 +4,17 @@ import static org.jeo.mongo.Functions.BBOX_MAP;
 import static org.jeo.mongo.Functions.BBOX_REDUCE;
 
 import org.jeo.feature.Feature;
+import org.jeo.geom.Geom;
 
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
+import com.mongodb.BasicDBObjectBuilder;
 import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
 import com.mongodb.MapReduceCommand;
 import com.mongodb.MapReduceCommand.OutputType;
 import com.vividsolutions.jts.geom.Envelope;
+import com.vividsolutions.jts.geom.Polygon;
 
 public class GeoJSONMapper implements MongoMapper {
 
@@ -43,4 +46,10 @@ public class GeoJSONMapper implements MongoMapper {
         return ((GeoJSONFeature)f).obj;
     }
 
+    @Override
+    public DBObject query(Envelope bbox) {
+        Polygon p = Geom.toPolygon(bbox);
+        return BasicDBObjectBuilder.start().push("geometry").push("$geoIntersects")
+            .append("$geometry", GeoJSON.toObject(p)).get();
+    }
 }

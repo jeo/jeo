@@ -43,6 +43,23 @@ import com.vividsolutions.jts.geom.Polygon;
 public class GeoJSONWriter extends JSONStringer {
 
     /**
+     * Encodes an object as GeoJSON to a string.
+     * <p>
+     * This method delegates to {@link GeoJSONWriter#write(Object)}.
+     * </p> 
+     * @param obj The object to encode.
+     *
+     * @return GeoJSON string. 
+     */
+    public static String toString(Object obj) {
+        try {
+            return new GeoJSONWriter().write(obj).toString();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
      * Encodes an object as GeoJSON.
      * <p>
      * This method can handle the following types of objects.

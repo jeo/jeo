@@ -73,7 +73,6 @@ public class JeoCLI {
             cmd.run(this);
         }
         catch(Exception e) {
-            e.printStackTrace();
             if (e.getMessage() != null) {
                 console.println(e.getMessage());
             }

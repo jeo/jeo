@@ -16,10 +16,10 @@ import com.beust.jcommander.Parameters;
 
 public abstract class JeoCmd {
 
-    @Parameter(names={"-h", "-help"}, description="Provides help for this command", help=true)
+    @Parameter(names={"-h", "--help"}, description="Provides help for this command", help=true)
     boolean help;
 
-    @Parameter(names={"-x", "-debug"}, description="Runs command in debug mode", help=true)
+    @Parameter(names={"-x", "--debug"}, description="Runs command in debug mode", help=true)
     boolean debug;
     
     Deque<Disposable> toDispose = new ArrayDeque<Disposable>();

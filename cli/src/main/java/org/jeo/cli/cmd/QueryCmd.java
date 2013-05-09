@@ -28,16 +28,16 @@ public class QueryCmd extends JeoCmd {
     @Parameter(description="data", arity = 1, required=true)
     List<String> datas; 
     
-    @Parameter(names = "-bbox", description = "Bounding box (xmin,ymin,xmax,ymax)")
+    @Parameter(names = {"-b", "--bbox"}, description = "Bounding box (xmin,ymin,xmax,ymax)")
     Envelope bbox;
 
-    @Parameter(names = "-filter", description = "Predicate used to constrain results")
+    @Parameter(names = {"-f", "--filter"}, description = "Predicate used to constrain results")
     Filter filter;
 
-    @Parameter(names = "-count", description = "Maximum number of results to return")
+    @Parameter(names = {"-c", "-count" }, description = "Maximum number of results to return")
     Integer count;
 
-    @Parameter(names = "-summary", description = "Summarize results only")
+    @Parameter(names = {"-s", "-summary"}, description = "Summarize results only")
     boolean summary;
     
     @Override

@@ -14,6 +14,7 @@ import org.jeo.data.VectorData;
 import org.jeo.data.Workspace;
 import org.jeo.feature.Feature;
 import org.jeo.feature.Features;
+import org.osgeo.proj4j.CoordinateReferenceSystem;
 
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.Parameters;
@@ -21,9 +22,15 @@ import com.beust.jcommander.Parameters;
 @Parameters(commandNames="convert", commandDescription="Converts between data sources")
 public class ConvertCmd extends JeoCmd {
 
-    @Parameter(description="from to", arity = 2, required=true)
+    @Parameter(description="source target", arity = 2, required=true)
     List<String> datas;
-    
+
+    @Parameter(names = "--from-crs", description="Source CRS override")
+    CoordinateReferenceSystem fromCRS;
+
+    @Parameter(names = "--to-crs", description="Target CRS")
+    CoordinateReferenceSystem toCRS;
+
     @Override
     protected void doCommand(JeoCLI cli) throws Exception {
         Object from = Drivers.open(parseDataURI(datas.get(0)));
@@ -69,7 +76,19 @@ public class ConvertCmd extends JeoCmd {
             ConsoleProgress progress = 
                 new ConsoleProgress(cli.getConsole(), (int) orig.count(new Query()));
 
-            o = orig.cursor(new Query());
+            // create query for source
+            Query q = new Query();
+
+            // reprojection
+            if (toCRS != null) {
+                if (fromCRS == null && orig.getCRS() == null) {
+                    throw new IllegalArgumentException(
+                        "Could not determine source crs, must supply it with --src-crs");
+                }
+
+                q.reproject(fromCRS, toCRS);
+            }
+            o = orig.cursor(q);
             d = dest.cursor(new Query().append());
     
             while(o.hasNext()) {

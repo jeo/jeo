@@ -1,6 +1,7 @@
 package org.jeo.cli.conv;
 
 import org.jeo.filter.Filter;
+import org.osgeo.proj4j.CoordinateReferenceSystem;
 
 import com.beust.jcommander.IStringConverter;
 import com.beust.jcommander.IStringConverterFactory;
@@ -15,6 +16,9 @@ public class JeoCLIConverterFactory implements IStringConverterFactory {
         }
         if (clazz == Filter.class) {
             return FilterConverter.class;
+        }
+        if (clazz == CoordinateReferenceSystem.class) {
+            return CRSConverter.class;
         }
         return null;
     }

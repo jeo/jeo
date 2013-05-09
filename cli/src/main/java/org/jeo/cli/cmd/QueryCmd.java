@@ -7,7 +7,6 @@ import java.util.Map;
 import jline.console.ConsoleReader;
 
 import org.jeo.cli.JeoCLI;
-import org.jeo.cli.conv.MapConverter;
 import org.jeo.data.Drivers;
 import org.jeo.data.Query;
 import org.jeo.data.VectorData;
@@ -71,24 +70,26 @@ public class QueryCmd extends JeoCmd {
                 q.limit(count);
             }
 
-            Schema schema = dataset.getSchema();
-
-            int size = new Ordering<Field>() {
-                public int compare(Field left, Field right) {
-                    return Ints.compare(left.getName().length(), right.getName().length());
-                };
-            }.max(schema.getFields()).getName().length() + 2;
-
             if (summary) {
                 console.println(String.format("Query matched %d features", dataset.count(q)));
             }
             else {
                 for (Feature f : dataset.cursor(q)) {
                     console.println("Feature " + f.getId());
-                    for (Field fld : schema) {
-                        console.print(Strings.padStart(fld.getName(), size, ' '));
-                        console.println("\t=\t" + f.get(fld.getName()));
+                    Map<String,Object> map = f.map();
+
+                    int padd = new Ordering<String>() {
+                        @Override
+                        public int compare(String left, String right) {
+                            return Ints.compare(left.length(), right.length());
+                        }
+                    }.max(map.keySet()).length();
+
+                    for (Map.Entry<String, Object> kv : f.map().entrySet()) {
+                        console.print(Strings.padStart(kv.getKey(), padd, ' '));
+                        console.println("\t=\t" + kv.getValue());
                     }
+
                     console.println();
                 }
             }

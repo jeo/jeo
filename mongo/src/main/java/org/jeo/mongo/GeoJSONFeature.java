@@ -121,7 +121,7 @@ public class GeoJSONFeature extends AbstractFeature {
 
         map.put("geometry", get("geometry"));
 
-        DBObject props = (DBObject) get("properties");
+        DBObject props = (DBObject) find("properties");
         if (props != null) {
             for (String key : props.keySet()) {
                 map.put(key, props.get(key));

@@ -18,4 +18,20 @@ public class Util {
     public static String uuid() {
         return UUID.randomUUID().toString();
     }
+
+    /**
+     * Returns the basename of the file, stripping off the extension if one exists.
+     */
+    public static String base(String filename) {
+        int dot = filename.lastIndexOf('.');
+        return dot != -1 ? filename.substring(0, dot) : filename;
+    }
+
+    /**
+     * Returns the extension of the file, or null if the filename has no extension.
+     */
+    public static String extension(String filename) {
+        int dot = filename.lastIndexOf('.');
+        return dot != -1 ? filename.substring(dot+1).toLowerCase() : null;
+    }
 }

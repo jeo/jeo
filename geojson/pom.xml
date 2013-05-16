@@ -8,8 +8,8 @@
     <version>1.0-SNAPSHOT</version>
   </parent>
 
-  <artifactId>jeo-nano</artifactId>
-  <name>NanoHTTPD Server</name>
+  <artifactId>jeo-geojson</artifactId>
+  <name>GeoJSON Driver</name>
   <packaging>jar</packaging>
 
   <dependencies>
@@ -19,21 +19,29 @@
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>org.jeo</groupId>
-      <artifactId>jeo-geojson</artifactId>
-      <version>${project.version}</version>
+      <groupId>com.googlecode.json-simple</groupId>
+      <artifactId>json-simple</artifactId>
+      <version>1.1.1</version>
     </dependency>
     <dependency>
       <groupId>org.jeo</groupId>
-      <artifactId>jeo-geopkg</artifactId>
+      <artifactId>jeo-core</artifactId>
+      <version>${project.version}</version>
+      <scope>test</scope>
+      <classifier>tests</classifier>
+    </dependency>
+      <dependency>
+      <groupId>org.jeo</groupId>
+      <artifactId>jeo-shp</artifactId>
       <version>${project.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.jeo</groupId>
-      <artifactId>jeo-guava</artifactId>
+      <artifactId>jeo-shp</artifactId>
       <version>${project.version}</version>
       <scope>test</scope>
+      <classifier>tests</classifier>
     </dependency>
   </dependencies>
 

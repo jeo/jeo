@@ -148,6 +148,7 @@
 
   <modules>
     <module>core</module>
+    <module>geojson</module>
     <module>csv</module>
     <module>geopkg</module>
     <module>nano</module>

@@ -14,6 +14,8 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
 import java.util.regex.Matcher;
@@ -27,12 +29,15 @@ import org.jeo.data.VectorData;
 import org.jeo.data.Workspace;
 import org.jeo.feature.Feature;
 import org.jeo.feature.Features;
+import org.jeo.feature.Field;
 import org.jeo.feature.Schema;
 import org.jeo.geojson.GeoJSONReader;
 import org.jeo.geojson.GeoJSONWriter;
+import org.jeo.geom.Geom;
 import org.jeo.nano.NanoHTTPD.Response;
-import org.json.JSONException;
-import org.json.JSONObject;
+import org.json.simple.JSONObject;
+import org.json.simple.JSONValue;
+import org.osgeo.proj4j.CoordinateReferenceSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -90,18 +95,8 @@ public class FeatureHandler extends Handler {
         }
 
         Envelope bbox = parseBBOX(q.getProperty("bbox"));
-
-        GeoJSONWriter w = new GeoJSONWriter();
-
         Cursor<Feature> c = layer.cursor(new Query().bounds(bbox));
-
-        w.featureCollection();
-        while(c.hasNext()) {
-            w.feature(c.next());
-        }
-        w.endFeatureCollection();
-        
-        return new Response(HTTP_OK, MIME_JSON, w.toString());
+        return new Response(HTTP_OK, MIME_JSON, GeoJSONWriter.toString(c));
     }
 
     Response handlePost(Request request) throws IOException {
@@ -123,7 +118,7 @@ public class FeatureHandler extends Handler {
     }
 
     Response handlePostCreateLayer(Request request, InputStream body) throws IOException {
-        Schema schema = (Schema) new GeoJSONReader().read(body);
+        Schema schema = parseSchema(body);
 
         Workspace ws = findWorkspace(request);
         ws.create(schema);
@@ -185,16 +180,52 @@ public class FeatureHandler extends Handler {
             Double.parseDouble(split[1]), Double.parseDouble(split[3]));
     }
 
-    JSONObject parseJSON(InputStream body) throws JSONException, IOException {
-        BufferedReader r  = new BufferedReader(new InputStreamReader(body));
+    JSONObject parseJSON(InputStream body) throws IOException {
+        return (JSONObject) JSONValue.parse(new InputStreamReader(body));
+    }
 
-        StringBuilder buf = new StringBuilder();
-        String line = null;
-        while((line = r.readLine()) != null) {
-            buf.append(line);
-        }
+    Schema parseSchema(InputStream body) {
 
-        
-        return new JSONObject(buf.toString());
+        JSONObject obj = (JSONObject) JSONValue.parse(new InputStreamReader(body));
+
+        //not part of GeoJSON
+         String name = (String) obj.get("name");
+         if (name == null) {
+             throw new IllegalArgumentException("Object must specify name property");
+         }
+ 
+         JSONObject properties = (JSONObject) obj.get("properties");
+         List<Field> fields = new ArrayList<Field>();
+ 
+         for (Iterator<?> it = properties.keySet().iterator(); it.hasNext(); ) {
+             String key = it.next().toString();
+             JSONObject prop = (JSONObject) properties.get(key);
+ 
+             String type = (String) prop.get("type");
+             Class<?> clazz = null; 
+ 
+             //first try as geometry
+             if (Geom.Type.from(type) != null) {
+                 clazz = Geom.Type.from(type).getType();
+             }
+             else {
+                 //try as a primitive
+                 try {
+                     clazz = Class.forName("java.lang." + 
+                         Character.toUpperCase(type.charAt(0)) + type.substring(1));
+                 } catch (ClassNotFoundException e) {
+                     throw new IllegalArgumentException("type " +type+ " not supported"); 
+                 }
+             }
+ 
+             CoordinateReferenceSystem crs = null;
+             if (prop.containsKey("crs")) {
+                 //crs = readCRS(prop.get("crs"));
+             }
+ 
+             fields.add(new Field(key, clazz, crs));
+         }
+ 
+         return new Schema(name, fields);
     }
 }

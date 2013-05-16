@@ -42,7 +42,7 @@ public interface Dataset extends Disposable {
     /**
      * The native coordinate reference system of the layer, or <code>null</code> if unknown. 
      */
-    CoordinateReferenceSystem getCRS();
+    CoordinateReferenceSystem getCRS() throws IOException;
 
     /**
      * The extent of the dataset in its native coordinate reference system.

@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.jeo.util.Key;
+import org.jeo.util.Util;
 
 /**
  * Base class for file based drivers.
@@ -91,7 +92,6 @@ public abstract class FileDriver<T> implements Driver<T> {
      * Helper to get file extension (lower case). 
      */
     protected String ext(File f) {
-        int dot = f.getName().lastIndexOf('.');
-        return dot != -1 ? f.getName().substring(dot+1).toLowerCase() : null;
+        return Util.extension(f.getName());
     }
 }

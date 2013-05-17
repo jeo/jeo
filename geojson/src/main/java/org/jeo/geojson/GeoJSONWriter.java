@@ -138,7 +138,10 @@ public class GeoJSONWriter {
             obj.put("geometry", toObject(g));
         }
 
-        obj.put("properties", f.map());
+        Map<String,Object> map = new LinkedHashMap<String, Object>(f.map());
+        map.remove("geometry");
+
+        obj.put("properties", map);
         return obj;
     }
 

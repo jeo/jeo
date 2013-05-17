@@ -1,11 +1,14 @@
 package org.jeo.geojson;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Reader;
+import java.io.Writer;
 
 import org.jeo.data.Cursor;
 import org.jeo.data.Cursors;
@@ -92,9 +95,10 @@ public class GeoJSONDataset implements VectorData {
             throw new IOException("Update cursor not supported");
         }
         if (q.getMode() == Mode.APPEND) {
-            //if (file.length() != 0) {
+            if (file.length() != 0) {
                 throw new IOException("Can't append to non empty dataset");
-            //}
+            }
+            return new GeoJSONAppendCursor(writer());
         }
         return q.apply(new GeoJSONCursor(reader()));
     }
@@ -118,5 +122,9 @@ public class GeoJSONDataset implements VectorData {
 
     Reader reader() throws IOException {
         return new BufferedReader(new FileReader(file));
+    }
+
+    Writer writer() throws IOException {
+        return new BufferedWriter(new FileWriter(file));
     }
 }

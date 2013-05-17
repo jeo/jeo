@@ -1,14 +1,21 @@
 package org.jeo.geojson;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 import org.jeo.Tests;
+import org.jeo.data.Cursor;
 import org.jeo.data.Query;
 import org.jeo.feature.Feature;
+import org.jeo.feature.Features;
 import org.jeo.shp.ShpData;
+import org.jeo.shp.ShpDataset;
 import org.junit.Before;
 import org.junit.Test;
 import org.osgeo.proj4j.CoordinateReferenceSystem;
@@ -67,5 +74,28 @@ public class GeoJSONTest {
         }
 
         assertTrue(names.isEmpty());
+    }
+
+    @Test
+    public void testAppend() throws Exception {
+        ShpDataset shp = ShpData.states();
+
+        Map map = new HashMap();
+        map.put(GeoJSON.FILE, Tests.newTmpFile());
+
+        GeoJSONDataset json = new GeoJSON().create(map, shp.getSchema());
+
+        Cursor<Feature> from = shp.cursor(new Query());
+        Cursor<Feature> to = json.cursor(new Query().append());
+        
+        for (Feature f : from) {
+            Feature g = to.next();
+            Features.copy(f, g);
+            to.write();
+        }
+
+        to.close();
+
+        assertEquals(49, json.count(new Query()));
     }
 }

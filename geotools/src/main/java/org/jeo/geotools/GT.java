@@ -70,8 +70,12 @@ public class GT {
         SimpleFeatureTypeBuilder b = new SimpleFeatureTypeBuilder();
         b.setName(schema.getName());
 
+        Integer epsg = null;
         if (schema.crs() != null) {
-            b.setSRS("EPSG:" + Proj.epsgCode(schema.crs()));
+            epsg = Proj.epsgCode(schema.crs());
+        }
+        if (epsg != null) {
+            b.setSRS("EPSG:" + epsg);
         }
         else {
             b.setCRS(null);

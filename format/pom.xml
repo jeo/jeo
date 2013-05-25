@@ -21,6 +21,7 @@
     <module>mongo</module>
     <module>postgis</module>
     <module>shp</module>
+    <module>ogr</module>
   </modules>
 
 </project>

@@ -37,7 +37,6 @@ public abstract class OGRDriver<T> implements Driver<T> {
         return (List) Arrays.asList(PATH);
     }
 
-    @Override
     public void probe() throws Exception {
         if (ogr.GetDriverCount() == 0) {
             ogr.RegisterAll();

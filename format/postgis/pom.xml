@@ -4,7 +4,7 @@
 
   <parent>
     <groupId>org.jeo</groupId>
-    <artifactId>jeo</artifactId>
+    <artifactId>jeo-format</artifactId>
     <version>1.0-SNAPSHOT</version>
   </parent>
 

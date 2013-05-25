@@ -72,6 +72,17 @@ public class Proj {
         return csFactory.createFromName(s);
     }
 
+    /**
+     * Creates a crs object from projection parameter definition.
+     * 
+     * @param projdef The projection / proj4 parameters.
+     * 
+     * @return The crs object.
+     */
+    public static CoordinateReferenceSystem crs(String[] projdef) {
+        return csFactory.createFromParameters(null, projdef);
+    }
+
     private static CoordinateReferenceSystem createFromExtra(String auth, String code) {
         Proj4FileReader r = new Proj4FileReader();
         InputStream in = Proj.class.getResourceAsStream("other.extra");

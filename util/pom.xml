@@ -9,19 +9,16 @@
   </parent>
 
   <groupId>org.jeo</groupId>
-  <artifactId>format</artifactId>
+  <artifactId>util</artifactId>
   <packaging>pom</packaging>
-  <name>Format Modules</name>
+  <name>Util Modules</name>
 
   <modules>
-    <module>csv</module>
-    <module>geogit</module>
-    <module>geojson</module>
-    <module>geopkg</module>
-    <module>mongo</module>
-    <module>postgis</module>
-    <module>shp</module>
-    <module>ogr</module>
+    <module>geotools</module>
+    <module>gmaps</module>
+    <module>guava</module>
+    <module>scala</module>
+
   </modules>
 
 </project>

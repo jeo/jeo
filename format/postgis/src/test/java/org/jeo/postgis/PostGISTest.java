@@ -40,7 +40,11 @@ import com.vividsolutions.jts.geom.Polygon;
 
 public class PostGISTest {
 
-    
+    /*
+     * change these params to run against a different server/database
+     */
+    static PostGISOpts opts = new PostGISOpts("jeo");
+
     PostGISWorkspace pg;
 
     @BeforeClass
@@ -57,7 +61,7 @@ public class PostGISTest {
     @BeforeClass
     public static void connect()  {
         try {
-            PGPoolingDataSource ds = PostGISWorkspace.createDataSource(new PostGISOpts("jeo")); 
+            PGPoolingDataSource ds = PostGISWorkspace.createDataSource(opts); 
             Connection cx = ds.getConnection();
             Assume.assumeNotNull(cx);
             cx.close();
@@ -70,7 +74,7 @@ public class PostGISTest {
 
     @Before
     public void rollback() throws Exception {
-        PGPoolingDataSource ds = PostGISWorkspace.createDataSource(new PostGISOpts("jeo")); 
+        PGPoolingDataSource ds = PostGISWorkspace.createDataSource(opts); 
         Connection cx = ds.getConnection();
         Statement st = cx.createStatement();
         st.executeUpdate(
@@ -84,7 +88,7 @@ public class PostGISTest {
 
     @Before
     public void setUp() throws Exception {
-        pg = new PostGISWorkspace(new PostGISOpts("jeo"));
+        pg = new PostGISWorkspace(opts);
     }
 
     @After

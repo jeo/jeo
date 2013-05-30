@@ -168,19 +168,20 @@ public class PostGISWorkspace implements Workspace {
                 st.execute(sql.toString());
 
                 if (!info.isAtLeastVersion2()) {
-                    sql = new SQL("INSERT INTO geometry_columns (f_table_schema, f_table_name,")
-                        .add("f_geometry_column, coord_dimension, srid, type) VALUES (?,?,?,?,?,?)");
+                    sql = new SQL("INSERT INTO geometry_columns (f_table_catalog, f_table_schema,"+
+                        " f_table_name, f_geometry_column, coord_dimension, srid, type)" + 
+                        " VALUES (?,?,?,?,?,?,?)");
 
                     //manually register geomtewry columns
                     for (Pair<Field,Integer> p : gcols) {
                         Field fld = p.first();
 
                         List<Pair<Object,Integer>> values = new ArrayList<Pair<Object,Integer>>();
+                        values.add(new Pair("", Types.VARCHAR));
                         values.add(new Pair("public", Types.VARCHAR));
                         values.add(new Pair(schema.getName(), Types.VARCHAR));
                         values.add(new Pair(fld.getName(), Types.VARCHAR));
                         values.add(new Pair(2, Types.INTEGER));
-                        values.add(new Pair(p.second(), Types.INTEGER));
                         values.add(new Pair(p.second(), Types.INTEGER));
                         values.add(new Pair(Geom.Type.from(fld.getType()).getName(), Types.VARCHAR));
 

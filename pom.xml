@@ -146,9 +146,8 @@
   <modules>
     <module>core</module>
     <module>format</module>
-    <module>render</module>
     <module>util</module>
-    <module>app</module>
+    <module>cli</module>
   </modules>
 
   <properties>

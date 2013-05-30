@@ -15,9 +15,7 @@
 
   <modules>
     <module>geotools</module>
-    <module>gmaps</module>
     <module>guava</module>
-    <module>scala</module>
 
   </modules>
 

@@ -7,15 +7,16 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.Set;
 
+import org.jeo.TestData;
 import org.jeo.data.Cursor;
 import org.jeo.data.Query;
+import org.jeo.data.VectorData;
 import org.jeo.feature.Feature;
 import org.jeo.feature.Schema;
 import org.jeo.geojson.GeoJSONWriter;
 import org.jeo.geom.Geom;
 import org.jeo.geom.GeometryBuilder;
-import org.jeo.shp.ShpData;
-import org.jeo.shp.ShpDataset;
+
 import org.junit.After;
 import org.junit.Assume;
 import org.junit.Before;
@@ -63,8 +64,8 @@ public class MongoTest {
             states.remove(new BasicDBObject());
         }
 
-        ShpDataset shp = ShpData.states();
-        for (Feature f : shp.cursor(new Query())) {
+        VectorData data = TestData.states();
+        for (Feature f : data.cursor(new Query())) {
             f.put("geometry", Geom.iterate((MultiPolygon) f.geometry()).iterator().next());
             states.insert((DBObject) JSON.parse(GeoJSONWriter.toString(f)));
         }

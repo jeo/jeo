@@ -30,19 +30,6 @@
       <scope>test</scope>
       <classifier>tests</classifier>
     </dependency>
-      <dependency>
-      <groupId>org.jeo</groupId>
-      <artifactId>jeo-shp</artifactId>
-      <version>${project.version}</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.jeo</groupId>
-      <artifactId>jeo-shp</artifactId>
-      <version>${project.version}</version>
-      <scope>test</scope>
-      <classifier>tests</classifier>
-    </dependency>
   </dependencies>
 
 </project>

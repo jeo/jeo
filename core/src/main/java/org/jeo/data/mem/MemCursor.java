@@ -36,7 +36,10 @@ public class MemCursor extends Cursor<Feature> {
             curr = new ListFeature(null, new ArrayList<Object>(), dataset.getSchema());
         }
         else {
-            curr = new DiffFeature(cursor.next()); 
+            curr = cursor.next();
+            if (mode == UPDATE) {
+                curr = new DiffFeature(curr);
+            }
         }
         return curr;
     }
@@ -47,7 +50,7 @@ public class MemCursor extends Cursor<Feature> {
             dataset.getFeatures().add(curr);
         }
         else {
-            ((DiffFeature) curr).apply();
+             ((DiffFeature) curr).apply();
         }
     }
     

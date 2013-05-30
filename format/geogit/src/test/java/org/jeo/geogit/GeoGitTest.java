@@ -24,6 +24,7 @@ import org.geogit.di.GeogitModule;
 import org.geogit.repository.Repository;
 import org.geogit.storage.bdbje.JEStorageModule;
 import org.geotools.util.NullProgressListener;
+import org.jeo.TestData;
 import org.jeo.Tests;
 import org.jeo.data.Cursor;
 import org.jeo.data.Query;
@@ -34,7 +35,6 @@ import org.jeo.feature.Schema;
 import org.jeo.feature.SchemaBuilder;
 import org.jeo.geom.GeometryBuilder;
 import org.jeo.geotools.GT;
-import org.jeo.shp.ShpData;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -66,10 +66,10 @@ public class GeoGitTest {
         repo.command(ConfigOp.class).setAction(ConfigAction.CONFIG_SET).setName("user.email")
             .setValue("wile@acme.com").call();
 
-        addShp(ShpData.states(), repo);
-        addShp(ShpData.point(), repo);
-        addShp(ShpData.line(), repo);
-        addShp(ShpData.poly(), repo);
+        addShp(TestData.states(), repo);
+        addShp(TestData.point(), repo);
+        addShp(TestData.line(), repo);
+        addShp(TestData.polygon(), repo);
 
         repo.command(BranchCreateOp.class).setName("scratch").call();
         ws = new GeoGitWorkspace(gg);
@@ -181,7 +181,7 @@ public class GeoGitTest {
 
     @Test
     public void testReadAll() throws Exception {
-        Set<String> names = Sets.newHashSet(Iterables.transform(ShpData.states().cursor(new Query()), 
+        Set<String> names = Sets.newHashSet(Iterables.transform(TestData.states().cursor(new Query()), 
             new Function<Feature, String>() {
                 @Override
                 public String apply(Feature input) {

@@ -4,6 +4,7 @@ import java.awt.Frame;
 import java.awt.HeadlessException;
 import java.awt.image.BufferedImage;
 
+import org.jeo.TestData;
 import org.jeo.data.VectorData;
 import org.jeo.java2d.Java2D;
 import org.jeo.map.Map;
@@ -11,7 +12,6 @@ import org.jeo.map.MapBuilder;
 import org.jeo.map.RGB;
 import org.jeo.map.StyleBuilder;
 import org.jeo.map.Stylesheet;
-import org.jeo.shp.ShpData;
 import org.junit.Assume;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -37,7 +37,7 @@ public class AggTest {
             .set("marker-width", 20)
             .set("marker-line-color", RGB.black)
             .style();
-        render(ShpData.point(), style);
+        render(TestData.point(), style);
     }
 
     @Test
@@ -46,7 +46,7 @@ public class AggTest {
             .set("line-color", RGB.black)
             .set("line-width", 2.5)
             .style();
-        render(ShpData.line(), style);
+        render(TestData.line(), style);
     }
 
     @Test
@@ -60,7 +60,7 @@ public class AggTest {
             .endRule()
             
             .style();
-        render(ShpData.line(), style);
+        render(TestData.line(), style);
     }
 
     @Test
@@ -70,7 +70,7 @@ public class AggTest {
             .set("line-width", 3)
             .set("line-dasharray", "5 2")
             .style();
-        render(ShpData.line(), style);
+        render(TestData.line(), style);
     }
 
     @Test
@@ -88,7 +88,7 @@ public class AggTest {
             .endRule()
             .style();
 
-        render(ShpData.states(), style);
+        render(TestData.states(), style);
     }
 
     @Test
@@ -160,7 +160,7 @@ public class AggTest {
             .endRule()
             .style();
 
-        render(ShpData.states(), style);
+        render(TestData.states(), style);
     }
 
     void render(VectorData l, Stylesheet s) {

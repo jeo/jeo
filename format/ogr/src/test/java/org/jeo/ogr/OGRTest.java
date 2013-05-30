@@ -10,11 +10,11 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 
+import org.jeo.TestData;
 import org.jeo.Tests;
 import org.jeo.data.Query;
 import org.jeo.data.VectorData;
 import org.jeo.feature.Feature;
-import org.jeo.shp.ShpData;
 import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Test;
@@ -49,7 +49,7 @@ public class OGRTest {
 
         assertNotNull(data.getCRS());
         assertEquals(49, data.count(new Query()));
-        Set<String> names = Sets.newHashSet(Iterables.transform(ShpData.states().cursor(new Query()), 
+        Set<String> names = Sets.newHashSet(Iterables.transform(TestData.states().cursor(new Query()), 
             new Function<Feature, String>() {
                 @Override
                 public String apply(Feature input) {

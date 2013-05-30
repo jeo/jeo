@@ -9,13 +9,13 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import org.jeo.TestData;
 import org.jeo.Tests;
 import org.jeo.data.Cursor;
 import org.jeo.data.Query;
+import org.jeo.data.VectorData;
 import org.jeo.feature.Feature;
 import org.jeo.feature.Features;
-import org.jeo.shp.ShpData;
-import org.jeo.shp.ShpDataset;
 import org.junit.Before;
 import org.junit.Test;
 import org.osgeo.proj4j.CoordinateReferenceSystem;
@@ -60,7 +60,7 @@ public class GeoJSONTest {
 
     @Test
     public void testRead() throws Exception {
-        Set<String> names = Sets.newHashSet(Iterables.transform(ShpData.states().cursor(new Query()), 
+        Set<String> names = Sets.newHashSet(Iterables.transform(TestData.states().cursor(new Query()), 
             new Function<Feature, String>() {
                 @Override
                 public String apply(Feature input) {
@@ -78,14 +78,14 @@ public class GeoJSONTest {
 
     @Test
     public void testAppend() throws Exception {
-        ShpDataset shp = ShpData.states();
+        VectorData data = TestData.states();
 
         Map map = new HashMap();
         map.put(GeoJSON.FILE, Tests.newTmpFile());
 
-        GeoJSONDataset json = new GeoJSON().create(map, shp.getSchema());
+        GeoJSONDataset json = new GeoJSON().create(map, data.getSchema());
 
-        Cursor<Feature> from = shp.cursor(new Query());
+        Cursor<Feature> from = data.cursor(new Query());
         Cursor<Feature> to = json.cursor(new Query().append());
         
         for (Feature f : from) {

@@ -6,7 +6,6 @@ import java.util.List;
 
 import org.jeo.data.Cursor;
 import org.jeo.data.Cursors;
-import org.jeo.data.Driver;
 import org.jeo.data.Query;
 import org.jeo.data.VectorData;
 import org.jeo.feature.Feature;
@@ -104,6 +103,10 @@ public class MemVector implements VectorData {
         }
     
         return q.apply(cursor);
+    }
+
+    public void add(Feature f) {
+        features.add(f);
     }
 
     @Override

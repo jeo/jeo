@@ -134,15 +134,6 @@
    </plugins>
   </build>
 
-  <profiles>
-    <profile>
-      <id>android</id>
-      <modules>
-        <module>gmaps</module>
-      </modules>
-    </profile>
-  </profiles>
-
   <modules>
     <module>core</module>
     <module>format</module>

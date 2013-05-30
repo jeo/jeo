@@ -4,7 +4,7 @@
 
   <parent>
     <groupId>org.jeo</groupId>
-    <artifactId>app</artifactId>
+    <artifactId>jeo</artifactId>
     <version>1.0-SNAPSHOT</version>
   </parent>
 

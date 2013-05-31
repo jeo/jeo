@@ -178,6 +178,7 @@
               <descriptors>
                 <descriptor>assembly/lib.xml</descriptor>
                 <descriptor>assembly/cli.xml</descriptor>
+                <descriptor>assembly/geogit.xml</descriptor>
               </descriptors>
             </configuration>
           </plugin>

@@ -4,7 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-import org.jeo.geom.GeometryBuilder;
+import org.jeo.geom.GeomBuilder;
 import org.jeo.proj.wkt.ProjWKTParser;
 import org.junit.Test;
 import org.osgeo.proj4j.CoordinateReferenceSystem;
@@ -34,9 +34,10 @@ public class ProjTest {
 
     @Test
     public void testReproject() throws Exception {
-        GeometryBuilder gb = new GeometryBuilder();
+        GeomBuilder gb = new GeomBuilder();
 
-        Point p = Proj.reproject(gb.point(-117, 63.15), Proj.crs("epsg:4326"), Proj.crs("epsg:3157"));
+        Point p = Proj.reproject(gb.point(-117, 63.15).toPoint(), 
+            Proj.crs("epsg:4326"), Proj.crs("epsg:3157"));
         assertEquals(802027.258082, p.getX(), 0.1);
         assertEquals(7016429.376474, p.getY(), 0.1);
     }
@@ -68,8 +69,8 @@ public class ProjTest {
         CoordinateReferenceSystem crs2 = Proj.crs("epsg:4326");
         CoordinateReferenceSystem crs3 = Proj.crs("epsg:3157");
 
-        Point p1 = new GeometryBuilder().point(-117, 63.15);
-        Point p2 = new GeometryBuilder().point(-117, 63.15);
+        Point p1 = new GeomBuilder().point(-117, 63.15).toPoint();
+        Point p2 = new GeomBuilder().point(-117, 63.15).toPoint();
 
         p1 = Proj.reproject(p1, crs1, crs3);
         p2 = Proj.reproject(p2, crs2, crs3);
@@ -105,8 +106,8 @@ public class ProjTest {
         CoordinateReferenceSystem crs1 = Proj.fromWKT(wkt);
         CoordinateReferenceSystem crs2 = Proj.crs("EPSG:26910");
 
-        Point p1 = new GeometryBuilder().point(-117, 63.15);
-        Point p2 = new GeometryBuilder().point(-117, 63.15);
+        Point p1 = new GeomBuilder().point(-117, 63.15).toPoint();
+        Point p2 = new GeomBuilder().point(-117, 63.15).toPoint();
 
         p1 = Proj.reproject(p1, geo, crs1);
         p2 = Proj.reproject(p2, geo, crs2);

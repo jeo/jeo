@@ -1,12 +1,10 @@
 package org.jeo.proj;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.text.ParseException;
 
-import org.jeo.geom.GeometryBuilder;
+import org.jeo.geom.GeomBuilder;
 import org.jeo.proj.wkt.ProjWKTEncoder;
 import org.jeo.proj.wkt.ProjWKTParser;
 import org.osgeo.proj4j.CRSFactory;
@@ -42,7 +40,7 @@ public class Proj {
 
     static CRSFactory csFactory = new CRSFactory();
     static CoordinateTransformFactory txFactory = new CoordinateTransformFactory();
-    static GeometryBuilder gBuilder = new GeometryBuilder();
+    static GeomBuilder gBuilder = new GeomBuilder();
 
     static {
         EPSG_4326 = Proj.crs("EPSG:4326");
@@ -133,8 +131,8 @@ public class Proj {
         if (p != null) {
             CoordinateReferenceSystem geo = crs("epsg:4326");
 
-            Point p1 = gBuilder.point(p.getMinLongitudeDegrees(), p.getMinLatitudeDegrees());
-            Point p2 = gBuilder.point(p.getMaxLongitudeDegrees(), p.getMaxLatitudeDegrees());
+            Point p1 = gBuilder.point(p.getMinLongitudeDegrees(), p.getMinLatitudeDegrees()).toPoint();
+            Point p2 = gBuilder.point(p.getMaxLongitudeDegrees(), p.getMaxLatitudeDegrees()).toPoint();
 
             p1 = reproject(p1, geo, crs);
             p2 = reproject(p2, geo, crs);

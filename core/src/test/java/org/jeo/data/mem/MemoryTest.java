@@ -12,7 +12,7 @@ import org.jeo.feature.Feature;
 import org.jeo.feature.Features;
 import org.jeo.feature.Schema;
 import org.jeo.feature.SchemaBuilder;
-import org.jeo.geom.GeometryBuilder;
+import org.jeo.geom.GeomBuilder;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -28,7 +28,7 @@ public class MemoryTest {
 
     @Before
     public void setUp() throws IOException {
-        GeometryBuilder gb = new GeometryBuilder();
+        GeomBuilder gb = new GeomBuilder();
 
         mem = new MemWorkspace();
         Schema schema = new SchemaBuilder("widgets")
@@ -37,12 +37,12 @@ public class MemoryTest {
             .field("name", String.class)
             .field("cost", Double.class).schema();
         MemVector data = mem.create(schema);
-        data.getFeatures().add(Features.create(null, data.getSchema(), gb.point(0,0), 1, "anvil", 
-            10.99));
-        data.getFeatures().add(Features.create(null, data.getSchema(), gb.lineString(10,10,20,20), 
-            2, "bomb", 11.99));
-        data.getFeatures().add(Features.create(null, data.getSchema(), gb.point(100,100).buffer(10), 
-            3, "dynamate", 12.99));
+        data.getFeatures().add(Features.create(null, data.getSchema(), gb.point(0,0).toPoint(), 1, 
+            "anvil", 10.99));
+        data.getFeatures().add(Features.create(null, data.getSchema(), 
+            gb.points(10,10,20,20).toLineString(), 2, "bomb", 11.99));
+        data.getFeatures().add(Features.create(null, data.getSchema(), 
+            gb.point(100,100).toPoint().buffer(10), 3, "dynamate", 12.99));
     }
 
     @Test

@@ -160,6 +160,13 @@ public class Geom {
     }
 
     /**
+     * Creates a new geometry builder.
+     */
+    public static GeomBuilder build() {
+        return new GeomBuilder();
+    }
+
+    /**
      * Returns an iterable over the points of a multipoint.
      */
     public static Iterable<Point> iterate(MultiPoint mp) {
@@ -237,8 +244,9 @@ public class Geom {
      * Converts the envelope to a Polygon.
      */
     public static Polygon toPolygon(Envelope e) {
-        return new GeometryBuilder().polygon(e.getMinX(), e.getMinY(), e.getMaxX(), e.getMinY(), 
-            e.getMaxX(), e.getMaxY(), e.getMinX(), e.getMaxY(), e.getMinX(), e.getMinY());
+        return new GeomBuilder().points(e.getMinX(), e.getMinY(), e.getMaxX(), e.getMinY(),
+            e.getMaxX(), e.getMaxY(), e.getMinX(), e.getMaxY(), e.getMinX(), e.getMinY()).ring()
+            .toPolygon();
     }
 
     public static boolean isNull(Envelope e) {

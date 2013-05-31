@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.jeo.feature.Field;
-import org.jeo.geom.GeometryBuilder;
+import org.jeo.geom.GeomBuilder;
 
 import com.vividsolutions.jts.geom.Geometry;
 
@@ -16,11 +16,11 @@ import com.vividsolutions.jts.geom.Geometry;
  */
 public class XYHandler extends CSVHandler {
     CSVOptions opts;
-    GeometryBuilder gb;
+    GeomBuilder gb;
 
     XYHandler(CSVOptions opts) {
         this.opts = opts;
-        this.gb = new GeometryBuilder();
+        this.gb = new GeomBuilder();
     }
 
     @Override
@@ -53,6 +53,6 @@ public class XYHandler extends CSVHandler {
 
     @Override
     public Geometry geom(String[] row) {
-        return gb.point(Double.parseDouble(row[opts.getX()]), Double.parseDouble(row[opts.getY()]));
+        return gb.point(Double.parseDouble(row[opts.getX()]), Double.parseDouble(row[opts.getY()])).toPoint();
     }
 }

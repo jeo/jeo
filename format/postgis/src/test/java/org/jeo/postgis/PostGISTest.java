@@ -21,7 +21,7 @@ import org.jeo.data.VectorData;
 import org.jeo.feature.Feature;
 import org.jeo.feature.Schema;
 import org.jeo.feature.SchemaBuilder;
-import org.jeo.geom.GeometryBuilder;
+import org.jeo.geom.GeomBuilder;
 import org.junit.After;
 import org.junit.Assume;
 import org.junit.Before;
@@ -224,8 +224,8 @@ public class PostGISTest {
         Cursor<Feature> c = states.cursor(new Query().append());
         Feature f = c.next();
 
-        GeometryBuilder gb = new GeometryBuilder();
-        Geometry g = gb.multiPolygon((Polygon)gb.point(0,0).buffer(1));
+        GeomBuilder gb = new GeomBuilder();
+        Geometry g = gb.point(0,0).point().buffer(1).toMultiPolygon();
         f.put(schema.geometry().getName(), g);
         f.put("STATE_NAME", "JEOLAND");
         c.write();
@@ -248,23 +248,23 @@ public class PostGISTest {
         PostGISDataset data = pg.create(widgets);
         assertEquals(0, data.count(new Query()));
 
-        GeometryBuilder gb = new GeometryBuilder();
+        GeomBuilder gb = new GeomBuilder();
         Cursor<Feature> c = data.cursor(new Query().append());
 
         Feature f = c.next();
-        f.put("shape", gb.point(0,0).buffer(10));
+        f.put("shape", gb.point(0,0).point().buffer(10).get());
         f.put("name", "bomb");
         f.put("cost", 1.99);
         c.write();
 
         f = c.next();
-        f.put("shape", gb.lineString(0,0,1,1).buffer(1));
+        f.put("shape", gb.points(0,0,1,1).lineString().buffer(1).get());
         f.put("name", "dynamite");
         f.put("cost", 2.99);
         c.write();
 
         f = c.next();
-        f.put("shape", gb.polygon(-5,5, 5,5, 2,-2, 3,-5, -3,-5, -2,-2, -5,5));
+        f.put("shape", gb.points(-5,5, 5,5, 2,-2, 3,-5, -3,-5, -2,-2, -5,5).ring().toPolygon());
         f.put("name", "anvil");
         f.put("cost", 3.99);
 

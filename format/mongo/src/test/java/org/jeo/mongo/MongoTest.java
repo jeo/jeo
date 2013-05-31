@@ -15,7 +15,7 @@ import org.jeo.feature.Feature;
 import org.jeo.feature.Schema;
 import org.jeo.geojson.GeoJSONWriter;
 import org.jeo.geom.Geom;
-import org.jeo.geom.GeometryBuilder;
+import org.jeo.geom.GeomBuilder;
 
 import org.junit.After;
 import org.junit.Assume;
@@ -149,7 +149,7 @@ public class MongoTest {
         MongoDataset states = mongo.get("states");
         Cursor<Feature> c = states.cursor(new Query().append());
 
-        Geometry g = new GeometryBuilder().point(0,0).buffer(1);
+        Geometry g = new GeomBuilder().point(0,0).toPoint().buffer(1);
         
         Feature f = c.next();
         f.put("geometry", g);
@@ -170,7 +170,7 @@ public class MongoTest {
     public void testUpdate() throws Exception {
         MongoDataset states = mongo.get("states");
         
-        Geometry g = new GeometryBuilder().point(0,0).buffer(1);
+        Geometry g = new GeomBuilder().point(0,0).toPoint().buffer(1);
         assertEquals(0, states.count(new Query().bounds(g.getEnvelopeInternal())));
         assertEquals(0, states.count(new Query().filter("STATE_NAME = 'foo'")));
 

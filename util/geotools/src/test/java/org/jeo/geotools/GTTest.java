@@ -3,11 +3,11 @@ import static org.junit.Assert.*;
 
 import org.geotools.feature.simple.SimpleFeatureBuilder;
 import org.geotools.feature.simple.SimpleFeatureTypeBuilder;
+import org.geotools.geometry.jts.GeometryBuilder;
 import org.jeo.feature.Feature;
 import org.jeo.feature.MapFeature;
 import org.jeo.feature.Schema;
 import org.jeo.feature.SchemaBuilder;
-import org.jeo.geom.GeometryBuilder;
 import org.jeo.proj.Proj;
 import org.junit.Test;
 import org.opengis.feature.simple.SimpleFeature;

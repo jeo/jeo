@@ -14,7 +14,7 @@ import org.jeo.data.Cursor;
 import org.jeo.data.Cursors;
 import org.jeo.feature.Feature;
 import org.jeo.feature.ListFeature;
-import org.jeo.geom.GeometryBuilder;
+import org.jeo.geom.GeomBuilder;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -34,14 +34,14 @@ public class GeoJSONReadWriteTest extends GeoJSONTestSupport {
     GeoJSONWriter writer;
 
     GeometryFactory gf;
-    GeometryBuilder gb;
+    GeomBuilder gb;
 
     @Before
     public void setUp() {
         reader = new GeoJSONReader();
         writer = new GeoJSONWriter(new StringWriter());
         gf = new GeometryFactory();
-        gb = new GeometryBuilder(gf);
+        gb = new GeomBuilder(gf);
     }
 
     @Test
@@ -198,7 +198,7 @@ public class GeoJSONReadWriteTest extends GeoJSONTestSupport {
     }
 
     Point point() {
-        return gb.point(100.1, 0.1);
+        return gb.point(100.1, 0.1).toPoint();
     }
 
     String point3dText() {
@@ -206,7 +206,7 @@ public class GeoJSONReadWriteTest extends GeoJSONTestSupport {
     }
 
     Point point3d() {
-        return gb.pointZ(100.1, 0.1, 10.2);
+        return gb.pointz(100.1, 0.1, 10.2).toPoint();
     }
 
     String lineText() {
@@ -215,7 +215,7 @@ public class GeoJSONReadWriteTest extends GeoJSONTestSupport {
     }
 
     LineString line() {
-        return gb.lineString(100.1, 0.1, 101.1,1.1);
+        return gb.points(100.1, 0.1, 101.1,1.1).toLineString();
     }
 
     String line3dText() {
@@ -224,11 +224,11 @@ public class GeoJSONReadWriteTest extends GeoJSONTestSupport {
     }
 
     LineString line3d() {
-        return gb.lineStringZ(100.1, 0.1, 10.2, 101.1,1.1, 10.2);
+        return gb.pointsz(100.1, 0.1, 10.2, 101.1,1.1, 10.2).toLineString();
     }
 
     Polygon polygon1() {
-        return gb.polygon(100.1, 0.1, 101.1, 0.1, 101.1, 1.1, 100.1, 1.1, 100.1, 0.1);
+        return gb.points(100.1, 0.1, 101.1, 0.1, 101.1, 1.1, 100.1, 1.1, 100.1, 0.1).ring().toPolygon();
     }
 
     String polygonText1() {
@@ -249,9 +249,8 @@ public class GeoJSONReadWriteTest extends GeoJSONTestSupport {
     }
 
     Polygon polygon2() {
-        return gb.polygon(
-            gb.linearRing(100.1, 0.1, 101.1, 0.1, 101.1, 1.1, 100.1, 1.1, 100.1, 0.1), 
-            gb.linearRing(100.2, 0.2, 100.8, 0.2, 100.8, 0.8, 100.2, 0.8, 100.2, 0.2));
+        return gb.points(100.1, 0.1, 101.1, 0.1, 101.1, 1.1, 100.1, 1.1, 100.1, 0.1).ring()
+          .points(100.2, 0.2, 100.8, 0.2, 100.8, 0.8, 100.2, 0.8, 100.2, 0.2).ring().toPolygon();
     }
 
     String polygonText3d() {
@@ -264,9 +263,9 @@ public class GeoJSONReadWriteTest extends GeoJSONTestSupport {
     }
     
     Polygon polygon3d() {
-        return gb.polygon(
-            gb.linearRingZ(100.1, 0.1, 10.2, 101.1, 0.1, 11.2, 101.1, 1.1, 11.2, 100.1, 1.1, 10.2, 100.1, 0.1, 10.2),
-            gb.linearRingZ(100.2, 0.2, 10.2, 100.8, 0.2, 11.2, 100.8, 0.8, 11.2, 100.2, 0.8, 10.2, 100.2, 0.2, 10.2));
+        return gb.pointsz(100.1, 0.1, 10.2, 101.1, 0.1, 11.2, 101.1, 1.1, 11.2, 100.1, 1.1, 10.2, 100.1, 0.1, 10.2)
+            .ring().pointsz(100.2, 0.2, 10.2, 100.8, 0.2, 11.2, 100.8, 0.8, 11.2, 100.2, 0.8, 10.2, 100.2, 0.2, 10.2)
+            .ring().toPolygon();
     }
 
     String multiPointText() {
@@ -277,7 +276,7 @@ public class GeoJSONReadWriteTest extends GeoJSONTestSupport {
     }
 
     MultiPoint multiPoint() {
-        return gb.multiPoint(100.1, 0.1, 101.1, 1.1);
+        return gb.points(100.1, 0.1, 101.1, 1.1).toMultiPoint();
     }
     
     String multiPoint3dText() {
@@ -288,7 +287,7 @@ public class GeoJSONReadWriteTest extends GeoJSONTestSupport {
     }
 
     MultiPoint multiPoint3d() {
-        return gb.multiPointZ(100.1, 0.1, 10.2, 101.1, 1.1, 11.2);
+        return gb.pointsz(100.1, 0.1, 10.2, 101.1, 1.1, 11.2).toMultiPoint();
     }
 
     String multiLineText() {
@@ -302,8 +301,8 @@ public class GeoJSONReadWriteTest extends GeoJSONTestSupport {
     }
 
     MultiLineString multiLine() {
-        return gb.multiLineString(gb.lineString(100.1, 0.1, 101.1, 1.1), 
-            gb.lineString(102.1, 2.1, 103.1, 3.1));
+        return gb.points(100.1, 0.1, 101.1, 1.1).lineString()
+          .points(102.1, 2.1, 103.1, 3.1).lineString().toMultiLineString();
     }
     
     String multiLine3dText() {
@@ -317,8 +316,8 @@ public class GeoJSONReadWriteTest extends GeoJSONTestSupport {
     }
 
     MultiLineString multiLine3d() {
-        return gb.multiLineString(gb.lineStringZ(100.1, 0.1, 10.2, 101.1, 1.1, 10.2), 
-                gb.lineStringZ(102.1, 2.1, 11.2, 103.1, 3.1, 11.2));
+        return gb.pointsz(100.1, 0.1, 10.2, 101.1, 1.1, 10.2).lineString()
+            .pointsz(102.1, 2.1, 11.2, 103.1, 3.1, 11.2).lineString().toMultiLineString();
     }
 
     String multiPolygonText() {
@@ -333,9 +332,10 @@ public class GeoJSONReadWriteTest extends GeoJSONTestSupport {
     }
 
     MultiPolygon multiPolygon() {
-        return gb.multiPolygon(gb.polygon(102.1, 2.1,103.1, 2.1,103.1, 3.1,102.1, 3.1,102.1, 2.1), 
-            gb.polygon(gb.linearRing(100.1, 0.1, 101.1, 0.1, 101.1, 1.1, 100.1, 1.1, 100.1, 0.1), 
-                gb.linearRing(100.2, 0.2, 100.8, 0.2, 100.8, 0.8, 100.2, 0.8, 100.2, 0.2)));
+        return gb.points(102.1, 2.1,103.1, 2.1,103.1, 3.1,102.1, 3.1,102.1, 2.1).ring().polygon()
+            .points(100.1, 0.1, 101.1, 0.1, 101.1, 1.1, 100.1, 1.1, 100.1, 0.1).ring()
+            .points(100.2, 0.2, 100.8, 0.2, 100.8, 0.8, 100.2, 0.8, 100.2, 0.2).ring().polygon()
+            .toMultiPolygon();
     }
 
     String multiPolygon3dText() {
@@ -350,9 +350,11 @@ public class GeoJSONReadWriteTest extends GeoJSONTestSupport {
     }
 
     MultiPolygon multiPolygon3d() {
-        return gb.multiPolygon(gb.polygonZ(102.1, 2.1, 10.2, 103.1, 2.1, 10.2, 103.1, 3.1, 10.2, 102.1, 3.1, 10.2, 102.1, 2.1, 10.2), 
-            gb.polygon(gb.linearRingZ(100.1, 0.1, 10.2, 101.1, 0.1, 10.2, 101.1, 1.1, 10.2, 100.1, 1.1, 10.2, 100.1, 0.1, 10.2), 
-                gb.linearRingZ(100.2, 0.2, 10.2, 100.8, 0.2, 10.2, 100.8, 0.8, 10.2, 100.2, 0.8, 10.2, 100.2, 0.2, 10.2)));
+        return gb.pointsz(102.1, 2.1, 10.2, 103.1, 2.1, 10.2, 103.1, 3.1, 10.2, 102.1, 3.1, 10.2, 102.1, 2.1, 10.2).ring().polygon()
+            .pointsz(100.1, 0.1, 10.2, 101.1, 0.1, 10.2, 101.1, 1.1, 10.2, 100.1, 1.1, 10.2, 100.1, 0.1, 10.2).ring()
+            .pointsz(100.2, 0.2, 10.2, 100.8, 0.2, 10.2, 100.8, 0.8, 10.2, 100.2, 0.8, 10.2, 100.2, 0.2, 10.2).ring().polygon()
+            .toMultiPolygon();
+
     }
 
     String collectionText() {
@@ -370,13 +372,12 @@ public class GeoJSONReadWriteTest extends GeoJSONTestSupport {
     }
 
     GeometryCollection collection() {
-        return gb.geometryCollection(gb.point(100.1, 0.1), 
-            gb.lineString(101.1, 0.1, 102.1, 1.1));
+        return gb.point(100.1,0.1).point().points(101.1, 0.1, 102.1, 1.1).lineString().toCollection();
     }
 
     Feature feature(int val) {
         List<Object> l = new ArrayList<Object>(); 
-        l.add(new GeometryBuilder().point(val+0.1, val+0.1));
+        l.add(new GeomBuilder().point(val+0.1, val+0.1).toPoint());
         l.add(val);
         l.add(val + 0.1);
         l.add(toString(val));

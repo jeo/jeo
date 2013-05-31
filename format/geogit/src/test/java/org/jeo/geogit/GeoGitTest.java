@@ -33,7 +33,7 @@ import org.jeo.data.VectorData;
 import org.jeo.feature.Feature;
 import org.jeo.feature.Schema;
 import org.jeo.feature.SchemaBuilder;
-import org.jeo.geom.GeometryBuilder;
+import org.jeo.geom.GeomBuilder;
 import org.jeo.geotools.GT;
 import org.junit.After;
 import org.junit.Before;
@@ -250,13 +250,13 @@ public class GeoGitTest {
         Cursor<Feature> c = points.cursor(new Query().append().transaction(tx));
 
         Feature f = c.next();
-        f.put("geometry", new GeometryBuilder().point(-114, 51));
+        f.put("geometry", new GeomBuilder().point(-114, 51).toPoint());
         f.put("name", "Calgary");
         f.put("pop", 1214839l);
         c.write();
 
         f = c.next();
-        f.put("geometry", new GeometryBuilder().point(-123, 49));
+        f.put("geometry", new GeomBuilder().point(-123, 49).toPoint());
         f.put("name", "Vancouver");
         f.put("pop", 2313328l);
         c.write();
@@ -272,25 +272,25 @@ public class GeoGitTest {
         GeoGitDataset data = ws.create(widgets);
         assertEquals(0, data.count(new Query()));
 
-        GeometryBuilder gb = new GeometryBuilder();
+        GeomBuilder gb = new GeomBuilder();
 
         Transaction tx = data.transaction(null);
         Cursor<Feature> c = data.cursor(new Query().append().transaction(tx));
 
         Feature f = c.next();
-        f.put("shape", gb.point(0,0).buffer(10));
+        f.put("shape", gb.point(0,0).toPoint().buffer(10));
         f.put("name", "bomb");
         f.put("cost", 1.99);
         c.write();
 
         f = c.next();
-        f.put("shape", gb.lineString(0,0,1,1).buffer(1));
+        f.put("shape", gb.points(0,0,1,1).toLineString().buffer(1));
         f.put("name", "dynamite");
         f.put("cost", 2.99);
         c.write();
 
         f = c.next();
-        f.put("shape", gb.polygon(-5,5, 5,5, 2,-2, 3,-5, -3,-5, -2,-2, -5,5));
+        f.put("shape", gb.points(-5,5, 5,5, 2,-2, 3,-5, -3,-5, -2,-2, -5,5).ring().toPolygon());
         f.put("name", "anvil");
         f.put("cost", 3.99);
 

@@ -26,7 +26,7 @@ public abstract class JeoCmd {
 
     public final void run(JeoCLI cli) throws Exception {
         if (help) {
-            usage();
+            usage(cli);
             return;
         }
 
@@ -57,7 +57,7 @@ public abstract class JeoCmd {
     
     protected abstract void doCommand(JeoCLI cli) throws Exception;
 
-    public void usage() {
+    public void usage(JeoCLI cli) {
         JCommander jc = new JCommander(this);
         String cmd = this.getClass().getAnnotation(Parameters.class).commandNames()[0];
         jc.setProgramName("jeo " + cmd);

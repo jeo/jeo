@@ -1,6 +1,9 @@
 package org.jeo.cli;
 
 import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PrintStream;
+import java.io.Writer;
 import java.util.Set;
 
 import jline.console.ConsoleReader;
@@ -10,7 +13,7 @@ import org.jeo.cli.cmd.DriversCmd;
 import org.jeo.cli.cmd.InfoCmd;
 import org.jeo.cli.cmd.JeoCmd;
 import org.jeo.cli.cmd.QueryCmd;
-import org.jeo.cli.conv.JeoCLIConverterFactory;
+import org.jeo.cli.cmd.RootCmd;
 
 import com.beust.jcommander.JCommander;
 import com.google.common.base.Strings;
@@ -21,6 +24,9 @@ import com.google.common.primitives.Ints;
 public class JeoCLI {
 
     ConsoleReader console;
+
+    RootCmd root;
+
     JCommander cmdr;
 
     public static void main(String[] args) throws Exception {
@@ -48,9 +54,31 @@ public class JeoCLI {
         return console;
     }
 
+    public PrintStream stream() {
+        final Writer w = console.getOutput();
+        return new PrintStream(new OutputStream() {
+            @Override
+            public void write(int b) throws IOException {
+                w.write(b);
+            }
+            @Override
+            public void flush() throws IOException {
+                super.flush();
+                w.flush();
+            }
+
+            @Override
+            public void close() throws IOException {
+                super.close();
+                w.close();
+            }
+        });
+    }
+    
     JCommander initJCommander() {
-        JCommander jcmdr = new JCommander(this);
-        jcmdr.addConverterFactory(new JeoCLIConverterFactory());
+        root = new RootCmd();
+        JCommander jcmdr = new JCommander(root);
+        
         jcmdr.addCommand("drivers", new DriversCmd());
         jcmdr.addCommand("query", new QueryCmd());
         jcmdr.addCommand("info", new InfoCmd());
@@ -63,13 +91,13 @@ public class JeoCLI {
             usage();
             return;
         }
-
+        
         try {
             cmdr.parse(args);
 
             JCommander subcmdr = cmdr.getCommands().get(cmdr.getParsedCommand());
 
-            JeoCmd cmd = (JeoCmd) subcmdr.getObjects().get(0);
+            JeoCmd cmd = subcmdr != null ? (JeoCmd) subcmdr.getObjects().get(0) : root;
             cmd.run(this);
         }
         catch(Exception e) {
@@ -92,12 +120,15 @@ public class JeoCLI {
             console.println("usage: jeo <command> [<args>]");
             console.println();
             console.println("Available commands are:");
+            console.println();
             for (String cmd : commands) {
                 console.print("\t");
                 console.print(Strings.padEnd(cmd, maxLength, ' '));
                 console.print("\t");
                 console.println(cmdr.getCommandDescription(cmd));
             }
+            console.println();
+            console.println("For detailed help on a specific command use jeo <command> -h");
             console.flush();
         } catch (IOException e) {
             throw Throwables.propagate(e);

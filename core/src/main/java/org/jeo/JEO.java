@@ -2,6 +2,7 @@ package org.jeo;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.PrintStream;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -67,6 +68,13 @@ public class JEO {
      * Prints version info to stdout.
      */
     public static void main(String[] args) {
-        System.out.println(String.format("jeo %s (%s)", version(), revision()));
+        printVersionInfo(System.out);
+    }
+
+    /**
+     * Prints version info for the library.
+     */
+    public static void printVersionInfo(PrintStream out) {
+        out.println(String.format("jeo %s (%s)", version(), revision()));
     }
 }

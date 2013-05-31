@@ -79,6 +79,13 @@
   </dependencies>
 
   <build>
+   <resources>
+      <resource>
+        <directory>src/main/resources</directory>
+        <filtering>true</filtering>
+      </resource>
+   </resources>
+
    <plugins>
      <!-- set compiler compliance level -->
      <plugin>
@@ -133,6 +140,54 @@
      </plugin>
    </plugins>
   </build>
+
+  <profiles>
+    <profile>
+      <id>assembly</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-dependency-plugin</artifactId>
+            <executions>
+              <execution>             
+                <id>copy-dependencies</id>
+                <phase>package</phase>
+                <goals>
+                  <goal>copy-dependencies</goal>
+                </goals>
+                <configuration>
+                  <artifactItems>
+                      <artifactItem>
+                        <groupId>${project.groupId}</groupId>
+                        <artifactId>${project.artifactId}</artifactId>
+                        <version>${project.version}</version>
+                        <type>${project.packaging}</type>
+                      </artifactItem>
+                  </artifactItems>
+                  <includeScope>runtime</includeScope>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+
+          <plugin>
+            <artifactId>maven-assembly-plugin</artifactId>
+            <version>2.4</version>
+            <configuration>
+              <descriptors>
+                <descriptor>assembly/lib.xml</descriptor>
+                <descriptor>assembly/cli.xml</descriptor>
+              </descriptors>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+      <modules>
+        <module>assembly</module>
+      </modules>
+    </profile>
+  </profiles>
 
   <modules>
     <module>core</module>

@@ -5,7 +5,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import org.jeo.geom.GeomBuilder;
-import org.jeo.proj.wkt.ProjWKTParser;
 import org.junit.Test;
 import org.osgeo.proj4j.CoordinateReferenceSystem;
 
@@ -18,6 +17,13 @@ public class ProjTest {
     public void testCrs() {
         CoordinateReferenceSystem crs = Proj.crs("EPSG:4326");
         assertNotNull(crs);
+
+        crs = Proj.crs("+proj=longlat +datum=WGS84 +no_defs");
+        assertNotNull(crs);
+
+        crs = Proj.crs("+proj=longlat", "+datum=WGS84", "+no_defs");
+        assertNotNull(crs);
+
     }
 
     @Test

@@ -3,6 +3,7 @@ package org.jeo.proj;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.ParseException;
+import java.util.regex.Pattern;
 
 import org.jeo.geom.GeomBuilder;
 import org.jeo.proj.wkt.ProjWKTEncoder;
@@ -33,18 +34,21 @@ public class Proj {
 
     static Logger LOGGER = LoggerFactory.getLogger(Proj.class);
 
-    /** 
-     * The canonical geographic coordinate reference system.
-     */
-    public static final CoordinateReferenceSystem EPSG_4326;
+    static Pattern AUTH_CODE = Pattern.compile("\\w+:\\d+", Pattern.CASE_INSENSITIVE);
 
     static CRSFactory csFactory = new CRSFactory();
     static CoordinateTransformFactory txFactory = new CoordinateTransformFactory();
     static GeomBuilder gBuilder = new GeomBuilder();
 
-    static {
-        EPSG_4326 = Proj.crs("EPSG:4326");
-    }
+    /** 
+     * The canonical geographic coordinate reference system.
+     */
+    public static final CoordinateReferenceSystem EPSG_4326 = Proj.crs("EPSG:4326");
+
+    /**
+     * Google mercator
+     */
+    public static final CoordinateReferenceSystem EPSG_900913 = Proj.crs("EPSG:900913");
 
     /**
      * Looks up a crs object base on its EPSG identifier.  
@@ -63,13 +67,24 @@ public class Proj {
      * @return The matching crs object, or <code>null</code> if none found.
      */
     public static CoordinateReferenceSystem crs(String s) {
+        
+        if (!AUTH_CODE.matcher(s).matches()) {
+            return crs(new String[]{s});
+        }
+
+        if ("epsg:4326".equalsIgnoreCase(s) && EPSG_4326 != null) {
+            return EPSG_4326;
+        }
+        
         //hack for epsg:900913, we nweed to add this to proj4j
         if ("epsg:900913".equalsIgnoreCase(s)) {
-            return createFromExtra("epsg", "900913");
+            return EPSG_900913 != null ? EPSG_900913 : createFromExtra("epsg", "900913");
         }
+
         return csFactory.createFromName(s);
     }
 
+    
     /**
      * Creates a crs object from projection parameter definition.
      * 
@@ -77,7 +92,10 @@ public class Proj {
      * 
      * @return The crs object.
      */
-    public static CoordinateReferenceSystem crs(String[] projdef) {
+    public static CoordinateReferenceSystem crs(String... projdef) {
+        if (projdef != null && projdef.length == 1) {
+            return csFactory.createFromParameters(null, projdef[0]);
+        }
         return csFactory.createFromParameters(null, projdef);
     }
 

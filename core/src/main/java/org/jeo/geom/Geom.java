@@ -249,6 +249,13 @@ public class Geom {
             .toPolygon();
     }
 
+    /**
+     * Checks if the envelope is null.
+     * <p>
+     * This method returns true if the reference is <code>null</code> or {@link Envelope#isNull()}
+     * returns <code>true</code>.
+     * </p>
+     */
     public static boolean isNull(Envelope e) {
         return e == null || e.isNull();
     }

@@ -32,7 +32,7 @@ public class MongoWorkspace implements Workspace {
     }
 
     @Override
-    public Iterator<String> layers() throws IOException {
+    public Iterable<String> list() throws IOException {
         Set<String> collections = db.getCollectionNames();
         for (Iterator<String> it = collections.iterator(); it.hasNext();) {
             String name = it.next();
@@ -40,7 +40,7 @@ public class MongoWorkspace implements Workspace {
                 it.remove();
             }
         }
-        return collections.iterator();
+        return collections;
     }
 
     @Override
@@ -56,7 +56,7 @@ public class MongoWorkspace implements Workspace {
     }
 
     @Override
-    public void dispose() {
+    public void close() {
     }
 
 }

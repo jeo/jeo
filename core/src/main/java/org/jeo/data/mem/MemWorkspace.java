@@ -1,7 +1,6 @@
 package org.jeo.data.mem;
 
 import java.io.IOException;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -19,8 +18,8 @@ public class MemWorkspace implements Workspace {
     }
 
     @Override
-    public Iterator<String> layers() throws IOException {
-        return data.keySet().iterator();
+    public Iterable<String> list() throws IOException {
+        return data.keySet();
     }
 
     @Override
@@ -40,7 +39,7 @@ public class MemWorkspace implements Workspace {
     }
 
     @Override
-    public void dispose() {
+    public void close() {
         data.clear();
     }
 }

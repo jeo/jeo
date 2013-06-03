@@ -176,9 +176,9 @@ public class Map implements Disposable {
     }
 
     @Override
-    public void dispose() {
+    public void close() {
         for (Disposable d : cleanup) {
-            d.dispose();
+            d.close();
         }
 
         layers.clear();

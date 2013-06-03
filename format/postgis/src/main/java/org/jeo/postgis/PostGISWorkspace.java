@@ -1,7 +1,5 @@
 package org.jeo.postgis;
 
-import static org.jeo.postgis.PostGISWorkspace.LOG;
-
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
@@ -12,13 +10,11 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Types;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import javax.sql.DataSource;
 
 import org.jeo.data.Driver;
-import org.jeo.data.VectorData;
 import org.jeo.data.Workspace;
 import org.jeo.feature.Field;
 import org.jeo.feature.Schema;
@@ -65,7 +61,7 @@ public class PostGISWorkspace implements Workspace {
     }
 
     @Override
-    public Iterator<String> layers() throws IOException {
+    public Iterable<String> list() throws IOException {
         return run(new DbOP<List<String>>() {
             @Override
             protected List<String> doRun(Connection cx) throws Exception {
@@ -85,7 +81,7 @@ public class PostGISWorkspace implements Workspace {
 
                 return l;
             }
-        }).iterator();
+        });
     }
 
     boolean includeTable(String tbl, String schema) {
@@ -228,7 +224,7 @@ public class PostGISWorkspace implements Workspace {
     }
 
     @Override
-    public void dispose() {
+    public void close() {
         if (db != null) {
             db.close();
         }
@@ -460,6 +456,6 @@ public class PostGISWorkspace implements Workspace {
     @Override
     protected void finalize() throws Throwable {
         super.finalize();
-        dispose();
+        close();
     }
 }

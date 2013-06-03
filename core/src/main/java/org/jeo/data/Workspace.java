@@ -1,7 +1,6 @@
 package org.jeo.data;
 
 import java.io.IOException;
-import java.util.Iterator;
 
 import org.jeo.feature.Schema;
 
@@ -18,11 +17,11 @@ public interface Workspace extends Disposable {
     Driver<?> getDriver();
 
     /**
-     * The names of all layers of the workspace.
+     * The names of all datasets of the workspace.
      * 
-     * @return Iterator over layer names.
+     * @return Iterable over datasets. 
      */
-    Iterator<String> layers() throws IOException;
+    Iterable<String> list() throws IOException;
 
     /**
      * Returns a layer object by name.
@@ -45,10 +44,10 @@ public interface Workspace extends Disposable {
     VectorData create(Schema schema) throws IOException;
 
     /**
-     * Disposes the workspace.
+     * Closes the workspace.
      * <p>
      * Application code should always call this method when the workspace is no longer needed. 
      * </p>
      */
-    void dispose();
+    void close();
 }

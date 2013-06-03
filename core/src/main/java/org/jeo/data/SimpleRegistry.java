@@ -59,7 +59,7 @@ public class SimpleRegistry implements Registry {
     public void dispose() {
         for (Workspace ws : reg.values()) {
             try {
-                ws.dispose();
+                ws.close();
             }
             catch(Exception e) {
                 LOG.warn("Error disposing workspace", e);

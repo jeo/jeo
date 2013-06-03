@@ -124,6 +124,6 @@ public class MongoDataset implements VectorData {
     }
 
     @Override
-    public void dispose() {
+    public void close() {
     }
 }

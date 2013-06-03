@@ -31,7 +31,7 @@ public class CachedRegistry implements Registry {
             .removalListener(new RemovalListener<String, Workspace>() {
                 @Override
                 public void onRemoval(RemovalNotification<String, Workspace> n) {
-                    n.getValue().dispose();
+                    n.getValue().close();
                 }
             }).build(new CacheLoader<String, Workspace>() {
                 @Override
@@ -90,8 +90,8 @@ public class CachedRegistry implements Registry {
         }
 
         @Override
-        public Iterator<String> layers() throws IOException {
-            return ws.layers();
+        public Iterable<String> list() throws IOException {
+            return ws.list();
         }
 
         @Override
@@ -105,7 +105,7 @@ public class CachedRegistry implements Registry {
         }
 
         @Override
-        public void dispose() {
+        public void close() {
             //do nothing, we wait for the entry to expire before disposing
         }
     }

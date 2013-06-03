@@ -31,7 +31,7 @@ import org.postgresql.ds.PGPoolingDataSource;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Predicates;
-import com.google.common.collect.Iterators;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
@@ -93,33 +93,33 @@ public class PostGISTest {
 
     @After
     public void tearDown() throws Exception {
-        pg.dispose();
+        pg.close();
     }
     @Test
     public void testLayers() throws Exception {
-        Iterators.find(pg.layers(), Predicates.equalTo("states"));
+        Iterables.find(pg.list(), Predicates.equalTo("states"));
         try {
-            Iterators.find(pg.layers(), Predicates.equalTo("geometry_columns"));
+            Iterables.find(pg.list(), Predicates.equalTo("geometry_columns"));
             fail();
         }
         catch(NoSuchElementException e) {}
         try {
-            Iterators.find(pg.layers(), Predicates.equalTo("geography_columns"));
+            Iterables.find(pg.list(), Predicates.equalTo("geography_columns"));
             fail();
         }
         catch(NoSuchElementException e) {}
         try {
-            Iterators.find(pg.layers(), Predicates.equalTo("raster_columns"));
+            Iterables.find(pg.list(), Predicates.equalTo("raster_columns"));
             fail();
         }
         catch(NoSuchElementException e) {}
         try {
-            Iterators.find(pg.layers(), Predicates.equalTo("raster_overviews"));
+            Iterables.find(pg.list(), Predicates.equalTo("raster_overviews"));
             fail();
         }
         catch(NoSuchElementException e) {}
         try {
-            Iterators.find(pg.layers(), Predicates.equalTo("topology"));
+            Iterables.find(pg.list(), Predicates.equalTo("topology"));
             fail();
         }
         catch(NoSuchElementException e) {}

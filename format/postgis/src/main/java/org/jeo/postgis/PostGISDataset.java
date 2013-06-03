@@ -185,7 +185,7 @@ public class PostGISDataset implements VectorData {
     }
 
     @Override
-    public void dispose() {
+    public void close() {
     }
 
     void encodeFieldForSelect(Field f, SQL sql) {

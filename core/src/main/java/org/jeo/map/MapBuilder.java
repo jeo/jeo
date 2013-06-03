@@ -78,7 +78,7 @@ public class MapBuilder {
 
         Dataset data = ws.get(name);
         if (data == null) {
-            ws.dispose();
+            ws.close();
             throw new IllegalArgumentException(
                 "No dataset named " + name + " in worksoace: " + params);
         }

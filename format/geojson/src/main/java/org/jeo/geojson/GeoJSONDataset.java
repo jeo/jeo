@@ -104,7 +104,7 @@ public class GeoJSONDataset implements VectorData {
     }
 
     @Override
-    public void dispose() {
+    public void close() {
     }
 
     Optional<Feature> first() throws IOException {

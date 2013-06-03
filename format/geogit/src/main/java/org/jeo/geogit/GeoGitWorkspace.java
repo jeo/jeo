@@ -39,7 +39,7 @@ import com.google.common.base.Predicate;
 import com.google.common.base.Throwables;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Iterators;
+import com.google.common.collect.Iterables;
 
 public class GeoGitWorkspace implements Workspace {
 
@@ -62,24 +62,24 @@ public class GeoGitWorkspace implements Workspace {
         return gg;
     }
 
-    public Iterator<String> branches() {
+    public Iterable<String> branches() {
         ImmutableList<Ref> heads = gg.command(BranchListOp.class).call();
         return Collections2.transform(heads, new Function<Ref,String>() {
             @Override
             public String apply(Ref ref) {
                 return ref.getName().substring(Ref.HEADS_PREFIX.length());
             }
-        }).iterator();
+        });
     }
 
     @Override
-    public Iterator<String> layers() throws IOException {
+    public Iterable<String> list() throws IOException {
         return layers(branch());
     }
 
-    public Iterator<String> layers(String rev) throws IOException {
+    public Iterable<String> layers(String rev) throws IOException {
         List<NodeRef> trees = typeRefs(rev);
-        return Iterators.transform(trees.iterator(), new Function<NodeRef, String>() {
+        return Iterables.transform(trees, new Function<NodeRef, String>() {
             @Override
             public String apply(NodeRef input) {
                 return NodeRef.nodeFromPath(input.path());
@@ -239,7 +239,7 @@ public class GeoGitWorkspace implements Workspace {
     }
 
     @Override
-    public void dispose() {
+    public void close() {
         // TODO Auto-generated method stub
         
     }

@@ -135,7 +135,7 @@ public class GeoGitDataset implements VectorData, Transactional {
     }
 
     @Override
-    public void dispose() {
+    public void close() {
     }
 
     NodeRef getRef() {

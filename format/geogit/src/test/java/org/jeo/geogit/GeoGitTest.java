@@ -85,7 +85,7 @@ public class GeoGitTest {
         String name = data.getName();
         repo.getWorkingTree().insert(name, GT.iterator(data.cursor(new Query())), 
             new NullProgressListener(), null, null);
-        data.dispose();
+        data.close();
 
         AddOp add = repo.command(AddOp.class);
         add.call();
@@ -112,7 +112,7 @@ public class GeoGitTest {
 
     @Test
     public void testLayers() throws IOException {
-        Set<String> layers = Sets.newHashSet(ws.layers());
+        Set<String> layers = Sets.newHashSet(ws.list());
         assertEquals(4, layers.size());
         assertTrue(layers.contains("states"));
         assertTrue(layers.contains("point"));

@@ -17,7 +17,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.google.common.base.Predicate;
-import com.google.common.collect.Iterators;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
@@ -47,7 +47,7 @@ public class MemoryTest {
 
     @Test
     public void testLayers() throws IOException {
-        assertTrue(Iterators.any(mem.layers(), new Predicate<String>() {
+        assertTrue(Iterables.any(mem.list(), new Predicate<String>() {
             @Override
             public boolean apply(String input) {
                 return "widgets".equals(input);

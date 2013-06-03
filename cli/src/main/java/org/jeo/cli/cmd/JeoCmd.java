@@ -45,7 +45,7 @@ public abstract class JeoCmd {
             while(!toDispose.isEmpty()) {
                 Disposable d = toDispose.pop();
                 try {
-                    d.dispose();
+                    d.close();
                 }
                 catch(Exception e) {
                     //TODO: log this

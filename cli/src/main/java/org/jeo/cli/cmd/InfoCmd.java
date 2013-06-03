@@ -4,7 +4,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
 import java.net.URI;
-import java.util.Iterator;
 import java.util.List;
 
 import jline.console.ConsoleReader;
@@ -90,7 +89,7 @@ public class InfoCmd extends JeoCmd {
             }
         }
         finally {
-            dataset.dispose();
+            dataset.close();
         }
     }
 
@@ -100,13 +99,13 @@ public class InfoCmd extends JeoCmd {
             console.println("Driver: " + workspace.getDriver().getName());
             console.println("Layers:");
 
-            for (Iterator<String> it = workspace.layers(); it.hasNext();) {
+            for (String l : workspace.list()) {
                 console.print("\t");
-                console.println(it.next());
+                console.println(l);
             }
         }
         finally {
-            workspace.dispose();
+            workspace.close();
         }
     }
 

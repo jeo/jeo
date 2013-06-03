@@ -76,7 +76,7 @@ public class MongoTest {
 
     @After
     public void tearDown() throws Exception {
-        mongo.dispose();
+        mongo.close();
     }
 
     @Test

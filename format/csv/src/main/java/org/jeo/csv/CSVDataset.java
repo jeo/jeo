@@ -124,7 +124,7 @@ public class CSVDataset implements VectorData {
         return q.apply(c);
     }
 
-    public void dispose() {
+    public void close() {
     }
     
     BufferedReader reader() throws FileNotFoundException {

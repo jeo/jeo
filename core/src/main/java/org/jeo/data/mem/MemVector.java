@@ -110,6 +110,6 @@ public class MemVector implements VectorData {
     }
 
     @Override
-    public void dispose() {
+    public void close() {
     }
 }

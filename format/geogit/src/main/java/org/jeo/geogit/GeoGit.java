@@ -21,13 +21,26 @@ import com.google.inject.util.Modules;
 
 public class GeoGit extends FileDriver<GeoGitWorkspace> {
 
+    /**
+     * Key to create repository if it doesn't exist, defaults to <tt>false</tt>.
+     */
     public static final Key<Boolean> CREATE = new Key<Boolean>("create", Boolean.class, true);
 
+    /**
+     * Username key, defaults to <tt>System.getProperty("user.name")</tt>
+     */
     public static final Key<String> USER = 
         new Key<String>("user.name", String.class, System.getProperty("user.name"));
 
+    /**
+     * Email key, defaults to <tt>System.getProperty("user.name") + "@localhost"</tt>
+     */
     public static final Key<String> EMAIL = 
         new Key<String>("user.email", String.class, USER.getDefault() + "@localhost");
+
+    public static GeoGitWorkspace open(GeoGitOpts opts) throws IOException {
+        return new GeoGitWorkspace(newGeoGIT(opts));
+    }
 
     @Override
     public String getName() {
@@ -55,28 +68,41 @@ public class GeoGit extends FileDriver<GeoGitWorkspace> {
 
     @Override
     public GeoGitWorkspace open(File file, Map<?, Object> opts) throws IOException {
-        if (!file.exists() && CREATE.get(opts)) {
+        GeoGitOpts ggopts = new GeoGitOpts(file);
+        if (CREATE.has(opts)) {
+            ggopts.create(CREATE.get(opts));
+        }
+        if (USER.has(opts)) {
+            ggopts.user(USER.get(opts));
+        }
+        if (EMAIL.has(opts)) {
+            ggopts.email(EMAIL.get(opts));
+        }
+
+        return new GeoGitWorkspace(newGeoGIT(ggopts));
+    }
+
+    static GeoGIT newGeoGIT(GeoGitOpts opts) throws IOException {
+        File file = opts.getFile();
+        if (!file.exists() && opts.isCreate()) {
             if (!file.mkdirs()) {
                 throw new IOException("Unable to create directory: " + file.getPath());
             }
         }
 
-        GeoGIT gg = newGeoGIT(file);
+        //TODO: something about this
+        Injector i = Guice.createInjector(
+            Modules.override(new GeogitModule()).with(new JEStorageModule()));
+
+        GeoGIT gg = new GeoGIT(i, file);
         gg.getOrCreateRepository();
 
         Repository repo = gg.getRepository();
         repo.command(ConfigOp.class).setAction(ConfigAction.CONFIG_SET)
-            .setName("user.name").setValue(USER.get(opts)).call();
+            .setName("user.name").setValue(opts.getUser()).call();
         repo.command(ConfigOp.class).setAction(ConfigAction.CONFIG_SET)
-            .setName("user.email").setValue(EMAIL.get(opts)).call();
-
-        return new GeoGitWorkspace(gg);
-    }
-
-    GeoGIT newGeoGIT(File file) {
-        //TODO: something about this
-        Injector i = Guice.createInjector(
-            Modules.override(new GeogitModule()).with(new JEStorageModule()));
-        return new GeoGIT(i, file);
+            .setName("user.email").setValue(opts.getEmail()).call();
+        
+        return gg;
     }
 }

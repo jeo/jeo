@@ -21,6 +21,10 @@ public class MongoDB implements Driver<MongoWorkspace> {
     
     public static final Key<String> PASSWD = new Key<String>("passwd", String.class);
 
+    public static MongoWorkspace open(MongoOpts opts) throws IOException {
+        return new MongoWorkspace(opts);
+    }
+
     @Override
     public String getName() {
         return "MongoDB";

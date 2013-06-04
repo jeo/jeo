@@ -167,6 +167,31 @@ public class Geom {
     }
 
     /**
+     * Convenience method to build a Point geometry.
+     */
+    public static Point point(double x, double y) {
+        return build().point(x, y).toPoint();
+    }
+
+    /**
+     * Convenience method to build a LineString geometry.
+     * 
+     * @param ord Even number of ordinates forming coordinates for the line string.
+     */
+    public static LineString lineString(double... ord) {
+        return build().points(ord).toLineString();
+    }
+
+    /**
+     * Convenience method to build a Polygon geometry.
+     * 
+     * @param ord Even number of ordinates forming coordinates for the outer ring of the polygon.
+     */
+    public static Polygon polygon(double... ord) {
+        return build().points(ord).toPolygon();
+    }
+
+    /**
      * Returns an iterable over the points of a multipoint.
      */
     public static Iterable<Point> iterate(MultiPoint mp) {

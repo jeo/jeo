@@ -47,6 +47,6 @@
   </dependencies>
 
   <properties>
-    <geogit.version>0.2-SNAPSHOT</geogit.version>
+    <geogit.version>0.3-SNAPSHOT</geogit.version>
   </properties>
 </project>

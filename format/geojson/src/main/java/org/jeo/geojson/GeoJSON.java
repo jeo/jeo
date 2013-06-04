@@ -10,7 +10,25 @@ import org.jeo.data.FileDriver;
 import org.jeo.data.VectorDriver;
 import org.jeo.feature.Schema;
 
+/**
+ * GeoJSON format driver.
+ * <p>
+ * Usage:
+ * <pre><code>
+ * GeoJSON.open(new File("states.json"));
+ * </code></pre>
+ * </p>
+ * 
+ * @author Justin Deoliveira, OpenGeo
+ */
 public class GeoJSON extends FileDriver<GeoJSONDataset> implements VectorDriver<GeoJSONDataset> {
+
+    /**
+     * Opens a file containing encoded GeoJSON.
+     */
+    public static GeoJSONDataset open(File file) {
+        return new GeoJSONDataset(file);
+    }
 
     @Override
     public String getName() {

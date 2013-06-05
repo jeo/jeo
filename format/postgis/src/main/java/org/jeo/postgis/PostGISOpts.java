@@ -1,5 +1,16 @@
 package org.jeo.postgis;
 
+/**
+ * Specifies options for connecting to a postgis database.
+ * <p>
+ * Usage:
+ * <pre><code>
+ * new MongoOpts("jeo").host("localhost").port(5432).user("bob").passwd("secret");
+ * </code></pre>
+ * </p>
+ * 
+ * @author Justin Deoliveira, OpenGeo
+ */
 public class PostGISOpts {
 
     String db; 

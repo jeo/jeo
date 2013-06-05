@@ -1,7 +1,7 @@
 function() {
-  if (this.geometry == null) return;
+  if (this.%geometry% == null) return;
 
-  var coords = this.geometry.coordinates;
+  var coords = this.%geometry%.coordinates;
   if (coords == null || coords.length == 0) return;
 
   var x = function(c) { return c[0]; }
@@ -24,7 +24,7 @@ function() {
             Math.max(b1[2], b2[2]), Math.max(b1[3], b2[3])];
   }
 
-  var type = this.geometry.type;
+  var type = this.%geometry%.type;
   var box = null;
 
   if (type == "Point") {

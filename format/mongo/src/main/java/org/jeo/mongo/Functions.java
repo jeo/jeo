@@ -16,8 +16,13 @@ public class Functions {
 
     static Logger LOG = LoggerFactory.getLogger(MongoDB.class);
 
-    static final String BBOX_MAP = load("bbox_map.js");
-    static final String BBOX_REDUCE = load("bbox_reduce.js");
+    static String bboxMap(String geometry) {
+        return load("bbox_map.js").replaceAll("%geometry%", geometry);
+    }
+
+    static String bboxReduce() {
+        return load("bbox_reduce.js");
+    }
 
     static String load(String filename) {
         BufferedReader r = 

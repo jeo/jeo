@@ -16,14 +16,24 @@ public class MongoWorkspace implements Workspace {
 
     MongoOpts mopts;
     DB db;
+    MongoMapper mapper;
 
     public MongoWorkspace(MongoOpts mopts) throws IOException {
+        this(mopts.connect());
         this.mopts = mopts;
-        this.db = mopts.connect();
     }
-    
+
     MongoWorkspace(DB db) {
         this.db = db;
+        this.mapper = new DefaultMapper();
+    }
+
+    public MongoMapper getMapper() {
+        return mapper;
+    }
+
+    public void setMapper(MongoMapper mapper) {
+        this.mapper = mapper;
     }
 
     @Override

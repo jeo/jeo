@@ -7,16 +7,11 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.Set;
 
-import org.jeo.TestData;
 import org.jeo.data.Cursor;
 import org.jeo.data.Query;
-import org.jeo.data.VectorData;
 import org.jeo.feature.Feature;
 import org.jeo.feature.Schema;
-import org.jeo.geojson.GeoJSONWriter;
-import org.jeo.geom.Geom;
 import org.jeo.geom.GeomBuilder;
-
 import org.junit.After;
 import org.junit.Assume;
 import org.junit.Before;
@@ -28,14 +23,10 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
 import com.mongodb.BasicDBObject;
-import com.mongodb.BasicDBObjectBuilder;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
-import com.mongodb.DBObject;
-import com.mongodb.util.JSON;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.MultiPolygon;
 
 public class MongoTest {
 
@@ -55,7 +46,17 @@ public class MongoTest {
         Assume.assumeNotNull(db);
     }
 
-    MongoWorkspace mongo;
+    protected MongoWorkspace mongo;
+    MongoTestData testData;
+
+    @Before
+    public void setUpTestData() {
+        testData = createTestData();
+    }
+
+    protected MongoTestData createTestData() {
+        return new MongoTestData();
+    }
 
     @Before
     public void setUp() throws Exception {
@@ -64,14 +65,8 @@ public class MongoTest {
             states.remove(new BasicDBObject());
         }
 
-        VectorData data = TestData.states();
-        for (Feature f : data.cursor(new Query())) {
-            f.put("geometry", Geom.iterate((MultiPolygon) f.geometry()).iterator().next());
-            states.insert((DBObject) JSON.parse(GeoJSONWriter.toString(f)));
-        }
-
-        states.ensureIndex(BasicDBObjectBuilder.start().add("geometry", "2dsphere").get());
         mongo = new MongoWorkspace(db);
+        testData.setUp(states, mongo);
     }
 
     @After
@@ -152,7 +147,8 @@ public class MongoTest {
         Geometry g = new GeomBuilder().point(0,0).toPoint().buffer(1);
         
         Feature f = c.next();
-        f.put("geometry", g);
+        f.put(g);
+        //f.put("geometry", g);
         f.put("STATE_NAME", "Nowhere");
         c.write();
 
@@ -178,7 +174,7 @@ public class MongoTest {
         assertTrue(c.hasNext());
 
         Feature f = c.next();
-        f.put("geometry", g);
+        f.put(g);
         f.put("STATE_NAME", "foo");
         c.write();
         c.close();

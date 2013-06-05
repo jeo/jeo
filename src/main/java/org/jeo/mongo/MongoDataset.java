@@ -31,11 +31,18 @@ public class MongoDataset implements VectorData {
         this.dbcol = dbcol;
         this.mongo = mongo;
         this.schema = new SchemaBuilder(dbcol.getName()).field("geometry", Geometry.class).schema();
-        this.mapper = new GeoJSONMapper(this);
     }
 
     public MongoMapper getMapper() {
         return mapper;
+    }
+
+    public void setMapper(MongoMapper mapper) {
+        this.mapper = mapper;
+    }
+
+    public MongoMapper mapper() {
+        return this.mapper != null ? mapper : mongo.getMapper();
     }
 
     public DBCollection getCollection() {
@@ -69,7 +76,7 @@ public class MongoDataset implements VectorData {
 
     @Override
     public Envelope bounds() throws IOException {
-        return mapper.bbox(dbcol);
+        return mapper().bbox(dbcol, this);
     }
 
     @Override
@@ -120,7 +127,7 @@ public class MongoDataset implements VectorData {
     }
 
     DBObject encodeBboxQuery(Envelope bbox) {
-        return mapper.query(bbox);
+        return mapper().query(bbox, this);
     }
 
     @Override

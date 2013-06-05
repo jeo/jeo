@@ -21,7 +21,7 @@ public class MongoCursor extends Cursor<Feature> {
         super(mode);
         this.dbCursor = dbCursor;
         this.dataset = dataset;
-        this.mapper = dataset.getMapper();
+        this.mapper = dataset.mapper();
     }
 
     @Override
@@ -31,23 +31,23 @@ public class MongoCursor extends Cursor<Feature> {
 
     @Override
     public Feature next() throws IOException {
-        return next = mapper.feature(mode == APPEND ? new BasicDBObject() : dbCursor.next());
+        return next = mapper.feature(mode==APPEND ? new BasicDBObject() : dbCursor.next(), dataset);
     }
 
     @Override
     protected void doRemove() throws IOException {
-        dbCursor.getCollection().remove(mapper.object(next));
+        dbCursor.getCollection().remove(mapper.object(next, dataset));
     }
 
     @Override
     protected void doWrite() throws IOException {
         //TODO: check write result
         if (getMode() == APPEND) {
-            DBObject obj = mapper.object(next);
+            DBObject obj = mapper.object(next, dataset);
             dataset.getCollection().insert(obj);
         }
         else {
-            DBObject obj = mapper.object(next);
+            DBObject obj = mapper.object(next, dataset);
             dataset.getCollection().update(new BasicDBObject("_id", obj.get("_id")), obj);
         }
     }

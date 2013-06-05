@@ -28,7 +28,7 @@ public class CSVDataset implements VectorData {
     File file;
 
     /** csv stuff */
-    CSVOptions opts;
+    CSVOpts opts;
 
     /** the feature schema */
     Schema schema;
@@ -37,10 +37,10 @@ public class CSVDataset implements VectorData {
     CSVHandler handler;
 
     public CSVDataset(File file) throws IOException {
-        this(file, new CSVOptions());
+        this(file, new CSVOpts());
     }
 
-    public CSVDataset(File file, CSVOptions opts) throws IOException {
+    public CSVDataset(File file, CSVOpts opts) throws IOException {
         this.file = file;
         this.opts = opts;
         handler = opts.handler();

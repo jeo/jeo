@@ -20,7 +20,7 @@ public class CSVTest {
 
     @Before
     public void setUp() throws IOException {
-        csv = new CSVDataset(Tests.newTmpFile("jeo", "csv", csv()), new CSVOptions().xy("lon", "lat"));
+        csv = new CSVDataset(Tests.newTmpFile("jeo", "csv", csv()), new CSVOpts().xy("lon", "lat"));
     }
 
     @Test

@@ -15,10 +15,10 @@ import com.vividsolutions.jts.geom.Geometry;
  *
  */
 public class XYHandler extends CSVHandler {
-    CSVOptions opts;
+    CSVOpts opts;
     GeomBuilder gb;
 
-    XYHandler(CSVOptions opts) {
+    XYHandler(CSVOpts opts) {
         this.opts = opts;
         this.gb = new GeomBuilder();
     }

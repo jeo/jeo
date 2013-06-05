@@ -20,7 +20,7 @@ public class CSV extends FileDriver<CSVDataset> {
 
     public static final Key<Object> Y = new Key<Object>("y", Object.class, "y");
 
-    public static CSVDataset open(File file, CSVOptions csvOpts) throws IOException {
+    public static CSVDataset open(File file, CSVOpts csvOpts) throws IOException {
         return new CSVDataset(file, csvOpts);
     }
 
@@ -49,8 +49,8 @@ public class CSV extends FileDriver<CSVDataset> {
         return new CSVDataset(file, csvOpts(opts));
     }
 
-    CSVOptions csvOpts(Map<?, Object> opts) {
-        CSVOptions csvOpts = new CSVOptions();
+    CSVOpts csvOpts(Map<?, Object> opts) {
+        CSVOpts csvOpts = new CSVOpts();
         csvOpts.delimiter(DELIM.get(opts)).header(HEADER.get(opts));
         
         Object x = X.get(opts);

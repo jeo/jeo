@@ -1,6 +1,6 @@
 package org.jeo.csv;
 
-public class CSVOptions {
+public class CSVOpts {
 
     Delimiter delim = CSV.DELIM.getDefault();
     boolean header = CSV.HEADER.getDefault();
@@ -12,7 +12,7 @@ public class CSVOptions {
         return delim;
     }
 
-    public CSVOptions delimiter(Delimiter delim) {
+    public CSVOpts delimiter(Delimiter delim) {
         this.delim = delim;
         return this;
     }
@@ -21,18 +21,18 @@ public class CSVOptions {
         return header;
     }
 
-    public CSVOptions header(boolean header) {
+    public CSVOpts header(boolean header) {
         this.header = header;
         return this;
     }
 
-    public CSVOptions xy(String x, String y) {
+    public CSVOpts xy(String x, String y) {
         this.xcol = x;
         this.ycol = y;
         return this;
     }
 
-    public CSVOptions xy(Integer x, Integer y) {
+    public CSVOpts xy(Integer x, Integer y) {
         this.x = x;
         this.y = y;
         return this;

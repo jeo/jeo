@@ -1,0 +1,18 @@
+{% if parents|length != 0 %}
+<ul class="breadcrumb">
+{% for p in parents %}
+  <li>
+    <a href="{{ p.link }}">{{ p.title }}</a>
+    {% if not loop.last %}
+      &raquo;
+    {% endif %}
+  </li>
+{% endfor %}
+</ul>
+{% endif %}
+
+{% block body %}
+{% endblock %}
+
+{% block sidebarrel %}
+{% endblock %}

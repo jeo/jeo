@@ -138,6 +138,43 @@
          <argLine>-Djava.library.path=${java.library.path}</argLine> 
        </configuration>
      </plugin>
+
+     <!-- javadoc -->
+     <plugin>
+      <groupId>org.apache.maven.plugins</groupId>
+      <artifactId>maven-javadoc-plugin</artifactId>
+      <version>2.9</version>
+      <configuration>
+        <stylesheetfile>doc/source/_static/javadoc.css</stylesheetfile>
+        <links>
+          <link>http://tsusiatsoftware.net/jts/javadoc</link>
+        </links>
+        <groups>
+          <group>
+            <title>Geometries</title>
+            <packages>org.jeo.geom*</packages>
+          </group>
+          <group>
+            <title>Projections</title>
+            <packages>org.jeo.proj*</packages>
+          </group>
+          <group>
+            <title>Features</title>
+            <packages>org.jeo.feature*</packages>
+          </group>
+          <group>
+            <title>Data Access</title>
+            <packages>org.jeo.data:org.jeo.filter*</packages>
+          </group>
+          <group>
+            <title>Formats</title>
+            <packages>
+              org.jeo.data.mem:org.jeo.csv:org.jeo.postgis:org.jeo.mongo:org.jeo.geojson:org.jeo.geogit
+             </packages>
+          </group>
+        </groups>
+      </configuration>
+    </plugin>
    </plugins>
   </build>
 
@@ -178,6 +215,7 @@
               <descriptors>
                 <descriptor>assembly/lib.xml</descriptor>
                 <descriptor>assembly/cli.xml</descriptor>
+                <descriptor>assembly/doc.xml</descriptor>
                 <descriptor>assembly/geogit.xml</descriptor>
               </descriptors>
             </configuration>

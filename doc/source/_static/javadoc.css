@@ -1,0 +1,12 @@
+@import "bootstrap.min.css";
+@import "jeo.css";
+
+body {
+  padding-left: 15px;
+  padding-right: 15px;
+}
+
+hr {
+  margin: 0;
+
+}

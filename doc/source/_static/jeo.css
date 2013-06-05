@@ -1,0 +1,106 @@
+/*
+ * deal with bootstrap navbar issue
+ *
+ * http://stackoverflow.com/questions/11124777/twitter-bootstrap-navbar-fixed-top-overlapping-site
+ */
+@media (min-width: 979px) {
+  body {
+    padding-top: 0;
+  }
+  .navbar-fixed-top {
+    margin-bottom: 20px;
+  }
+  .navbar-fixed-top, .navbar-fixed-bottom {
+    position: static;
+  }
+}
+
+/*
+ * general look and feel stuff
+ */
+a, a:hover {
+  color: #005580;  
+}
+
+h2 a {
+  color: rgb(44, 62, 80);
+}
+
+h2 a:hover {
+  color: rgb(44, 62, 80);
+}
+
+/*
+ * navbar
+ */
+.navbar a.brand {
+  padding-top: 10px;
+  padding-bottom: 0;
+}
+
+.navbar a.brand:hover {
+  color: white;
+}
+
+.navbar .nav > li > a:hover {
+   color: gray;
+}
+
+.navbar ul.nav {
+  padding-top: 25px;
+}
+
+.brand h1 {
+  display: inline;
+}
+
+/*
+ * footer
+ */
+.footer {
+  border-top: 0;
+  font-size: 12px;
+}
+
+/*
+ *
+ */ 
+.hero-unit {
+  padding: 20px;
+}
+
+/**
+ * sphinx stuff
+ */
+.section h1 {
+  font-size: 32px;
+  font-weight: normal;
+}
+
+.section h2 {
+  font-size: 24px;
+  font-weight: normal;
+}
+
+.section h3 {
+  font-size: 20px;
+  font-weight: normal;
+}
+
+li.toctree-l1 {
+  list-style-type: none;
+}
+
+.admonition-title {
+  display: none;
+}
+
+.admonition p.last {
+  margin-bottom:0px;
+}
+
+.line-block {
+  border-left: 2px solid lightgrey;
+  padding-left: 1em;
+  font-style: italic;
+}

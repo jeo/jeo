@@ -12,13 +12,13 @@ import com.vividsolutions.jts.geom.Geometry;
 
 public class GeoJSONAppendCursor extends Cursor<Feature> {
 
-    FeatureCollectionWriter writer;
+    GeoJSONWriter writer;
     Feature next;
 
     public GeoJSONAppendCursor(Writer out) throws IOException {
         super(Mode.APPEND);
-        writer = new FeatureCollectionWriter(out);
-        writer.start();
+        writer = new GeoJSONWriter(out);
+        writer.featureCollection();
     }
 
     @Override
@@ -45,47 +45,9 @@ public class GeoJSONAppendCursor extends Cursor<Feature> {
     @Override
     public void close() throws IOException {
         if (writer != null) {
-            writer.end();
+            writer.endFeatureCollection();
+            writer.flush();
         }
         writer = null;
-    }
-
-    class FeatureCollectionWriter {
-    
-        GeoJSONWriter writer;
-        boolean first = true;
-
-        public FeatureCollectionWriter(Writer out) {
-            writer = new GeoJSONWriter(out);
-        }
-
-        void start() throws IOException {
-            Writer out = writer.getWriter();
-
-            out.write("{");
-            out.write("\"type\": \"FeatureCollection\", ");
-            out.write("\"features\": [");
-
-            out.flush();
-        }
-
-        void feature(Feature f) throws IOException {
-            Writer out = writer.getWriter();
-
-            if (!first) {
-                out.write(",");
-            }
-            first = false;
-            writer.feature(f);
-            out.flush();
-        }
-
-        void end() throws IOException {
-            Writer out = writer.getWriter();
-            out.write("]}");
-            out.flush();
-            out.close();
-        }
-
     }
 }

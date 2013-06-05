@@ -427,9 +427,8 @@ public class GeoJSONWriter {
     }
 
     /**
-     * Encoded a feature collection.
+     * Encodes a feature collection.
      *
-     * 
      * @see {@linkplain http://www.geojson.org/geojson-spec.html#feature-collection-objects}
      */
     public GeoJSONWriter featureCollection(Cursor<Feature> features)  throws IOException {
@@ -437,6 +436,30 @@ public class GeoJSONWriter {
         obj.put("type", "FeatureCollection");
         obj.put("features", new FeatureCollection(features));
         return write(obj);
+    }
+
+    /**
+     * Starts the encoding of a feature collection.
+     * <p>
+     * This method should be followed by any number of calls to {@link #feature(Feature)} and 
+     * finally terminated with a call to {@link #endFeatureCollection()}.
+     * </p> 
+     * 
+     * @see {@linkplain http://www.geojson.org/geojson-spec.html#feature-collection-objects}
+     */
+    public GeoJSONWriter featureCollection() throws IOException {
+        return obj()
+            .key("type").value("FeatureCollection")
+            .key("features").array();
+        
+    }
+
+    /**
+     * Finishes the encoding a feature collection previously started with 
+     * {@link #featureCollection()}.
+     */
+    public GeoJSONWriter endFeatureCollection() throws IOException {
+        return endArray().endObj();
     }
 
     //
@@ -528,6 +551,13 @@ public class GeoJSONWriter {
      */
     public GeoJSONWriter geometryCollection(GeometryCollection gc) throws IOException {
         return write(toObject(gc));
+    }
+
+    /**
+     * Flushes the underlying writer.
+     */
+    public void flush() throws IOException {
+        out.flush();
     }
 
     GeoJSONWriter write(Object obj) throws IOException {

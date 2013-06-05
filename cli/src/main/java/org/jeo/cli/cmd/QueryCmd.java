@@ -20,10 +20,10 @@ import com.google.common.collect.Ordering;
 import com.google.common.primitives.Ints;
 import com.vividsolutions.jts.geom.Envelope;
 
-@Parameters(commandNames="query", commandDescription="Executes a query against a data source")
+@Parameters(commandNames="query", commandDescription="Executes a query against a data set")
 public class QueryCmd extends JeoCmd {
 
-    @Parameter(description="data", arity = 1, required=true)
+    @Parameter(description="dataset", arity = 1, required=true)
     List<String> datas; 
     
     @Parameter(names = {"-b", "--bbox"}, description = "Bounding box (xmin,ymin,xmax,ymax)")

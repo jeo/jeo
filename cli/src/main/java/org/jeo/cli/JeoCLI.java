@@ -14,6 +14,7 @@ import org.jeo.cli.cmd.InfoCmd;
 import org.jeo.cli.cmd.JeoCmd;
 import org.jeo.cli.cmd.QueryCmd;
 import org.jeo.cli.cmd.RootCmd;
+import org.jeo.cli.conv.JeoCLIConverterFactory;
 
 import com.beust.jcommander.JCommander;
 import com.google.common.base.Strings;
@@ -78,7 +79,7 @@ public class JeoCLI {
     JCommander initJCommander() {
         root = new RootCmd();
         JCommander jcmdr = new JCommander(root);
-        
+        jcmdr.addConverterFactory(new JeoCLIConverterFactory());
         jcmdr.addCommand("drivers", new DriversCmd());
         jcmdr.addCommand("query", new QueryCmd());
         jcmdr.addCommand("info", new InfoCmd());
@@ -119,7 +120,7 @@ public class JeoCLI {
         try {
             console.println("usage: jeo <command> [<args>]");
             console.println();
-            console.println("Available commands are:");
+            console.println("Commands:");
             console.println();
             for (String cmd : commands) {
                 console.print("\t");

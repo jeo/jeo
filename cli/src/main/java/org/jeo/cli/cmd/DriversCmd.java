@@ -18,8 +18,9 @@ public class DriversCmd extends JeoCmd {
         ConsoleReader console = cli.getConsole();
 
         Iterator<Driver<?>> it = Drivers.list();
-        console.println("Available drivers:");
-
+        console.println();
+        console.println("Drivers:");
+        console.println();
         while(it.hasNext()) {
             console.print("\t");
             console.println(it.next().getName());

@@ -21,7 +21,7 @@ import org.osgeo.proj4j.CoordinateReferenceSystem;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.Parameters;
 
-@Parameters(commandNames="convert", commandDescription="Converts between data sources")
+@Parameters(commandNames="convert", commandDescription="Converts between data sets")
 public class ConvertCmd extends JeoCmd {
 
     @Parameter(description="source target", arity = 2, required=true)

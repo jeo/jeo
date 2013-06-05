@@ -68,6 +68,7 @@ public abstract class JeoCmd {
         try {
             URI uri = new URI(str);
             if (uri.getScheme() == null) {
+                //assume a file based uri
                 uri = new File(str).toURI();
             }
             return uri;

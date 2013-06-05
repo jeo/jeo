@@ -97,7 +97,7 @@ public class InfoCmd extends JeoCmd {
         ConsoleReader console = cli.getConsole();
         try {
             console.println("Driver: " + workspace.getDriver().getName());
-            console.println("Layers:");
+            console.println("Data sets:");
 
             for (String l : workspace.list()) {
                 console.print("\t");

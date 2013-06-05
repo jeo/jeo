@@ -3,12 +3,14 @@ package org.jeo.data;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
 import org.jeo.feature.Schema;
 import org.jeo.util.Key;
+import org.jeo.util.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -180,10 +182,8 @@ public class Drivers {
     }
     
     public static Object open(URI uri, DriverRegistry registry) throws IOException {
-        if ("file".equalsIgnoreCase(uri.getScheme())) {
-            return open(new File(uri), Object.class, registry);
-        }
-
+        uri = convertFileURI(uri);
+        
         Driver<?> d = find(uri, registry);
 
         Map<String,Object> opts = parseURI(uri, d);
@@ -208,6 +208,8 @@ public class Drivers {
     public static <T extends VectorData> T create(Schema schema, URI uri, Class<T> clazz, 
         DriverRegistry registry) throws IOException {
         
+        uri = convertFileURI(uri);
+
         Driver<T> d = find(uri, registry);
         if (!(d instanceof VectorDriver)) {
             throw new IllegalArgumentException(d.getName() + " not a vector driver");
@@ -283,5 +285,19 @@ public class Drivers {
             }
         }
         return null;
+    }
+
+    static URI convertFileURI(URI uri) {
+        if ("file".equalsIgnoreCase(uri.getScheme())) {
+            //hack for files, turn file extension 
+            String ext = Util.extension(uri.getPath());
+            if (ext != null) {
+                try {
+                    uri = new URI(String.format("%s://?file=%s", ext, uri.getPath()));
+                } catch (URISyntaxException e) {
+                }
+            }
+        }
+        return uri;
     }
 }

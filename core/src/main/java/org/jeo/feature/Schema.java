@@ -23,6 +23,15 @@ public class Schema implements Iterable<Field> {
     List<Field> fields;
 
     /**
+     * Returns a new schema builder.
+     * 
+     * @param name The name of the schema.
+     */
+    public static SchemaBuilder build(String name) {
+        return new SchemaBuilder(name);
+    }
+
+    /**
      * Constructs a new Schema.
      * 
      * @param name Name of the schema.

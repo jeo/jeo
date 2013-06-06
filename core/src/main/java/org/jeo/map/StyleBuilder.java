@@ -10,7 +10,7 @@ import org.jeo.filter.cql.ParseException;
 public class StyleBuilder {
 
     Deque<Rule> ruleStack = new ArrayDeque<Rule>();
-    Stylesheet style = new Stylesheet();
+    Style style = new Style();
 
     public StyleBuilder set(String key, Object value) {
 //        if (style.getRules().isEmpty()) {
@@ -80,7 +80,7 @@ public class StyleBuilder {
         }
     }
 
-    public Stylesheet style() {
+    public Style style() {
         return style;
     }
 

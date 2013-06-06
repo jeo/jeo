@@ -25,9 +25,23 @@ import com.vividsolutions.jts.geom.Envelope;
  */
 public class Map implements Disposable {
 
+    /**
+     * default map width. 
+     */
     public static int DEFAULT_WIDTH = 256;
+
+    /**
+     * default map height.
+     */
     public static int DEFAULT_HEIGHT = 256;
-    
+
+    /**
+     * Returns a new map builder.
+     */
+    public static MapBuilder build() {
+        return new MapBuilder();
+    }
+
     int width = DEFAULT_WIDTH;
     int height = DEFAULT_HEIGHT;
 
@@ -36,7 +50,7 @@ public class Map implements Disposable {
     
     List<Layer> layers = new ArrayList<Layer>();
 
-    Stylesheet style = new Stylesheet();
+    Style style = new Style();
 
     List<Disposable> cleanup = new ArrayList<Disposable>(); 
 
@@ -109,14 +123,14 @@ public class Map implements Disposable {
     /**
      * The stylesheet containing the rules for rendering/symbolizing the map.  
      */
-    public Stylesheet getStyle() {
+    public Style getStyle() {
         return style;
     }
 
     /**
      * Sets the stylesheet containing the rules for rendering/symbolizing the map.  
      */
-    public void setStyle(Stylesheet style) {
+    public void setStyle(Style style) {
         this.style = style;
     }
 

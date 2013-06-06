@@ -12,7 +12,7 @@ public class RuleTest {
 
     @Test
     public void testFlatten() throws Exception {
-        Stylesheet style = new StyleBuilder().rule().select("#widgets").filter("cost > 12")
+        Style style = new StyleBuilder().rule().select("#widgets").filter("cost > 12")
             .rule().select("::costly").filter("cost > 20").set("color", "yellow").endRule()
             .rule().select("::expensive").filter("cost > 30").set("color", "red").endRule()
             .set("color", "green").endRule().style();

@@ -88,7 +88,7 @@ public class MapBuilder {
         return this;
     }
 
-    public MapBuilder style(Stylesheet style) {
+    public MapBuilder style(Style style) {
         map.setStyle(style);
         return this;
     }

@@ -139,6 +139,10 @@ public class GeomBuilder {
      * on the geometry stack.
      */
     public GeomBuilder polygon() {
+        if (gstack.isEmpty() || !(gstack.peek() instanceof LinearRing)) {
+            ring();
+        }
+
         LinearRing[] rings = gpopAll(LinearRing.class);
         LinearRing outer = rings[0];
         LinearRing[] inner = null;

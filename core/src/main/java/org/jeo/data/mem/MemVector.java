@@ -76,7 +76,7 @@ public class MemVector implements VectorData {
     }
     
     @Override
-    public Schema getSchema() throws IOException {
+    public Schema getSchema() {
         return schema;
     }
     

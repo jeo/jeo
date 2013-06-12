@@ -3,9 +3,12 @@ package org.jeo.map;
 import java.io.IOException;
 import java.util.Iterator;
 
+import org.jeo.data.Cursor;
 import org.jeo.data.Dataset;
 import org.jeo.data.Drivers;
 import org.jeo.data.Workspace;
+import org.jeo.data.mem.MemVector;
+import org.jeo.feature.Feature;
 import org.osgeo.proj4j.CoordinateReferenceSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -86,6 +89,27 @@ public class MapBuilder {
         layer(name, title, data);
         map.getCleanup().add(ws);
         return this;
+    }
+
+    public MapBuilder layer(Cursor<Feature> cursor) throws IOException {
+        Feature first = null;
+        if (cursor.hasNext()) {
+            first = cursor.next();
+        }
+
+        if (first == null) {
+            //nothing to render
+            return this;
+        }
+
+        MemVector mem = new MemVector(first.schema());
+        mem.add(first);
+
+        for (Feature f : cursor) {
+            mem.add(f);
+        }
+
+        return layer(mem);
     }
 
     public MapBuilder style(Style style) {

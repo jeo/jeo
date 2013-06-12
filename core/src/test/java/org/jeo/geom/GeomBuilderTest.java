@@ -8,6 +8,7 @@ import org.junit.Test;
 
 import com.vividsolutions.jts.geom.GeometryCollection;
 import com.vividsolutions.jts.geom.LineString;
+import com.vividsolutions.jts.geom.LinearRing;
 import com.vividsolutions.jts.geom.MultiLineString;
 import com.vividsolutions.jts.geom.MultiPoint;
 import com.vividsolutions.jts.geom.MultiPolygon;
@@ -49,6 +50,16 @@ public class GeomBuilderTest {
         assertEquals(2, l.getNumPoints());
         assertPointZ(l.getPointN(0), 1,2,3);
         assertPointZ(l.getPointN(1), 4,5,6);
+    }
+
+    @Test
+    public void testLinearRing() {
+        LinearRing l = gb.points(1,2,3,4,5,6).toLinearRing();
+        assertEquals(4, l.getNumPoints());
+        assertPoint(l.getPointN(0), 1,2);
+        assertPoint(l.getPointN(1), 3,4);
+        assertPoint(l.getPointN(2), 5,6);
+        assertPoint(l.getPointN(3), 1,2);
     }
 
     @Test

@@ -128,9 +128,21 @@ public class GeomBuilder {
     /**
      * Creates a LinearRing from all points on the coordinate stack, and places the result
      * on the geometry stack.
+     * <p>
+     * If the first and last coordinate on the point stack are not equal an additional point 
+     * will be added.
+     * </p>
      */
     public GeomBuilder ring() {
-        gstack.push(factory.createLinearRing(cpopAll()));
+        Coordinate[] coords = cpopAll();
+        if (coords.length > 1 && !coords[0].equals(coords[coords.length-1])) {
+            Coordinate[] tmp = new Coordinate[coords.length+1];
+            System.arraycopy(coords, 0, tmp, 0, coords.length);
+            tmp[tmp.length-1] = new Coordinate(tmp[0]);
+            coords = tmp;
+        }
+
+        gstack.push(factory.createLinearRing(coords));
         return this;
     }
 
@@ -239,6 +251,19 @@ public class GeomBuilder {
      */
     public LineString toLineString() {
         return lineString().gpop(LineString.class);
+    }
+
+    /**
+     * Builds and returns a LineString.
+     * <p>
+     * This method is equivalent to:
+     * <pre>
+     *   (LinearRing) ring().get();
+     * </pre>
+     * </p>
+     */
+    public LinearRing toLinearRing() {
+        return ring().gpop(LinearRing.class);
     }
 
     /**

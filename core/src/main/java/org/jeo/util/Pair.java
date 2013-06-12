@@ -23,4 +23,9 @@ public class Pair<F,S> {
         return second;
     }
 
+    @Override
+    public String toString() {
+        return new StringBuilder().append("(")
+            .append(first()).append(",").append(second()).append(")").toString();
+    }
 }

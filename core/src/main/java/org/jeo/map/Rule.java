@@ -125,6 +125,10 @@ public class Rule {
         return eval(obj, key, Float.class, def);
     }
 
+    public Boolean bool(Object obj, String key, Boolean def) {
+        return eval(obj, key, Boolean.class, def);
+    }
+
     /*public double[] numbers(String key, double... def) {
         Object obj = get(key, def);
         if (obj == null) {

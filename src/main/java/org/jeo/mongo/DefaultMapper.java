@@ -1,7 +1,7 @@
 package org.jeo.mongo;
 
 import org.jeo.feature.Feature;
-import org.jeo.geom.Geom;
+import org.jeo.geom.Envelopes;
 
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
@@ -67,7 +67,7 @@ public class DefaultMapper implements MongoMapper {
 
     @Override
     public DBObject query(Envelope bbox, MongoDataset data) {
-        Polygon p = Geom.toPolygon(bbox);
+        Polygon p = Envelopes.toPolygon(bbox);
         return BasicDBObjectBuilder.start().push(mapping.geometry().join()).push("$geoIntersects")
             .append("$geometry", GeoJSON.toObject(p)).get();
     }

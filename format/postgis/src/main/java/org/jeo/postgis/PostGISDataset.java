@@ -22,7 +22,7 @@ import org.jeo.data.VectorData;
 import org.jeo.feature.Feature;
 import org.jeo.feature.Field;
 import org.jeo.feature.Schema;
-import org.jeo.geom.Geom;
+import org.jeo.geom.Envelopes;
 import org.jeo.util.Pair;
 import org.jeo.util.Util;
 import org.osgeo.proj4j.CoordinateReferenceSystem;
@@ -208,7 +208,7 @@ public class PostGISDataset implements VectorData {
             String geom = schema.geometry().getName();
             Integer srid = schema.geometry().property("srid", Integer.class);
             
-            Polygon poly = Geom.toPolygon(q.getBounds());
+            Polygon poly = Envelopes.toPolygon(q.getBounds());
 
             sql.add(" WHERE ").name(geom).add(" && ST_GeomFromText(?, ?)")
                .add(" AND ST_Intersects(").name(geom).add(", ST_GeomFromText(?, ?))");

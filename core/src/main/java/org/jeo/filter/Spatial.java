@@ -1,6 +1,6 @@
 package org.jeo.filter;
 
-import org.jeo.geom.Geom;
+import org.jeo.geom.Envelopes;
 
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
@@ -81,7 +81,7 @@ public class Spatial extends Filter {
             return (Geometry) o;
         }
         if (o instanceof Envelope) {
-            return Geom.toPolygon((Envelope)o);
+            return Envelopes.toPolygon((Envelope)o);
         }
 
         throw new IllegalArgumentException("Unable to convert " + o + " to geometry");

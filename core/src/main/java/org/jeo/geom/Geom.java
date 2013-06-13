@@ -264,24 +264,4 @@ public class Geom {
             throw new UnsupportedOperationException();
         }
     }
-
-    /**
-     * Converts the envelope to a Polygon.
-     */
-    public static Polygon toPolygon(Envelope e) {
-        return new GeomBuilder().points(e.getMinX(), e.getMinY(), e.getMaxX(), e.getMinY(),
-            e.getMaxX(), e.getMaxY(), e.getMinX(), e.getMaxY(), e.getMinX(), e.getMinY()).ring()
-            .toPolygon();
-    }
-
-    /**
-     * Checks if the envelope is null.
-     * <p>
-     * This method returns true if the reference is <code>null</code> or {@link Envelope#isNull()}
-     * returns <code>true</code>.
-     * </p>
-     */
-    public static boolean isNull(Envelope e) {
-        return e == null || e.isNull();
-    }
 }

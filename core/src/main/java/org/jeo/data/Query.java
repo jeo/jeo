@@ -9,7 +9,7 @@ import java.util.Map;
 import org.jeo.filter.Filter;
 import org.jeo.filter.cql.CQL;
 import org.jeo.filter.cql.ParseException;
-import org.jeo.geom.Geom;
+import org.jeo.geom.Envelopes;
 import org.jeo.proj.Proj;
 import org.jeo.util.Key;
 import org.jeo.util.Pair;
@@ -335,7 +335,7 @@ public class Query {
      * Determines if any of the query properties constrain the number of results in any way. 
      */
     public boolean isAll() {
-        return options.isEmpty() && Geom.isNull(bounds);
+        return options.isEmpty() && Envelopes.isNull(bounds);
     }
 
     /**

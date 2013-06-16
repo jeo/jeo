@@ -54,7 +54,23 @@ public class Map implements Disposable {
 
     List<Disposable> cleanup = new ArrayList<Disposable>(); 
 
+    /**
+     * Creates a new empty map.
+     */
     public Map() {
+    }
+
+    /**
+     * Creates a new map initializing properties from an existing map.
+     */
+    public Map(Map other) {
+        width = other.getWidth();
+        height = other.getHeight();
+        bounds = other.getBounds();
+        crs = other.getCRS();
+        layers = new ArrayList<Layer>(other.getLayers());
+        style = other.getStyle();
+        cleanup = new ArrayList<Disposable>(other.getCleanup());
     }
 
     /**

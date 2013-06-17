@@ -26,7 +26,7 @@ public class PostGIS implements Driver<PostGISWorkspace>{
     public static final Key<Integer> PORT = new Key<Integer>("port", Integer.class, 5432);
 
     /**
-     * Host key, defaults to current user, obtained via <tt>System.getProperty("user.name")</tt>
+     * User key, defaults to current user, obtained via <tt>System.getProperty("user.name")</tt>
      */
     public static final Key<String> USER = 
             new Key<String>("user", String.class, System.getProperty("user.name"));

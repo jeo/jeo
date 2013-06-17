@@ -38,6 +38,17 @@ public class SQL {
     }
 
     /**
+     * Appends a formatted string to the buffer with arguments.
+     * <p>
+     * <tt>s</tt> should be the same format as specified to {@link String#format(String, Object...)}.
+     * </p>
+     */
+    public SQL add(String s, Object... args) {
+        buf.append(String.format(s, args));
+        return this;
+    }
+
+    /**
      * Appends an integer to the buffer.
      */
     public SQL add(int i) {

@@ -9,6 +9,8 @@ import com.vividsolutions.jts.geom.Geometry;
  * Filter that applies a spatial comparison operator to two geometry expression operands.  
  * 
  * @author Justin Deoliveira, OpenGeo
+ * 
+ * TODO: use prepared geometries
  */
 public class Spatial extends Filter {
 

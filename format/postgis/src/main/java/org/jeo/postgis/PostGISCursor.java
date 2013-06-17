@@ -13,6 +13,8 @@ import org.jeo.data.Cursor;
 import org.jeo.feature.DiffFeature;
 import org.jeo.feature.Feature;
 import org.jeo.feature.MapFeature;
+import org.jeo.sql.PrimaryKey;
+import org.jeo.sql.PrimaryKeyColumn;
 
 import com.vividsolutions.jts.io.WKBReader;
 

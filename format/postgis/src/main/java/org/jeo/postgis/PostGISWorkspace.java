@@ -21,6 +21,10 @@ import org.jeo.feature.Schema;
 import org.jeo.feature.SchemaBuilder;
 import org.jeo.geom.Geom;
 import org.jeo.proj.Proj;
+import org.jeo.sql.DbOP;
+import org.jeo.sql.PrimaryKeyColumn;
+import org.jeo.sql.SQL;
+import org.jeo.sql.Table;
 import org.jeo.util.Pair;
 import org.osgeo.proj4j.CoordinateReferenceSystem;
 import org.postgresql.ds.PGPoolingDataSource;
@@ -35,10 +39,12 @@ public class PostGISWorkspace implements Workspace {
 
     PGPoolingDataSource db;
     PostGISInfo info;
-
+    PostGISTypes dbtypes;
+    
     public PostGISWorkspace(PostGISOpts pgopts) throws IOException {
         db = createDataSource(pgopts);
         info = new PostGISInfo(this);
+        dbtypes = new PostGISTypes();
     }
 
     static PGPoolingDataSource createDataSource(PostGISOpts pgopts) {
@@ -122,9 +128,9 @@ public class PostGISWorkspace implements Workspace {
                     .add(" (").name(findIdColumnName(schema)).add(" SERIAL PRIMARY KEY, ");
                 
                 for (Field fld : schema) {
-                    String typename = TypeMappings.toName(fld.getType());
+                    String typename = dbtypes.toName(fld.getType());
                     if (typename == null) {
-                        Integer sqlType = TypeMappings.toSQL(fld.getType());
+                        Integer sqlType = dbtypes.toSQL(fld.getType());
                         if (sqlType != null) {
                             typename = lookupTypeName(sqlType, cx);
                         }
@@ -263,9 +269,9 @@ public class PostGISWorkspace implements Workspace {
                     String typeName = md.getColumnTypeName(i);
                     int sqlType = md.getColumnType(i);
 
-                    Class<?> binding = TypeMappings.fromName(typeName);
+                    Class<?> binding = dbtypes.fromName(typeName);
                     if (binding == null) {
-                        binding = TypeMappings.fromSQL(sqlType);
+                        binding = dbtypes.fromSQL(sqlType);
                     }
                     if (binding == null) {
                         if (LOG.isDebugEnabled()) {
@@ -365,7 +371,7 @@ public class PostGISWorkspace implements Workspace {
 
                 ResultSet rs = open(st.executeQuery());
                 if (rs.next()) {
-                    return (Class<? extends Geometry>) TypeMappings.fromName(rs.getString(1));
+                    return (Class<? extends Geometry>) dbtypes.fromName(rs.getString(1));
                 }
                 else if (info.hasGeography()) {
                     sql = "SELECT type FROM geography_columns" +
@@ -377,7 +383,7 @@ public class PostGISWorkspace implements Workspace {
                     st.setString(2, col);
 
                     rs = open(st.executeQuery());
-                    return (Class<? extends Geometry>) TypeMappings.fromName(rs.getString(1));
+                    return (Class<? extends Geometry>) dbtypes.fromName(rs.getString(1));
                 }
                 
                 return null;

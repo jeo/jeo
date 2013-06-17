@@ -11,9 +11,6 @@ import java.sql.Connection;
 import java.sql.Statement;
 import java.util.NoSuchElementException;
 import java.util.Set;
-import java.util.logging.ConsoleHandler;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import org.jeo.data.Cursor;
 import org.jeo.data.Query;
@@ -28,7 +25,6 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.postgresql.ds.PGPoolingDataSource;
-import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Predicates;
 import com.google.common.collect.Iterables;
@@ -47,16 +43,18 @@ public class PostGISTest {
 
     PostGISWorkspace pg;
 
-    @BeforeClass
-    public static void logging() {
-        //uncomment to view debug logs during test
-        Logger log = Logger.getLogger(LoggerFactory.getLogger(PostGIS.class).getName());
-        log.setLevel(Level.FINE);
-
-        ConsoleHandler h = new ConsoleHandler();
-        h.setLevel(Level.FINE);
-        log.addHandler(h);
-    }
+    //uncomment to view debug logs during test
+//    @BeforeClass
+//    public static void logging() {
+//        
+//        java.util.logging.Logger log = java.util.logging.Logger.getLogger(
+//            org.slf4j.LoggerFactory.getLogger(PostGIS.class).getName());
+//        log.setLevel(java.util.logging.Level.FINE);
+//
+//        java.util.logging.ConsoleHandler h = new java.util.logging.ConsoleHandler();
+//        h.setLevel(java.util.logging.Level.FINE);
+//        log.addHandler(h);
+//    }
 
     @BeforeClass
     public static void connect()  {

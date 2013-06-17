@@ -19,6 +19,11 @@
       <version>${project.version}</version>
     </dependency>
     <dependency>
+      <groupId>org.jeo</groupId>
+      <artifactId>jeo-sql</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
       <groupId>postgresql</groupId>
       <artifactId>postgresql</artifactId>
       <version>${pg.version}</version>

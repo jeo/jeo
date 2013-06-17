@@ -5,6 +5,7 @@ import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 
+import org.jeo.sql.DbOP;
 import org.jeo.util.Pair;
 import org.jeo.util.Version;
 

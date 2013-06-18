@@ -9,8 +9,11 @@ import java.util.List;
 import jline.console.ConsoleReader;
 
 import org.jeo.cli.JeoCLI;
+import org.jeo.data.Dataset;
 import org.jeo.data.Drivers;
 import org.jeo.data.Query;
+import org.jeo.data.TileGrid;
+import org.jeo.data.TileSet;
 import org.jeo.data.VectorData;
 import org.jeo.data.Workspace;
 import org.jeo.feature.Field;
@@ -49,6 +52,9 @@ public class InfoCmd extends JeoCmd {
             else if (obj instanceof VectorData) {
                 print((VectorData)obj, cli);
             }
+            else if (obj instanceof TileSet) {
+                print((TileSet)obj, cli);
+            }
             else {
                 throw new IllegalArgumentException(
                     "Object " + obj.getClass().getName() + " not supported");
@@ -57,21 +63,26 @@ public class InfoCmd extends JeoCmd {
         }
     }
 
+    void print(Dataset dataset, JeoCLI cli) throws IOException {
+        ConsoleReader console = cli.getConsole();
+        console.println("Name:   " + dataset.getName());
+        console.println("Driver: " + dataset.getDriver().getName());
+
+        Envelope bbox = dataset.bounds();
+        console.println("Bounds: " + String.format("%f, %f, %f, %f",
+            bbox.getMinX(), bbox.getMinY(), bbox.getMaxX(), bbox.getMaxY()));
+
+        CoordinateReferenceSystem crs = dataset.getCRS();
+        console.println("CRS:    " + (crs != null ? crs.getName() : "None"));
+        if (crs != null) {
+            print(crs, cli);
+        }
+    }
+
     void print(VectorData dataset, JeoCLI cli) throws IOException {
         ConsoleReader console = cli.getConsole();
         try {
-            console.println("Name:   " + dataset.getName());
-            console.println("Driver: " + dataset.getDriver().getName());
-
-            Envelope bbox = dataset.bounds();
-            console.println("Bounds: " + String.format("%f, %f, %f, %f",
-                bbox.getMinX(), bbox.getMinY(), bbox.getMaxX(), bbox.getMaxY()));
-
-            CoordinateReferenceSystem crs = dataset.getCRS();
-            console.println("CRS:    " + (crs != null ? crs.getName() : "None"));
-            if (crs != null) {
-                print(crs, cli);
-            }
+            print((Dataset) dataset, cli);
 
             console.println("Count:  " + dataset.count(new Query()));
             console.println("Schema:");
@@ -93,11 +104,31 @@ public class InfoCmd extends JeoCmd {
         }
     }
 
+    void print(TileSet dataset, JeoCLI cli) throws IOException {
+        ConsoleReader console = cli.getConsole();
+        try {
+            print((Dataset) dataset, cli);
+
+            console.println("Tilesets:");
+            for (TileGrid grid : dataset.grids()) {
+                int width = grid.getWidth();
+                int height = grid.getHeight();
+                
+                console.print("\t");
+                console.println(String.format("%d: %d x %d (%d); %f, %f", grid.getZoom(), 
+                    width, height, width*height, grid.getXRes(), grid.getYRes()));
+            }
+        }
+        finally {
+            dataset.close();
+        }
+    }
+
     void print(Workspace workspace, JeoCLI cli) throws IOException {
         ConsoleReader console = cli.getConsole();
         try {
             console.println("Driver: " + workspace.getDriver().getName());
-            console.println("Data sets:");
+            console.println("Datasets:");
 
             for (String l : workspace.list()) {
                 console.print("\t");

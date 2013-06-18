@@ -18,16 +18,15 @@
       <artifactId>jeo-core</artifactId>
       <version>${project.version}</version>
     </dependency>
-    <!--dependency>
-      <groupId>spatialite-android</groupId>
-      <artifactId>spatialite-android</artifactId>
-      <version>20120209</version>
-      <scope>provided</scope>
-    </dependency-->
     <dependency>
-      <groupId>jsqlite</groupId>
-      <artifactId>jsqlite</artifactId>
-      <version>20120209</version>
+      <groupId>org.jeo</groupId>
+      <artifactId>jeo-sql</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.xerial</groupId>
+      <artifactId>sqlite-jdbc</artifactId>
+      <version>3.7.2</version>
     </dependency>
     <dependency>
       <groupId>org.jeo</groupId>

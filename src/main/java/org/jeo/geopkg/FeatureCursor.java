@@ -1,39 +1,44 @@
 package org.jeo.geopkg;
 
+import static org.jeo.geopkg.GeoPkgWorkspace.LOG;
+
 import java.io.IOException;
+import java.sql.Connection;
+import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.List;
-
-import jsqlite.Stmt;
 
 import org.jeo.data.Cursor;
 import org.jeo.feature.Feature;
 import org.jeo.feature.Field;
 import org.jeo.feature.ListFeature;
 import org.jeo.feature.Schema;
+import org.jeo.geopkg.geom.GeoPkgGeomReader;
 
 import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.io.WKBReader;
 
 public class FeatureCursor extends Cursor<Feature> {
 
-    Stmt stmt;
+    ResultSet results;
+    Connection cx;
+
     Schema schema;
 
     Boolean next;
-    WKBReader wkbReader;
+    GeoPkgGeomReader geomReader;
 
-    FeatureCursor(Stmt stmt, Schema schema) {
-        this.stmt = stmt;
+    FeatureCursor(ResultSet stmt, Connection cx ,Schema schema) {
+        this.results = stmt;
+        this.cx = cx;
         this.schema = schema;
-        this.wkbReader = new WKBReader();
+        this.geomReader = new GeoPkgGeomReader();
     }
 
     @Override
     public boolean hasNext() throws IOException {
         if (next == null) {
             try {
-                next = stmt.step();
+                next = results.next();
             } catch (Exception e) {
                 throw new IOException(e);
             }
@@ -48,14 +53,14 @@ public class FeatureCursor extends Cursor<Feature> {
             if (next != null && next) {
                 try {
                     List<Field> fields = schema.getFields();
-                    List<Object> values = new ArrayList<Object>(stmt.column_count());
+                    List<Object> values = new ArrayList<Object>();
 
                     for (int i = 0; i < fields.size(); i++) {
                         if (Geometry.class.isAssignableFrom(fields.get(i).getType())) {
-                            values.add(wkbReader.read(stmt.column_bytes(i)));
+                            values.add(geomReader.read(results.getBytes(i+1)));
                         }
                         else {
-                            values.add(stmt.column(i));
+                            values.add(results.getObject(i+1));
                         }
                     }
     
@@ -76,9 +81,21 @@ public class FeatureCursor extends Cursor<Feature> {
     @Override
     public void close() throws IOException {
         try {
-            stmt.close();
+            if (results != null) {
+                results.close();
+            }
+            results = null;
         } catch (Exception e) {
-            throw new IOException(e);
+            LOG.debug("error closing result set", e);
+        }
+
+        try {
+            if (cx != null) {
+                cx.close();
+            }
+        }
+        catch(Exception e) {
+            LOG.debug("error closing Connection", e);
         }
     }
 }

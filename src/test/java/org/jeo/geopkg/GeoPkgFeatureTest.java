@@ -8,10 +8,9 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
+import java.sql.Connection;
+import java.sql.ResultSet;
 import java.util.List;
-
-import jsqlite.Database;
-import jsqlite.Stmt;
 
 import org.apache.commons.io.FileUtils;
 import org.jeo.data.Cursor;
@@ -22,8 +21,8 @@ import org.jeo.feature.ListFeature;
 import org.jeo.feature.Schema;
 import org.jeo.feature.SchemaBuilder;
 import org.jeo.geom.Geom;
-import org.jeo.geom.GeometryBuilder;
 import org.jeo.geopkg.Entry.DataType;
+import org.jeo.sql.DbOP;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -39,13 +38,13 @@ public class GeoPkgFeatureTest extends GeoPkgTestSupport {
 
     @Before
     public void setUp() throws Exception {
-        File dir = unzip(getClass().getResourceAsStream("states.db.zip"), newTmpDir());
-        geopkg = new GeoPkgWorkspace(new File(dir, "states.db"));
+        File dir = unzip(getClass().getResourceAsStream("states.geopackage.zip"), newTmpDir());
+        geopkg = GeoPackage.open(new File(dir, "states.geopackage"));
     }
 
     @After
     public void tearDown() throws Exception {
-        geopkg.dispose();
+        geopkg.close();
         FileUtils.deleteQuietly(geopkg.getFile().getParentFile());
     }
 
@@ -75,7 +74,7 @@ public class GeoPkgFeatureTest extends GeoPkgTestSupport {
     @Test
     public void testCount() throws Exception {
         FeatureEntry entry = geopkg.feature("states");
-        assertEquals(49, geopkg.count(entry, null));
+        assertEquals(49, geopkg.count(entry, new Query()));
     }
 
     @Test
@@ -104,13 +103,13 @@ public class GeoPkgFeatureTest extends GeoPkgTestSupport {
         FeatureEntry entry = geopkg.feature("states");
         Schema schema = geopkg.schema(entry);
 
-        Geometry g = new GeometryBuilder().point(0,0).buffer(1);
+        Geometry g = Geom.point(0,0).buffer(1);
         Feature f = new ListFeature(null, null, schema);
         f.put(schema.geometry().getName(), g);
         f.put("STATE_NAME", "JEOLAND");
         geopkg.add(entry, f);
 
-        assertEquals(50, geopkg.count(entry, null));
+        assertEquals(50, geopkg.count(entry, new Query()));
 
         Cursor<Feature> c = geopkg.cursor(entry, new Query().bounds(g.getEnvelopeInternal()));
         assertTrue(c.hasNext());
@@ -129,8 +128,7 @@ public class GeoPkgFeatureTest extends GeoPkgTestSupport {
         entry.setBounds(new Envelope(-180, 180, -90, 90));
         geopkg.create(entry, schema);
 
-        GeometryBuilder gb = new GeometryBuilder();
-        geopkg.add(entry, Features.create(null, schema, gb.point(1,2), "anvil", 10.99));
+        geopkg.add(entry, Features.create(null, schema, Geom.point(1,2), "anvil", 10.99));
 
         Cursor<Feature> c = geopkg.cursor(entry, new Query());
         try {
@@ -151,15 +149,17 @@ public class GeoPkgFeatureTest extends GeoPkgTestSupport {
         assertNotNull(entry);
 
         assertEquals(Geom.Type.POINT, entry.getGeometryType());
-        
-        Database db = geopkg.getDatabase();
-        Stmt st = db.prepare(
-            "SELECT data_type FROM geopackage_contents WHERE table_name = ?");
-        st.bind(1, "widgets");
 
-        assertTrue(st.step());
-        assertEquals(DataType.Feature.value(), st.column_string(0));
-
-        st.close();
+        geopkg.run(new DbOP<Object>() {
+            @Override
+            protected Object doRun(Connection cx) throws Exception {
+                ResultSet rs = open(open(cx.createStatement()).executeQuery(
+                    "SELECT data_type FROM geopackage_contents WHERE table_name = 'widgets'"));
+                
+                assertTrue(rs.next());
+                assertEquals(DataType.Feature.value(), rs.getString(1));
+                return null;
+            }
+        });
     }
 }

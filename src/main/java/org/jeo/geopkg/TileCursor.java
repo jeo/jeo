@@ -1,26 +1,29 @@
 package org.jeo.geopkg;
 
+import static org.jeo.geopkg.GeoPkgWorkspace.LOG;
 import java.io.IOException;
-
-import jsqlite.Stmt;
+import java.sql.Connection;
+import java.sql.ResultSet;
 
 import org.jeo.data.Cursor;
 import org.jeo.data.Tile;
 
 public class TileCursor extends Cursor<Tile> {
 
-    Stmt stmt;
+    ResultSet results;
+    Connection cx;
     Boolean next;
 
-    public TileCursor(Stmt stmt) {
-        this.stmt = stmt;
+    public TileCursor(ResultSet results, Connection cx) {
+        this.results = results;
+        this.cx = cx;
     }
 
     @Override
     public boolean hasNext() throws IOException {
         if (next == null) {
             try {
-                next = stmt.step();
+                next = results.next();
             } catch (Exception e) {
                 throw new IOException(e);
             }
@@ -36,10 +39,10 @@ public class TileCursor extends Cursor<Tile> {
         Tile t = new Tile();
 
         try {
-            t.setZoom(stmt.column_int(0));
-            t.setColumn(stmt.column_int(1));
-            t.setRow(stmt.column_int(2));
-            t.setData(stmt.column_bytes(3)); 
+            t.setZoom(results.getInt(1));
+            t.setColumn(results.getInt(2));
+            t.setRow(results.getInt(2));
+            t.setData(results.getBytes(4)); 
         }
         catch(Exception e) {
             throw new IOException(e);
@@ -52,9 +55,21 @@ public class TileCursor extends Cursor<Tile> {
     @Override
     public void close() throws IOException {
         try {
-            stmt.close();
+            if (results != null) {
+                results.close();
+            }
+            results = null;
         } catch (Exception e) {
-            throw new IOException(e);
+            LOG.debug("error closing result set", e);
+        }
+
+        try {
+            if (cx != null) {
+                cx.close();
+            }
+        }
+        catch(Exception e) {
+            LOG.debug("error closing Connection", e);
         }
     }
 }

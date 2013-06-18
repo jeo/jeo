@@ -89,6 +89,6 @@ public class GeoPkgTileSet implements TileSet {
     }
 
     @Override
-    public void dispose() {
+    public void close() {
     }
 }

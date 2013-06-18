@@ -1,26 +1,25 @@
 package org.jeo.geopkg;
 
 import static java.lang.String.format;
-import static jsqlite.Constants.SQLITE_OPEN_CREATE;
-import static jsqlite.Constants.SQLITE_OPEN_READWRITE;
 
 import java.io.File;
 import java.io.IOException;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.TimeZone;
 
-import jsqlite.Database;
-import jsqlite.Exception;
-import jsqlite.Stmt;
-import jsqlite.TableResult;
+import javax.sql.DataSource;
 
 import org.jeo.data.Cursor;
 import org.jeo.data.Cursors;
@@ -33,13 +32,19 @@ import org.jeo.feature.Feature;
 import org.jeo.feature.Features;
 import org.jeo.feature.Field;
 import org.jeo.feature.Schema;
+import org.jeo.feature.SchemaBuilder;
 import org.jeo.filter.Filter;
+import org.jeo.geom.Envelopes;
 import org.jeo.geom.Geom;
 import org.jeo.geopkg.Entry.DataType;
+import org.jeo.geopkg.geom.GeoPkgGeomWriter;
 import org.jeo.proj.Proj;
+import org.jeo.sql.DbOP;
+import org.jeo.sql.SQL;
 import org.osgeo.proj4j.CoordinateReferenceSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.sqlite.SQLiteDataSource;
 
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
@@ -52,47 +57,16 @@ import com.vividsolutions.jts.io.WKBWriter;
  */
 public class GeoPkgWorkspace implements Workspace {
 
-    static enum Types {
-        INTEGER(Integer.class, Long.class, Short.class, Byte.class, Boolean.class),
-        REAL(Double.class, Float.class),
-        TEXT(String.class),
-        BLOB(byte[].class);
-
-        Set<Class<?>> classes;
-        Types(Class<?>... classes) {
-            this.classes = new HashSet<Class<?>>(Arrays.asList(classes));
-        }
-
-        Class<?> getPrimaryClass() {
-            return classes.iterator().next();
-        }
-
-        static Types forClass(Class<?> clazz) {
-            for (Types t : values() ) {
-                if (t.classes.contains(clazz)) {
-                    return t;
-                }
-            }
-            return null;
-        }
-
-        static Types forName(String name) {
-            for (Types t : values()) {
-                if (t.name().equals(name)) {
-                    return t;
-                }
-            }
-            return null;
-        }
-    }
-
-    Logger LOG = LoggerFactory.getLogger(GeoPackage.class);
+    static Logger LOG = LoggerFactory.getLogger(GeoPackage.class);
 
     /** name of geopackage contents table */
     static final String GEOPACKAGE_CONTENTS = "geopackage_contents";
 
     /** name of geoemtry columns table */
     static final String GEOMETRY_COLUMNS = "geometry_columns";
+
+    /** name of geoemtry columns table */
+    static final String SPATIAL_REF_SYS = "spatial_ref_sys";
 
     /** name of tile metadata table */
     static final String TILE_TABLE_METADATA = "tile_table_metadata";
@@ -106,14 +80,16 @@ public class GeoPkgWorkspace implements Workspace {
         DATE_FORMAT.setTimeZone(TimeZone.getTimeZone("GMT"));
     }
 
-    /** database file */
-    File file;
+    /** creation options */
+    GeoPkgOpts opts;
 
-    /** database handle */
-    Database db;
+    /** data source */
+    DataSource db;
 
     /** wkb writer */
-    WKBWriter wkbWriter;
+    GeoPkgGeomWriter geomWriter;
+
+    GeoPkgTypes dbtypes;
 
     /**
      * Creates a GeoPackage from an existing file.
@@ -122,16 +98,18 @@ public class GeoPkgWorkspace implements Workspace {
      * 
      * @throws Exception Any error occurring opening the database file. 
      */
-    public GeoPkgWorkspace(File file) throws IOException {
-        this.file = file;
-        db = new Database();
-        try {
-            db.open(file.getAbsolutePath(), SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE);
-        } catch (Exception e) {
-            throw new IOException(e);
-        }
+    public GeoPkgWorkspace(GeoPkgOpts opts) throws IOException {
+        this.opts = opts;
+        db = createDataSource(opts);
 
-        wkbWriter = new WKBWriter();
+        dbtypes = new GeoPkgTypes();
+        geomWriter = new GeoPkgGeomWriter();
+    }
+
+    DataSource createDataSource(GeoPkgOpts opts) {
+        SQLiteDataSource dataSource = new SQLiteDataSource();
+        dataSource.setUrl("jdbc:sqlite:" + opts.getFile().getPath());
+        return dataSource;
     }
 
     @Override
@@ -140,20 +118,29 @@ public class GeoPkgWorkspace implements Workspace {
     }
     
     File getFile() {
-        return file;
+        return opts.getFile();
     }
 
-    Database getDatabase() {
+    DataSource getDataSource() {
         return db;
     }
 
     @Override
-    public Iterator<String> layers() throws IOException {
-        List<String> names = new ArrayList<String>();
-        for (Entry e : entries()) {
-            names.add(e.getTableName());
-        }
-        return names.iterator();
+    public Iterable<String> list() throws IOException {
+        return run(new DbOP<List<String>>() {
+            @Override
+            protected List<String> doRun(Connection cx) throws Exception {
+                String sql = format("SELECT table_name FROM %s", GEOPACKAGE_CONTENTS);
+                log(sql);
+
+                ResultSet rs = open(open(cx.createStatement()).executeQuery(sql));
+                List<String> names = new ArrayList<String>();
+                while(rs.next()) {
+                    names.add(rs.getString(1));
+                }
+                return names;
+            }
+        });
     }
 
     @Override
@@ -171,136 +158,124 @@ public class GeoPkgWorkspace implements Workspace {
         return null;
     }
 
-    /**
-     * Lists all entries in the geopackage.
-     */
-    public List<Entry> entries() throws IOException {
-        List<Entry> entries = new ArrayList<Entry>();
-        entries.addAll(features());
-        entries.addAll(tiles());
-        return entries;
-    }
+//    /**
+//     * Lists all entries in the geopackage.
+//     */
+//    public List<Entry> entries() throws IOException {
+//        List<Entry> entries = new ArrayList<Entry>();
+//        entries.addAll(features());
+//        entries.addAll(tiles());
+//        return entries;
+//    }
 
     /**
      * Lists all the feature entries in the geopackage.
      */
     public List<FeatureEntry> features() throws IOException {
-        String sql = format(
-            "SELECT a.*, b.f_geometry_column, b.type, b.coord_dimension" +
-             " FROM %s a, %s b" + 
-            " WHERE a.table_name = b.f_table_name" + 
-              " AND a.data_type = ?", 
-          GEOPACKAGE_CONTENTS, GEOMETRY_COLUMNS);
-        log(sql, DataType.Feature);
+        return run(new DbOP<List<FeatureEntry>>() {
+            @Override
+            protected List<FeatureEntry> doRun(Connection cx) throws Exception {
+                String sql = format(
+                    "SELECT a.*, b.f_geometry_column, b.geometry_type, b.coord_dimension, " +
+                           "c.auth_name, c.auth_srid" +
+                     " FROM %s a, %s b, %s c" + 
+                    " WHERE a.table_name = b.f_table_name" + 
+                      " AND a.srid = c.srid" + 
+                      " AND a.data_type = '%s'", 
+                      GEOPACKAGE_CONTENTS,GEOMETRY_COLUMNS,SPATIAL_REF_SYS, DataType.Feature.value());
+                log(sql);
 
-        try {
-            List<FeatureEntry> entries = new ArrayList<FeatureEntry>();
+                List<FeatureEntry> entries = new ArrayList<FeatureEntry>();
 
-            Stmt st = db.prepare(sql);
-            st.bind(1, DataType.Feature.value());
+                ResultSet rs = open(open(cx.createStatement()).executeQuery(sql));
+                while(rs.next()) {
+                    entries.add(createFeatureEntry(rs));
+                }
 
-            while(st.step()) {
-                entries.add(createFeatureEntry(st));
+                return entries;
             }
-    
-            st.close();
-
-            return entries;
-        }
-        catch(Exception e) {
-            throw new IOException(e);
-        }
+        });
     }
 
-    public FeatureEntry feature(String name) throws IOException {
-        String sql = format(
-                "SELECT a.*, b.f_geometry_column, b.type, b.coord_dimension" +
-                 " FROM %s a, %s b" + 
-                " WHERE a.table_name = b.f_table_name" +
-                  " AND a.table_name = ?" + 
-                  " AND a.data_type = ?", 
-              GEOPACKAGE_CONTENTS, GEOMETRY_COLUMNS);
+    public FeatureEntry feature(final String name) throws IOException {
+        return run(new DbOP<FeatureEntry>() {
+            @Override
+            protected FeatureEntry doRun(Connection cx) throws Exception {
+                String sql = format(
+                    "SELECT a.*, b.f_geometry_column, b.geometry_type, b.coord_dimension" +
+                     " FROM %s a, %s b" + 
+                    " WHERE a.table_name = b.f_table_name" +
+                      " AND a.table_name = ?" + 
+                      " AND a.data_type = ?", 
+                  GEOPACKAGE_CONTENTS, GEOMETRY_COLUMNS);
+                log(sql, name, DataType.Feature);
 
-        log(sql, name, DataType.Feature);
-        try {
-            Stmt st = db.prepare(sql);
-            st.bind(1, name);
-            st.bind(2, DataType.Feature.value());
+                PreparedStatement ps = open(cx.prepareStatement(sql));
+                ps.setString(1, name);
+                ps.setString(2, DataType.Feature.value());
 
-            try {
-                while(st.step()) {
-                    return createFeatureEntry(st);
+                ResultSet rs = open(ps.executeQuery());
+                while(rs.next()) {
+                    return createFeatureEntry(rs);
                 }
+
+                return null;
             }
-            finally {
-                st.close();
-            }
-        }
-        catch(Exception e) {
-            throw new IOException(e);
-        }
-        return null;
+        });
     }
 
-    public long count(FeatureEntry entry, Query q) throws IOException {
-        //TODO: handle filters natively
-        Filter f = q != null ? q.get(Query.FILTER) : null;
-        if (Filter.isTrueOrNull(f)) {
-            //optimize
-            Envelope bbox = q != null ? q.getBounds() : null;
-            try {
-                SQLBuilder sql = new SQLBuilder("SELECT COUNT(*) FROM ").name(entry.getTableName());
-                if (!Geom.isNull(bbox)) {
-                    sql.add(" WHERE ");
-                    encodeBBOX(sql, entry.getSchema(), bbox);
-                }
+    public long count(final FeatureEntry entry, Query q) throws IOException {
+        if (q.isAll()) {
+            // optimize
+            return run(new DbOP<Long>() {
+                @Override
+                protected Long doRun(Connection cx) throws Exception {
+                    String sql = format("SELECT count(*) from %s", entry.getTableName());
+                    log(sql);
 
-                Stmt st = db.prepare(log(sql.toString()));
-                st.step();
-                try {
-                    return st.column_long(0);
+                    ResultSet rs = open(open(cx.createStatement()).executeQuery(sql));
+                    rs.next();
+                    return rs.getLong(1);
                 }
-                finally {
-                    st.close();
-                }
-            }
-            catch(Exception e) {
-                throw new IOException(e);
-            }
+            });
         }
         else {
-            //fall back on cursor
+            //TODO: handle filters natively
             return Cursors.size(cursor(entry, q));
         }
     }
 
     public Cursor<Feature> cursor(FeatureEntry entry, Query q) throws IOException {
         //TODO: handle filters natively
-        //TODO: use selected property names
         try {
             Schema schema = schema(entry);
-            Field geom = schema.geometry();
 
-            SQLBuilder sql = new SQLBuilder("SELECT ");
-
-            for (Field f : schema) {
-                if (Geometry.class.isAssignableFrom(f.getType())) {
-                    sql.add("AsBinary(").name(geom.getName()).add("),");
-                }
-                else {
-                    sql.name(f.getName()).add(",");
+            SQL sqlb = new SQL("SELECT ");
+            if (q.getFields().isEmpty()) {
+                for (Field f : schema) {
+                    sqlb.name(f.getName()).add(",");
                 }
             }
-            sql.trim(1);
-            sql.add("FROM ").name(entry.getTableName());
-
-            Envelope bbox = q != null ? q.getBounds() : null;
-            if (bbox != null) {
-                sql.add(" WHERE ");
-                encodeBBOX(sql, schema, bbox);
+            else {
+                for (String fld : q.getFields()) {
+                    sqlb.name(fld).add(",");
+                }
             }
-    
-            FeatureCursor c = new FeatureCursor(db.prepare(log(sql.toString())), schema);
+
+            sqlb.trim(1).add(" FROM ").name(entry.getTableName());
+            String sql = sqlb.toString();
+
+            log(sql);
+
+            Connection cx = db.getConnection();
+            ResultSet rs = cx.createStatement().executeQuery(sql);
+
+            Cursor<Feature> c = new FeatureCursor(rs, cx, schema);
+
+            if (!Envelopes.isNull(q.getBounds())) {
+                c = Cursors.intersects(c, q.getBounds());
+            }
+
             return q.apply(c);
         }
         catch(Exception e) {
@@ -308,66 +283,58 @@ public class GeoPkgWorkspace implements Workspace {
         }
     }
 
-    public void add(FeatureEntry entry, Feature f) throws IOException {
-        try {
-            f = Features.retype(f, schema(entry));
+    public void add(final FeatureEntry entry, final Feature feature) throws IOException {
+        run(new DbOP<Boolean>() {
+            @Override
+            protected Boolean doRun(Connection cx) throws Exception {
+                Feature f = Features.retype(feature, schema(entry));
 
-            SQLBuilder sql = new SQLBuilder("INSERT INTO ").name(entry.getTableName()).add(" (");
-            StringBuilder vals = new StringBuilder();
-            List<Object> objs = new ArrayList<Object>();
+                SQL sqlb = new SQL("INSERT INTO ").name(entry.getTableName()).add(" (");
+                List<Object> objs = new ArrayList<Object>();
 
-            for (Field fld : f.schema()) {
-                Object o = f.get(fld.getName());
-                if (o != null) {
-                    sql.name(fld.getName()).add(", ");
+                for (Field fld : f.schema()) {
+                    Object o = f.get(fld.getName());
+                    if (o != null) {
+                        sqlb.name(fld.getName()).add(", ");
+                        objs.add(o);
+                    }
+                }
 
-                    if (o instanceof Geometry) {
-                        vals.append("GeomFromWKB(?), ");
+                sqlb.trim(2).add(") VALUES (");
+                for(Object obj : objs) {
+                    sqlb.add("?,");
+                }
+                sqlb.trim(1).add(")");
+
+                String sql = sqlb.toString();
+                log(sql, objs);
+
+                PreparedStatement ps = open(cx.prepareStatement(sql));
+                for (int i = 0; i < objs.size(); i++) {
+                    Object obj = objs.get(i);
+                    if (obj instanceof Geometry) {
+                        ps.setBytes(i+1, geomWriter.write((Geometry)obj));
                     }
                     else {
-                        
-                        vals.append("?, ");
-                    }
-
-                    objs.add(o);
-                }
-            }
-
-            if (vals.length() > 0) {
-                sql.trim(2);
-                vals.setLength(vals.length()-2);
-            }
-
-            sql.add(") VALUES (").add(vals.toString()).add(")");
-
-            Stmt st = db.prepare(log(sql.toString(), objs.toArray()));
-            for (int i = 0; i < objs.size(); i++) {
-                Object obj = objs.get(i);
-                if (obj instanceof Geometry) {
-                    st.bind(i+1, wkbWriter.write((Geometry)obj));
-                }
-                else {
-                    if (obj instanceof Byte || obj instanceof Short || obj instanceof Integer) {
-                        st.bind(i+1, ((Number)obj).intValue());
-                    }
-                    if (obj instanceof Long) {
-                        st.bind(i+1, ((Long)obj).longValue());
-                    }
-                    if (obj instanceof Float || obj instanceof Double) {
-                        st.bind(i+1, ((Number)obj).doubleValue());
-                    }
-                    else {
-                        st.bind(i+1, obj.toString());
+                        if (obj instanceof Byte || obj instanceof Short || obj instanceof Integer) {
+                            ps.setInt(i+1, ((Number)obj).intValue());
+                        }
+                        if (obj instanceof Long) {
+                            ps.setLong(i+1, ((Number)obj).longValue());
+                        }
+                        if (obj instanceof Float || obj instanceof Double) {
+                            ps.setDouble(i+1, ((Number)obj).doubleValue());
+                        }
+                        else {
+                            ps.setString(i+1, obj.toString());
+                        }
                     }
                 }
-            }
 
-            st.step();
-            st.close();
-        }
-        catch(Exception e) {
-            throw new IOException(e);
-        }
+                return ps.execute();
+            }
+        });
+        
     }
 
     public GeoPkgVector create(Schema schema) throws IOException {
@@ -443,105 +410,121 @@ public class GeoPkgWorkspace implements Workspace {
         entry.init(e);
     }
 
-    void createFeatureTable(Schema schema, FeatureEntry entry) throws Exception {
-        SQLBuilder sql = new SQLBuilder("CREATE TABLE ").name(schema.getName()).add("(");
-        
-        sql.name(findPrimaryKeyColumnName(schema)).add(" INTEGER PRIMARY KEY, ");
-        for (Field f : schema) {
-            sql.name(f.getName()).add(" ");
-            if (f.isGeometry()) {
-                sql.add(Geom.Type.from(f.getType()).getSimpleName());
+    void createFeatureTable(final Schema schema, final FeatureEntry entry) throws Exception {
+        run(new DbOP<Object>() {
+            @Override
+            protected Object doRun(Connection cx) throws Exception {
+                SQL sql = new SQL("CREATE TABLE ").name(schema.getName()).add("(");
+                
+                sql.name(findPrimaryKeyColumnName(schema)).add(" INTEGER PRIMARY KEY, ");
+                for (Field f : schema) {
+                    sql.name(f.getName()).add(" ");
+                    if (f.isGeometry()) {
+                        sql.add(Geom.Type.from(f.getType()).getSimpleName());
+                    }
+                    else {
+                        String t = dbtypes.toName(f.getType());
+                        sql.add(t != null ? t : "TEXT");
+                    }
+
+                    sql.add(", ");
+                }
+                sql.trim(2).add(")");
+                
+                PreparedStatement ps = open(cx.prepareStatement(log(sql.toString())));
+                ps.execute();
+
+                //update geometry columns
+                addGeometryColumnsEntry(schema, entry, cx);
+                return null;
             }
-            else {
-                Types t = Types.forClass(f.getType());
-                sql.add(t != null ? t.name() : Types.TEXT.name());
-            }
-
-            sql.add(", ");
-        }
-        sql.trim(2).add(")");
-
-        Stmt st = db.prepare(log(sql.toString()));
-        try { 
-            st.step();
-
-            //update geometry columns
-            addGeometryColumnsEntry(schema, entry);
-
-        }
-        finally {
-            st.close();
-        }
+        });
     }
 
-    void addGeopackageContentsEntry(FeatureEntry entry) throws Exception {
-        SQLBuilder sql = new SQLBuilder(format("INSERT INTO %s", GEOPACKAGE_CONTENTS));
-        sql.add("(")
-           .name("table_name").add(", ")
-           .name("data_type").add(",")
-           .name("identifier").add(",")
-           .name("description").add(",")
-           .name("last_change").add(",")
-           .name("min_x").add(",")
-           .name("min_y").add(",")
-           .name("max_x").add(",")
-           .name("max_y").add(",")
-           .name("srid");
-        sql.add(") VALUES (?,?,?,?,?,?,?,?,?,?)");
+    void addGeopackageContentsEntry(final FeatureEntry entry) throws Exception {
+        run(new DbOP<Object>() {
+            @Override
+            protected Object doRun(Connection cx) throws Exception {
+                //addCRS(e.getSrid());
 
-        Stmt st = db.prepare(log(sql.toString(), entry.getTableName(), entry.getDataType(), 
-            entry.getIdentifier(), entry.getDescription(), entry.getLastChange(), entry.getBounds(),
-            entry.getSrid()));
+                SQL sqlb = new SQL("INSERT INTO").add(" %s ", GEOPACKAGE_CONTENTS)
+                    .add("(table_name, data_type, identifier");
 
-        st.bind(1, entry.getTableName());
-        st.bind(2, entry.getDataType().value());
-        st.bind(3, entry.getIdentifier());
-        st.bind(4, entry.getDescription());
-        st.bind(5, DATE_FORMAT.format(entry.getLastChange()));
-        st.bind(6, entry.getBounds().getMinX());
-        st.bind(7, entry.getBounds().getMinY());
-        st.bind(8, entry.getBounds().getMaxX());
-        st.bind(9, entry.getBounds().getMaxY());
-        st.bind(10, entry.getSrid());
+                StringBuilder vals = new StringBuilder("VALUES (?,?,?");
 
-        st.step();
-        st.close();
-        /*
-        table_name TEXT NOT NULL PRIMARY KEY,
-        data_type TEXT NOT NULL,
-        identifier TEXT NOT NULL UNIQUE,
-        description TEXT NOT NULL DEFAULT 'none',
-        last_change TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ',CURRENT_TIMESTAMP)),
-        min_x DOUBLE NOT NULL DEFAULT -180.0,
-        min_y DOUBLE NOT NULL DEFAULT -90.0,
-        max_x DOUBLE NOT NULL DEFAULT 180.0,
-        max_y DOUBLE NOT NULL DEFAULT 90.0,
-        srid INTEGER NOT NULL DEFAULT 0,
-        */
+                if (entry.getDescription() != null) {
+                    sqlb.add(", description");
+                    vals.append(",?");
+                }
+
+                if (entry.getLastChange() != null) {
+                    sqlb.add(", last_change");
+                    vals.append(",?");
+                }
+                if (entry.getBounds() != null) {
+                    sqlb.add(", min_x, min_y, max_x, max_y");
+                    vals.append(",?,?,?,?");
+                }
+                
+                if (entry.getSrid() != null) {
+                    sqlb.add(", srid");
+                    vals.append(",?");
+                }
+                sqlb.add(") ").add(vals.append(")").toString());
+
+                PreparedStatement ps = open(cx.prepareStatement(log(sqlb.toString(), entry)));
+                ps.setString(1, entry.getTableName());
+                ps.setString(2, entry.getDataType().value());
+                ps.setString(3, entry.getIdentifier());
+
+                int i = 4;
+                if (entry.getDescription() != null) {
+                    ps.setString(i++, entry.getDescription());
+                }
+
+                if (entry.getLastChange() != null) {
+                    ps.setString(i++, DATE_FORMAT.format(entry.getLastChange()));
+                }
+                if (entry.getBounds() != null) {
+                    Envelope b = entry.getBounds();
+                    ps.setDouble(i++, b.getMinX());
+                    ps.setDouble(i++, b.getMinY());
+                    ps.setDouble(i++, b.getMaxX());
+                    ps.setDouble(i++, b.getMaxY());
+                }
+
+                if(entry.getSrid() != null) {
+                    ps.setInt(i++, entry.getSrid());
+                }
+                
+                ps.executeUpdate();
+                return null;
+            }
+        });
     }
 
-    void addGeometryColumnsEntry(Schema schema, FeatureEntry entry) throws Exception {
-        SQLBuilder sql = new SQLBuilder(format("INSERT INTO %s", GEOMETRY_COLUMNS));
-        sql.add("(")
-           .name("f_table_name").add(", ")
-           .name("f_geometry_column").add(",")
-           .name("type").add(",")
-           .name("coord_dimension").add(",")
-           .name("srid").add(",")
-           .name("spatial_index_enabled");
-        sql.add(") VALUES (?,?,?,?,?,?)");
-        
-        Stmt st = db.prepare(log(sql.toString(), entry.getTableName(), entry.getGeometryColumn(), 
-            entry.getGeometryType(), entry.getCoordDimension(), entry.getSrid(), false));
-        st.bind(1, entry.getTableName());
-        st.bind(2, entry.getGeometryColumn());
-        st.bind(3, entry.getGeometryType().getSimpleName());
-        st.bind(4, entry.getCoordDimension());
-        st.bind(5, entry.getSrid());
-        st.bind(6, 0);
+    void addGeometryColumnsEntry(final Schema schema, final FeatureEntry entry, Connection cx) 
+        throws Exception {
+        run(new DbOP<Object>() {
+            @Override
+            protected Object doRun(Connection cx) throws Exception {
+                String sql = format(
+                    "INSERT INTO %s VALUES (?, ?, ?, ?, ?);", GEOMETRY_COLUMNS);
+                
+                log(sql, entry.getTableName(), entry.getGeometryColumn(), 
+                    entry.getGeometryType(), entry.getCoordDimension(), entry.getSrid());
 
-        st.step();
-        st.close();
+                PreparedStatement ps = open(cx.prepareStatement(sql));
+                ps.setString(1, entry.getTableName());
+                ps.setString(2, entry.getGeometryColumn());
+                ps.setString(3, entry.getGeometryType().getSimpleName());
+                ps.setInt(4, entry.getCoordDimension());
+                ps.setInt(5, entry.getSrid());
+
+                ps.executeUpdate();
+                return null;
+            }
+        }, cx);
     }
 
     String findPrimaryKeyColumnName(Schema schema) {
@@ -569,13 +552,13 @@ public class GeoPkgWorkspace implements Workspace {
         return geom != null ? geom.getName() : null;
     }
 
-    FeatureEntry createFeatureEntry(Stmt st) throws Exception {
+    FeatureEntry createFeatureEntry(ResultSet rs) throws Exception {
         FeatureEntry e = new FeatureEntry();
 
-        initEntry(e, st);
-        e.setGeometryColumn(st.column_string(10));
-        e.setGeometryType(Geom.Type.from(st.column_string(11)));
-        e.setCoordDimension((st.column_int(12)));
+        initEntry(e, rs);
+        e.setGeometryColumn(rs.getString(11));
+        e.setGeometryType(Geom.Type.from(rs.getString(12)));
+        e.setCoordDimension((rs.getInt(13)));
         return e;
     }
 
@@ -590,86 +573,84 @@ public class GeoPkgWorkspace implements Workspace {
         return entry.getSchema();
     }
 
-    Schema createSchema(FeatureEntry entry) throws Exception {
-        String sql = format("SELECT * FROM %s", entry.getTableName());
-        TableResult table = db.get_table(log(sql), 1);
-        
-        List<Field> fields = new ArrayList<Field>();
+    Schema createSchema(final FeatureEntry entry) throws Exception {
+        return run(new DbOP<Schema>() {
+            @Override
+            protected Schema doRun(Connection cx) throws Exception {
+                String sql = format("SELECT * FROM %s", entry.getTableName());
+                log(sql);
 
-        for (int i = 0; i < table.column.length; i++) {
-            String col = table.column[i];
-            Class<?> type = null;
-            if (col.equals(entry.getGeometryColumn())) {
-                type = entry.getGeometryType().getType();
+                ResultSet rs = open(open(cx.createStatement()).executeQuery(sql));
+                ResultSetMetaData rsmd = rs.getMetaData();
+
+                SchemaBuilder sb = Schema.build(entry.getTableName());
+                for (int i = 0; i < rsmd.getColumnCount(); i++) {
+                    String col = rsmd.getColumnName(i+1);
+                    if (col.equals(entry.getGeometryColumn())) {
+                        CoordinateReferenceSystem crs = entry.getSrid() != null ? 
+                            Proj.crs(entry.getSrid()) : null;
+                        sb.field(col, entry.getGeometryType().getType(), crs);
+                    }
+                    else {
+                        sb.field(col, dbtypes.fromSQL(rsmd.getColumnType(i+1)));
+                    }
+                }
+                return sb.schema();
             }
-            else {
-                Types t = Types.valueOf(table.types[i].toUpperCase());
-                type = t != null ? t.getPrimaryClass() : Object.class;
-            }
-
-            fields.add(new Field(col, type));
-        }
-
-        return new Schema(entry.getTableName(), fields);
+        });
     }
 
     /**
      * Lists all the tile entries in the geopackage. 
      */
     public List<TileEntry> tiles() throws IOException {
-        try {
-            String sql = format(
-            "SELECT a.*, b.is_times_two_zoom" +
-             " FROM %s a, %s b" + 
-            " WHERE a.table_name = b.t_table_name" + 
-              " AND a.data_type = ?", GEOPACKAGE_CONTENTS, TILE_TABLE_METADATA);
+        return run(new DbOP<List<TileEntry>>() {
+            @Override
+            protected List<TileEntry> doRun(Connection cx) throws Exception {
+                String sql = format(
+                    "SELECT a.*, b.is_times_two_zoom" +
+                     " FROM %s a, %s b" + 
+                    " WHERE a.table_name = b.t_table_name" + 
+                      " AND a.data_type = ?", GEOPACKAGE_CONTENTS, TILE_TABLE_METADATA);
+                log(sql, DataType.Tile);
 
-            log(sql, DataType.Tile);
+                PreparedStatement ps = open(cx.prepareStatement(sql));
+                ps.setString(1, DataType.Tile.value());
 
-            Stmt st = db.prepare(sql);
-            st.bind(1,  DataType.Tile.value());
+                ResultSet rs = open(ps.executeQuery());
 
-            List<TileEntry> entries = new ArrayList<TileEntry>();
-            while(st.step()) {
-                entries.add(createTileEntry(st));
+                List<TileEntry> entries = new ArrayList<TileEntry>();
+                while(rs.next()) {
+                    entries.add(createTileEntry(rs));
+                }
+                return entries;
             }
-            st.close();
-
-            return entries;
-        }
-        catch(Exception e) {
-            throw new IOException(e);
-        }
+        });
     }
 
-    public TileEntry tile(String name) throws IOException {
-        try {
-            String sql = format(
-            "SELECT a.*, b.is_times_two_zoom" +
-             " FROM %s a, %s b" + 
-            " WHERE a.table_name = ?" + 
-              " AND a.data_type = ?", GEOPACKAGE_CONTENTS, TILE_TABLE_METADATA);
+    public TileEntry tile(final String name) throws IOException {
+        return run(new DbOP<TileEntry>() {
+            @Override
+            protected TileEntry doRun(Connection cx) throws Exception {
+                String sql = format(
+                    "SELECT a.*, b.is_times_two_zoom" +
+                     " FROM %s a, %s b" + 
+                    " WHERE a.table_name = ?" + 
+                      " AND a.data_type = ?", GEOPACKAGE_CONTENTS, TILE_TABLE_METADATA);
 
-            log(sql, name, DataType.Tile);
+                log(sql, name, DataType.Tile);
 
-            Stmt st = db.prepare(sql);
-            st.bind(1,  name);
-            st.bind(2,  DataType.Tile.value());
-
-            try {
-                if (st.step()) {
-                    return createTileEntry(st);
+                PreparedStatement ps = open(cx.prepareStatement(sql));
+                ps.setString(1, name);
+                ps.setString(2, DataType.Tile.value());
+                    
+                ResultSet rs = ps.executeQuery();
+                if (rs.next()) {
+                    return createTileEntry(rs);
                 }
+                return null;
             }
-            finally {
-                st.close();
-            }
-        }
-        catch(Exception e) {
-            throw new IOException(e);
-        }
-
-        return null;
+        });
     }
 
     public Cursor<Tile> read(TileEntry entry) throws IOException  {
@@ -679,39 +660,41 @@ public class GeoPkgWorkspace implements Workspace {
     public Cursor<Tile> read(TileEntry entry, Integer lowZoom, Integer highZoom, 
         Integer lowCol, Integer highCol, Integer lowRow, Integer highRow) throws IOException  {
 
+        final List<String> q = new ArrayList<String>();
+        if (lowZoom != null) {
+            q.add("zoom_level >= " + lowZoom);
+        }
+        if (highZoom != null) {
+            q.add("zoom_level <= " + lowZoom);
+        }
+        if (lowCol != null) {
+            q.add("tile_column >= " + lowCol);
+        }
+        if (highCol != null) {
+            q.add("tile_column <= " + highCol);
+        }
+        if (lowRow != null) {
+            q.add("tile_row >= " + lowRow);
+        }
+        if (highRow != null) {
+            q.add("tile_row <= " + highRow);
+        }
+
+        SQL sql = new SQL("SELECT zoom_level,tile_column,tile_row,tile_data FROM")
+            .name(entry.getTableName());
+
+        if (!q.isEmpty()) {
+            sql.add(" WHERE ");
+            for (String s : q) {
+                sql.add(s).add(" AND ");
+            }
+            sql.trim(5);
+        }
+
         try {
-            List<String> q = new ArrayList<String>();
-            if (lowZoom != null) {
-                q.add("zoom_level >= " + lowZoom);
-            }
-            if (highZoom != null) {
-                q.add("zoom_level <= " + lowZoom);
-            }
-            if (lowCol != null) {
-                q.add("tile_column >= " + lowCol);
-            }
-            if (highCol != null) {
-                q.add("tile_column <= " + highCol);
-            }
-            if (lowRow != null) {
-                q.add("tile_row >= " + lowRow);
-            }
-            if (highRow != null) {
-                q.add("tile_row <= " + highRow);
-            }
-
-            SQLBuilder sql = new SQLBuilder(
-                "SELECT zoom_level,tile_column,tile_row,tile_data FROM ").name(entry.getTableName());
-            if (!q.isEmpty()) {
-                sql.add(" WHERE ");
-                for (String s : q) {
-                    sql.add(s).add(" AND ");
-                }
-                sql.trim(5);
-            }
-
-            Stmt stmt = db.prepare(log(sql.toString()));
-            return new TileCursor(stmt);
+            Connection cx = db.getConnection();
+            ResultSet rs = cx.createStatement().executeQuery(log(sql.toString()));
+            return new TileCursor(rs, cx);
         }
         catch(Exception e) {
             throw new IOException(e);
@@ -719,28 +702,34 @@ public class GeoPkgWorkspace implements Workspace {
         
     }
 
-    TileEntry createTileEntry(Stmt st) throws Exception {
-        TileEntry e = new TileEntry();
-        initEntry(e, st);
+    TileEntry createTileEntry(ResultSet rs) throws Exception {
+        final TileEntry e = new TileEntry();
+        initEntry(e, rs);
 
-        e.setTimesTwoZoom(1 == st.column_int(10));
+        e.setTimesTwoZoom(1 == rs.getInt(10));
 
-        //load all the tile matrix entries
-        String sql = format("SELECT zoom_level,matrix_width,matrix_height,tile_width,tile_height," +
-            "pixel_x_size, pixel_y_size FROM %s WHERE t_table_name = ?", TILE_MATRIX_METADATA);
-        log(sql, e.getTableName());
+        run(new DbOP<Object>() {
+            @Override
+            protected Object doRun(Connection cx) throws Exception {
+                //load all the tile matrix entries
+                String sql = format("SELECT zoom_level,matrix_width,matrix_height,tile_width,tile_height," +
+                    "pixel_x_size, pixel_y_size FROM %s WHERE t_table_name = ?", TILE_MATRIX_METADATA);
+                log(sql, e.getTableName());
 
-        Stmt stm = db.prepare(sql);
-        stm.bind(1, e.getTableName());
+                PreparedStatement ps = open(cx.prepareStatement(sql));
+                ps.setString(1, e.getTableName());
 
-        while(stm.step()) {
-            TileGrid m = new TileGrid(
-                stm.column_int(0), stm.column_int(1), stm.column_int(2), stm.column_int(3), 
-                stm.column_int(4), stm.column_double(5), stm.column_double(6));
-            e.getTileMatricies().add(m);
-        }
+                ResultSet rs = open(ps.executeQuery());
+                while(rs.next()) {
+                    TileGrid m = new TileGrid(
+                        rs.getInt(1), rs.getInt(2), rs.getInt(3), rs.getInt(4), rs.getInt(5), 
+                        rs.getDouble(6), rs.getDouble(7));
+                    e.getTileMatricies().add(m);
+                }
 
-        stm.close();
+                return null;
+            }
+        }, rs.getStatement().getConnection());
 
         return e;
     }
@@ -748,28 +737,35 @@ public class GeoPkgWorkspace implements Workspace {
     /**
      * Sets common attributes of an entry. 
      */
-    void initEntry(Entry e, Stmt st) throws Exception {
-        e.setTableName(st.column_string(0));
-        e.setIdentifier(st.column_string(2));
-        e.setDescription(st.column_string(3));
+    void initEntry(Entry e, ResultSet rs) throws Exception {
+        e.setTableName(rs.getString(1));
+        e.setIdentifier(rs.getString(3));
+        e.setDescription(rs.getString(4));
+
         try {
-            e.setLastChange(DATE_FORMAT.parse(st.column_string(4)));
+            e.setLastChange(DATE_FORMAT.parse(rs.getString(5)));
         } catch (ParseException ex) {
             throw new RuntimeException(ex);
         }
         e.setBounds(new Envelope(
-            st.column_double(5), st.column_double(7), st.column_double(6), st.column_double(8)));
-        e.setSrid(st.column_int(9));
+            rs.getDouble(6), rs.getDouble(8), rs.getDouble(7), rs.getDouble(9)));
+        e.setSrid(rs.getInt(10));
     }
 
-    SQLBuilder encodeBBOX(SQLBuilder sql, Schema schema, Envelope bbox) {
-        return sql.add(" Intersects(").name(schema.geometry().getName()).add(",")
-           .add(" BuildMbr(").add(bbox.getMinX()).add(",").add(bbox.getMinY()).add(",")
-           .add(bbox.getMaxX()).add(",").add(bbox.getMaxY()).add("))");
+    <T> T run(DbOP<T> op) throws IOException {
+        return op.run(db);
+    }
+
+    <T> T run(DbOP<T> op, Connection cx) throws IOException {
+        return op.run(cx);
     }
 
     String log(String sql, Object... params) {
         if (LOG.isDebugEnabled()) {
+            if (params.length == 1 && params[0] instanceof Collection) {
+                params = ((Collection)params[0]).toArray(); 
+            }
+
             StringBuilder log = new StringBuilder(sql);
             if (params.length > 0) {
                 log.append("; ");
@@ -791,10 +787,10 @@ public class GeoPkgWorkspace implements Workspace {
      * geopackage is no longer needed.  
      * </p> 
      */
-    public void dispose() {
+    public void close() {
         try {
             if (db != null) {
-                db.close();
+                //db.close();
                 db = null;
             }
         } catch (Exception e) {
@@ -803,6 +799,6 @@ public class GeoPkgWorkspace implements Workspace {
     }
 
     protected void finalize() throws Throwable {
-        dispose();
+        close();
     }
 }

@@ -73,6 +73,6 @@ public class GeoPkgVector implements VectorData {
     }
 
     @Override
-    public void dispose() {
+    public void close() {
     }
 }

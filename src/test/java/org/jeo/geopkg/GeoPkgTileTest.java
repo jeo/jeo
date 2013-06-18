@@ -22,13 +22,13 @@ public class GeoPkgTileTest extends GeoPkgTestSupport {
 
     @Before
     public void setUp() throws Exception {
-        File dir = unzip(getClass().getResourceAsStream("ne.db.zip"), newTmpDir());
-        geopkg = new GeoPkgWorkspace(new File(dir, "ne.db"));
+        File dir = unzip(getClass().getResourceAsStream("ne.geopackage.zip"), newTmpDir());
+        geopkg = GeoPackage.open(new File(dir, "ne.geopackage"));
     }
 
     @After
     public void tearDown() throws Exception {
-        geopkg.dispose();
+        geopkg.close();
         FileUtils.deleteQuietly(geopkg.getFile().getParentFile());
     }
 

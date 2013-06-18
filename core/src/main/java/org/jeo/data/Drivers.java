@@ -293,7 +293,8 @@ public class Drivers {
             String ext = Util.extension(uri.getPath());
             if (ext != null) {
                 try {
-                    uri = new URI(String.format("%s://?file=%s", ext, uri.getPath()));
+                    uri = new URI(String.format("%s://?file=%s%s", ext, uri.getPath(), 
+                        uri.getFragment() != null ? "#"+uri.getFragment() : ""));
                 } catch (URISyntaxException e) {
                 }
             }

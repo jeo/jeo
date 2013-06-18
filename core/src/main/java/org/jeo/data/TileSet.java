@@ -1,7 +1,6 @@
 package org.jeo.data;
 
 import java.io.IOException;
-import java.util.List;
 
 /**
  * A layer consisting of {@link Tile} objects.
@@ -16,7 +15,7 @@ public interface TileSet extends Dataset {
      * The list should be sorted ascending by {@link TileGrid#getZoom()}. 
      * </p>
      */
-    List<TileGrid> grids();
+    Iterable<TileGrid> grids();
 
     /**
      * The tile grid for the specific zoom level.

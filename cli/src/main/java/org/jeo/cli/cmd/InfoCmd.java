@@ -13,6 +13,7 @@ import org.jeo.data.Dataset;
 import org.jeo.data.Drivers;
 import org.jeo.data.Query;
 import org.jeo.data.TileGrid;
+import org.jeo.data.TilePyramid;
 import org.jeo.data.TileSet;
 import org.jeo.data.VectorData;
 import org.jeo.data.Workspace;
@@ -109,13 +110,17 @@ public class InfoCmd extends JeoCmd {
         try {
             print((Dataset) dataset, cli);
 
+            TilePyramid pyr = dataset.getPyramid();
+
+            console.println(
+                String.format("Tilesize: %d, %d", pyr.getTileWidth(), pyr.getTileHeight()));
             console.println("Tilesets:");
-            for (TileGrid grid : dataset.grids()) {
+            for (TileGrid grid : dataset.getPyramid().getGrids()) {
                 int width = grid.getWidth();
                 int height = grid.getHeight();
                 
                 console.print("\t");
-                console.println(String.format("%d: %d x %d (%d); %f, %f", grid.getZoom(), 
+                console.println(String.format("%d: %d x %d (%d); %f, %f", grid.getZ(), 
                     width, height, width*height, grid.getXRes(), grid.getYRes()));
             }
         }

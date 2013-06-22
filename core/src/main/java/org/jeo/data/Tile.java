@@ -4,14 +4,13 @@ import java.util.Arrays;
 
 /**
  * A map tile, as defined by {@linkplain http://wiki.osgeo.org/wiki/Tile_Map_Service_Specification}.
- * 
  */
 public class Tile {
 
-    Integer zoom, column, row;
+    Integer z, x, y;
     byte[] data;
     String mimeType;
-
+    
     /**
      * Constructs an empty tile object.
      */
@@ -19,57 +18,57 @@ public class Tile {
     }
 
     /**
-     * Constructs a tile object from its tile index and image data.
+     * Constructs a tile object from its tile index, bounds, and image data.
      */
-    public Tile(Integer zoom, Integer column, Integer row, byte[] data, String mimeType) {
+    public Tile(Integer z, Integer x, Integer y, byte[] data, String mimeType) {
         super();
-        this.zoom = zoom;
-        this.column = column;
-        this.row = row;
+        this.z = z;
+        this.x = x;
+        this.y = y;
         this.data = data;
         this.mimeType = mimeType;
     }
 
     /**
-     * The zoom level of the tile.
+     * The z value (zoom level) of the tile.
      */
-    public Integer getZoom() {
-        return zoom;
+    public Integer getZ() {
+        return z;
     }
 
     /**
-     * Sets the zoom level of the tile.
+     * Sets the z value (zoom level) of the tile.
      */
-    public void setZoom(Integer zoom) {
-        this.zoom = zoom;
+    public void setZ(Integer z) {
+        this.z = z;
     }
 
     /**
-     * The column index of the tile.
+     * The x value (column index) of the tile.
      */
-    public Integer getColumn() {
-        return column;
+    public Integer getX() {
+        return x;
     }
 
     /**
-     * Sets the column index of the tile.
+     * Sets the x value (column index) of the tile.
      */
-    public void setColumn(Integer column) {
-        this.column = column;
+    public void setX(Integer x) {
+        this.x = x;
     }
 
     /**
-     * The row index of the tile.
+     * The y value (row index) of the tile.
      */
-    public Integer getRow() {
-        return row;
+    public Integer getY() {
+        return y;
     }
 
     /**
-     * Sets the row index of the tile.
+     * Sets the y value (row index) of the tile.
      */
-    public void setRow(Integer row) {
-        this.row = row;
+    public void setY(Integer y) {
+        this.y = y;
     }
 
     /**
@@ -104,11 +103,11 @@ public class Tile {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((column == null) ? 0 : column.hashCode());
         result = prime * result + Arrays.hashCode(data);
-        result = prime * result + ((row == null) ? 0 : row.hashCode());
-        result = prime * result + ((zoom == null) ? 0 : zoom.hashCode());
         result = prime * result + ((mimeType == null) ? 0 : mimeType.hashCode());
+        result = prime * result + ((x == null) ? 0 : x.hashCode());
+        result = prime * result + ((y == null) ? 0 : y.hashCode());
+        result = prime * result + ((z == null) ? 0 : z.hashCode());
         return result;
     }
 
@@ -121,28 +120,34 @@ public class Tile {
         if (getClass() != obj.getClass())
             return false;
         Tile other = (Tile) obj;
-        if (column == null) {
-            if (other.column != null)
-                return false;
-        } else if (!column.equals(other.column))
-            return false;
+        
         if (!Arrays.equals(data, other.data))
-            return false;
-        if (row == null) {
-            if (other.row != null)
-                return false;
-        } else if (!row.equals(other.row))
-            return false;
-        if (zoom == null) {
-            if (other.zoom != null)
-                return false;
-        } else if (!zoom.equals(other.zoom))
             return false;
         if (mimeType == null) {
             if (other.mimeType != null)
                 return false;
         } else if (!mimeType.equals(other.mimeType))
             return false;
+        if (x == null) {
+            if (other.x != null)
+                return false;
+        } else if (!x.equals(other.x))
+            return false;
+        if (y == null) {
+            if (other.y != null)
+                return false;
+        } else if (!y.equals(other.y))
+            return false;
+        if (z == null) {
+            if (other.z != null)
+                return false;
+        } else if (!z.equals(other.z))
+            return false;
         return true;
+    }
+
+    @Override
+    public String toString() {
+        return String.format("(z=%d, x=%d, y=%d)", z, y, x);
     }
 }

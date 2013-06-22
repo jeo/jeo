@@ -6,6 +6,7 @@ import java.util.List;
 import org.jeo.data.Cursor;
 import org.jeo.data.Tile;
 import org.jeo.data.TileGrid;
+import org.jeo.data.TilePyramid;
 import org.jeo.data.TileSet;
 import org.jeo.proj.Proj;
 import org.osgeo.proj4j.CoordinateReferenceSystem;
@@ -43,21 +44,6 @@ public class GeoPkgTileSet implements TileSet {
     }
 
     @Override
-    public List<TileGrid> grids() {
-        return entry.getTileMatricies();
-    }
-
-    @Override
-    public TileGrid grid(long z) {
-        for (TileGrid g : grids()) {
-            if (g.getZoom() == z) {
-                return g;
-            }
-        }
-        return null;
-    }
-
-    @Override
     public CoordinateReferenceSystem getCRS() {
         int srid = entry.getSrid();
         return srid != -1 ? Proj.crs(srid) : null;
@@ -66,6 +52,11 @@ public class GeoPkgTileSet implements TileSet {
     @Override
     public Envelope bounds() throws IOException {
         return entry.getBounds();
+    }
+
+    @Override
+    public TilePyramid getPyramid() {
+        return entry.getTilePyramid();
     }
 
     @Override

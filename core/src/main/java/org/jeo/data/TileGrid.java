@@ -7,29 +7,24 @@ package org.jeo.data;
  */
 public class TileGrid {
 
-    Integer zoom;
+    Integer z;
     Integer width, height;
-    Integer tileWidth, tileHeight;
-    Double xRes;
-    Double yRes;
-
-    public TileGrid(Integer zoom, Integer width, Integer height, Integer tileWidth, 
-        Integer tileHeight, Double xRes, Double yRes) {
+    Double xRes, yRes;
+    
+    public TileGrid(Integer z, Integer width, Integer height, Double xRes, Double yRes) {
         super();
-        this.zoom = zoom;
+        this.z = z;
         this.width = width;
         this.height = height;
-        this.tileWidth = tileWidth;
-        this.tileHeight = tileHeight;
         this.xRes = xRes;
         this.yRes = yRes;
     }
 
     /**
-     * The zoom level of the tile grid.
+     * The z (zoom) level of the tile grid.
      */
-    public Integer getZoom() {
-        return zoom;
+    public Integer getZ() {
+        return z;
     }
 
     /**
@@ -47,21 +42,10 @@ public class TileGrid {
     }
 
     /**
-     * The width of a tile in the matrix, measured in pixels.
-     */
-    public Integer getTileWidth() {
-        return tileWidth;
-    }
-
-    /**
-     * The height of a tile in the matrix, measured in pixels.
-     */
-    public Integer getTileHeight() {
-        return tileHeight;
-    }
-
-    /**
      * The horizontal resolution of the tile grid.
+     * <p>
+     * More specifically the horizontal size of a single pixel in "map" units. 
+     * </p>
      */
     public Double getXRes() {
         return xRes;
@@ -69,6 +53,9 @@ public class TileGrid {
 
     /**
      * The vertical resolution of the tile grid.
+     * <p>
+     * More specifically the vertical size of a single pixel in "map" units. 
+     * </p>
      */
     public Double getYRes() {
         return yRes;

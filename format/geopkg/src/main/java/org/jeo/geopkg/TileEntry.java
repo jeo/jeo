@@ -4,22 +4,23 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.jeo.data.TileGrid;
+import org.jeo.data.TilePyramid;
 
 public class TileEntry extends Entry {
 
-    List<TileGrid> tileMatricies = new ArrayList<TileGrid>();
+    TilePyramid tilePyramid;
     Boolean timesTwoZoom;
 
     public TileEntry() {
         setDataType(DataType.Tile);
     }
 
-    public List<TileGrid> getTileMatricies() {
-        return tileMatricies;
+    public TilePyramid getTilePyramid() {
+        return tilePyramid;
     }
 
-    void setTileMatricies(List<TileGrid> tileMatricies) {
-        this.tileMatricies = tileMatricies;
+    public void setTilePyramid(TilePyramid tilePyramid) {
+        this.tilePyramid = tilePyramid;
     }
 
     public Boolean isTimesTwoZoom() {
@@ -32,7 +33,7 @@ public class TileEntry extends Entry {
 
     void init(TileEntry e) {
         super.init(e);
-        setTileMatricies(e.getTileMatricies());
+        setTilePyramid(e.getTilePyramid());
         setTimesTwoZoom(e.isTimesTwoZoom());
     }
 

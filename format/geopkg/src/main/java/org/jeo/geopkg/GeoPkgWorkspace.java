@@ -27,6 +27,8 @@ import org.jeo.data.Dataset;
 import org.jeo.data.Query;
 import org.jeo.data.Tile;
 import org.jeo.data.TileGrid;
+import org.jeo.data.TilePyramid;
+import org.jeo.data.TilePyramidBuilder;
 import org.jeo.data.Workspace;
 import org.jeo.feature.Feature;
 import org.jeo.feature.Features;
@@ -250,16 +252,10 @@ public class GeoPkgWorkspace implements Workspace {
         try {
             Schema schema = schema(entry);
 
+            //TODO: handle selective fields
             SQL sqlb = new SQL("SELECT ");
-            if (q.getFields().isEmpty()) {
-                for (Field f : schema) {
-                    sqlb.name(f.getName()).add(",");
-                }
-            }
-            else {
-                for (String fld : q.getFields()) {
-                    sqlb.name(fld).add(",");
-                }
+            for (Field f : schema) {
+                sqlb.name(f.getName()).add(",");
             }
 
             sqlb.trim(1).add(" FROM ").name(entry.getTableName());
@@ -577,7 +573,7 @@ public class GeoPkgWorkspace implements Workspace {
         return run(new DbOP<Schema>() {
             @Override
             protected Schema doRun(Connection cx) throws Exception {
-                String sql = format("SELECT * FROM %s", entry.getTableName());
+                String sql = format("SELECT * FROM %s LIMIT 1", entry.getTableName());
                 log(sql);
 
                 ResultSet rs = open(open(cx.createStatement()).executeQuery(sql));
@@ -661,22 +657,22 @@ public class GeoPkgWorkspace implements Workspace {
         Integer lowCol, Integer highCol, Integer lowRow, Integer highRow) throws IOException  {
 
         final List<String> q = new ArrayList<String>();
-        if (lowZoom != null) {
+        if (lowZoom != null && lowZoom > -1) {
             q.add("zoom_level >= " + lowZoom);
         }
-        if (highZoom != null) {
+        if (highZoom != null && highZoom > -1) {
             q.add("zoom_level <= " + lowZoom);
         }
-        if (lowCol != null) {
+        if (lowCol != null && lowCol > -1) {
             q.add("tile_column >= " + lowCol);
         }
-        if (highCol != null) {
+        if (highCol != null && highCol > -1) {
             q.add("tile_column <= " + highCol);
         }
-        if (lowRow != null) {
+        if (lowRow != null && lowRow > -1) {
             q.add("tile_row >= " + lowRow);
         }
-        if (highRow != null) {
+        if (highRow != null && highRow > -1) {
             q.add("tile_row <= " + highRow);
         }
 
@@ -712,20 +708,28 @@ public class GeoPkgWorkspace implements Workspace {
             @Override
             protected Object doRun(Connection cx) throws Exception {
                 //load all the tile matrix entries
-                String sql = format("SELECT zoom_level,matrix_width,matrix_height,tile_width,tile_height," +
-                    "pixel_x_size, pixel_y_size FROM %s WHERE t_table_name = ?", TILE_MATRIX_METADATA);
+                String sql = format(
+                    "SELECT zoom_level,matrix_width,matrix_height,tile_width,tile_height," +
+                           "pixel_x_size, pixel_y_size FROM %s WHERE t_table_name = ? " +
+                    " ORDER BY zoom_level", TILE_MATRIX_METADATA);
                 log(sql, e.getTableName());
 
                 PreparedStatement ps = open(cx.prepareStatement(sql));
                 ps.setString(1, e.getTableName());
 
                 ResultSet rs = open(ps.executeQuery());
-                while(rs.next()) {
-                    TileGrid m = new TileGrid(
-                        rs.getInt(1), rs.getInt(2), rs.getInt(3), rs.getInt(4), rs.getInt(5), 
-                        rs.getDouble(6), rs.getDouble(7));
-                    e.getTileMatricies().add(m);
+
+                TilePyramidBuilder tpb = TilePyramid.build();
+                //TODO: bounds
+                if (rs.next()) {
+                    tpb.tileSize(rs.getInt(4), rs.getInt(5));
+                    do {
+                        tpb.grid(rs.getInt(1), rs.getInt(2), rs.getInt(3));
+                    }
+                    while (rs.next());
                 }
+
+                e.setTilePyramid(tpb.pyramid());
 
                 return null;
             }

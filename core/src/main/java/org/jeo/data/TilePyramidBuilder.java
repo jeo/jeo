@@ -1,0 +1,170 @@
+package org.jeo.data;
+
+import java.util.List;
+
+import org.jeo.proj.Proj;
+import org.osgeo.proj4j.CoordinateReferenceSystem;
+
+import com.vividsolutions.jts.geom.Envelope;
+
+/**
+ * Builder for {@link TilePyramid} objects.
+ * <p>
+ * Example usage:
+ * <pre>
+ * TilePyramid schema = TilePyramid.build().bounds(-180,-90,180,90).crs("EPSG:4326")
+ *   .tileSize(256, 256).grid(2,1).grid().grid(2, 8, 4).pyramid();
+ * </pre>
+ * </p>
+ * @author Justin Deoliveira, OpenGeo
+ *
+ */
+public class TilePyramidBuilder {
+
+    TilePyramid tp;
+
+    /**
+     * Creates a new builder.
+     */
+    public TilePyramidBuilder() {
+        tp = new TilePyramid();
+    }
+
+    /**
+     * Sets bounds of the pyramid.
+     */
+    public TilePyramidBuilder bounds(double minx, double miny, double maxx, double maxy) {
+        return bounds(new Envelope(minx, maxx, miny, maxy));
+    }
+
+    /**
+     * Sets bounds of the pyramid.
+     */
+    public TilePyramidBuilder bounds(Envelope bounds) {
+        tp.setBounds(bounds);
+        return this;
+    }
+
+    /**
+     * Sets crs of the pyramid.
+     */
+    public TilePyramidBuilder crs(String srs) {
+        return crs(Proj.crs(srs));
+    }
+
+    /**
+     * Sets crs of the pyramid.
+     */
+    public TilePyramidBuilder crs(CoordinateReferenceSystem crs) {
+        tp.setCRS(crs);
+        return this;
+    }
+
+    /**
+     * Sets the tile dimensions for the pyramid.
+     */
+    public TilePyramidBuilder tileSize(int width, int height) {
+        tp.setTileWidth(width);
+        tp.setTileHeight(height);
+        return this;
+    }
+
+    /**
+     * Sets the origin of the tile coordinate system.
+     */
+    public TilePyramidBuilder origin(TilePyramid.Origin origin) {
+        tp.setOrigin(origin);
+        return this;
+    }
+
+    /**
+     * Creates a new level in the pyramid.
+     *  
+     * @param z The zoom level of the grid level.
+     * @param width The number of horizontal tiles in the level.
+     * @param height The number of vertical tiles in the level. 
+     * 
+     */
+    public TilePyramidBuilder grid(int z, int width, int height) {
+        double xres = tp.getBounds().getWidth() / ((double)width) / ((double)tp.getTileWidth());
+        double yres = tp.getBounds().getHeight() / ((double)height) / ((double)tp.getTileHeight());
+
+        tp.getGrids().add(new TileGrid(z, width, height, xres, yres));
+        return this;
+    }
+
+    /**
+     * Creates a new level in the pyramid automatically determining the zoom level.
+     * <p>
+     * If no grids have been previously added the z level is set to 0. Otherwise the z level is 
+     * the previously added z level + 1.
+     * </p> 
+     * @param width The number of horizontal tiles in the level.
+     * @param height The number of vertical tiles in the level.
+     */
+    public TilePyramidBuilder grid(int width, int height) {
+        int z;
+
+        List<TileGrid> grids = tp.getGrids();
+        if (grids.isEmpty()) {
+            z = 0;
+        }
+        else {
+            TileGrid last = grids.get(grids.size()-1);
+            z = last.getZ()+1;
+        }
+
+        return grid(z, width, height);
+    }
+
+    /**
+     * Creates a new level in the pyramid automatically determining the zoom level and grid 
+     * dimensions.
+     * <p>
+     * If not grids have been previously added to the pyramid the z level is set to 0 and grid 
+     * dimensions inferred from the pyramid bounds. Otherwise the grid z level is the previous
+     * z value + 1, and the grid dimensions are the previous dimensions * 2.
+     * </p>
+     */
+    public TilePyramidBuilder grid() {
+        List<TileGrid> grids = tp.getGrids();
+        if (grids.isEmpty()) {
+            Envelope bounds = tp.getBounds();
+            if (bounds != null) {
+                if (bounds.getWidth() > bounds.getHeight()) {
+                    return grid(0, (int)(bounds.getWidth()/bounds.getHeight()), 1);
+                }
+                else {
+                    return grid(0, 1, (int)(bounds.getHeight()/bounds.getWidth()));
+                }
+            }
+            else {
+                grid(0, 2, 1);
+            }
+        }
+        else {
+            TileGrid last = grids.get(grids.size()-1);
+            return grid(last.getZ()+1, last.getWidth()*2, last.getHeight()*2);
+        }
+        return this;
+    }
+
+    /**
+     * Adds a number of levels to the pyramid.
+     * <p>
+     * This method is equivalent to calling {@link #grid()} <tt>n</tt> times.
+     * </p>
+     * @param n The number of levels to add to the pyramid.     * @return
+     */
+    public TilePyramidBuilder grids(int n) {
+        for (int i = 0; i < n; i++) grid();
+        return this;
+    }
+
+    /**
+     * Returns the built pyramid.
+     */
+    public TilePyramid pyramid() {
+        return tp;
+    }
+}

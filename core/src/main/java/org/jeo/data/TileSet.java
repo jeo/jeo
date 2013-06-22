@@ -10,17 +10,9 @@ import java.io.IOException;
 public interface TileSet extends Dataset {
 
     /**
-     * The immutable list of tile grids of the layer.
-     * <p>
-     * The list should be sorted ascending by {@link TileGrid#getZoom()}. 
-     * </p>
+     * The pyramid describing the tile structure of the dataset. 
      */
-    Iterable<TileGrid> grids();
-
-    /**
-     * The tile grid for the specific zoom level.
-     */
-    TileGrid grid(long z);
+    TilePyramid getPyramid();
 
     /**
      * Reads a single tile from the layer by tile index.

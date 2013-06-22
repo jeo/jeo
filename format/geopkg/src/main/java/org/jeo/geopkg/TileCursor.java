@@ -39,9 +39,9 @@ public class TileCursor extends Cursor<Tile> {
         Tile t = new Tile();
 
         try {
-            t.setZoom(results.getInt(1));
-            t.setColumn(results.getInt(2));
-            t.setRow(results.getInt(2));
+            t.setZ(results.getInt(1));
+            t.setX(results.getInt(2));
+            t.setY(results.getInt(3));
             t.setData(results.getBytes(4)); 
         }
         catch(Exception e) {

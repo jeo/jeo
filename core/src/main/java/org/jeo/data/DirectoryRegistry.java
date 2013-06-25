@@ -92,9 +92,7 @@ public class DirectoryRegistry implements Registry {
         return null;
     }
 
-    @Override
-    public void dispose() {
-
+    public void close() {
     }
 
     String basename(String fn) {

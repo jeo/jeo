@@ -8,7 +8,7 @@ import java.util.Iterator;
  * 
  * @author Justin Deoliveira, OpenGeo
  */
-public interface Registry {
+public interface Registry extends Disposable {
 
     /**
      * The names of all workspaces of the registry.
@@ -24,11 +24,4 @@ public interface Registry {
      */
     Workspace get(String key) throws IOException;
 
-    /**
-     * Disposes the registry.
-     * <p>
-     * Application code must ensure this method is called when the registry is no longer needed.
-     * </p>
-     */
-    void dispose();
 }

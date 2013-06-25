@@ -58,9 +58,9 @@ public class CachedRegistry implements Registry {
     }
 
     @Override
-    public void dispose() {
+    public void close() {
         wsCache.invalidateAll();
-        reg.dispose();
+        reg.close();
     }
 
     static class CachedWorkspace implements Workspace {

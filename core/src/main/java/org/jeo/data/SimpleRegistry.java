@@ -56,7 +56,7 @@ public class SimpleRegistry implements Registry {
         return reg.get(key);
     }
 
-    public void dispose() {
+    public void close() {
         for (Workspace ws : reg.values()) {
             try {
                 ws.close();

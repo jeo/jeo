@@ -47,16 +47,17 @@ public class MemCursor extends Cursor<Feature> {
     @Override
     protected void doWrite() throws IOException {
         if (mode == APPEND) {
-            dataset.getFeatures().add(curr);
+            dataset.add(curr);
         }
         else {
-             ((DiffFeature) curr).apply();
+            dataset.modify((DiffFeature)curr);
         }
     }
     
     @Override
     protected void doRemove() throws IOException {
-        dataset.getFeatures().remove(((DiffFeature)curr).getDelegate());
+        Feature f = ((DiffFeature)curr).getDelegate();
+        dataset.remove(f);
     }
     
     @Override

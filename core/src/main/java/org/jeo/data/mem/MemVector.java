@@ -8,20 +8,26 @@ import org.jeo.data.Cursor;
 import org.jeo.data.Cursors;
 import org.jeo.data.Query;
 import org.jeo.data.VectorData;
+import org.jeo.feature.DiffFeature;
 import org.jeo.feature.Feature;
+import org.jeo.feature.Field;
 import org.jeo.feature.Schema;
 import org.osgeo.proj4j.CoordinateReferenceSystem;
 
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.index.SpatialIndex;
+import com.vividsolutions.jts.index.quadtree.Quadtree;
 
 public class MemVector implements VectorData {
 
     Schema schema;
     List<Feature> features = new ArrayList<Feature>();
-    
+    SpatialIndex index;
+
     public MemVector(Schema schema) {
         this.schema = schema;
+        index = new Quadtree();
     }
 
     public Memory getDriver() {
@@ -107,9 +113,44 @@ public class MemVector implements VectorData {
 
     public void add(Feature f) {
         features.add(f);
+
+        Geometry g = f.geometry();
+        if (g != null) {
+            index.insert(g.getEnvelopeInternal(), f);
+        }
+    }
+
+    public void remove(Feature f) {
+        features.remove(f);
+
+        Geometry g = f.geometry();
+        if (g != null) {
+            index.remove(g.getEnvelopeInternal(), f);
+        }
+    }
+
+    void modify(DiffFeature f) {
+        Feature pre = f.getDelegate();
+
+        Field geo = schema.geometry(); 
+        if (geo != null && f.getChanged().containsKey(geo.getName())) {
+            Geometry g1 = pre.geometry();
+            Geometry g2 = f.geometry();
+
+            if (g1 != null) {
+                index.remove(g1.getEnvelopeInternal(), pre);
+            }
+
+            if (g2 != null) {
+                index.insert(g2.getEnvelopeInternal(), pre);
+            }
+        }
+
+        f.apply();
     }
 
     @Override
     public void close() {
     }
+
 }

@@ -30,10 +30,10 @@ public class SQL {
     }
 
     /**
-     * Appends a string to the buffer.
+     * Appends an object to the buffer.
      */
-    public SQL add(String s) {
-        buf.append(s);
+    public SQL add(Object o) {
+        buf.append(o);
         return this;
     }
 
@@ -49,22 +49,6 @@ public class SQL {
     }
 
     /**
-     * Appends an integer to the buffer.
-     */
-    public SQL add(int i) {
-        buf.append(i);
-        return this;
-    }
-
-    /**
-     * Appends a double to the buffer.
-     */
-    public SQL add(double d) {
-        buf.append(d);
-        return this;
-    }
-
-    /**
      * Appends a column/table/etc... name to the buffer. 
      * <p>
      * The name is escaped with double quotes.
@@ -75,11 +59,25 @@ public class SQL {
         return this;
     }
 
+    public SQL str(String str) {
+        str = str.replaceAll("'", "''");
+        buf.append("'").append(str).append("'");
+        return this;
+    }
+
     /**
      * Trims the last n characters from the buffer.
      */
     public SQL trim(int n) {
         buf.setLength(buf.length()-n);
+        return this;
+    }
+
+    /**
+     * Clears the buffer.
+     */
+    public SQL clear() {
+        buf.setLength(0);
         return this;
     }
 

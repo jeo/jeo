@@ -26,6 +26,10 @@ public class Id extends Filter {
         this.ids = new ArrayList<Expression>(ids);
     }
 
+    public List<Expression> getIds() {
+        return ids;
+    }
+
     @Override
     public boolean apply(Object obj) {
         if (obj instanceof Feature) {

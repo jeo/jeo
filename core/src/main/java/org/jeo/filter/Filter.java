@@ -8,6 +8,13 @@ package org.jeo.filter;
 public abstract class Filter {
 
     /**
+     * Returns a new filter builder.
+     */
+    public static FilterBuilder build() {
+        return new FilterBuilder();
+    }
+
+    /**
      * Returns true if the filter is <tt>null</tt> or equal to {@link #TRUE}.
      */
     public static boolean isTrueOrNull(Filter f) {
@@ -79,4 +86,10 @@ public abstract class Filter {
      * Applies a visitor to the filter.
      */
     public abstract Object accept(FilterVisitor v, Object obj);
+
+    @Override
+    public abstract boolean equals(Object obj);
+
+    @Override
+    public abstract int hashCode();
 }

@@ -35,6 +35,10 @@ public class Comparison extends Filter {
         this.type = type;
         this.left = left;
         this.right = right;
+
+        if (left == null || right == null) {
+            throw new NullPointerException("operands must not be null");
+        }
     }
 
     public Type getType() {

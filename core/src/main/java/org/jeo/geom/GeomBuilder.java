@@ -2,11 +2,9 @@ package org.jeo.geom;
 
 import java.lang.reflect.Array;
 import java.util.ArrayDeque;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Deque;
 import java.util.Iterator;
-import java.util.List;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
@@ -19,6 +17,7 @@ import com.vividsolutions.jts.geom.MultiPoint;
 import com.vividsolutions.jts.geom.MultiPolygon;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
+import com.vividsolutions.jts.geom.PrecisionModel;
 
 /**
  * Builder for geometry objects.
@@ -59,6 +58,13 @@ public class GeomBuilder {
      */
     public GeomBuilder(GeometryFactory factory) {
         this.factory = factory;
+    }
+
+    /**
+     * Constructs a builder with a specific srid for geometry objects.  
+     */
+    public GeomBuilder(int srid) {
+        this.factory = new GeometryFactory(new PrecisionModel(), srid);
     }
 
     /**

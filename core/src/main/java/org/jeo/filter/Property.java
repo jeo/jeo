@@ -3,7 +3,7 @@ package org.jeo.filter;
 import org.jeo.feature.Feature;
 
 /**
- * Evaluates a field/propety of a {@link Feature} object.
+ * Evaluates a field/property of a {@link Feature} object.
  *  
  * @author Justin Deoliveira, OpenGeo
  */
@@ -25,6 +25,11 @@ public class Property implements Expression {
             return ((Feature)obj).get(property);
         }
         return null;
+    }
+
+    @Override
+    public Object accept(FilterVisitor visitor, Object obj) {
+        return visitor.visit(this, obj);
     }
 
     @Override

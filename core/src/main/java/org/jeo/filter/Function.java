@@ -32,4 +32,9 @@ public abstract class Function implements Expression {
     public List<Expression> getArgs() {
         return args;
     }
+
+    @Override
+    public Object accept(FilterVisitor visitor, Object obj) {
+        return visitor.visit(this, obj);
+    }
 }

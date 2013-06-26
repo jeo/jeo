@@ -2,7 +2,15 @@ package org.jeo.filter;
 
 public class FilterVisitor {
 
-    public Object visit(Expression expr, Object obj) {
+    public Object visit(Literal literal, Object obj) {
+        return obj;
+    }
+
+    public Object visit(Property property, Object obj) {
+        return obj;
+    }
+
+    public Object visit(Function function, Object obj) {
         return obj;
     }
 
@@ -26,14 +34,23 @@ public class FilterVisitor {
     }
 
     public Object visit(Comparison compare, Object obj) {
-        visit(compare.getLeft(), obj);
-        visit(compare.getRight(), obj);
+        if (compare.getLeft() != null) {
+            compare.getLeft().accept(this, obj);
+        }
+        if (compare.getRight() != null) {
+            compare.getRight().accept(this, obj);
+        }
         return obj;
     }
 
     public Object visit(Spatial spatial, Object obj) {
-        visit(spatial.getLeft(), obj);
-        visit(spatial.getRight(), obj);
+        if (spatial.getLeft() != null) {
+            spatial.getLeft().accept(this, obj);
+        }
+        if (spatial.getRight() != null) {
+            spatial.getRight().accept(this, obj);
+        }
+        
         return obj;
     }
 }

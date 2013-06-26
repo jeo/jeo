@@ -19,6 +19,11 @@ public class Literal implements Expression {
     }
 
     @Override
+    public Object accept(FilterVisitor visitor, Object obj) {
+        return visitor.visit(this, obj);
+    }
+
+    @Override
     public String toString() {
         return value != null ? value.toString() : "null";
     }

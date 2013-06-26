@@ -37,11 +37,10 @@ public class MemoryTest {
             .field("name", String.class)
             .field("cost", Double.class).schema();
         MemVector data = mem.create(schema);
-        data.getFeatures().add(Features.create(null, data.getSchema(), gb.point(0,0).toPoint(), 1, 
-            "anvil", 10.99));
-        data.getFeatures().add(Features.create(null, data.getSchema(), 
+        data.add(Features.create(null, data.getSchema(), gb.point(0,0).toPoint(), 1, "anvil", 10.99));
+        data.add(Features.create(null, data.getSchema(), 
             gb.points(10,10,20,20).toLineString(), 2, "bomb", 11.99));
-        data.getFeatures().add(Features.create(null, data.getSchema(), 
+        data.add(Features.create(null, data.getSchema(), 
             gb.point(100,100).toPoint().buffer(10), 3, "dynamate", 12.99));
     }
 
@@ -58,7 +57,7 @@ public class MemoryTest {
     @Test
     public void testCount() throws IOException {
         MemVector widgets = (MemVector) mem.get("widgets"); 
-        assertEquals(3, widgets.count(null));
+        assertEquals(3, widgets.count(new Query()));
         assertEquals(2, widgets.count(new Query().limit(2)));
         assertEquals(1, widgets.count(new Query().bounds(new Envelope(-1,1,-1,1))));
         assertEquals(2, widgets.count(new Query().filter("cost < 12.0")));
@@ -111,7 +110,7 @@ public class MemoryTest {
         f.put("name", "tack");
         c.write();
 
-        assertEquals(5, widgets.count(null));
+        assertEquals(5, widgets.count(new Query()));
         assertCovered(widgets.cursor(new Query().filter("cost < 3.0")), 4, 5);
     }
 }

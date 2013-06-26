@@ -12,6 +12,7 @@ import java.util.List;
 import org.jeo.data.Cursor;
 import org.jeo.data.Cursors;
 import org.jeo.data.Query;
+import org.jeo.data.QueryPlan;
 import org.jeo.data.VectorData;
 import org.jeo.feature.Feature;
 import org.jeo.feature.Field;
@@ -117,11 +118,7 @@ public class CSVDataset implements VectorData {
             reader.readLine();
         }
 
-        Cursor<Feature> c = new CSVCursor(reader, this);
-        if (q.getBounds() != null) {
-            c = Cursors.intersects(c, q.getBounds());
-        }
-        return q.apply(c);
+        return new QueryPlan(q).apply(new CSVCursor(reader, this));
     }
 
     public void close() {

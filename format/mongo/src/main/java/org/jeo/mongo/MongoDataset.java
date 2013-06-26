@@ -7,10 +7,13 @@ import org.jeo.data.Cursor.Mode;
 import org.jeo.data.Cursors;
 import org.jeo.data.Driver;
 import org.jeo.data.Query;
+import org.jeo.data.QueryPlan;
 import org.jeo.data.VectorData;
 import org.jeo.feature.Feature;
 import org.jeo.feature.Schema;
 import org.jeo.feature.SchemaBuilder;
+import org.jeo.filter.Filter;
+import org.jeo.geom.Envelopes;
 import org.jeo.proj.Proj;
 import org.osgeo.proj4j.CoordinateReferenceSystem;
 
@@ -87,20 +90,21 @@ public class MongoDataset implements VectorData {
     @Override
     public long count(Query q) throws IOException {
         if (q.isAll()) {
-            return dbcol.count();
+            return q.adjustCount(dbcol.count());
         }
 
-        if (Query.FILTER.has(q.getOptions())) {
+        QueryPlan qp = new QueryPlan(q);
+
+        if (!Filter.isTrueOrNull(q.getFilter())) {
+            // TODO: transform natively to filter 
             // we can't optimize
-            return Cursors.size(q.apply(cursor(q)));
+            return Cursors.size(qp.apply(cursor(q)));
         }
 
         long count = 
             q.getBounds() != null ? dbcol.count(encodeBboxQuery(q.getBounds())) : dbcol.count();
-        Integer offset = q.consume(Query.OFFSET, 0);
-        Integer limit = q.consume(Query.LIMIT, (int) count);
 
-        return Math.min(limit, count - offset);
+        return q.adjustCount(count);
     }
 
     @Override
@@ -109,21 +113,26 @@ public class MongoDataset implements VectorData {
             return new MongoCursor(q.getMode(), null, this);
         }
 
-        //TODO: sorting
-        DBCursor dbCursor = 
-            q.getBounds() != null ? dbcol.find(encodeBboxQuery(q.getBounds())) : dbcol.find();
+        QueryPlan qp = new QueryPlan(q);
 
-        Integer skip = q.consume(Query.OFFSET, null);
-        if (skip != null) {
-            dbCursor.skip(skip);
+        //TODO: sorting
+        DBCursor dbCursor = !Envelopes.isNull(q.getBounds()) ? 
+            dbcol.find(encodeBboxQuery(q.getBounds())) : dbcol.find();
+        qp.bounded();
+
+        Integer offset = q.getOffset();
+        if (offset != null) {
+            dbCursor.skip(offset);
+            qp.offsetted();
         }
 
-        Integer limit = q.consume(Query.LIMIT, null);
+        Integer limit = q.getLimit();
         if (limit != null) {
             dbCursor.limit(limit);
+            qp.limited();
         }
 
-        return q.apply(new MongoCursor(q.getMode(), dbCursor, this));
+        return qp.apply(new MongoCursor(q.getMode(), dbCursor, this));
     }
 
     DBObject encodeBboxQuery(Envelope bbox) {

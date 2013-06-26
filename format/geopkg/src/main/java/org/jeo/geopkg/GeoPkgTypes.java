@@ -5,6 +5,7 @@ import java.util.Map;
 import org.jeo.sql.DbTypes;
 
 public class GeoPkgTypes extends DbTypes {
+
     @Override
     protected Map<String, Class<?>> createNameMappings() {
         Map<String,Class<?>> map = super.createNameMappings();

@@ -2,16 +2,13 @@ package org.jeo.data;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.jeo.filter.Filter;
 import org.jeo.filter.cql.CQL;
 import org.jeo.filter.cql.ParseException;
 import org.jeo.geom.Envelopes;
 import org.jeo.proj.Proj;
-import org.jeo.util.Key;
 import org.jeo.util.Pair;
 import org.osgeo.proj4j.CoordinateReferenceSystem;
 import org.slf4j.Logger;
@@ -30,37 +27,6 @@ public class Query {
     static Logger LOGGER = LoggerFactory.getLogger(Query.class);
 
     /**
-     * Query option for filtering results returned. 
-     */
-    public static final Key<Filter> FILTER = new Key<Filter>("filter", Filter.class);
-    
-    /**
-     * Query option for limiting the number of results returned. 
-     */
-    public static final Key<Integer> LIMIT = new Key<Integer>("limit", Integer.class);
-
-    /**
-     * Query option for skipping over number of results. 
-     */
-    public static final Key<Integer> OFFSET = new Key<Integer>("offset", Integer.class);
-
-    /**
-     * Query option for sorting results.
-     */
-    public static final Key<List<Sort>> SORT = new Key<List<Sort>>("sort", (Class) List.class);
-
-    /**
-     * Query option for re-projecting results.
-     */
-    public static final Key<Pair<CoordinateReferenceSystem,CoordinateReferenceSystem>> REPROJECT = 
-        new Key<Pair<CoordinateReferenceSystem,CoordinateReferenceSystem>>("reproject", (Class) Pair.class);
-
-    /**
-     * Query option for simplifying geometry of results.
-     */
-    public static final Key<Double> SIMPLIFY = new Key<Double>("simplify", Double.class);
-
-    /**
      * Fields to include in query.
      */
     List<String> fields = new ArrayList<String>();
@@ -71,6 +37,31 @@ public class Query {
     Envelope bounds;
 
     /**
+     * Filter of the query
+     */
+    Filter filter;
+
+    /**
+     * Limit / offset
+     */
+    Integer limit, offset;
+
+    /** 
+     * sorting
+     */
+    List<Sort> sort;
+
+    /**
+     * reprojection
+     */
+    Pair<CoordinateReferenceSystem,CoordinateReferenceSystem> reproject;
+
+    /**
+     * simplification
+     */
+    Double simplify;
+
+    /**
      * Transaction associated with the query
      */
     Transaction transaction;
@@ -79,11 +70,6 @@ public class Query {
      * Cursor mode
      */
     Cursor.Mode mode = Cursor.READ;
-
-    /**
-     * Query options.
-     */
-    Map<String,Object> options = new HashMap<String,Object>();
 
     /**
      * New query instance.
@@ -107,6 +93,55 @@ public class Query {
     }
 
     /**
+     * Constraint on the query, may be <code>null</code> meaning no constraint.
+     */
+    public Filter getFilter() {
+        return filter;
+    }
+
+    /**
+     * Limit on the number of features to return from the query, <code>null</code> meaning no limit.
+     */
+    public Integer getLimit() {
+        return limit;
+    }
+
+    /**
+     *  Offset into query result set from which to start returning features, <code>null</code> 
+     *  meaning no offset.
+     */
+    public Integer getOffset() {
+        return offset;
+    }
+
+    /**
+     * Coordinate reference systems to reproject feature results between, <code>null</code> 
+     * meaning no reprojection should occur.
+     * <p>
+     * The first element in the pair may be <code>null</code> to signify that the dataset crs 
+     * (if available) should be used
+     * </p>
+     */
+    public Pair<CoordinateReferenceSystem, CoordinateReferenceSystem> getReproject() {
+        return reproject;
+    }
+
+    /**
+     * Simplification tolerance to apply to feature geometries, <code>null</code> meaning no 
+     * simplification.
+     */
+    public Double getSimplify() {
+        return simplify;
+    }
+
+    /**
+     * Sort criteria for the query, <code>null</code> meaning no sorting.
+     */
+    public List<Sort> getSort() {
+        return sort;
+    }
+
+    /**
      * The mode of cursor to return when handling this query.
      */
     public Cursor.Mode getMode() {
@@ -118,13 +153,6 @@ public class Query {
      */
     public Transaction getTransaction() {
         return transaction;
-    }
-
-    /**
-     * Additional query options.
-     */
-    public Map<String, Object> getOptions() {
-        return options;
     }
 
     /**
@@ -154,11 +182,10 @@ public class Query {
      */
     public Query filter(String cql) {
         try {
-            set(FILTER, CQL.parse(cql));
+            return filter(CQL.parse(cql));
         } catch (ParseException e) {
             throw new RuntimeException(e);
         }
-        return this;
     }
 
     /**
@@ -167,7 +194,7 @@ public class Query {
      * @return This object.
      */
     public Query filter(Filter filter) {
-        set(FILTER, filter);
+        this.filter = filter;
         return this;
     }
 
@@ -187,7 +214,7 @@ public class Query {
      * @return This object.
      */
     public Query limit(Integer limit) {
-        set(LIMIT, limit);
+        this.limit = limit;
         return this;
     }
 
@@ -197,7 +224,7 @@ public class Query {
      * @return This object.
      */
     public Query offset(Integer offset) {
-        set(OFFSET, offset);
+        this.offset = offset;
         return this;
     }
 
@@ -211,7 +238,7 @@ public class Query {
         for (String s : sort) {
             list.add(new Sort(s));
         }
-        set(SORT, list);
+        this.sort = list;
         return this;
     }
 
@@ -257,7 +284,7 @@ public class Query {
      * @return This object.
      */
     public Query reproject(CoordinateReferenceSystem from, CoordinateReferenceSystem to) {
-        set(REPROJECT, new Pair<CoordinateReferenceSystem,CoordinateReferenceSystem>(from, to));
+        reproject = new Pair<CoordinateReferenceSystem,CoordinateReferenceSystem>(from, to);
         return this;
     }
 
@@ -267,7 +294,7 @@ public class Query {
      * @return This object.
      */
     public Query simplify(Double tolerance) {
-        set(SIMPLIFY, tolerance);
+        simplify = tolerance;
         return this;
     }
 
@@ -304,70 +331,40 @@ public class Query {
     }
 
     /**
-     * Sets a query option. 
-     */
-    public <T> void set(Key<T> key, T value) {
-        options.put(key.getName(), value);
-    }
-
-    /**
-     * Gets a query option. 
-     */
-    public <T> T get(Key<T> key) {
-        return (T) options.get(key.getName());
-    }
-
-    /**
-     * Consumes a query option specifying a default value.
-     * <p>
-     * This method is called by datasets handling the query to handle options that can be handled
-     * natively by the dataset. 
-     * </p>
-     */
-    public <T> T consume(Key<T> key, T def) {
-        if (options.containsKey(key.getName())) {
-            return (T) options.remove(key.getName());
-        }
-        return def;
-    }
-
-    /**
-     * Determines if any of the query properties constrain the number of results in any way. 
+     * Determines if the query constrains results with a bounds constraint or filter.
+     * 
+     * @return True if no bounds or filter constraint is applied, otherwise false.
      */
     public boolean isAll() {
-        return options.isEmpty() && Envelopes.isNull(bounds);
+        return Envelopes.isNull(bounds) && !isFiltered();
     }
 
     /**
-     * Wraps the cursor based on the query properties that have not yet been consumed.
+     * Determines if the query constrains results with or filter.
      */
-    public <T> Cursor<T> apply(Cursor<T> cursor) {
-        Filter filter = consume(FILTER, null);
-        if (filter != null) {
-            cursor = Cursors.filter(cursor, filter);
-        }
+    public boolean isFiltered() {
+        return !Filter.isTrueOrNull(filter);
+    }
 
-        Integer offset = consume(OFFSET, null);
+    /**
+     * Adjusts a raw count based on limit and offset of the query.
+     * <p>
+     * The adjusted count is equivalent to:
+     * <pre>
+     * min(max(0, count-offset), limit)
+     * </pre>
+     * </p>
+     * @return The adjusted count.
+     */
+    public long adjustCount(long count) {
         if (offset != null) {
-            cursor = Cursors.offset(cursor, offset);
+            count = Math.max(0, count - offset);
         }
-
-        Integer limit = consume(LIMIT, null);
         if (limit != null) {
-            cursor = Cursors.limit(cursor, limit);
+            count = Math.min(count, limit);
         }
 
-        Pair<CoordinateReferenceSystem,CoordinateReferenceSystem> reproj = consume(REPROJECT, null);
-        if (reproj != null) {
-            cursor = Cursors.reproject(cursor, reproj.first(), reproj.second());
-        }
-
-        if (!options.isEmpty()) {
-            for (Map.Entry<String, Object> e : options.entrySet()) {
-                LOGGER.debug(String.format("Query option %s: %s ignored", e.getKey(), e.getValue()));
-            }
-        }
-        return cursor;
+        return count;
     }
 
     @Override
@@ -375,9 +372,18 @@ public class Query {
         final int prime = 31;
         int result = 1;
         result = prime * result + ((bounds == null) ? 0 : bounds.hashCode());
-        result = prime * result + ((options == null) ? 0 : options.hashCode());
+        result = prime * result + ((fields == null) ? 0 : fields.hashCode());
+        result = prime * result + ((filter == null) ? 0 : filter.hashCode());
+        result = prime * result + ((limit == null) ? 0 : limit.hashCode());
+        result = prime * result + ((mode == null) ? 0 : mode.hashCode());
+        result = prime * result + ((offset == null) ? 0 : offset.hashCode());
         result = prime * result
-                + ((fields == null) ? 0 : fields.hashCode());
+                + ((reproject == null) ? 0 : reproject.hashCode());
+        result = prime * result
+                + ((simplify == null) ? 0 : simplify.hashCode());
+        result = prime * result + ((sort == null) ? 0 : sort.hashCode());
+        result = prime * result
+                + ((transaction == null) ? 0 : transaction.hashCode());
         return result;
     }
 
@@ -395,15 +401,47 @@ public class Query {
                 return false;
         } else if (!bounds.equals(other.bounds))
             return false;
-        if (options == null) {
-            if (other.options != null)
-                return false;
-        } else if (!options.equals(other.options))
-            return false;
         if (fields == null) {
             if (other.fields != null)
                 return false;
         } else if (!fields.equals(other.fields))
+            return false;
+        if (filter == null) {
+            if (other.filter != null)
+                return false;
+        } else if (!filter.equals(other.filter))
+            return false;
+        if (limit == null) {
+            if (other.limit != null)
+                return false;
+        } else if (!limit.equals(other.limit))
+            return false;
+        if (mode != other.mode)
+            return false;
+        if (offset == null) {
+            if (other.offset != null)
+                return false;
+        } else if (!offset.equals(other.offset))
+            return false;
+        if (reproject == null) {
+            if (other.reproject != null)
+                return false;
+        } else if (!reproject.equals(other.reproject))
+            return false;
+        if (simplify == null) {
+            if (other.simplify != null)
+                return false;
+        } else if (!simplify.equals(other.simplify))
+            return false;
+        if (sort == null) {
+            if (other.sort != null)
+                return false;
+        } else if (!sort.equals(other.sort))
+            return false;
+        if (transaction == null) {
+            if (other.transaction != null)
+                return false;
+        } else if (!transaction.equals(other.transaction))
             return false;
         return true;
     }

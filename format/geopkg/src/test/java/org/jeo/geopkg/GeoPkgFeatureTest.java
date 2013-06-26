@@ -99,6 +99,18 @@ public class GeoPkgFeatureTest extends GeoPkgTestSupport {
     }
 
     @Test
+    public void testReadWithFilter() throws Exception {
+        FeatureEntry entry = geopkg.feature("states");
+        Cursor<Feature> c = geopkg.cursor(entry, new Query().filter("STATE_NAME = 'Texas'"));
+        
+        assertNotNull(c);
+        assertTrue(c.hasNext());
+        assertNotNull(c.next());
+        assertFalse(c.hasNext());
+        c.close();
+    }
+
+    @Test
     public void testAdd() throws Exception {
         FeatureEntry entry = geopkg.feature("states");
         Schema schema = geopkg.schema(entry);

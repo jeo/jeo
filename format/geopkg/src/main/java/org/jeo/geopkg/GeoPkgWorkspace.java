@@ -8,15 +8,13 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.TimeZone;
 
 import javax.sql.DataSource;
@@ -25,8 +23,8 @@ import org.jeo.data.Cursor;
 import org.jeo.data.Cursors;
 import org.jeo.data.Dataset;
 import org.jeo.data.Query;
+import org.jeo.data.QueryPlan;
 import org.jeo.data.Tile;
-import org.jeo.data.TileGrid;
 import org.jeo.data.TilePyramid;
 import org.jeo.data.TilePyramidBuilder;
 import org.jeo.data.Workspace;
@@ -43,6 +41,7 @@ import org.jeo.geopkg.geom.GeoPkgGeomWriter;
 import org.jeo.proj.Proj;
 import org.jeo.sql.DbOP;
 import org.jeo.sql.SQL;
+import org.jeo.util.Pair;
 import org.osgeo.proj4j.CoordinateReferenceSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,7 +49,6 @@ import org.sqlite.SQLiteDataSource;
 
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.io.WKBWriter;
 
 /**
  * Provides access to a GeoPackage SQLite database.
@@ -226,45 +224,45 @@ public class GeoPkgWorkspace implements Workspace {
         });
     }
 
-    public long count(final FeatureEntry entry, Query q) throws IOException {
-        if (q.isAll()) {
-            // optimize
-            return run(new DbOP<Long>() {
-                @Override
-                protected Long doRun(Connection cx) throws Exception {
-                    String sql = format("SELECT count(*) from %s", entry.getTableName());
-                    log(sql);
+    public long count(final FeatureEntry entry, final Query q) throws IOException {
+        QueryPlan qp = new QueryPlan(q);
 
-                    ResultSet rs = open(open(cx.createStatement()).executeQuery(sql));
-                    rs.next();
-                    return rs.getLong(1);
-                }
-            });
-        }
-        else {
-            //TODO: handle filters natively
+        if (!Envelopes.isNull(q.getBounds())) {
             return Cursors.size(cursor(entry, q));
         }
+
+        final SQL sql = new SQL("SELECT count(*) FROM ").name(entry.getTableName());
+        final List<Object> args = encodeQuery(sql, q, qp);
+
+        if (q.isFiltered() && !qp.isFiltered()) {
+            return Cursors.size(cursor(entry, q));
+        }
+
+        return run(new DbOP<Long>() {
+            @Override
+            protected Long doRun(Connection cx) throws Exception {
+                ResultSet rs = 
+                    open(open(prepareStatement(log(sql.toString()), args, cx)).executeQuery());
+                rs.next();
+                return q.adjustCount(rs.getLong(1));
+            }
+        });
     }
 
     public Cursor<Feature> cursor(FeatureEntry entry, Query q) throws IOException {
-        //TODO: handle filters natively
         try {
             Schema schema = schema(entry);
 
+            QueryPlan qp = new QueryPlan(q);
+
             //TODO: handle selective fields
-            SQL sqlb = new SQL("SELECT ");
-            for (Field f : schema) {
-                sqlb.name(f.getName()).add(",");
-            }
-
-            sqlb.trim(1).add(" FROM ").name(entry.getTableName());
-            String sql = sqlb.toString();
-
-            log(sql);
+            SQL sqlb = new SQL("SELECT * FROM ").name(entry.getTableName());
+            List<Object> args = encodeQuery(sqlb, q, qp);
 
             Connection cx = db.getConnection();
-            ResultSet rs = cx.createStatement().executeQuery(sql);
+            PreparedStatement ps = prepareStatement(log(sqlb.toString()), args, cx);
+
+            ResultSet rs = ps.executeQuery();
 
             Cursor<Feature> c = new FeatureCursor(rs, cx, schema);
 
@@ -272,11 +270,39 @@ public class GeoPkgWorkspace implements Workspace {
                 c = Cursors.intersects(c, q.getBounds());
             }
 
-            return q.apply(c);
+            return qp.apply(c);
         }
         catch(Exception e) {
             throw new IOException(e);
         }
+    }
+
+    List<Object> encodeQuery(SQL sql, Query q, QueryPlan qp) {
+        GeoPkgFilterSQLEncoder sqlfe = new GeoPkgFilterSQLEncoder(null, dbtypes);
+        if (!Filter.isTrueOrNull(q.getFilter())) {
+            try {
+                sql.add(" WHERE ").add(sqlfe.encode(q.getFilter(), null));
+                qp.filtered();
+            }
+            catch(Exception e) {
+                LOG.debug("Unable to natively encode filter: " + q.getFilter(), e);
+            }
+        }
+
+        if (q.getLimit() != null) {
+            sql.add(" LIMIT ").add(q.getLimit());
+            qp.offsetted();
+        }
+        if (q.getOffset() != null) {
+            sql.add(" OFFSET ").add(q.getOffset());
+            qp.limited();
+        }
+
+        List<Object> args = new ArrayList<Object>();
+        for (Pair<Object, Integer> p : sqlfe.getArgs()) {
+            args.add(p.first());
+        }
+        return args;
     }
 
     public void add(final FeatureEntry entry, final Feature feature) throws IOException {
@@ -305,29 +331,7 @@ public class GeoPkgWorkspace implements Workspace {
                 String sql = sqlb.toString();
                 log(sql, objs);
 
-                PreparedStatement ps = open(cx.prepareStatement(sql));
-                for (int i = 0; i < objs.size(); i++) {
-                    Object obj = objs.get(i);
-                    if (obj instanceof Geometry) {
-                        ps.setBytes(i+1, geomWriter.write((Geometry)obj));
-                    }
-                    else {
-                        if (obj instanceof Byte || obj instanceof Short || obj instanceof Integer) {
-                            ps.setInt(i+1, ((Number)obj).intValue());
-                        }
-                        if (obj instanceof Long) {
-                            ps.setLong(i+1, ((Number)obj).longValue());
-                        }
-                        if (obj instanceof Float || obj instanceof Double) {
-                            ps.setDouble(i+1, ((Number)obj).doubleValue());
-                        }
-                        else {
-                            ps.setString(i+1, obj.toString());
-                        }
-                    }
-                }
-
-                return ps.execute();
+                return open(prepareStatement(sql, objs, cx)).execute();
             }
         });
         
@@ -754,6 +758,35 @@ public class GeoPkgWorkspace implements Workspace {
         e.setBounds(new Envelope(
             rs.getDouble(6), rs.getDouble(8), rs.getDouble(7), rs.getDouble(9)));
         e.setSrid(rs.getInt(10));
+    }
+
+    PreparedStatement prepareStatement(String sql, List<Object> args, Connection cx) 
+        throws SQLException, IOException {
+
+        PreparedStatement ps = cx.prepareStatement(sql);
+
+        for (int i = 0; i < args.size(); i++) {
+            Object obj = args.get(i);
+            if (obj instanceof Geometry) {
+                ps.setBytes(i+1, geomWriter.write((Geometry)obj));
+            }
+            else {
+                if (obj instanceof Byte || obj instanceof Short || obj instanceof Integer) {
+                    ps.setInt(i+1, ((Number)obj).intValue());
+                }
+                if (obj instanceof Long) {
+                    ps.setLong(i+1, ((Number)obj).longValue());
+                }
+                if (obj instanceof Float || obj instanceof Double) {
+                    ps.setDouble(i+1, ((Number)obj).doubleValue());
+                }
+                else {
+                    ps.setString(i+1, obj.toString());
+                }
+            }
+        }
+
+        return ps;
     }
 
     <T> T run(DbOP<T> op) throws IOException {

@@ -3,7 +3,6 @@ package org.jeo.geojson;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -11,11 +10,12 @@ import java.io.Reader;
 import java.io.Writer;
 
 import org.jeo.data.Cursor;
+import org.jeo.data.Cursor.Mode;
 import org.jeo.data.Cursors;
 import org.jeo.data.Driver;
 import org.jeo.data.Query;
+import org.jeo.data.QueryPlan;
 import org.jeo.data.VectorData;
-import org.jeo.data.Cursor.Mode;
 import org.jeo.feature.Feature;
 import org.jeo.feature.Schema;
 import org.jeo.util.Optional;
@@ -100,7 +100,8 @@ public class GeoJSONDataset implements VectorData {
             }
             return new GeoJSONAppendCursor(writer());
         }
-        return q.apply(new GeoJSONCursor(reader()));
+
+        return new QueryPlan(q).apply(new GeoJSONCursor(reader()));
     }
 
     @Override

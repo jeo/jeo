@@ -66,6 +66,10 @@ public class PostGISWorkspace implements Workspace {
         return db;
     }
 
+    public PostGISTypes getDbTypes() {
+        return dbtypes;
+    }
+
     @Override
     public Iterable<String> list() throws IOException {
         return run(new DbOP<List<String>>() {

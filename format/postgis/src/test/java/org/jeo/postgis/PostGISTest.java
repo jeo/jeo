@@ -13,6 +13,7 @@ import java.util.NoSuchElementException;
 import java.util.Set;
 
 import org.jeo.data.Cursor;
+import org.jeo.data.Cursors;
 import org.jeo.data.Query;
 import org.jeo.data.VectorData;
 import org.jeo.feature.Feature;
@@ -187,6 +188,12 @@ public class PostGISTest {
         assertFalse(c.hasNext());
         assertNull(c.next());
         c.close();
+    }
+
+    @Test
+    public void testCursorFilter() throws Exception {
+        VectorData states = pg.get("states");
+        assertEquals(1, Cursors.size(states.cursor(new Query().filter("STATE_NAME = 'Texas'"))));
     }
 
     @Test

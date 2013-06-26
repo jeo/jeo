@@ -20,10 +20,12 @@ import org.jeo.data.Cursor;
 import org.jeo.data.Cursor.Mode;
 import org.jeo.data.Cursors;
 import org.jeo.data.Query;
+import org.jeo.data.QueryPlan;
 import org.jeo.data.Transactional;
 import org.jeo.data.VectorData;
 import org.jeo.feature.Feature;
 import org.jeo.feature.Schema;
+import org.jeo.geom.Envelopes;
 import org.jeo.util.Pair;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
@@ -80,8 +82,8 @@ public class GeoGitDataset implements VectorData, Transactional {
 
     @Override
     public long count(Query q) throws IOException {
-        if (q == null || q.isAll()) {
-            return countAll();
+        if (q.isAll()) {
+            return q.adjustCount(countAll());
         }
 
         return Cursors.size(cursor(q));
@@ -114,8 +116,11 @@ public class GeoGitDataset implements VectorData, Transactional {
         LsTreeOp ls = geogit.getGeoGIT().command(LsTreeOp.class)
             .setStrategy(Strategy.FEATURES_ONLY).setReference(getRef().path());
 
-        final Envelope bbox = q != null ? q.getBounds() : null;
-        if (bbox != null && !bbox.isNull()) {
+        QueryPlan qp = new QueryPlan(q);
+        
+        final Envelope bbox = q.getBounds();
+        if (!Envelopes.isNull(bbox)) {
+            qp.bounded();
             ls.setBoundsFilter(new Predicate<Bounded>() {
                 @Override
                 public boolean apply(Bounded input) {
@@ -124,7 +129,7 @@ public class GeoGitDataset implements VectorData, Transactional {
             });
         }
 
-        return q.apply(new GeoGitCursor(q.getMode(), ls.call(), this, tx));
+        return qp.apply(new GeoGitCursor(q.getMode(), ls.call(), this, tx));
     }
 
     public GeoGitTransaction transaction(Map<String,Object> options) {

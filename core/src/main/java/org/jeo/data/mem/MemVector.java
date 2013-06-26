@@ -2,16 +2,19 @@ package org.jeo.data.mem;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import org.jeo.data.Cursor;
 import org.jeo.data.Cursors;
 import org.jeo.data.Query;
+import org.jeo.data.QueryPlan;
 import org.jeo.data.VectorData;
 import org.jeo.feature.DiffFeature;
 import org.jeo.feature.Feature;
 import org.jeo.feature.Field;
 import org.jeo.feature.Schema;
+import org.jeo.geom.Envelopes;
 import org.osgeo.proj4j.CoordinateReferenceSystem;
 
 import com.vividsolutions.jts.geom.Envelope;
@@ -88,27 +91,32 @@ public class MemVector implements VectorData {
     
     @Override
     public long count(Query q) throws IOException {
-        if (q == null) {
-            return features.size();
-        }
-    
-        Cursor<Feature> cursor = Cursors.create(features);
-        if (q.getBounds() != null && !q.getBounds().isNull()) {
-            cursor = Cursors.intersects(cursor, q.getBounds());
-        }
-    
-        return Cursors.size(q.apply(cursor));
+        return Cursors.size(cursor(q));
     }
 
     @Override
     public Cursor<Feature> cursor(Query q) throws IOException {
-        Cursor<Feature> cursor = new MemCursor(q.getMode(), this);
-    
-        if (q.getBounds() != null && !q.getBounds().isNull()) {
-            cursor = Cursors.intersects(cursor, q.getBounds());
+        QueryPlan qp = new QueryPlan(q);
+
+        List<Feature> features = this.features;
+        if (!Envelopes.isNull(q.getBounds())) {
+            features = query(q.getBounds()); 
+            qp.bounded();
         }
-    
-        return q.apply(cursor);
+
+        return qp.apply(new MemCursor(q.getMode(), features, this));
+    }
+
+    List<Feature> query(Envelope bounds) {
+        List<Feature> features = index.query(bounds);
+        for (Iterator<Feature> it = features.iterator(); it.hasNext(); ) {
+            Feature f = it.next();
+            if (!bounds.intersects(f.geometry().getEnvelopeInternal())) {
+                it.remove();
+            }
+        }
+
+        return features;
     }
 
     public void add(Feature f) {

@@ -16,14 +16,18 @@ import java.util.List;
 import java.util.Map;
 
 import org.jeo.data.Cursor;
+import org.jeo.data.Cursors;
 import org.jeo.data.Driver;
 import org.jeo.data.Query;
+import org.jeo.data.QueryPlan;
 import org.jeo.data.VectorData;
 import org.jeo.feature.Feature;
 import org.jeo.feature.Field;
 import org.jeo.feature.Schema;
+import org.jeo.filter.Filter;
 import org.jeo.geom.Envelopes;
 import org.jeo.sql.DbOP;
+import org.jeo.sql.FilterSQLEncoder;
 import org.jeo.sql.PrimaryKey;
 import org.jeo.sql.PrimaryKeyColumn;
 import org.jeo.sql.SQL;
@@ -109,26 +113,37 @@ public class PostGISDataset implements VectorData {
 
     @Override
     public long count(final Query q) throws IOException {
-        return pg.run(new DbOP<Long>() {
-            @Override
-            protected Long doRun(Connection cx) throws Exception {
-                SQL sql = new SQL("SELECT count(*) FROM ").name(getSchema().getName());
-                List<Pair<Object,Integer>> values = encodeQueryPredicate(sql, q);
+        //save original query
+        QueryPlan qp = new QueryPlan(q);
 
-                pg.logQuery(sql, values);
+        final SQL sql = new SQL("SELECT count(*) FROM ").name(getSchema().getName());
+        final List<Pair<Object,Integer>> args = new ArrayList<Pair<Object,Integer>>();
 
-                PreparedStatement ps = open(pg.prepareStatement(sql, values, cx));
-                
-                ResultSet rs = open(ps.executeQuery());
-                rs.next();
-                return rs.getLong(1);
-            }
-        });
+        encodeQuery(sql, q, qp, args);
+        if (!Filter.isTrueOrNull(q.getFilter()) && qp.isFiltered()) {
+            return pg.run(new DbOP<Long>() {
+                @Override
+                protected Long doRun(Connection cx) throws Exception {
+                    pg.logQuery(sql, args);
+
+                    PreparedStatement ps = open(pg.prepareStatement(sql, args, cx));
+
+                    ResultSet rs = open(ps.executeQuery());
+                    rs.next();
+                    return rs.getLong(1);
+                }
+            });
+        }
+        else {
+            return Cursors.size(cursor(q));
+        }
     }
 
     @Override
     public Cursor<Feature> cursor(Query q) throws IOException {
         try {
+            QueryPlan qp = new QueryPlan(q);
+
             Connection cx = pg.getDataSource().getConnection();
             
             if (q.getMode() == Cursor.APPEND) {
@@ -172,13 +187,15 @@ public class PostGISDataset implements VectorData {
             }
     
             sql.add(" FROM ").name(schema.getName());
-            
-            List<Pair<Object,Integer>> values = encodeQueryPredicate(sql, q);
-            pg.logQuery(sql, values);
+
+            List<Pair<Object,Integer>> args = new ArrayList<Pair<Object,Integer>>();
+            encodeQuery(sql, q, qp, args);
+
+            pg.logQuery(sql, args);
 
             try {
-                PreparedStatement st = pg.prepareStatement(sql, values, cx);
-                return q.apply(new PostGISCursor(st.executeQuery(), cx, q.getMode(), this));
+                PreparedStatement st = pg.prepareStatement(sql, args, cx);
+                return qp.apply(new PostGISCursor(st.executeQuery(), cx, q.getMode(), this));
             }
             catch(SQLException e) {
                 cx.close();
@@ -204,42 +221,59 @@ public class PostGISDataset implements VectorData {
         }
     }
 
-    List<Pair<Object,Integer>> encodeQueryPredicate(SQL sql, Query q) {
+    void encodeQuery(SQL sql, Query q, QueryPlan qp, List<Pair<Object,Integer>> args) {
         Schema schema = getSchema();
 
-        List<Pair<Object,Integer>> values = new ArrayList<Pair<Object,Integer>>();
-        
-        if (schema.geometry() != null && q.getBounds() != null && !q.getBounds().isNull()) {
+        if (schema.geometry() != null && !Envelopes.isNull(q.getBounds())) {
+            qp.bounded();
+
             String geom = schema.geometry().getName();
             Integer srid = schema.geometry().property("srid", Integer.class);
             
             Polygon poly = Envelopes.toPolygon(q.getBounds());
 
-            sql.add(" WHERE ").name(geom).add(" && ST_GeomFromText(?, ?)")
-               .add(" AND ST_Intersects(").name(geom).add(", ST_GeomFromText(?, ?))");
+            sql.add(" WHERE ").name(geom).add(" && ST_GeomFromText(?, ?)");
+               //.add(" AND ST_Intersects(").name(geom).add(", ST_GeomFromText(?, ?))");
 
             String wkt = poly.toText();
-            values.add(new Pair(wkt, Types.VARCHAR));
-            values.add(new Pair(srid, Types.INTEGER));
-            values.add(new Pair(wkt, Types.VARCHAR));
-            values.add(new Pair(srid ,Types.INTEGER));
+            args.add(new Pair(wkt, Types.VARCHAR));
+            args.add(new Pair(srid, Types.INTEGER));
+            //values.add(new Pair(wkt, Types.VARCHAR));
+            //values.add(new Pair(srid ,Types.INTEGER));
         }
 
-        Integer offset = q.consume(Query.OFFSET, null);
+        Filter filter = q.getFilter();
+        if (!Filter.isTrueOrNull(filter)) {
+            FilterSQLEncoder sqle = new FilterSQLEncoder(table.getPrimaryKey(), pg.getDbTypes());
+            try {
+                String where = sqle.encode(filter, null);
+                if (args.isEmpty()) {
+                    sql.add(" WHERE ");
+                }
+                sql.add(where);
+                args.addAll(sqle.getArgs());
+
+                qp.bounded();
+            }
+            catch(Exception e) {
+                LOG.debug("Unable to natively encode filter", e);
+            }
+        }
+
+        Integer offset = q.getOffset();
         if (offset != null) {
+            qp.offsetted();
             sql.add(" OFFSET ").add(offset);
             //values.add(new Pair(offset, Types.INTEGER));
         }
-        Integer limit = q.consume(Query.LIMIT, null);
+        Integer limit = q.getLimit();
         if (limit != null) {
+            qp.limited();
             sql.add(" LIMIT ").add(limit);
             //values.add(new Pair(limit, Types.INTEGER));
         }
 
-        return values;
     }
-
-    
 
     void doUpdate(final Feature f, final Map<String,Object> changed, Connection cx) throws IOException {
         pg.run(new DbOP<Boolean>() {

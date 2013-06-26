@@ -2,6 +2,7 @@ package org.jeo.data.mem;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 import org.jeo.data.Cursor;
 import org.jeo.data.Cursors;
@@ -15,10 +16,10 @@ public class MemCursor extends Cursor<Feature> {
     Cursor<Feature> cursor;
     Feature curr;
 
-    MemCursor(Mode mode, MemVector dataset) {
+    MemCursor(Mode mode, List<Feature> features, MemVector dataset) {
         super(mode);
         this.dataset = dataset;
-        cursor = Cursors.create(dataset.getFeatures());
+        cursor = Cursors.create(features);
     }
     
     @Override

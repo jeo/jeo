@@ -15,4 +15,18 @@ public class None extends Filter {
         return v.visit(this, obj);
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        return obj instanceof None;
+    }
+
+    @Override
+    public int hashCode() {
+        return None.class.getName().hashCode();
+    }
+
+    @Override
+    public String toString() {
+        return "None";
+    }
 }

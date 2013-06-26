@@ -15,4 +15,18 @@ public class All extends Filter {
         return v.visit(this, obj);
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        return obj instanceof All;
+    }
+
+    @Override
+    public int hashCode() {
+        return All.class.getName().hashCode();
+    }
+
+    @Override
+    public String toString() {
+        return "All";
+    }
 }

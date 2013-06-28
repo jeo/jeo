@@ -12,13 +12,13 @@ import org.jeo.nano.NanoJeoServer;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.Parameters;
 
-@Parameters(commandNames="serve", commandDescription="Starts ")
+@Parameters(commandNames="serve", commandDescription="Starts NanoHTTPD web server")
 public class ServeCmd extends JeoCmd {
 
     @Parameter(description="registry", arity=1, required=true)
     List<String> reg;
 
-    @Parameter(names = {"-p", "-port" }, description="port")
+    @Parameter(names = {"-p", "-port" }, description="Port to listen on")
     Integer port = 8000;
 
     @Override

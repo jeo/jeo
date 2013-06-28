@@ -337,6 +337,7 @@ public class GeoJSONWriter {
     public GeoJSONWriter endObj() throws IOException {
         pop();
         out.write("}");
+        next();
         return this;
     }
 
@@ -392,6 +393,7 @@ public class GeoJSONWriter {
     public GeoJSONWriter endArray() throws IOException {
         pop();
         out.write("]");
+        next();
         return this;
     }
 
@@ -584,7 +586,7 @@ public class GeoJSONWriter {
                 JSONValue.writeJSONString(obj, out);
             }
 
-            state.first = false;
+            next();
         }
         return this;
     }
@@ -608,6 +610,12 @@ public class GeoJSONWriter {
             throw new IllegalStateException("Unexpected object");
         }
         stack.push(state);
+    }
+
+    void next() {
+        if (!stack.isEmpty()) {
+            peek().first = false;
+        }
     }
 
     static Map<String,Object> object() {

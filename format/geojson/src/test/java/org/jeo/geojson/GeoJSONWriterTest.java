@@ -63,6 +63,49 @@ public class GeoJSONWriterTest extends GeoJSONTestSupport {
         assertEquals(2 ,arr.size());
     }
 
+    @Test
+    public void testObjectWithArrayProperties() throws Exception {
+        w.obj();
+
+        w.key("foo").array();
+        w.value("one").value("two");
+        w.endArray();
+
+        w.key("bar").array();
+        w.value("three").value("four");
+        w.endArray();
+
+        w.endObj();
+
+        JSONObject obj = (JSONObject) JSONValue.parse(string());
+        assertEquals(2, obj.keySet().size());
+       
+        assertTrue(obj.get("foo") instanceof JSONArray);
+        assertEquals(2, ((JSONArray)obj.get("foo")).size());
+
+        assertTrue(obj.get("bar") instanceof JSONArray);
+        assertEquals(2, ((JSONArray)obj.get("bar")).size());
+    }
+
+    @Test
+    public void testObjectWithEmptyObjectProperties() throws Exception {
+        w.obj();
+
+        w.key("foo").obj().endObj();
+        w.key("bar").obj().endObj();
+
+        w.endObj();
+
+        JSONObject obj = (JSONObject) JSONValue.parse(string());
+        assertEquals(2, obj.keySet().size());
+       
+        assertTrue(obj.get("foo") instanceof JSONObject);
+        assertEquals(0, ((JSONObject)obj.get("foo")).size());
+
+        assertTrue(obj.get("bar") instanceof JSONObject);
+        assertEquals(0, ((JSONObject)obj.get("bar")).size());
+    }
+
     String string() {
         return w.getWriter().toString();
     }

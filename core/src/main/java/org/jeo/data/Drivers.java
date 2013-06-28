@@ -9,7 +9,6 @@ import java.util.Iterator;
 import java.util.Map;
 
 import org.jeo.feature.Schema;
-import org.jeo.util.Key;
 import org.jeo.util.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -121,6 +120,15 @@ public class Drivers {
      * 
      * @see Drivers#open(File, Class, DriverRegistry)
      */
+    public static Object open(File file) throws IOException {
+        return open(file, Object.class);
+    }
+
+    /**
+     * Opens a connection to data specified by a file expecting an object of the specified class.
+     * 
+     * @see Drivers#open(File, Class, DriverRegistry)
+     */
     public static <T> T open(File file, Class<T> clazz) throws IOException {
         return open(file, clazz, REGISTRY);
     }
@@ -144,10 +152,7 @@ public class Drivers {
      *   database connection failure. 
      */
     public static <T> T open(File file, Class<T> clazz, DriverRegistry registry) throws IOException {
-        Map<Key<?>,Object> opts = new HashMap<Key<?>,Object>();
-        opts.put(FileDriver.FILE, file);
-
-        return open(opts, clazz, list(FileDriver.class));
+        return open(file.toURI(), clazz, registry);
     }
 
     /**
@@ -177,11 +182,69 @@ public class Drivers {
         return open(opts, clazz, list(registry));
     }
 
+    /**
+     * Opens a connection to data described by the specified uri.
+     * 
+     * @see Drivers#open(URI, Class, DriverRegistry)
+     */
     public static Object open(URI uri) throws IOException {
         return open(uri, REGISTRY);
     }
-    
+
+    /**
+     * Opens a connection to data described by the specified uri with the specified driver 
+     * registry.
+     * 
+     * @see Drivers#open(URI, Class, DriverRegistry)
+     */
     public static Object open(URI uri, DriverRegistry registry) throws IOException {
+        return open(uri, Object.class, registry);
+    }
+
+    /**
+     * Opens a connection to data described by the specified uri.
+     * <p>
+     * The <tt>uri</tt> can take one of two forms. The first is a file uri:
+     * <pre>
+     *   file:&lt;path>
+     * </pre>
+     * For example <tt>file:/Users/jdeolive/foo.json</tt> specifies a connection to a GeoJSON file.
+     * </p>
+     * <p>
+     * The second form uses the uri components to describe different aspect of the connection:
+     * <pre>
+     * [&lt;driver>://][&lt;primary-option>][?&lt;secondary-options>]*][#&lt;dataset>]
+     * </pre>
+     * Where:
+     * <ul>
+     *  <li><tt>driver</tt> is the driver name or alias
+     *  <li><tt>primary-option</tt> is the "main" option for that driver, for example in the case
+     *  of file based drivers this would be the file path, in the case of database based drivers
+     *  this would be the database name.
+     *  <li><tt>secondary-options</tt> are additional driver options
+     *  <li><tt>dataset</tt> is the name of a dataset within a workspace
+     * </ul>
+     * For example <tt>pg://jeo?host=locahost&port=5432&user=bob#states</tt> specifies a 
+     * connection to a PostGIS table named "states", in a database named "jeo", as user "bob", to 
+     * a server running on localhost, port 5432.  
+     * </p>
+     * <p>
+     * The optional <tt>class</tt> parameter is used to filter the candidate driver set. For 
+     * example to constrain to workspace drivers.
+     * <pre><code>
+     * Workspace ws = Drivers.open(..., Workspace.class);
+     * </code></pre>
+     * </p>
+     * @param uri uri specifying connection options.
+     * @param clazz Class used to filter registered drivers, may be <code>null</code>.
+     * 
+     * @return The data object, or <code>null</code> if no suitable driver could be found for the 
+     *   specified options.
+     *
+     * @throws IOException Any connection errors, such as a file system error or 
+     *   database connection failure. 
+     */
+    public static <T> T open(URI uri, Class<T> clazz, DriverRegistry registry) throws IOException {
         uri = convertFileURI(uri);
         
         Driver<?> d = find(uri, registry);
@@ -197,7 +260,7 @@ public class Drivers {
             data = ((Workspace)data).get(uri.getFragment()); 
         }
 
-        return data;
+        return clazz.cast(data);
     }
 
     public static <T extends VectorData> T create(Schema schema, URI uri, Class<T> clazz) 

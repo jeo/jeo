@@ -1,7 +1,6 @@
 package org.jeo.data;
 
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 
 import org.slf4j.Logger;
@@ -37,8 +36,8 @@ public class SimpleRegistry implements Registry {
     }
 
     @Override
-    public Iterator<String> keys() {
-        return reg.keySet().iterator();
+    public Iterable<String> list() {
+        return reg.keySet();
     }
 
     /**

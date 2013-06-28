@@ -4,9 +4,11 @@ import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
+
+import org.jeo.data.mem.MemWorkspace;
+import org.jeo.util.Util;
 
 /**
  * A registry that loads workspaces from files in a specified directory.
@@ -33,12 +35,12 @@ public class DirectoryRegistry implements Registry {
     }
 
     @Override
-    public Iterator<String> keys() {
+    public Iterable<String> list() {
         LinkedHashSet<String> set = new LinkedHashSet<String>();
 
         if (exts == null) {
             for (String fn : baseDir.list()) {
-                set.add(basename(fn));
+                set.add(Util.base(fn));
             }
         }
         else {
@@ -51,12 +53,12 @@ public class DirectoryRegistry implements Registry {
                     }
                 });
                 for (String file : files) {
-                    set.add(basename(file));
+                    set.add(Util.base(file));
                 }
             }
         }
 
-        return set.iterator();
+        return set;
     }
 
     @Override
@@ -70,7 +72,7 @@ public class DirectoryRegistry implements Registry {
                 }
             });
             for (String file : files) {
-                Workspace ws = Drivers.open(new File(baseDir, file), Workspace.class);
+                Workspace ws = workspace(new File(baseDir, file));
                 if (ws != null) {
                     return ws;
                 }
@@ -81,7 +83,7 @@ public class DirectoryRegistry implements Registry {
             for (String ext : exts) {
                 File f = new File(baseDir, key + "." + ext);
                 if (f.exists()) {
-                    Workspace ws = Drivers.open(f, Workspace.class);
+                    Workspace ws = workspace(f);
                     if (ws != null) {
                         return ws;
                     }
@@ -92,11 +94,22 @@ public class DirectoryRegistry implements Registry {
         return null;
     }
 
-    public void close() {
+    Workspace workspace(File file) throws IOException {
+        Object obj = Drivers.open(file);
+        if (obj instanceof Workspace) {
+            return (Workspace) obj;
+        }
+        else if (obj instanceof Dataset) {
+            Dataset data = (Dataset) obj;
+            MemWorkspace mem = new MemWorkspace();
+            mem.put(data.getName(), data);
+            return mem;
+        }
+        else {
+            return null;
+        }
     }
 
-    String basename(String fn) {
-        int dot = fn.lastIndexOf('.');
-        return fn.substring(0, dot);
+    public void close() {
     }
 }

@@ -1,7 +1,6 @@
 package org.jeo.data;
 
 import java.io.IOException;
-import java.util.Iterator;
 
 /**
  * A container of {@link Workspace} objects.
@@ -13,7 +12,7 @@ public interface Registry extends Disposable {
     /**
      * The names of all workspaces of the registry.
      */
-    Iterator<String> keys();
+    Iterable<String> list();
 
     /**
      * Returns a workspace object by name.

@@ -1,7 +1,6 @@
 package org.jeo.data;
 
 import java.io.IOException;
-import java.util.Iterator;
 import java.util.concurrent.ExecutionException;
 
 import org.jeo.feature.Schema;
@@ -42,9 +41,9 @@ public class CachedRegistry implements Registry {
     }
 
     @Override
-    public Iterator<String> keys() {
+    public Iterable<String> list() {
         //TODO: might want to cache this
-        return reg.keys();
+        return reg.list();
     }
 
     @Override

@@ -233,6 +233,7 @@
     <module>format</module>
     <module>util</module>
     <module>cli</module>
+    <module>nano</module>
   </modules>
 
   <properties>

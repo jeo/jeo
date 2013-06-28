@@ -14,6 +14,7 @@ import org.jeo.cli.cmd.InfoCmd;
 import org.jeo.cli.cmd.JeoCmd;
 import org.jeo.cli.cmd.QueryCmd;
 import org.jeo.cli.cmd.RootCmd;
+import org.jeo.cli.cmd.ServeCmd;
 import org.jeo.cli.conv.JeoCLIConverterFactory;
 
 import com.beust.jcommander.JCommander;
@@ -84,6 +85,7 @@ public class JeoCLI {
         jcmdr.addCommand("query", new QueryCmd());
         jcmdr.addCommand("info", new InfoCmd());
         jcmdr.addCommand("convert", new ConvertCmd());
+        jcmdr.addCommand("serve", new ServeCmd());
         return jcmdr;
     }
 

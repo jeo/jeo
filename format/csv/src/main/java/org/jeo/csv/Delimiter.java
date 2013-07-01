@@ -3,7 +3,11 @@ package org.jeo.csv;
 public class Delimiter {
 
     public static Delimiter comma() {
-        return new Delimiter(" *, *");
+        return character(',');
+    }
+
+    public static Delimiter character(char ch) {
+        return new Delimiter(" *" + ch + " *");
     }
 
     public static Delimiter whitespace() {

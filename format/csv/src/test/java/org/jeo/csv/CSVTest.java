@@ -1,6 +1,6 @@
 package org.jeo.csv;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -8,7 +8,6 @@ import java.io.InputStream;
 
 import org.jeo.Tests;
 import org.jeo.data.Query;
-import org.jeo.feature.Feature;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -31,13 +30,6 @@ public class CSVTest {
     @Test
     public void testBounds() throws Exception {
         assertEquals(new Envelope(2, 6, 0, 5), csv.bounds());
-    }
-
-    @Test
-    public void testCursor() throws Exception {
-        for (Feature f : csv.cursor(new Query())) {
-            System.out.println(f);
-        }
     }
 
     InputStream csv() {

@@ -1,9 +1,7 @@
 package org.jeo.csv;
 
-import java.util.Collections;
+import java.io.IOException;
 import java.util.List;
-
-import org.jeo.feature.Field;
 
 import com.vividsolutions.jts.geom.Geometry;
 
@@ -12,9 +10,7 @@ import com.vividsolutions.jts.geom.Geometry;
  */
 public abstract class CSVHandler {
 
-    public List<Field> header(String[] head) {
-        return Collections.emptyList();
-    }
+    public abstract void header(String[] head);
 
-    public abstract Geometry geom(String[] row);
+    public abstract Geometry geom(List<Object> row) throws IOException;
 }

@@ -1,9 +1,7 @@
 package org.jeo.csv;
 
-import java.util.ArrayList;
 import java.util.List;
 
-import org.jeo.feature.Field;
 import org.jeo.geom.GeomBuilder;
 
 import com.vividsolutions.jts.geom.Geometry;
@@ -24,8 +22,7 @@ public class XYHandler extends CSVHandler {
     }
 
     @Override
-    public List<Field> header(String[] head) {
-        List<Field> fields = new ArrayList<Field>();
+    public void header(String[] head) {
         if (opts.getX() == null) {
             Integer x = null, y = null;
             for (int i = 0; i < head.length; i++) {
@@ -44,15 +41,12 @@ public class XYHandler extends CSVHandler {
 
             opts.xy(x, y);
         }
-
-        for (String col: head) {
-            fields.add(new Field(col, String.class));
-        }
-        return fields;
     }
 
     @Override
-    public Geometry geom(String[] row) {
-        return gb.point(Double.parseDouble(row[opts.getX()]), Double.parseDouble(row[opts.getY()])).toPoint();
+    public Geometry geom(List<Object> row) {
+        Number x = (Number) row.get(opts.getX());
+        Number y = (Number) row.get(opts.getY());
+        return gb.point(x.doubleValue(), y.doubleValue()).toPoint();
     }
 }

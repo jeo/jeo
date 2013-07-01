@@ -1,12 +1,19 @@
 package org.jeo.csv;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.jeo.util.Pair;
+
 public class CSVOpts {
 
     Delimiter delim = CSV.DELIM.getDefault();
     boolean header = CSV.HEADER.getDefault();
 
-    String xcol, ycol;
-    Integer x, y;
+    String xcol, ycol, wktcol;
+    Integer x, y, wkt;
+
+    List<Pair<Object,Class<?>>> mappings = new ArrayList<Pair<Object,Class<?>>>();
 
     public Delimiter getDelimiter() {
         return delim;
@@ -38,6 +45,26 @@ public class CSVOpts {
         return this;
     }
 
+    public CSVOpts wkt(String wkt) {
+        this.wktcol = wkt;
+        return this;
+    }
+
+    public CSVOpts wkt(Integer wkt) {
+        this.wkt = wkt;
+        return this;
+    }
+
+    public CSVOpts map(Integer col, Class<?> type) {
+        mappings.add(new Pair<Object,Class<?>>(col, type));
+        return this;
+    }
+
+    public CSVOpts map(String col, Class<?> type) {
+        mappings.add(new Pair<Object,Class<?>>(col, type));
+        return this;
+    }
+
     Integer getX() {
         return x;
     }
@@ -54,18 +81,25 @@ public class CSVOpts {
         return ycol;
     }
 
-    CSVHandler handler() {
-        //sanity check
-        if (x == null || y == null) {
-            if (xcol == null || ycol == null) {
-                throw new IllegalArgumentException("Must specify x/y columns");
-            }
-        }
+    String getWktCol() {
+        return wktcol;
+    }
 
-        if (xcol != null && !header) {
+    Integer getWkt() {
+        return wkt;
+    }
+
+    CSVHandler handler() {
+        //sanity checks
+
+        if ((wktcol != null && !header) || (xcol != null && ycol != null && !header)) { 
             throw new IllegalArgumentException("specifying column names requires a header");
         }
 
-        return new XYHandler(this);
+        if (x == null && y == null && wkt == null && xcol == null && ycol == null && wktcol == null) {
+            throw new IllegalArgumentException("Must specify x/y columns or wkt column");
+        }
+
+        return (wkt == null && wktcol == null) ? new XYHandler(this) : new WKTHandler(this); 
     }
 }

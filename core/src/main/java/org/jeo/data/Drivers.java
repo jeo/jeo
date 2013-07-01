@@ -305,14 +305,15 @@ public class Drivers {
     static Map<String,Object> parseURI(URI uri, Driver<?> d) {
         Map<String,Object> opts = new HashMap<String, Object>();
         
-        // parse host 
-        if (uri.getHost() != null) {
+        // parse host / path
+        String first = uri.getHost() != null ? uri.getHost() : uri.getPath();
+        if (first != null) {
             //use the first key
             if (d.getKeys().isEmpty()) {
                 throw new IllegalArgumentException(d.getName() + " declared no keys");
             }
 
-            opts.put(d.getKeys().get(0).getName(), uri.getHost());
+            opts.put(d.getKeys().get(0).getName(), first);
         }
 
         // parse query string

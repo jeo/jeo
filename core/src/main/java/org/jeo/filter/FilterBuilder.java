@@ -6,6 +6,8 @@ import java.util.Deque;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.jeo.filter.Logic.Type;
+
 /**
  * Builder for filters that can compose complex filter / expression trees. 
  * <p>
@@ -109,8 +111,12 @@ public class FilterBuilder {
 
     FilterBuilder log(Logic.Type type) {
         LinkedList<Filter> parts = new LinkedList<Filter>();
+
         while(stack.peek() instanceof Filter) {
             parts.addFirst((Filter)stack.pop());
+            if (type == Type.NOT) {
+                break;
+            }
         }
 
         stack.push(new Logic(type, parts));

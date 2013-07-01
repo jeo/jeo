@@ -75,7 +75,7 @@ public class Logic extends Filter {
     boolean or(Object obj) {
         Iterator<Filter> it = parts.iterator();
         boolean result = it.next().apply(obj);
-        while (it.hasNext()) {
+        while (it.hasNext() && !result) {
             result = result || it.next().apply(obj);
         }
         return result;

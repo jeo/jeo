@@ -58,7 +58,7 @@ public class QueryPlan {
      * Marks {@link Query#getFilter()} as being handled natively.
      */
     public void filtered() {
-        filtered = false;
+        filtered = true;
     }
 
     /**

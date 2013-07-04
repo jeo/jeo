@@ -32,8 +32,12 @@ public abstract class VectorApiTestBase {
     VectorData data;
 
     @Before
-    public void setUp() throws Exception {
+    public final void setUp() throws Exception {
+        init();
         data = createVectorData();
+    }
+
+    protected void init() throws Exception {
     }
 
     protected abstract VectorData createVectorData() throws Exception;

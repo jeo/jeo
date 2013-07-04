@@ -37,34 +37,18 @@ import com.vividsolutions.jts.geom.Polygon;
 
 public class PostGISTest {
 
-    /*
-     * change these params to run against a different server/database
-     */
-    static PostGISOpts opts = new PostGISOpts("jeo");
-
     PostGISWorkspace pg;
 
     //uncomment to view debug logs during test
 //    @BeforeClass
 //    public static void logging() {
-//        
-//        java.util.logging.Logger log = java.util.logging.Logger.getLogger(
-//            org.slf4j.LoggerFactory.getLogger(PostGIS.class).getName());
-//        log.setLevel(java.util.logging.Level.FINE);
-//
-//        java.util.logging.ConsoleHandler h = new java.util.logging.ConsoleHandler();
-//        h.setLevel(java.util.logging.Level.FINE);
-//        log.addHandler(h);
+//        PostGISTests.logging();
 //    }
 
     @BeforeClass
     public static void connect()  {
         try {
-            PGPoolingDataSource ds = PostGISWorkspace.createDataSource(opts); 
-            Connection cx = ds.getConnection();
-            Assume.assumeNotNull(cx);
-            cx.close();
-            ds.close();
+            PostGISTests.connect();
         }
         catch(Exception e) {
             Assume.assumeTrue(false);
@@ -73,7 +57,7 @@ public class PostGISTest {
 
     @Before
     public void rollback() throws Exception {
-        PGPoolingDataSource ds = PostGISWorkspace.createDataSource(opts); 
+        PGPoolingDataSource ds = PostGISWorkspace.createDataSource(PostGISTests.OPTS); 
         Connection cx = ds.getConnection();
         Statement st = cx.createStatement();
         st.executeUpdate(
@@ -87,7 +71,7 @@ public class PostGISTest {
 
     @Before
     public void setUp() throws Exception {
-        pg = new PostGISWorkspace(opts);
+        pg = new PostGISWorkspace(PostGISTests.OPTS);
     }
 
     @After

@@ -19,7 +19,9 @@ public class FilterSQLEncoderTest {
         PrimaryKey pkey = new PrimaryKey();
         pkey.getColumns().add(col);
 
-        sqle = new FilterSQLEncoder(pkey, new DbTypes());
+        sqle = new FilterSQLEncoder();
+        sqle.setPrimaryKey(pkey);
+        sqle.setDbTypes(new DbTypes());
     }
 
     @Test

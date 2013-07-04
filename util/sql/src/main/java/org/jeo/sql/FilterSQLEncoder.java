@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import org.jeo.feature.Field;
+import org.jeo.feature.Schema;
 import org.jeo.filter.All;
 import org.jeo.filter.Comparison;
 import org.jeo.filter.Expression;
@@ -39,20 +41,29 @@ import com.vividsolutions.jts.geom.Geometry;
 public class FilterSQLEncoder extends FilterVisitor {
 
     protected PrimaryKey pkey;
-
-    protected DbTypes dbtypes;
+    protected DbTypes dbtypes = new DbTypes();
+    protected Schema schema;
 
     protected SQL sql;
 
     protected boolean prepared = true;
     protected List<Pair<Object, Integer>> args;
 
-    public FilterSQLEncoder(PrimaryKey pkey, DbTypes dbtypes) {
-        this.pkey = pkey;
-        this.dbtypes = dbtypes;
-
+    public FilterSQLEncoder() {
         sql = new SQL();
         args = new ArrayList<Pair<Object, Integer>>();
+    }
+
+    public void setPrimaryKey(PrimaryKey pkey) {
+        this.pkey = pkey;
+    }
+
+    public void setDbTypes(DbTypes dbtypes) {
+        this.dbtypes = dbtypes;
+    }
+
+    public void setSchema(Schema schema) {
+        this.schema = schema;
     }
 
     public SQL getSQL() {
@@ -124,19 +135,25 @@ public class FilterSQLEncoder extends FilterVisitor {
     }
 
     protected void encode(Geometry geo, Object obj) {
+        int srid = srid(geo, obj);
+
         if (prepared) {
             sql.add("ST_GeomFromText(?,?)");
             args.add(new Pair<Object,Integer>(geo.toText(), Types.VARCHAR));
-            args.add(new Pair<Object,Integer>(geo.getSRID(), Types.INTEGER));
+            args.add(new Pair<Object,Integer>(srid, Types.INTEGER));
         }
         else {
-            sql.add("ST_GeomFromText(").str(geo.toText()).add(",").add(geo.getSRID()).add(")");
+            sql.add("ST_GeomFromText(").str(geo.toText()).add(",").add(srid).add(")");
         }
     }
 
     protected String encode(Date date, Object obj) {
         abort(date, "not implemented");
         return null;
+    }
+
+    protected int srid(Geometry geo, Object obj) {
+        return geo.getSRID();
     }
 
     public Object visit(Property property, Object obj) {
@@ -182,24 +199,37 @@ public class FilterSQLEncoder extends FilterVisitor {
     }
 
     public Object visit(Logic logic, Object obj) {
-        String op = logic.getType().name();
-        for (Filter f : logic.getParts()) {
-            sql.add("(");
-            f.accept(this, obj);
-            sql.add(") ").add(op).add(" ");
+        switch(logic.getType()) {
+        case NOT:
+            sql.add("NOT (");
+            logic.getParts().get(0).accept(this, obj);
+            sql.add(")");
+            break;
+        default:
+            String op = logic.getType().name();
+            for (Filter f : logic.getParts()) {
+                sql.add("(");
+                f.accept(this, obj);
+                sql.add(") ").add(op).add(" ");
+            }
+            sql.trim(op.length()+2);
         }
-        sql.trim(op.length()+2);
+
         return obj;
     }
 
     public Object visit(Comparison compare, Object obj) {
-        compare.getLeft().accept(this, obj);
+        Field fld = field(compare.getLeft(), compare.getRight());
+
+        compare.getLeft().accept(this, fld);
         sql.add(" ").add(compare.getType().toString()).add(" ");
-        compare.getRight().accept(this,  obj);
+        compare.getRight().accept(this,  fld);
         return obj;
     }
 
     public Object visit(Spatial spatial, Object obj) {
+        Field fld = field(spatial.getLeft(), spatial.getRight());
+        
         String function = null;
         switch(spatial.getType()) {
         case INTERSECT:
@@ -228,10 +258,30 @@ public class FilterSQLEncoder extends FilterVisitor {
         }
 
         sql.add(function).add("(");
-        spatial.getLeft().accept(this, obj);
+        spatial.getLeft().accept(this, fld);
         sql.add(", ");
-        spatial.getRight().accept(this, obj);
+        spatial.getRight().accept(this, fld);
         sql.add(")");
         return obj;
+    }
+
+    Field field(Expression e1, Expression e2) {
+        if (schema == null) {
+            return null;
+        }
+
+        Property prop = null;
+        if (e1 instanceof Property) {
+            prop = (Property) e1;
+        }
+        else if (e2 instanceof Property) {
+            prop = (Property) e2;
+        }
+
+        if (prop != null) {
+            return schema.field(prop.getProperty());
+        }
+
+        return null;
     }
 }

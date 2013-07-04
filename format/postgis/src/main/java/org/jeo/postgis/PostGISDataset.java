@@ -244,7 +244,7 @@ public class PostGISDataset implements VectorData {
 
         Filter filter = q.getFilter();
         if (!Filter.isTrueOrNull(filter)) {
-            FilterSQLEncoder sqle = new FilterSQLEncoder(table.getPrimaryKey(), pg.getDbTypes());
+            FilterSQLEncoder sqle = new PostGISFilterEncoder(this);
             try {
                 String where = sqle.encode(filter, null);
                 if (args.isEmpty()) {
@@ -253,7 +253,7 @@ public class PostGISDataset implements VectorData {
                 sql.add(where);
                 args.addAll(sqle.getArgs());
 
-                qp.bounded();
+                qp.filtered();
             }
             catch(Exception e) {
                 LOG.debug("Unable to natively encode filter", e);

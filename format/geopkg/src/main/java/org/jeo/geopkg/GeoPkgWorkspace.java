@@ -278,7 +278,9 @@ public class GeoPkgWorkspace implements Workspace {
     }
 
     List<Object> encodeQuery(SQL sql, Query q, QueryPlan qp) {
-        GeoPkgFilterSQLEncoder sqlfe = new GeoPkgFilterSQLEncoder(null, dbtypes);
+        GeoPkgFilterSQLEncoder sqlfe = new GeoPkgFilterSQLEncoder();
+        sqlfe.setDbTypes(dbtypes);
+
         if (!Filter.isTrueOrNull(q.getFilter())) {
             try {
                 sql.add(" WHERE ").add(sqlfe.encode(q.getFilter(), null));

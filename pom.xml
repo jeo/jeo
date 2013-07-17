@@ -133,7 +133,7 @@
      <!-- test configuration -->
      <plugin>
        <artifactId>maven-surefire-plugin</artifactId>
-       <version>2.7</version>
+       <version>2.15</version>
        <configuration>
          <argLine>-Djava.library.path=${java.library.path}</argLine> 
        </configuration>

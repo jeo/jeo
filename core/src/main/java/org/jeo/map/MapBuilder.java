@@ -50,11 +50,11 @@ public class MapBuilder {
     }
 
     public MapBuilder layer(Dataset data) {
-        return layer(data.getName(), data.getTitle(), data);
+        return layer(data.getName(), data);
     }
 
     public MapBuilder layer(String name, Dataset data) {
-        return layer(name, data.getTitle() != null ? data.getTitle() : name, data);
+        return layer(name, name, data);
     }
 
     public MapBuilder layer(String name, String title, Dataset data) {

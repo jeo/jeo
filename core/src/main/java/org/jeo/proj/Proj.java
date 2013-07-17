@@ -261,6 +261,13 @@ public class Proj {
     }
 
     /**
+     * Returns the projection string for the specified CRS.
+     */
+    public static String toString(CoordinateReferenceSystem crs) {
+        return crs.getParameterString();
+    }
+
+    /**
      * Creates a crs from Well Known Text. 
      * 
      * @param wkt WKT representation of a CRS.
@@ -283,4 +290,5 @@ public class Proj {
     public static String toWKT(CoordinateReferenceSystem crs, boolean format) {
         return new ProjWKTEncoder().encode(crs, format);
     }
+
 }

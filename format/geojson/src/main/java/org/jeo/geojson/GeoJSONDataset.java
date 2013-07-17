@@ -21,6 +21,7 @@ import org.jeo.data.QueryPlan;
 import org.jeo.data.VectorData;
 import org.jeo.feature.Feature;
 import org.jeo.feature.Schema;
+import org.jeo.proj.Proj;
 import org.jeo.util.Key;
 import org.jeo.util.Optional;
 import org.jeo.util.Util;
@@ -76,14 +77,16 @@ public class GeoJSONDataset implements VectorData, FileData {
 
     @Override
     public CoordinateReferenceSystem getCRS() throws IOException {
-        //scan for a crs property
+        CoordinateReferenceSystem crs = null;
+
+        //first scan for a crs property
         JSONParser p = new JSONParser();
         Reader r = reader();
         try {
             CRSFinder f = new CRSFinder();
             try {
                 p.parse(r, new RootHandler(f), true);
-                return f.getCRS();
+                crs = f.getCRS();
             } catch (ParseException e) {
                 throw new IOException(e);
             }
@@ -91,6 +94,9 @@ public class GeoJSONDataset implements VectorData, FileData {
         finally {
             r.close();
         }
+
+        // GeoJSON actually specified that the data should be 4326 so fall back on that
+        return crs != null ? crs : Proj.EPSG_4326;
     }
 
     @Override

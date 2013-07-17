@@ -16,6 +16,7 @@ import org.jeo.filter.Function;
 import org.jeo.filter.Id;
 import org.jeo.filter.Literal;
 import org.jeo.filter.Logic;
+import org.jeo.filter.Mixed;
 import org.jeo.filter.None;
 import org.jeo.filter.Property;
 import org.jeo.filter.Spatial;
@@ -168,6 +169,12 @@ public class FilterSQLEncoder extends FilterVisitor {
         }
         sql.add(")");
         return obj;
+    }
+
+    @Override
+    public Object visit(Mixed mixed, Object obj) {
+        abort(mixed, "Encoding mixed expressions not supported");
+        return null;
     }
 
     public final Object visit(All all, Object obj) {

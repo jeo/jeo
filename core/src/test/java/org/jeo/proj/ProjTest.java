@@ -34,6 +34,18 @@ public class ProjTest {
 
     @Test
     public void testBounds() {
+        Envelope b = Proj.bounds(Proj.crs("epsg:4326"));
+        assertEquals(-180,b.getMinX(),0.1);
+        assertEquals(-90,b.getMinY(),0.1);
+        assertEquals(180,b.getMaxX(),0.1);
+        assertEquals(90,b.getMaxY(),0.1);
+
+        b = Proj.bounds(Proj.crs("epsg:900913"));
+        assertEquals(-20037508.34, b.getMinX(), 0.01);
+        assertEquals(-19971868.88, b.getMinY(), 0.01);
+        assertEquals(20037508.34, b.getMaxX(), 0.01);
+        assertEquals(19971868.88, b.getMaxY(), 0.01);
+
         CoordinateReferenceSystem crs = Proj.crs("EPSG:3005");
         assertNotNull(Proj.bounds(crs));
     }

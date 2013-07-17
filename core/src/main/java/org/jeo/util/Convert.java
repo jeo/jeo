@@ -1,6 +1,14 @@
 package org.jeo.util;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.io.StringReader;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -14,26 +22,26 @@ import java.util.List;
  */
 public class Convert {
 
-    public static <T> T to(Object obj, Class<T> clazz) {
+    public static <T> Optional<T> to(Object obj, Class<T> clazz) {
         return to(obj, clazz, true);
     }
     
-    public static <T> T to(Object obj, Class<T> clazz, boolean safe) {
+    public static <T> Optional<T> to(Object obj, Class<T> clazz, boolean safe) {
         if (clazz.isInstance(obj)) {
-            return (T) obj;
+            return Optional.of((T) obj);
         }
 
         if (clazz == String.class) {
-            return clazz.cast(toString(obj));
+            return (Optional<T>) toString(obj);
         }
         else if (Number.class.isAssignableFrom(clazz)) {
-            return clazz.cast(toNumber(obj, (Class)clazz));
+            return toNumber(obj, (Class)clazz);
         }
         else if (Boolean.class.isAssignableFrom(clazz)) {
-            return clazz.cast(toBoolean(obj));
+            return (Optional<T>) toBoolean(obj);
         }
         else if (File.class.isAssignableFrom(clazz)) {
-            return clazz.cast(toFile(obj));
+            return (Optional<T>) toFile(obj);
         }
         else if (!safe && obj != null) {
             //constructor trick
@@ -49,70 +57,72 @@ public class Convert {
             }
             catch(Exception e) {
             }
-            return converted;
+            return Optional.of(converted);
         }
-        return null;
+
+        return Optional.nil(clazz);
     }
 
-    public static String toString(Object obj) {
+    public static Optional<String> toString(Object obj) {
         if (obj != null) {
-            return obj.toString();
+            return Optional.of(obj.toString());
         }
-        return null;
+        return Optional.nil(String.class);
     }
 
-    public static Boolean toBoolean(Object obj) {
+    public static Optional<Boolean> toBoolean(Object obj) {
         if (obj instanceof Boolean) {
-            return (Boolean) obj;
+            return Optional.of((Boolean) obj);
         }
 
         if (obj instanceof String) {
-            return Boolean.parseBoolean((String)obj);
+            return Optional.of(Boolean.parseBoolean((String)obj));
         }
 
         return null;
     }
 
-    public static File toFile(Object obj) {
+    public static Optional<File> toFile(Object obj) {
         if (obj instanceof File) {
-            return (File) obj;
+            return Optional.of((File) obj);
         }
 
         if (obj instanceof String) {
-            return new File((String)obj);
+            return Optional.of(new File((String)obj));
         }
 
         return null;
     }
 
-    public static <T extends Number> T toNumber(Object obj, Class<T> clazz) {
-        Number n = toNumber(obj);
-        if (n == null) {
-            return null;
+    public static <T extends Number> Optional<T> toNumber(Object obj, Class<T> clazz) {
+        Optional<Number> n = toNumber(obj);
+        if (!n.has()) {
+            return Optional.nil(clazz);
         }
 
         if (clazz == Byte.class) {
-            return clazz.cast(new Byte(n.byteValue()));
+            return Optional.of(clazz.cast(new Byte(n.get().byteValue())));
         }
         if (clazz == Short.class) {
-            return clazz.cast(new Short(n.shortValue()));
+            return Optional.of(clazz.cast(new Short(n.get().shortValue())));
         }
         if (clazz == Integer.class) {
-            return clazz.cast(new Integer(n.intValue()));
+            return Optional.of(clazz.cast(new Integer(n.get().intValue())));
         }
         if (clazz == Long.class) {
-            return clazz.cast(new Long(n.longValue()));
+            return Optional.of(clazz.cast(new Long(n.get().longValue())));
         }
         if (clazz == Float.class) {
-            return clazz.cast(new Float(n.floatValue()));
+            return Optional.of(clazz.cast(new Float(n.get().floatValue())));
         }
         if (clazz == Double.class) {
-            return clazz.cast(new Double(n.doubleValue()));
+            return Optional.of(clazz.cast(new Double(n.get().doubleValue())));
         }
-        return null;
+        
+        return Optional.nil(clazz);
     }
 
-    public static <T extends Number> List<T> toNumbers(Object obj, Class<T> clazz) {
+    public static <T extends Number> Optional<List<T>> toNumbers(Object obj, Class<T> clazz) {
         Collection<Object> l = null;
         if (obj instanceof Collection) {
             l = (Collection<Object>) obj;
@@ -130,35 +140,54 @@ public class Convert {
         if (l != null) {
             List<T> converted = new ArrayList<T>();
             for (Object o : l) {
-                T num = toNumber(o, clazz);
-                if (num == null) {
-                    return null;
+                Optional<T> num = toNumber(o, clazz);
+                if (!num.has()) {
+                    return (Optional) Optional.nil(List.class);
                 }
-                converted.add(num);
+                converted.add(num.get());
             }
-            return converted;
+            return Optional.of(converted);
         }
 
-        return null;
+        return (Optional) Optional.nil(List.class);
     }
 
-    public static Number toNumber(Object obj) {
+    public static Optional<Number> toNumber(Object obj) {
         if (obj instanceof Number) {
-            return (Number) obj;
+            return Optional.of((Number) obj);
         }
         if (obj instanceof String) {
             String str = (String) obj;
             try {
-                return Long.parseLong(str);
+                return Optional.of((Number)Long.parseLong(str));
             }
             catch(NumberFormatException e) {
                 try {
-                    return Double.parseDouble(str);
+                    return Optional.of((Number)Double.parseDouble(str));
                 }
                 catch(NumberFormatException e1) {
                 }
             }
         }
+        return Optional.nil(Number.class);
+    }
+
+    public static Optional<Reader> toReader(Object obj) throws IOException {
+        if (obj instanceof Reader) {
+            return Optional.of((Reader) obj);
+        }
+
+        if (obj instanceof InputStream) {
+            return Optional.of((Reader)new BufferedReader(new InputStreamReader((InputStream)obj)));
+        }
+
+        if (obj instanceof File) {
+            return Optional.of((Reader)new BufferedReader(new FileReader((File)obj)));
+        }
+        if (obj instanceof String) {
+            return Optional.of((Reader) new StringReader((String) obj));
+        }
+
         return null;
     }
 }

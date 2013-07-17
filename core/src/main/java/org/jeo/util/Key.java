@@ -66,7 +66,7 @@ public class Key<T> {
             return null;
         }
 
-        return Convert.to(obj, type);
+        return Convert.to(obj, type).get("Unable to convert " + obj + " to " + type.getName());
     }
 
     /**

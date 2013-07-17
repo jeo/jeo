@@ -97,7 +97,7 @@ public class Map implements Disposable {
 
     Envelope bounds = new Envelope(-180,180,-90,90);
     CoordinateReferenceSystem crs = Proj.EPSG_4326;
-    
+
     List<Layer> layers = new ArrayList<Layer>();
 
     Style style = new Style();
@@ -206,7 +206,7 @@ public class Map implements Disposable {
     }
 
     /**
-     * The stylesheet containing the rules for rendering/symbolizing the map.  
+     * The style containing the rules for rendering/symbolizing the map.  
      */
     public Style getStyle() {
         return style;

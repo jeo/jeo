@@ -11,6 +11,14 @@ import org.junit.Test;
 public class RuleTest {
 
     @Test
+    public void testFlattenNoNested() {
+        Style style = Style.build().select("*").style();
+        
+        Rule r = style.getRules().get(0);
+        assertEquals(1, r.flatten().size());
+    }
+
+    @Test
     public void testFlatten() throws Exception {
         Style style = new StyleBuilder().rule().select("#widgets").filter("cost > 12")
             .rule().select("::costly").filter("cost > 20").set("color", "yellow").endRule()

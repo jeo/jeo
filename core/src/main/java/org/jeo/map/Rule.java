@@ -1,6 +1,8 @@
 package org.jeo.map;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -83,6 +85,56 @@ public class Rule {
     }
 
     public <T> T eval(Object obj, String key, Class<T> clazz, T def) {
+        Object result = evalRaw(obj, key, def);
+        if (result != null) {
+            return Convert.to(result, clazz, false).get(
+                "Unable to convert " + result + " to " + clazz);
+        }
+
+        return null;
+    }
+
+    public <T> T[] evalArray(Object obj, String key, Class<T> clazz, T[] def) {
+        Object result = evalRaw(obj, key, def);
+        if (result == null) {
+            return def;
+        }
+    
+        if (result instanceof Collection) {
+            result = ((Collection) result).toArray();
+        }
+
+        // check if the object is an array, and try to convert it to the right type
+        if (result.getClass().isArray()) {
+            //TODO: don't do conversion if the array is already of right type
+            int len = Array.getLength(result);
+            T[] arr = (T[]) Array.newInstance(clazz, len);
+
+            for (int i = 0; i < len; i++) {
+                Object o = Array.get(result, i);
+                arr[i] = Convert.to(o, clazz).get("Unable to convert " + o + " to " + clazz);
+            }
+
+            return arr;
+        }
+    
+        // parse as string delimited by spaces
+        String[] split = result.toString().split(" ");
+        T[] arr = (T[]) Array.newInstance(clazz, split.length);
+        for (int i = 0; i < split.length; i++) {
+            String s = split[i];
+            arr[i] = Convert.to(s, clazz).get("Unable to convert " + s + " to " + clazz);
+        }
+
+        return arr;
+
+        //TODO: attempt to convert from string delimiated by ' ', or ',' 
+        //throw new IllegalArgumentException("Unable to convert " + obj + " to array");
+    }
+
+    Object evalRaw(Object obj, String key, Object def) {
+        Map<String,Object> props = props();
+
         if (!props.containsKey(key)) {
             return def;
         }
@@ -97,16 +149,7 @@ public class Rule {
             result = ((Expression) val).evaluate(obj);
         }
 
-        if (result != null) {
-            T converted = Convert.to(result, clazz, false);
-            if (converted == null) {
-                throw new IllegalArgumentException("Unable to convert " + result + " to " + clazz);
-            }
-
-            return converted;
-        }
-
-        return null;
+        return result;
     }
 
     public RGB color(Object obj, String key, RGB def) {
@@ -129,37 +172,13 @@ public class Rule {
         return eval(obj, key, Boolean.class, def);
     }
 
-    /*public double[] numbers(String key, double... def) {
-        Object obj = get(key, def);
-        if (obj == null) {
-            return null;
-        }
-    
-        if (obj instanceof double[]) {
-            return (double[]) obj;
-        }
-    
-        if (obj.getClass().isArray()) {
-            int n = Array.getLength(obj);
-            double[] d = new double[n];
-            for (int i = 0; i < n; i++) {
-                d[i] = toDouble(Array.get(obj, i));
-            }
-    
-            return d;
-        }
-    
-        String s = obj.toString();
-        if (s.contains(" ")) {
-            return toDoubles(s, " ");
-        }
-        else if (s.contains(",")) {
-            return toDoubles(s, ",");
-        }
+    public Double[] numbers(Object obj, String key, Double... def) {
+        return evalArray(obj, key, Double.class, def);
+    }
 
-        //TODO: attempt to convert from string delimiated by ' ', or ',' 
-        throw new IllegalArgumentException("Unable to convert " + obj + " to array");
-    }*/
+    public Float[] numbers(Object obj, String key, Float... def) {
+        return evalArray(obj, key, Float.class, def);
+    }
 
     protected Map<String,Object> props() {
         if (props == null) {
@@ -211,11 +230,17 @@ public class Rule {
         //TODO: multiple levels of nesting?
         List<Rule> flat = new ArrayList<Rule>();
 
-        for (Rule r : parts) {
-            if (r != this) {
-                r = merge(r);
+        if (parts.isEmpty()) {
+            flat.add(this);
+        }
+        else {
+            // intersect this with all the parts
+            for (Rule r : parts) {
+                if (r != this) {
+                    r = merge(r);
+                }
+                flat.add(r);
             }
-            flat.add(r);
         }
 
         return flat;

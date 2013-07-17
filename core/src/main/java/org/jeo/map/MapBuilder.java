@@ -76,7 +76,7 @@ public class MapBuilder {
 
         Workspace ws = Drivers.open(params, Workspace.class);
         if (ws == null) {
-            throw new IllegalArgumentException("Unable to obtqin workspace: " + params);
+            throw new IllegalArgumentException("Unable to obtain workspace: " + params);
         }
 
         Dataset data = ws.get(name);

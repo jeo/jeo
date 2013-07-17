@@ -14,6 +14,13 @@ public class FilterVisitor {
         return obj;
     }
 
+    public Object visit(Mixed mixed, Object obj) {
+        for (Expression e : mixed.getExpressions()) {
+            e.accept(this, obj);
+        }
+        return obj;
+    }
+
     public Object visit(All all, Object obj) {
         return obj;
     }

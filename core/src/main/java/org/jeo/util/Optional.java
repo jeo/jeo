@@ -28,8 +28,12 @@ public class Optional<T> {
     }
 
     public T get() {
+        return get("null value");
+    }
+
+    public T get(String errmsg) {
         if (value == null) {
-            throw new IllegalArgumentException("null value");
+            throw new IllegalArgumentException(errmsg);
         }
         return value;
     }

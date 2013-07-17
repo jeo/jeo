@@ -1,6 +1,7 @@
 package org.jeo.cli.cmd;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
 import java.net.URI;
@@ -10,8 +11,10 @@ import jline.console.ConsoleReader;
 
 import org.jeo.cli.JeoCLI;
 import org.jeo.data.Dataset;
+import org.jeo.data.DirectoryRegistry;
 import org.jeo.data.Drivers;
 import org.jeo.data.Query;
+import org.jeo.data.Registry;
 import org.jeo.data.TileGrid;
 import org.jeo.data.TilePyramid;
 import org.jeo.data.TileSet;
@@ -42,26 +45,44 @@ public class InfoCmd extends JeoCmd {
         for (String data : datas) {
             URI uri = parseDataURI(data);
 
-            Object obj = Drivers.open(uri);
-            if (obj == null) {
-                throw new IllegalArgumentException("Unable to open data source: " + uri);
+            try {
+                Object obj = Drivers.open(uri);
+                if (obj == null) {
+                    throw new IllegalArgumentException("Unable to open data source: " + uri);
+                }
+    
+                print(obj, cli);
             }
-
-            if (obj instanceof Workspace) {
-                print((Workspace)obj, cli);
+            catch(Exception e) {
+                File f = new File(uri);
+                if (f.exists() && f.isDirectory()) {
+                    DirectoryRegistry reg = new DirectoryRegistry(f);
+                    for (Registry.Item it : reg.list()) {
+                        print(reg.get(it.getName()), cli);
+                    }
+                }
+                else {
+                    throw e;
+                }
             }
-            else if (obj instanceof VectorData) {
-                print((VectorData)obj, cli);
-            }
-            else if (obj instanceof TileSet) {
-                print((TileSet)obj, cli);
-            }
-            else {
-                throw new IllegalArgumentException(
-                    "Object " + obj.getClass().getName() + " not supported");
-            }
-            console.println();
         }
+    }
+
+    void print(Object obj, JeoCLI cli) throws IOException {
+        if (obj instanceof Workspace) {
+            print((Workspace)obj, cli);
+        }
+        else if (obj instanceof VectorData) {
+            print((VectorData)obj, cli);
+        }
+        else if (obj instanceof TileSet) {
+            print((TileSet)obj, cli);
+        }
+        else {
+            throw new IllegalArgumentException(
+                "Object " + obj.getClass().getName() + " not supported");
+        }
+        cli.getConsole().println();
     }
 
     void print(Dataset dataset, JeoCLI cli) throws IOException {

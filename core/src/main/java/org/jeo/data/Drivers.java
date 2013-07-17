@@ -116,14 +116,60 @@ public class Drivers {
     }
 
     /**
+     * Looks up a driver from a data uri.
+     * 
+     * @see Drivers#find(URI, DriverRegistry)}.
+     */
+    public static Driver<?> find(URI uri) {
+        return find(uri, REGISTRY);
+    }
+
+    /**
+     * Looks up a driver from a data uri.
+     * 
+     * @param uri A uri defining a data source, as described by 
+     * {@link #open(URI, Class, DriverRegistry)}.
+     * 
+     * @return The matching driver, or <code>null</code> if no match was found.
+     */
+    public static <T> Driver<T> find(URI uri, DriverRegistry registry) {
+        uri = convertFileURI(uri);
+
+        String scheme = uri.getScheme();
+        if (scheme == null) {
+            LOG.debug("URI must have scheme: " + uri);
+            return null;
+            //throw new IllegalArgumentException("URI must have a scheme");
+        }
+
+        Driver<T> d = (Driver<T>) find(scheme, registry);
+        if (d == null) {
+            LOG.debug("No matching driver for " + scheme);
+            return null;
+        }
+
+        return d;
+    }
+    
+    /**
      * Opens a connection to data specified by a file.
      * 
      * @see Drivers#open(File, Class, DriverRegistry)
      */
     public static Object open(File file) throws IOException {
-        return open(file, Object.class);
+        return open(file, REGISTRY);
     }
 
+    /**
+     * Opens a connection to data specified by a file using the specified driver registry.
+     * 
+     * @see Drivers#open(File, Class, DriverRegistry)
+     */
+    public static Object open(File file, DriverRegistry registry) throws IOException {
+        return open(file, Object.class, registry);
+    }
+
+    
     /**
      * Opens a connection to data specified by a file expecting an object of the specified class.
      * 
@@ -248,6 +294,9 @@ public class Drivers {
         uri = convertFileURI(uri);
         
         Driver<?> d = find(uri, registry);
+        if (d == null) {
+            return null;
+        }
 
         Map<String,Object> opts = parseURI(uri, d);
 
@@ -274,6 +323,10 @@ public class Drivers {
         uri = convertFileURI(uri);
 
         Driver<T> d = find(uri, registry);
+        if (d == null) {
+            throw new IllegalArgumentException("No driver for " + uri);
+        }
+
         if (!(d instanceof VectorDriver)) {
             throw new IllegalArgumentException(d.getName() + " not a vector driver");
         }
@@ -286,20 +339,6 @@ public class Drivers {
         }
 
         return vd.create(opts, schema);
-    }
-
-    static <T> Driver<T> find(URI uri, DriverRegistry registry) {
-        String scheme = uri.getScheme();
-        if (scheme == null) {
-            throw new IllegalArgumentException("URI must have a scheme");
-        }
-
-        Driver<T> d = (Driver<T>) find(scheme, registry);
-        if (d == null) {
-            throw new IllegalArgumentException("No matching driver for " + scheme); 
-        }
-
-        return d;
     }
 
     static Map<String,Object> parseURI(URI uri, Driver<?> d) {

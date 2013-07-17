@@ -91,6 +91,39 @@ public class Envelopes {
         return e == null || e.isNull();
     }
 
+    /**
+     * Parses a string of the form <tt>&lt;x1>,&lt;y1>,&lt;x2,&lt;y2></tt> into an envelope.
+     * <p>
+     * To parse an envelope of the form <tt>&lt;x1>,&lt;x2>,&lt;y1,&lt;y2></tt> call 
+     *  <tt>parse(str, false)</tt>
+     * </p>
+     */
+    public static Envelope parse(String str) {
+        return parse(str, true);
+    }
+
+    /**
+     * Parses a string into an envelope.
+     * 
+     * @param str The envelope string.
+     * @param alt Whether x/y compontents alternate, if <tt>true</tt> the <tt>str</tt> argument must
+     * be of the form <tt>&lt;x1>,&lt;y1>,&lt;x2,&lt;y2></tt>. If <tt>false</tt> the <tt>str</tt>
+     * argument must be of the form tt>&lt;x1>,&lt;x2>,&lt;y1,&lt;y2>.
+     */
+    public static Envelope parse(String str, boolean alt) {
+        String[] split = str.split(",");
+        if (split.length != 4) {
+            return null;
+        }
+
+        double x1 = Double.parseDouble(split[0]);
+        double y1 = Double.parseDouble(split[alt?1:2]);
+        double x2 = Double.parseDouble(split[alt?2:1]);
+        double y2 = Double.parseDouble(split[3]);
+
+        return new Envelope(x1,x2,y1,y2);
+    }
+
     static void checkContains(Envelope e, Coordinate c) {
         if (!e.contains(c)) {
             throw new IllegalArgumentException(

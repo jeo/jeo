@@ -13,6 +13,17 @@ public class Layer {
     String title;
     Dataset data;
 
+    boolean visible = true;
+
+    public Layer() {
+    }
+
+    public Layer(Dataset data) {
+        this.data = data;
+        this.name = data.getName();
+        this.title = data.getTitle() != null ? data.getTitle() : name;
+    }
+
     /**
      * Name of the layer.
      */
@@ -54,5 +65,18 @@ public class Layer {
     public void setData(Dataset data) {
         this.data = data;
     }
-    
+
+    /**
+     * Visibility flag for layer.
+     */
+    public boolean isVisible() {
+        return visible;
+    }
+
+    /**
+     * Sets visibility flag for layer.
+     */
+    public void setVisible(boolean visible) {
+        this.visible = visible;
+    }
 }

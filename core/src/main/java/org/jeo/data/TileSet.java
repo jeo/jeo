@@ -12,7 +12,7 @@ public interface TileSet extends Dataset {
     /**
      * The pyramid describing the tile structure of the dataset. 
      */
-    TilePyramid getPyramid();
+    TilePyramid getPyramid() throws IOException;
 
     /**
      * Reads a single tile from the layer by tile index.

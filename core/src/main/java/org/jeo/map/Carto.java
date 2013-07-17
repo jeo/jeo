@@ -144,7 +144,7 @@ public interface Carto {
     static final String TEXT_FILL = "text-fill";
     static final String TEXT_OPACITY = "text-opacity";
     static final String TEXT_HALO_FILL = "text-halo-fill";
-    static final String TEXT_HALO_RADIUS = "text-radius";
+    static final String TEXT_HALO_RADIUS = "text-halo-radius";
     static final String TEXT_DX = "text-dx";
     static final String TEXT_DY = "text-dy";
     static final String TEXT_VERTICAL_ALIGNMENT = "text-vertical-alignment";

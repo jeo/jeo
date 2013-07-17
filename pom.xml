@@ -231,6 +231,7 @@
   <modules>
     <module>core</module>
     <module>format</module>
+    <module>carto</module>
     <module>util</module>
     <module>cli</module>
     <module>nano</module>

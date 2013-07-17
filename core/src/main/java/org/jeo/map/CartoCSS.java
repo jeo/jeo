@@ -6,7 +6,7 @@ package org.jeo.map;
  *  
  * @author Justin Deoliveira, OpenGeo
  */
-public interface Carto {
+public interface CartoCSS {
     // all
     static final String COMP_OP = "comp-op";
     static final String IMAGE_FILTERS = "image-filters";

@@ -14,6 +14,7 @@ import org.osgeo.proj4j.CoordinateTransform;
 import org.osgeo.proj4j.CoordinateTransformFactory;
 import org.osgeo.proj4j.Proj4jException;
 import org.osgeo.proj4j.ProjCoordinate;
+import org.osgeo.proj4j.datum.Datum;
 import org.osgeo.proj4j.io.Proj4FileReader;
 import org.osgeo.proj4j.proj.Projection;
 import org.slf4j.Logger;
@@ -291,4 +292,34 @@ public class Proj {
         return new ProjWKTEncoder().encode(crs, format);
     }
 
+    /**
+     * Determines if two crs objects are equal.
+     * <p>
+     * Two crs objects are considered equal if {@link Datum#isEqual(Datum)} returns <tt>true</tt> 
+     * and the two {@link CoordinateReferenceSystem#getProjection()} instances are the same type.
+     * </p>
+     * 
+     */
+    public static boolean equal(CoordinateReferenceSystem crs1, CoordinateReferenceSystem crs2) {
+        if (crs1 == crs2) {
+            return true;
+        }
+
+        if (crs1 == null || crs2 == null) {
+            return false;
+        }
+
+        Datum dat1 = crs1.getDatum();
+        Datum dat2 = crs2.getDatum();
+
+        if (!dat1.isEqual(dat2)) {
+            return false;
+        }
+
+        Projection p1 = crs1.getProjection();
+        Projection p2 = crs2.getProjection();
+
+        // TODO: do a better job of this 
+        return p1.getClass().equals(p2.getClass());
+    }
 }

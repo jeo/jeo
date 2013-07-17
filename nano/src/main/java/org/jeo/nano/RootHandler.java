@@ -5,6 +5,8 @@ import static org.jeo.nano.NanoHTTPD.MIME_JSON;
 
 import java.io.StringWriter;
 
+import org.jeo.data.DataRef;
+import org.jeo.data.Driver;
 import org.jeo.data.Registry;
 import org.jeo.data.Workspace;
 import org.jeo.geojson.GeoJSONWriter;
@@ -25,20 +27,30 @@ public class RootHandler extends Handler {
 
         GeoJSONWriter writer = new GeoJSONWriter(out);
         writer.obj();
-        for (String name : reg.list()) {
-            writer.key(name).array();
+        for (Registry.Item item : reg.list()) {
+            writer.key(item.getName()).obj();
 
-            Workspace ws = reg.get(name);
-            try {
-                for (String data : ws.list()) {
-                    writer.value(data);
+            Driver<?> drv = item.getDriver();
+            writer.key("driver").value(drv.getName());
+
+            if (Workspace.class.isAssignableFrom(drv.getClass())) {
+                writer.key("datasets").array();
+
+                Workspace ws = (Workspace) reg.get(item.getName());
+                try {
+                    for (DataRef<?> ref : ws.list()) {
+                        writer.value(ref.first());
+                    }
                 }
-            }
-            finally {
-                ws.close();
-            }
+                finally {
+                    ws.close();
+                }
 
-            writer.endArray();
+                writer.endArray();
+            }
+            
+            writer.endObj();
+
         }
         writer.endObj();
         writer.flush();

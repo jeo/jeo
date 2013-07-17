@@ -27,6 +27,8 @@ import org.geotools.util.NullProgressListener;
 import org.jeo.TestData;
 import org.jeo.Tests;
 import org.jeo.data.Cursor;
+import org.jeo.data.DataRef;
+import org.jeo.data.Dataset;
 import org.jeo.data.Query;
 import org.jeo.data.Transaction;
 import org.jeo.data.VectorData;
@@ -40,6 +42,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.google.common.base.Function;
+import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.Sets;
@@ -72,7 +75,7 @@ public class GeoGitTest {
         addShp(TestData.polygon(), repo);
 
         repo.command(BranchCreateOp.class).setName("scratch").call();
-        ws = new GeoGitWorkspace(gg);
+        ws = new GeoGitWorkspace(gg, null);
     }
 
     void log(GeoGIT gg) {
@@ -112,10 +115,19 @@ public class GeoGitTest {
 
     @Test
     public void testLayers() throws IOException {
-        Set<String> layers = Sets.newHashSet(ws.list());
-        assertEquals(4, layers.size());
-        assertTrue(layers.contains("states"));
-        assertTrue(layers.contains("point"));
+        assertEquals(4, Iterables.size(ws.list()));
+        Iterables.find(ws.list(), new Predicate<DataRef<Dataset>>() {
+            @Override
+            public boolean apply(DataRef<Dataset> input) {
+                return input.first().equals("states");
+            }
+        });
+        Iterables.find(ws.list(), new Predicate<DataRef<Dataset>>() {
+            @Override
+            public boolean apply(DataRef<Dataset> input) {
+                return input.first().equals("point");
+            }
+        });
         //assertTrue(layers.contains("line"));
         //assertTrue(layers.contains("polygon"));
     }

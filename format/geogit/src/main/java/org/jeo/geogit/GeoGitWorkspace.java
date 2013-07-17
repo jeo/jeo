@@ -1,9 +1,11 @@
 package org.jeo.geogit;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.geogit.api.GeoGIT;
 import org.geogit.api.GeogitTransaction;
@@ -27,9 +29,13 @@ import org.geogit.api.porcelain.DiffOp;
 import org.geogit.api.porcelain.LogOp;
 import org.geogit.repository.Repository;
 import org.geogit.repository.WorkingTree;
+import org.jeo.data.DataRef;
+import org.jeo.data.Dataset;
+import org.jeo.data.FileData;
 import org.jeo.data.Workspace;
 import org.jeo.feature.Schema;
 import org.jeo.geotools.GT;
+import org.jeo.util.Key;
 import org.jeo.util.Pair;
 import org.opengis.feature.simple.SimpleFeatureType;
 
@@ -41,18 +47,32 @@ import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 
-public class GeoGitWorkspace implements Workspace {
+public class GeoGitWorkspace implements Workspace, FileData {
 
     /** underlying geogit repo */
     GeoGIT gg;
+    
+    /** connection options */
+    GeoGitOpts opts;
 
-    public GeoGitWorkspace(GeoGIT gg) {
+    public GeoGitWorkspace(GeoGIT gg, GeoGitOpts opts) {
         this.gg = gg;
+        this.opts = opts;
     }
 
     @Override
     public GeoGit getDriver() {
         return new GeoGit();
+    }
+
+    @Override
+    public Map<Key<?>, Object> getDriverOptions() {
+        return opts.toMap();
+    }
+
+    @Override
+    public File getFile() {
+        return opts.getFile();
     }
 
     /**
@@ -73,16 +93,16 @@ public class GeoGitWorkspace implements Workspace {
     }
 
     @Override
-    public Iterable<String> list() throws IOException {
+    public Iterable<DataRef<Dataset>> list() throws IOException {
         return layers(branch());
     }
 
-    public Iterable<String> layers(String rev) throws IOException {
+    public Iterable<DataRef<Dataset>> layers(String rev) throws IOException {
         List<NodeRef> trees = typeRefs(rev);
-        return Iterables.transform(trees, new Function<NodeRef, String>() {
+        return Iterables.transform(trees, new Function<NodeRef, DataRef<Dataset>>() {
             @Override
-            public String apply(NodeRef input) {
-                return NodeRef.nodeFromPath(input.path());
+            public DataRef<Dataset> apply(NodeRef input) {
+                return new DataRef<Dataset>(Dataset.class, NodeRef.nodeFromPath(input.path()));
             }
         });
     }

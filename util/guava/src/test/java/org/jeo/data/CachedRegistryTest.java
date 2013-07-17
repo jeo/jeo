@@ -39,9 +39,9 @@ public class CachedRegistryTest {
         replay(l, ws, reg);
 
         CachedRegistry cached = new CachedRegistry(reg);
-        assertNotNull(cached.get("foo").get("bar"));
-        assertNotNull(cached.get("foo").get("bar"));
-        assertNotNull(cached.get("foo").get("bar"));
+        assertNotNull(((Workspace)cached.get("foo")).get("bar"));
+        assertNotNull(((Workspace)cached.get("foo")).get("bar"));
+        assertNotNull(((Workspace)cached.get("foo")).get("bar"));
 
         verify(l, ws, reg);
     }

@@ -7,9 +7,11 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.jeo.data.Cursor;
 import org.jeo.data.Cursors;
+import org.jeo.data.FileData;
 import org.jeo.data.Query;
 import org.jeo.data.QueryPlan;
 import org.jeo.data.VectorData;
@@ -17,13 +19,14 @@ import org.jeo.feature.Feature;
 import org.jeo.feature.ListFeature;
 import org.jeo.feature.Schema;
 import org.jeo.feature.SchemaBuilder;
+import org.jeo.util.Key;
 import org.jeo.util.Util;
 import org.osgeo.proj4j.CoordinateReferenceSystem;
 
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 
-public class CSVDataset implements VectorData {
+public class CSVDataset implements VectorData, FileData {
 
     /** the csv file */
     File file;
@@ -51,6 +54,16 @@ public class CSVDataset implements VectorData {
     @Override
     public CSV getDriver() {
         return new CSV();
+    }
+
+    @Override
+    public Map<Key<?>, Object> getDriverOptions() {
+        return opts.toMap();
+    }
+
+    @Override
+    public File getFile() {
+        return file;
     }
 
     void init() throws IOException {
@@ -83,12 +96,12 @@ public class CSVDataset implements VectorData {
 
     @Override
     public String getTitle() {
-        return getName();
+        return null;
     }
 
     @Override
     public String getDescription() {
-        return getTitle();
+        return null;
     }
 
     @Override

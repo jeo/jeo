@@ -7,6 +7,7 @@ import java.util.Map;
 
 import org.jeo.data.Driver;
 import org.jeo.util.Key;
+import org.jeo.util.Password;
 
 public class PostGIS implements Driver<PostGISWorkspace>{
 
@@ -34,7 +35,7 @@ public class PostGIS implements Driver<PostGISWorkspace>{
     /**
      * Password key. 
      */
-    public static final Key<String> PASSWD = new Key<String>("passwd", String.class);
+    public static final Key<Password> PASSWD = new Key<Password>("passwd", Password.class);
 
     public PostGISWorkspace open(PostGISOpts opts) throws IOException {
         return new PostGISWorkspace(opts);
@@ -67,22 +68,7 @@ public class PostGIS implements Driver<PostGISWorkspace>{
 
     @Override
     public PostGISWorkspace open(Map<?, Object> opts) throws IOException {
-        PostGISOpts pgopts = new PostGISOpts(DB.get(opts));
-
-        if (HOST.has(opts)) {
-            pgopts.host(HOST.get(opts));
-        }
-        if (PORT.has(opts)) {
-            pgopts.port(PORT.get(opts));
-        }
-        if (USER.has(opts)) {
-            pgopts.user(USER.get(opts));
-        }
-        if (PASSWD.has(opts)) {
-            pgopts.passwd(PASSWD.get(opts));
-        }
-
-        return new PostGISWorkspace(pgopts);
+        return new PostGISWorkspace(PostGISOpts.fromMap(opts));
     }
 
 }

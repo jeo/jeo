@@ -20,6 +20,9 @@ public class DirectoryRegistry implements Registry {
     /** base directory */
     File baseDir;
 
+    /** driver registry */
+    DriverRegistry drivers;
+
     /** list of file extensions to restrict to */
     List<String> exts;
 
@@ -30,39 +33,45 @@ public class DirectoryRegistry implements Registry {
      * @param exts Optional file name extensions to restrict look ups to.
      */
     public DirectoryRegistry(File baseDir, String... exts) {
+         this(baseDir, Drivers.REGISTRY, exts);
+    }
+
+    /**
+     * Constructs a new registry.
+     * 
+     * @param baseDir The directory to search for files in.
+     * @param exts Optional file name extensions to restrict look ups to.
+     */
+    public DirectoryRegistry(File baseDir, DriverRegistry drivers, String... exts) {
         this.baseDir = baseDir;
+        this.drivers = drivers;
         this.exts = exts.length > 0 ? Arrays.asList(exts) : null; 
     }
-
+    
     @Override
-    public Iterable<String> list() {
-        LinkedHashSet<String> set = new LinkedHashSet<String>();
-
-        if (exts == null) {
-            for (String fn : baseDir.list()) {
-                set.add(Util.base(fn));
+    public Iterable<Item> list() {
+        // list all files, possibily filtering by extension
+        String[] files = exts == null ? baseDir.list() : baseDir.list(new FilenameFilter() {
+            @Override
+            public boolean accept(File dir, String name) {
+                return exts.contains(Util.extension(name));
             }
-        }
-        else {
-            for (final String ext : exts) {
-                String[] files = baseDir.list(new FilenameFilter() {
-                    @Override
-                    public boolean accept(File dir, String name) {
-                        int dot = name.lastIndexOf('.');
-                        return ext.equalsIgnoreCase(name.substring(dot+1));
-                    }
-                });
-                for (String file : files) {
-                    set.add(Util.base(file));
-                }
+        });
+
+        // process files to see what ones we have drivers for
+        LinkedHashSet<Item> items = new LinkedHashSet<Item>();
+        for (String fn : files) {
+            Driver<?> drv = Drivers.find(new File(baseDir, fn).toURI(), drivers);
+            if (drv != null) {
+                items.add(new Item(Util.base(fn), drv));
             }
         }
 
-        return set;
+        return items;
     }
 
     @Override
-    public Workspace get(final String key) throws IOException {
+    public Object get(final String key) throws IOException {
         if (exts == null) {
             //search for any file with this base name
             String[] files = baseDir.list(new FilenameFilter() {
@@ -72,10 +81,7 @@ public class DirectoryRegistry implements Registry {
                 }
             });
             for (String file : files) {
-                Workspace ws = workspace(new File(baseDir, file));
-                if (ws != null) {
-                    return ws;
-                }
+                return Drivers.open(new File(baseDir, file), drivers);
             }
         }
         else {
@@ -83,10 +89,7 @@ public class DirectoryRegistry implements Registry {
             for (String ext : exts) {
                 File f = new File(baseDir, key + "." + ext);
                 if (f.exists()) {
-                    Workspace ws = workspace(f);
-                    if (ws != null) {
-                        return ws;
-                    }
+                    return Drivers.open(f, drivers);
                 }
             }
         }

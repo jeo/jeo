@@ -1,8 +1,10 @@
 package org.jeo.data;
 
 import java.io.IOException;
+import java.util.Map;
 
 import org.jeo.feature.Schema;
+import org.jeo.util.Key;
 
 /**
  * A container of {@link Dataset} objects.
@@ -17,11 +19,16 @@ public interface Workspace extends Disposable {
     Driver<?> getDriver();
 
     /**
+     * The driver options for the workspace.
+     */
+    Map<Key<?>,Object> getDriverOptions();
+
+    /**
      * The names of all datasets of the workspace.
      * 
      * @return Iterable over datasets. 
      */
-    Iterable<String> list() throws IOException;
+    Iterable<DataRef<Dataset>> list() throws IOException;
 
     /**
      * Returns a layer object by name.

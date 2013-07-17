@@ -10,6 +10,7 @@ import java.util.List;
 import jline.console.ConsoleReader;
 
 import org.jeo.cli.JeoCLI;
+import org.jeo.data.DataRef;
 import org.jeo.data.Dataset;
 import org.jeo.data.DirectoryRegistry;
 import org.jeo.data.Drivers;
@@ -156,9 +157,9 @@ public class InfoCmd extends JeoCmd {
             console.println("Driver: " + workspace.getDriver().getName());
             console.println("Datasets:");
 
-            for (String l : workspace.list()) {
+            for (DataRef<? extends Dataset> ref : workspace.list()) {
                 console.print("\t");
-                console.println(l);
+                console.println(ref.last());
             }
         }
         finally {

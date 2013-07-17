@@ -1,19 +1,38 @@
 package org.jeo.csv;
 
+import static org.jeo.csv.CSV.*;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
+import org.jeo.util.Key;
 import org.jeo.util.Pair;
 
 public class CSVOpts {
 
-    Delimiter delim = CSV.DELIM.getDefault();
-    boolean header = CSV.HEADER.getDefault();
+    Delimiter delim = DELIM.getDefault();
+    boolean header = HEADER.getDefault();
 
     String xcol, ycol, wktcol;
     Integer x, y, wkt;
 
     List<Pair<Object,Class<?>>> mappings = new ArrayList<Pair<Object,Class<?>>>();
+
+    public static CSVOpts fromMap(Map<?, Object> map) {
+        CSVOpts csvOpts = new CSVOpts();
+        csvOpts.delimiter(DELIM.get(map)).header(HEADER.get(map));
+        
+        Object x = X.get(map);
+        if (x instanceof Integer) {
+            csvOpts.xy((Integer)x, (Integer)Y.get(map));
+        }
+        else {
+            csvOpts.xy(x.toString(), Y.get(map).toString());
+        }
+
+        return csvOpts;
+    }
 
     public Delimiter getDelimiter() {
         return delim;
@@ -63,6 +82,15 @@ public class CSVOpts {
     public CSVOpts map(String col, Class<?> type) {
         mappings.add(new Pair<Object,Class<?>>(col, type));
         return this;
+    }
+
+    public Map<Key<?>,Object> toMap() {
+        Map<Key<?>, Object> map = new LinkedHashMap<Key<?>, Object>();
+        map.put(DELIM, delim);
+        map.put(HEADER, header);
+        map.put(X, x != null ? x : xcol);
+        map.put(Y, y != null ? y : ycol);
+        return map;
     }
 
     Integer getX() {

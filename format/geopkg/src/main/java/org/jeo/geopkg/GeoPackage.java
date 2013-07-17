@@ -9,6 +9,7 @@ import java.util.Map;
 
 import org.jeo.data.FileDriver;
 import org.jeo.util.Key;
+import org.jeo.util.Password;
 
 public class GeoPackage extends FileDriver<GeoPkgWorkspace> {
 
@@ -20,10 +21,10 @@ public class GeoPackage extends FileDriver<GeoPkgWorkspace> {
     /**
      * Password key. 
      */
-    public static final Key<String> PASSWD = new Key<String>("passwd", String.class);
+    public static final Key<Password> PASSWD = new Key<Password>("passwd", Password.class);
 
     public static GeoPkgWorkspace open(File file) throws IOException {
-        return new GeoPackage().open(file, Collections.emptyMap());
+        return new GeoPackage().open(file, (Map) Collections.singletonMap(FILE, file));
     }
 
     @Override
@@ -38,7 +39,7 @@ public class GeoPackage extends FileDriver<GeoPkgWorkspace> {
 
     @Override
     public List<String> getAliases() {
-        return Arrays.asList("geopkg");
+        return Arrays.asList("gpkg", "geopkg");
     }
 
     @Override
@@ -48,8 +49,7 @@ public class GeoPackage extends FileDriver<GeoPkgWorkspace> {
 
     @Override
     public GeoPkgWorkspace open(File file, Map<?, Object> opts) throws IOException {
-        return new GeoPkgWorkspace(
-            new GeoPkgOpts(file).user(USER.get(opts)).passwd(PASSWD.get(opts)));
+        return new GeoPkgWorkspace(GeoPkgOpts.fromMap(opts));
     }
 
 }

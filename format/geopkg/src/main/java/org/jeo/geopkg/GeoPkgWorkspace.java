@@ -15,13 +15,16 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.TimeZone;
 
 import javax.sql.DataSource;
 
 import org.jeo.data.Cursor;
 import org.jeo.data.Cursors;
+import org.jeo.data.DataRef;
 import org.jeo.data.Dataset;
+import org.jeo.data.FileData;
 import org.jeo.data.Query;
 import org.jeo.data.QueryPlan;
 import org.jeo.data.Tile;
@@ -41,6 +44,7 @@ import org.jeo.geopkg.geom.GeoPkgGeomWriter;
 import org.jeo.proj.Proj;
 import org.jeo.sql.DbOP;
 import org.jeo.sql.SQL;
+import org.jeo.util.Key;
 import org.jeo.util.Pair;
 import org.osgeo.proj4j.CoordinateReferenceSystem;
 import org.slf4j.Logger;
@@ -55,7 +59,7 @@ import com.vividsolutions.jts.geom.Geometry;
  * 
  * @author Justin Deoliveira, OpenGeo
  */
-public class GeoPkgWorkspace implements Workspace {
+public class GeoPkgWorkspace implements Workspace, FileData {
 
     static Logger LOG = LoggerFactory.getLogger(GeoPackage.class);
 
@@ -116,8 +120,13 @@ public class GeoPkgWorkspace implements Workspace {
     public GeoPackage getDriver() {
         return new GeoPackage();
     }
-    
-    File getFile() {
+
+    @Override
+    public Map<Key<?>, Object> getDriverOptions() {
+        return opts.toMap();
+    }
+
+    public File getFile() {
         return opts.getFile();
     }
 
@@ -126,19 +135,19 @@ public class GeoPkgWorkspace implements Workspace {
     }
 
     @Override
-    public Iterable<String> list() throws IOException {
-        return run(new DbOP<List<String>>() {
+    public Iterable<DataRef<Dataset>> list() throws IOException {
+        return run(new DbOP<List<DataRef<Dataset>>>() {
             @Override
-            protected List<String> doRun(Connection cx) throws Exception {
+            protected List<DataRef<Dataset>> doRun(Connection cx) throws Exception {
                 String sql = format("SELECT table_name FROM %s", GEOPACKAGE_CONTENTS);
                 log(sql);
 
                 ResultSet rs = open(open(cx.createStatement()).executeQuery(sql));
-                List<String> names = new ArrayList<String>();
+                List<DataRef<Dataset>> refs = new ArrayList<DataRef<Dataset>>();
                 while(rs.next()) {
-                    names.add(rs.getString(1));
+                    refs.add(new DataRef<Dataset>(Dataset.class, rs.getString(1)));
                 }
-                return names;
+                return refs;
             }
         });
     }

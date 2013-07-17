@@ -13,11 +13,11 @@ public class TileSetView implements Disposable {
         this.tiles = tiles;
     }
 
-    public TileGrid grid(int z) {
+    public TileGrid grid(int z) throws IOException {
         return tiles.getPyramid().grid(z);
     }
 
-    public TileGrid gridr(int i) {
+    public TileGrid gridr(int i) throws IOException {
         List<TileGrid> grids = tiles.getPyramid().getGrids(); 
         return i < grids.size() ? grids.get(i) : null;
     }

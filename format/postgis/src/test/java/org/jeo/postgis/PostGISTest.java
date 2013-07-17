@@ -14,6 +14,8 @@ import java.util.Set;
 
 import org.jeo.data.Cursor;
 import org.jeo.data.Cursors;
+import org.jeo.data.DataRef;
+import org.jeo.data.Dataset;
 import org.jeo.data.Query;
 import org.jeo.data.VectorData;
 import org.jeo.feature.Feature;
@@ -27,7 +29,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.postgresql.ds.PGPoolingDataSource;
 
-import com.google.common.base.Predicates;
+import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
 import com.vividsolutions.jts.geom.Envelope;
@@ -80,32 +82,41 @@ public class PostGISTest {
     }
     @Test
     public void testLayers() throws Exception {
-        Iterables.find(pg.list(), Predicates.equalTo("states"));
+        Iterables.find(pg.list(), refFor("states"));
         try {
-            Iterables.find(pg.list(), Predicates.equalTo("geometry_columns"));
+            Iterables.find(pg.list(), refFor("geometry_columns"));
             fail();
         }
         catch(NoSuchElementException e) {}
         try {
-            Iterables.find(pg.list(), Predicates.equalTo("geography_columns"));
+            Iterables.find(pg.list(), refFor("geography_columns"));
             fail();
         }
         catch(NoSuchElementException e) {}
         try {
-            Iterables.find(pg.list(), Predicates.equalTo("raster_columns"));
+            Iterables.find(pg.list(), refFor("raster_columns"));
             fail();
         }
         catch(NoSuchElementException e) {}
         try {
-            Iterables.find(pg.list(), Predicates.equalTo("raster_overviews"));
+            Iterables.find(pg.list(), refFor("raster_overviews"));
             fail();
         }
         catch(NoSuchElementException e) {}
         try {
-            Iterables.find(pg.list(), Predicates.equalTo("topology"));
+            Iterables.find(pg.list(), refFor("topology"));
             fail();
         }
         catch(NoSuchElementException e) {}
+    }
+
+    Predicate<DataRef<Dataset>> refFor(final String name) {
+        return new Predicate<DataRef<Dataset>>() {
+            @Override
+            public boolean apply(DataRef<Dataset> input) {
+                return name.equals(input.first());
+            }
+        };
     }
 
     @Test

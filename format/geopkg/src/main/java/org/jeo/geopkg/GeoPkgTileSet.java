@@ -2,6 +2,7 @@ package org.jeo.geopkg;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 import org.jeo.data.Cursor;
 import org.jeo.data.Tile;
@@ -9,6 +10,7 @@ import org.jeo.data.TileGrid;
 import org.jeo.data.TilePyramid;
 import org.jeo.data.TileSet;
 import org.jeo.proj.Proj;
+import org.jeo.util.Key;
 import org.osgeo.proj4j.CoordinateReferenceSystem;
 
 import com.vividsolutions.jts.geom.Envelope;
@@ -26,6 +28,11 @@ public class GeoPkgTileSet implements TileSet {
     @Override
     public GeoPackage getDriver() {
         return geopkg.getDriver();
+    }
+
+    @Override
+    public Map<Key<?>, Object> getDriverOptions() {
+        return geopkg.getDriverOptions();
     }
 
     @Override

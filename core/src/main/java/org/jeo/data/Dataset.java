@@ -1,7 +1,9 @@
 package org.jeo.data;
 
 import java.io.IOException;
+import java.util.Map;
 
+import org.jeo.util.Key;
 import org.osgeo.proj4j.CoordinateReferenceSystem;
 
 import com.vividsolutions.jts.geom.Envelope;
@@ -20,6 +22,11 @@ public interface Dataset extends Disposable {
      * The driver used to open the dataset.
      */
     Driver<?> getDriver();
+
+    /**
+     * The driver options for the dataset.
+     */
+    Map<Key<?>,Object> getDriverOptions();
 
     /**
      * Name of the layer.

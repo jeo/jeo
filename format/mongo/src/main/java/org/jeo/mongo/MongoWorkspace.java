@@ -1,12 +1,18 @@
 package org.jeo.mongo;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
+import org.jeo.data.DataRef;
+import org.jeo.data.Dataset;
 import org.jeo.data.Driver;
 import org.jeo.data.Workspace;
 import org.jeo.feature.Schema;
+import org.jeo.util.Key;
 
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
@@ -42,15 +48,19 @@ public class MongoWorkspace implements Workspace {
     }
 
     @Override
-    public Iterable<String> list() throws IOException {
-        Set<String> collections = db.getCollectionNames();
-        for (Iterator<String> it = collections.iterator(); it.hasNext();) {
-            String name = it.next();
-            if (name.startsWith("system.")) {
-                it.remove();
+    public Map<Key<?>, Object> getDriverOptions() {
+        return mopts.toMap();
+    }
+
+    @Override
+    public Iterable<DataRef<Dataset>> list() throws IOException {
+        List<DataRef<Dataset>> refs = new ArrayList<DataRef<Dataset>>(); 
+        for (String name : db.getCollectionNames()) {
+            if (!name.startsWith("system.")) {
+                refs.add(new DataRef<Dataset>(Dataset.class, name));
             }
         }
-        return collections;
+        return refs;
     }
 
     @Override

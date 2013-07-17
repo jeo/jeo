@@ -7,6 +7,7 @@ import java.util.Map;
 
 import org.jeo.data.Driver;
 import org.jeo.util.Key;
+import org.jeo.util.Password;
 
 public class MongoDB implements Driver<MongoWorkspace> {
 
@@ -19,7 +20,7 @@ public class MongoDB implements Driver<MongoWorkspace> {
     public static final Key<String> USER = 
             new Key<String>("user", String.class, System.getProperty("user.name"));
     
-    public static final Key<String> PASSWD = new Key<String>("passwd", String.class);
+    public static final Key<Password> PASSWD = new Key<Password>("passwd", Password.class);
 
     public static MongoWorkspace open(MongoOpts opts) throws IOException {
         return new MongoWorkspace(opts);
@@ -52,13 +53,7 @@ public class MongoDB implements Driver<MongoWorkspace> {
 
     @Override
     public MongoWorkspace open(Map<?, Object> opts) throws IOException {
-        MongoOpts mopts = new MongoOpts(DB.get(opts));
-        mopts.host(HOST.get(opts))
-             .port(PORT.get(opts))
-             .user(USER.get(opts))
-             .passwd(PASSWD.get(opts));
-
-        return new MongoWorkspace(mopts);
+        return new MongoWorkspace(MongoOpts.fromMap(opts));
     }
 
 }

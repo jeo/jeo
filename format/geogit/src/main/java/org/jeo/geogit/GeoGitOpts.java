@@ -1,15 +1,37 @@
 package org.jeo.geogit;
 
+import static org.jeo.geogit.GeoGit.*;
+
 import java.io.File;
+import java.util.LinkedHashMap;
+import java.util.Map;
+
+import org.jeo.util.Key;
 
 public class GeoGitOpts {
 
     File file;
-    boolean create = GeoGit.CREATE.getDefault();
-    String user = GeoGit.USER.getDefault();
+    boolean create = CREATE.getDefault();
+    String user = USER.getDefault();
 
-    String email = GeoGit.EMAIL.getDefault();
+    String email = EMAIL.getDefault();
     boolean emailIsSet = false;
+
+    public static GeoGitOpts fromMap(Map<?,Object> map) {
+        GeoGitOpts ggopts = new GeoGitOpts(FILE.get(map));
+
+        if (CREATE.has(map)) {
+            ggopts.create(CREATE.get(map));
+        }
+        if (USER.has(map)) {
+            ggopts.user(USER.get(map));
+        }
+        if (EMAIL.has(map)) {
+            ggopts.email(EMAIL.get(map));
+        }
+
+        return ggopts;
+    }
 
     public GeoGitOpts(File file) {
         this.file = file;
@@ -48,5 +70,15 @@ public class GeoGitOpts {
 
     public String getEmail() {
         return email;
+    }
+
+    public Map<Key<?>,Object> toMap() {
+        LinkedHashMap<Key<?>, Object> map = new LinkedHashMap<Key<?>, Object>();
+        map.put(FILE, file);
+        map.put(CREATE, create);
+        map.put(USER, user);
+        map.put(EMAIL, email);
+
+        return map;
     }
 }

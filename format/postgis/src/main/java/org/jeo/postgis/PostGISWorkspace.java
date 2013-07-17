@@ -11,9 +11,12 @@ import java.sql.Statement;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import javax.sql.DataSource;
 
+import org.jeo.data.DataRef;
+import org.jeo.data.Dataset;
 import org.jeo.data.Driver;
 import org.jeo.data.Workspace;
 import org.jeo.feature.Field;
@@ -25,6 +28,7 @@ import org.jeo.sql.DbOP;
 import org.jeo.sql.PrimaryKeyColumn;
 import org.jeo.sql.SQL;
 import org.jeo.sql.Table;
+import org.jeo.util.Key;
 import org.jeo.util.Pair;
 import org.osgeo.proj4j.CoordinateReferenceSystem;
 import org.postgresql.ds.PGPoolingDataSource;
@@ -37,11 +41,13 @@ public class PostGISWorkspace implements Workspace {
 
     static Logger LOG = LoggerFactory.getLogger(PostGIS.class);
 
+    PostGISOpts opts;
     PGPoolingDataSource db;
     PostGISInfo info;
     PostGISTypes dbtypes;
-    
+
     public PostGISWorkspace(PostGISOpts pgopts) throws IOException {
+        opts = pgopts;
         db = createDataSource(pgopts);
         info = new PostGISInfo(this);
         dbtypes = new PostGISTypes();
@@ -53,13 +59,18 @@ public class PostGISWorkspace implements Workspace {
         dataSource.setDatabaseName(pgopts.getDb());
         dataSource.setPortNumber(pgopts.getPort());
         dataSource.setUser(pgopts.getUser());
-        dataSource.setPassword(pgopts.getPasswd());
+        dataSource.setPassword(new String(pgopts.getPasswd().get()));
         return dataSource;
     }
 
     @Override
     public Driver<?> getDriver() {
         return new PostGIS();
+    }
+
+    @Override
+    public Map<Key<?>, Object> getDriverOptions() {
+        return opts.toMap();
     }
 
     public DataSource getDataSource() {
@@ -71,21 +82,21 @@ public class PostGISWorkspace implements Workspace {
     }
 
     @Override
-    public Iterable<String> list() throws IOException {
-        return run(new DbOP<List<String>>() {
+    public Iterable<DataRef<Dataset>> list() throws IOException {
+        return run(new DbOP<List<DataRef<Dataset>>>() {
             @Override
-            protected List<String> doRun(Connection cx) throws Exception {
+            protected List<DataRef<Dataset>> doRun(Connection cx) throws Exception {
                 DatabaseMetaData md = cx.getMetaData();
                 ResultSet tables = 
                     open(md.getTables(null, "", null, new String[]{"TABLE", "VIEW"}));
 
                 //TODO: avoid pulling all into list
-                List<String> l = new ArrayList<String>();
+                List<DataRef<Dataset>> l = new ArrayList<DataRef<Dataset>>();
                 while(tables.next()) {
                     String tbl = tables.getString("TABLE_NAME");
                     String schema = tables.getString("TABLE_SCHEM");
                     if (includeTable(tbl, schema)) {
-                        l.add(tbl);
+                        l.add(new DataRef<Dataset>(Dataset.class, tbl));
                     }
                 }
 

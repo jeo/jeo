@@ -26,6 +26,7 @@ import org.jeo.data.VectorData;
 import org.jeo.feature.Feature;
 import org.jeo.feature.Schema;
 import org.jeo.geom.Envelopes;
+import org.jeo.util.Key;
 import org.jeo.util.Pair;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
@@ -52,6 +53,11 @@ public class GeoGitDataset implements VectorData, Transactional {
         return geogit.getDriver();
     }
 
+    @Override
+    public Map<Key<?>, Object> getDriverOptions() {
+        return geogit.getDriverOptions();
+    }
+
     public GeoGIT getGeoGIT() {
         return geogit.getGeoGIT();
     }
@@ -62,12 +68,12 @@ public class GeoGitDataset implements VectorData, Transactional {
 
     @Override
     public String getTitle() {
-        return getName();
+        return null;
     }
-    
+
     @Override
     public String getDescription() {
-        return getName();
+        return null;
     }
 
     @Override

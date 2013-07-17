@@ -8,16 +8,20 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
+import java.util.Collections;
+import java.util.Map;
 
 import org.jeo.data.Cursor;
 import org.jeo.data.Cursor.Mode;
 import org.jeo.data.Cursors;
 import org.jeo.data.Driver;
+import org.jeo.data.FileData;
 import org.jeo.data.Query;
 import org.jeo.data.QueryPlan;
 import org.jeo.data.VectorData;
 import org.jeo.feature.Feature;
 import org.jeo.feature.Schema;
+import org.jeo.util.Key;
 import org.jeo.util.Optional;
 import org.jeo.util.Util;
 import org.json.simple.parser.JSONParser;
@@ -26,7 +30,7 @@ import org.osgeo.proj4j.CoordinateReferenceSystem;
 
 import com.vividsolutions.jts.geom.Envelope;
 
-public class GeoJSONDataset implements VectorData {
+public class GeoJSONDataset implements VectorData, FileData {
 
     File file;
 
@@ -40,18 +44,28 @@ public class GeoJSONDataset implements VectorData {
     }
 
     @Override
+    public Map<Key<?>, Object> getDriverOptions() {
+        return (Map) Collections.singletonMap(GeoJSON.FILE, file);
+    }
+
+    @Override
+    public File getFile() {
+        return file;
+    }
+
+    @Override
     public String getName() {
         return Util.base(file.getName());
     }
 
     @Override
     public String getTitle() {
-        return getName();
+        return null;
     }
 
     @Override
     public String getDescription() {
-        return getName();
+        return null;
     }
 
     @Override

@@ -23,7 +23,6 @@ import java.util.regex.Pattern;
 import org.jeo.data.Cursor;
 import org.jeo.data.Dataset;
 import org.jeo.data.Query;
-import org.jeo.data.Registry;
 import org.jeo.data.VectorData;
 import org.jeo.data.Workspace;
 import org.jeo.feature.Feature;
@@ -48,7 +47,8 @@ public class FeatureHandler extends Handler {
 
     // /features/<workspace>[/<layer>]
     static final Pattern FEATURES_URI_RE = 
-        Pattern.compile("/features/([^/]+)(?:/([^/]+))?/?", Pattern.CASE_INSENSITIVE);
+        //Pattern.compile("/features/([^/]+)(?:/([^/]+))?/?", Pattern.CASE_INSENSITIVE);
+        Pattern.compile("/features/((?:[^/]+/)?[^/]+)/?", Pattern.CASE_INSENSITIVE);
 
     @Override
     public boolean canHandle(Request request, NanoJeoServer server) {
@@ -94,11 +94,12 @@ public class FeatureHandler extends Handler {
 
     Response handlePost(Request request, NanoJeoServer server) throws IOException {
         Matcher m = (Matcher) request.getContext().get(Matcher.class);
+        String key = m.group(1);
 
         String file = request.getFiles().getProperty("content");
         BufferedInputStream in = new BufferedInputStream(new FileInputStream(file));
         try {
-            if (m.group(2) == null) {
+            if (!key.contains("/")) {
                 return handlePostCreateLayer(request, in, server);
             }
             else {
@@ -111,9 +112,10 @@ public class FeatureHandler extends Handler {
     }
 
     Response handlePostCreateLayer(Request request, InputStream body, NanoJeoServer server) throws IOException {
+        Matcher m = (Matcher) request.getContext().get(Matcher.class);
+        Workspace ws = findWorkspace(m.group(1), server.getRegistry());
+        
         Schema schema = parseSchema(body);
-
-        Workspace ws = findWorkspace(request, server);
         ws.create(schema);
 
         //TODO: set Location header
@@ -143,30 +145,15 @@ public class FeatureHandler extends Handler {
     }
 
     VectorData findVectorLayer(Request request, NanoJeoServer server) throws IOException {
-        Workspace ws = findWorkspace(request, server);
-
         Matcher m = (Matcher) request.getContext().get(Matcher.class);
-        Dataset l = ws.get(m.group(2));
+
+        Dataset l = findDataset(m.group(1), server.getRegistry());
         if (l == null || !(l instanceof VectorData)) {
             //no such layer
             throw new HttpException(HTTP_NOTFOUND, "No such feature layer: " + m.group(0));
         }
 
         return (VectorData) l;
-    }
-
-    Workspace findWorkspace(Request request, NanoJeoServer server) throws IOException {
-        Matcher m = (Matcher) request.getContext().get(Matcher.class);
-
-        String key = m.group(1);
-
-        Registry reg = server.getRegistry();
-        Workspace ws = reg.get(key);
-        if ( ws == null) {
-            throw new HttpException(HTTP_NOTFOUND, "No such workspace: " +key);
-        }
-
-        return ws;
     }
 
     Envelope parseBBOX(String bbox) {

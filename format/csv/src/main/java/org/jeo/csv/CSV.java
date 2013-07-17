@@ -46,21 +46,6 @@ public class CSV extends FileDriver<CSVDataset> {
 
     @Override
     public CSVDataset open(File file, Map<?,Object> opts) throws IOException {
-        return new CSVDataset(file, csvOpts(opts));
-    }
-
-    CSVOpts csvOpts(Map<?, Object> opts) {
-        CSVOpts csvOpts = new CSVOpts();
-        csvOpts.delimiter(DELIM.get(opts)).header(HEADER.get(opts));
-        
-        Object x = X.get(opts);
-        if (x instanceof Integer) {
-            csvOpts.xy((Integer)x, (Integer)Y.get(opts));
-        }
-        else {
-            csvOpts.xy(x.toString(), Y.get(opts).toString());
-        }
-
-        return csvOpts;
+        return new CSVDataset(file, CSVOpts.fromMap(opts));
     }
 }

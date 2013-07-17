@@ -32,6 +32,7 @@ import org.jeo.sql.PrimaryKey;
 import org.jeo.sql.PrimaryKeyColumn;
 import org.jeo.sql.SQL;
 import org.jeo.sql.Table;
+import org.jeo.util.Key;
 import org.jeo.util.Pair;
 import org.jeo.util.Util;
 import org.osgeo.proj4j.CoordinateReferenceSystem;
@@ -62,18 +63,23 @@ public class PostGISDataset implements VectorData {
     }
 
     @Override
+    public Map<Key<?>, Object> getDriverOptions() {
+        return pg.getDriverOptions();
+    }
+
+    @Override
     public String getName() {
         return table.getName();
     }
 
     @Override
     public String getTitle() {
-        return getName();
+        return null;
     }
 
     @Override
     public String getDescription() {
-        return getName();
+        return null;
     }
 
     @Override

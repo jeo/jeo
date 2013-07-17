@@ -2,8 +2,10 @@ package org.jeo.data.mem;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.jeo.data.Cursor;
 import org.jeo.data.Cursors;
@@ -15,6 +17,7 @@ import org.jeo.feature.Feature;
 import org.jeo.feature.Field;
 import org.jeo.feature.Schema;
 import org.jeo.geom.Envelopes;
+import org.jeo.util.Key;
 import org.osgeo.proj4j.CoordinateReferenceSystem;
 
 import com.vividsolutions.jts.geom.Envelope;
@@ -35,8 +38,12 @@ public class MemVector implements VectorData {
 
     public Memory getDriver() {
         return new Memory();
-    };
+    }
 
+    public Map<Key<?>,Object> getDriverOptions() {
+        return Collections.emptyMap();
+    }
+    
     List<Feature> getFeatures() {
         return features;
     }

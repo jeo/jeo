@@ -17,15 +17,15 @@ import org.jeo.data.Registry;
 import org.jeo.data.Tile;
 import org.jeo.data.TileGrid;
 import org.jeo.data.TileSet;
-import org.jeo.data.Workspace;
 import org.jeo.nano.NanoHTTPD.Response;
 
 public class TileHandler extends Handler {
 
     /* /tiles/<workspace>/<layer>/<z>/<x>/<y>.<format.  */
-    static final Pattern TILES_URI_RE = 
-        Pattern.compile("/tiles/([^/]+)/([^/]+)/(\\d+)/+(\\d+)/+(\\d+).(\\w+)", Pattern.CASE_INSENSITIVE);
-
+    static final Pattern TILES_URI_RE = Pattern.compile( 
+        //"/tiles/([^/]+)/([^/]+)/(\\d+)/+(\\d+)/+(\\d+).(\\w+)", Pattern.CASE_INSENSITIVE);
+        "/tiles/((?:[^/]+/)?[^/]+)/(\\d+)/+(\\d+)/+(\\d+).(\\w+)", Pattern.CASE_INSENSITIVE);
+    
     @Override
     public boolean canHandle(Request request, NanoJeoServer server) {
         Matcher m = TILES_URI_RE.matcher(request.getUri());
@@ -46,17 +46,7 @@ public class TileHandler extends Handler {
 
         try {
             Registry reg = server.getRegistry();
-            Workspace ws = reg.get(m.group(1));
-            if (ws == null) {
-                //no such layer
-                return new Response(HTTP_NOTFOUND, MIME_PLAINTEXT, "No such workspace: " + m.group(1));
-            }
-    
-            Dataset l = ws.get(m.group(2));
-            if (l == null) {
-                //no such layer
-                return new Response(HTTP_NOTFOUND, MIME_PLAINTEXT, "No such layer: " + m.group(2));
-            }
+            Dataset l = findDataset(m.group(1), reg);
     
             if (!(l instanceof TileSet)) {
                 // not a tile set
@@ -67,9 +57,9 @@ public class TileHandler extends Handler {
             TileSet ts = (TileSet) l;
     
             //get teh tile index
-            long z = Long.parseLong(m.group(3));
-            long x = Long.parseLong(m.group(4));
-            long y = Long.parseLong(m.group(5));
+            long z = Long.parseLong(m.group(2));
+            long x = Long.parseLong(m.group(3));
+            long y = Long.parseLong(m.group(4));
     
             //check for flipy flag
             Properties q = request.getParms();

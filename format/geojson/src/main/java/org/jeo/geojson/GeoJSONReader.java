@@ -1,16 +1,13 @@
 package org.jeo.geojson;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.Reader;
-import java.io.StringReader;
 import java.util.Collection;
 
 import org.jeo.data.Cursor;
 import org.jeo.data.Cursors;
 import org.jeo.feature.Feature;
+import org.jeo.util.Convert;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
@@ -63,7 +60,11 @@ public class GeoJSONReader {
     }
 
     public Cursor<Feature> features(Object json) {
-        return new GeoJSONCursor(toReader(json));
+        try {
+            return new GeoJSONCursor(toReader(json));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public Object read(Object json) {
@@ -77,20 +78,8 @@ public class GeoJSONReader {
         return result;
     }
 
-    Reader toReader(Object input) {
-        if (input instanceof Reader) {
-            return (Reader) input;
-        }
-
-        if (input instanceof InputStream) {
-            return new BufferedReader(new InputStreamReader((InputStream)input));
-        }
-
-        if (input instanceof String) {
-            return new StringReader((String) input);
-        }
-
-        throw new IllegalArgumentException("unable to turn " + input + " into reader");
+    Reader toReader(Object input) throws IOException {
+        return Convert.toReader(input).get("unable to turn " + input + " into reader");
     }
 
     Object parse(Object input, BaseHandler handler) {

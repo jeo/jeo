@@ -39,7 +39,7 @@ public class GeoGit extends FileDriver<GeoGitWorkspace> {
         new Key<String>("user.email", String.class, USER.getDefault() + "@localhost");
 
     public static GeoGitWorkspace open(GeoGitOpts opts) throws IOException {
-        return new GeoGitWorkspace(newGeoGIT(opts));
+        return new GeoGitWorkspace(newGeoGIT(opts), opts);
     }
 
     @Override
@@ -79,7 +79,7 @@ public class GeoGit extends FileDriver<GeoGitWorkspace> {
             ggopts.email(EMAIL.get(opts));
         }
 
-        return new GeoGitWorkspace(newGeoGIT(ggopts));
+        return new GeoGitWorkspace(newGeoGIT(ggopts), ggopts);
     }
 
     static GeoGIT newGeoGIT(GeoGitOpts opts) throws IOException {

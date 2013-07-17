@@ -1,6 +1,7 @@
 package org.jeo.mongo;
 
 import java.io.IOException;
+import java.util.Map;
 
 import org.jeo.data.Cursor;
 import org.jeo.data.Cursor.Mode;
@@ -15,6 +16,7 @@ import org.jeo.feature.SchemaBuilder;
 import org.jeo.filter.Filter;
 import org.jeo.geom.Envelopes;
 import org.jeo.proj.Proj;
+import org.jeo.util.Key;
 import org.osgeo.proj4j.CoordinateReferenceSystem;
 
 import com.mongodb.DBCollection;
@@ -58,18 +60,23 @@ public class MongoDataset implements VectorData {
     }
 
     @Override
+    public Map<Key<?>, Object> getDriverOptions() {
+        return mongo.getDriverOptions();
+    }
+
+    @Override
     public String getName() {
         return dbcol.getName();
     }
 
     @Override
     public String getTitle() {
-        return getName();
+        return null;
     }
 
     @Override
     public String getDescription() {
-        return getName();
+        return null;
     }
 
     @Override

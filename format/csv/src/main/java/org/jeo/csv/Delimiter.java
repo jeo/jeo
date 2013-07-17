@@ -27,4 +27,9 @@ public class Delimiter {
     public String[] split(String row) {
         return row.split(regex);
     }
+
+    @Override
+    public String toString() {
+        return regex;
+    }
 }

@@ -295,9 +295,19 @@ public class GeoJSONWriter {
             obj.put("geometry", toObject(g));
         }
 
-        Map<String,Object> map = new LinkedHashMap<String, Object>(f.map());
-        map.remove("geometry");
+        Map<String,Object> map = new LinkedHashMap<String, Object>();
+        for (Map.Entry<String, Object> p : f.map().entrySet()) {
+            Object o = p.getValue();
+            if (o instanceof Geometry) {
+                if (o == g) {
+                    continue;
+                }
 
+                o = toObject((Geometry)o);
+            }
+            map.put(p.getKey(), o);
+        }
+        
         obj.put("properties", map);
         return obj;
     }

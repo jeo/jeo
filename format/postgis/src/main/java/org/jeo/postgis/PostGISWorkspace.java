@@ -59,7 +59,11 @@ public class PostGISWorkspace implements Workspace {
         dataSource.setDatabaseName(pgopts.getDb());
         dataSource.setPortNumber(pgopts.getPort());
         dataSource.setUser(pgopts.getUser());
-        dataSource.setPassword(new String(pgopts.getPasswd().get()));
+
+        if (pgopts.getPasswd() != null) {
+            dataSource.setPassword(new String(pgopts.getPasswd().get()));
+        }
+
         return dataSource;
     }
 

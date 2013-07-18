@@ -705,14 +705,29 @@ public class GeoJSONWriter {
 
         @Override
         public void writeJSONString(Writer out) throws IOException {
-            out.write("[");
+            try {
+                out.write("[");
+        
+                if (cursor.hasNext()) {
+                    out.write(toJSON(cursor.next()));
+                }
+                while (cursor.hasNext()) {
+                    out.write(",");
+                    out.write(toJSON(cursor.next()));
+                }
 
-            for (Feature f : cursor) {
-                out.write(JSONValue.toJSONString(toObject(f)));
+                cursor.close();
+              
+                out.write("]");
+                out.flush();
             }
+            finally {
+                cursor.close();
+            }
+        }
 
-            out.write("]");
-            out.flush();
+        String toJSON(Feature f) {
+            return JSONValue.toJSONString(toObject(f));
         }
    }
 }

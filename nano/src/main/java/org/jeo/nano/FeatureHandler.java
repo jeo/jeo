@@ -82,13 +82,19 @@ public class FeatureHandler extends Handler {
         VectorData layer = findVectorLayer(request, server);
 
         //parse the bbox
-        Properties q = request.getParms();
-        if (!q.containsKey("bbox")) {
+        Properties p = request.getParms();
+        if (!p.containsKey("bbox")) {
             return new Response(HTTP_BADREQUEST, MIME_PLAINTEXT, "Request must specify bbox");
         }
 
-        Envelope bbox = parseBBOX(q.getProperty("bbox"));
-        Cursor<Feature> c = layer.cursor(new Query().bounds(bbox));
+        Envelope bbox = parseBBOX(p.getProperty("bbox"));
+
+        Query q = new Query().bounds(bbox);
+        if (p.containsKey("limit")) {
+            q.limit(Integer.parseInt(p.getProperty("limit")));
+        }
+        
+        Cursor<Feature> c = layer.cursor(q);
         return new Response(HTTP_OK, MIME_JSON, GeoJSONWriter.toString(c));
     }
 

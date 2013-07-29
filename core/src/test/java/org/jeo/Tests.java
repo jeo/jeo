@@ -3,6 +3,7 @@ package org.jeo;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.zip.GZIPInputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipException;
 import java.util.zip.ZipInputStream;
@@ -107,4 +108,21 @@ public class Tests {
         return dir;
     }
 
+    /**
+     * Unzips a gzipped resource.
+     * 
+     * @param gzipped The gzipped content.
+     * @param dir The target directory to gunzip to.
+     * @param filename The filename to gunzip to.
+     * 
+     */
+    public static File gunzip(final InputStream gzipped, final File dir, String filename) 
+        throws IOException {
+        GZIPInputStream gzipin = new GZIPInputStream(gzipped);
+
+        File file = new File(dir, filename);
+        ByteStreams.copy(gzipin, Files.newOutputStreamSupplier(file).getOutput());
+
+        return file;
+    }
 }

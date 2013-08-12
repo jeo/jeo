@@ -67,7 +67,7 @@ public class ProtobufDataset implements VectorData, FileData {
 
     @Override
     public String getName() {
-        return Util.base(file.getName());
+        return schema.getName();
     }
 
     @Override

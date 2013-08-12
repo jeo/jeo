@@ -72,7 +72,10 @@ public class GeoJSONDataset implements VectorData, FileData {
     @Override
     public Schema getSchema() throws IOException {
         Optional<Feature> f = first();
-        return f.has() ? f.get().schema() : null;
+        if (f.has()) {
+            return Schema.build(getName()).fields(f.get().schema().getFields()).schema();
+        }
+        return null;
     }
 
     @Override

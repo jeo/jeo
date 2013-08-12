@@ -78,6 +78,20 @@ public class SchemaBuilder {
     }
 
     /**
+     * Adds a collection/iterable of fields to the schema being built.
+     * 
+     * @param flds The fields to add.
+     * 
+     * @return This builder.
+     */
+    public SchemaBuilder fields(Iterable<Field> flds) {
+        for (Field fld : flds) {
+            fields.add(fld);
+        }
+        return this;
+    }
+
+    /**
      * Adds a property to be set on the next field.
      * <p>
      * This value is discarded after the next call to <tt>field()</tt>

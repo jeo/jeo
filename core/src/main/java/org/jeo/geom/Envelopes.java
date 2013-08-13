@@ -92,6 +92,13 @@ public class Envelopes {
     }
 
     /**
+     * Encodes an envelope as a string of the form <tt>&lt;x1>,&lt;y1>,&lt;x2,&lt;y2></tt>.
+     */
+    public static String toString(Envelope e) {
+        return String.format("%d,%d,%d,%d", e.getMinX(),e.getMinY(),e.getMaxX(),e.getMaxY());
+    }
+
+    /**
      * Parses a string of the form <tt>&lt;x1>,&lt;y1>,&lt;x2,&lt;y2></tt> into an envelope.
      * <p>
      * To parse an envelope of the form <tt>&lt;x1>,&lt;x2>,&lt;y1,&lt;y2></tt> call 

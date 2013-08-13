@@ -25,6 +25,8 @@ Build the ``master`` branch of the [geogit repoistory](https://github.com/openge
 
 ### Build jeo
 
+jeo requires the [protoc](http://code.google.com/p/protobuf/downloads/list) program. On OSX, it is best to build it from source with `configure && make && sudo make install`.
+
     git clone https://github.com/jdeolive/jeo
     cd jeo
     mvn install

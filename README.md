@@ -14,15 +14,6 @@ Build the ``jeo`` branch of the [proj4j repository](https://github.com/jdeolive/
     git checkout jeo
     mvn install
 
-### Build GeoGIT
-
-Build the ``master`` branch of the [geogit repoistory](https://github.com/opengeo/GeoGit/).
-
-    git clone https://github.com/opengeo/GeoGit.git
-    cd GeoGit
-    cd src/parent
-    mvn install
-
 ### Build jeo
 
     git clone https://github.com/jdeolive/jeo

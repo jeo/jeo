@@ -20,21 +20,24 @@ public class MapBuilder {
     static Logger LOG = LoggerFactory.getLogger(MapBuilder.class);
 
     Map map;
+    Viewport view;
+   
     boolean size = false, bounds = false, crs = false;
 
     public MapBuilder() {
         map = new Map();
+        view = new Viewport(map);
     }
 
     public MapBuilder size(int width, int height) {
-        map.setWidth(width);
-        map.setHeight(height);
+        view.setWidth(width);
+        view.setHeight(height);
         size = true;
         return this;
     }
 
     public MapBuilder bounds(Envelope bounds) {
-        map.setBounds(bounds);
+        view.setBounds(bounds);
         this.bounds = true;
         return this;
     }
@@ -44,7 +47,7 @@ public class MapBuilder {
     }
 
     public MapBuilder crs(CoordinateReferenceSystem crs) {
-        map.setCRS(crs);
+        view.setCRS(crs);
         this.crs = true;
         return this;
     }
@@ -127,14 +130,14 @@ public class MapBuilder {
                     if (!bounds) {
                         Envelope e = l.getData().bounds();
                         if (e != null && !e.isNull()) {
-                            map.setBounds(e);
+                            view.setBounds(e);
                             bounds = true;
                         }
                     }
                     if (!crs) {
                         CoordinateReferenceSystem c = l.getData().getCRS();
                         if (c != null) {
-                            map.setCRS(c);
+                            view.setCRS(c);
                             crs = true;
                         }
                     }
@@ -146,13 +149,14 @@ public class MapBuilder {
 
         if (!size) {
             //set from bounds
-            Envelope e = map.getBounds();
+            Envelope e = view.getBounds();
             if (e != null) {
-                map.setWidth(Map.DEFAULT_WIDTH);
-                map.setHeight((int)(map.getWidth() * e.getHeight() / e.getWidth()));
+                view.setWidth(Viewport.DEFAULT_WIDTH);
+                view.setHeight((int)(view.getWidth() * e.getHeight() / e.getWidth()));
             }
         }
 
+        map.setView(view);
         return map;
     }
 }

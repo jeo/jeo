@@ -16,6 +16,8 @@ Build the ``jeo`` branch of the [proj4j repository](https://github.com/jdeolive/
 
 ### Build jeo
 
+jeo requires the [protoc](http://code.google.com/p/protobuf/downloads/list) program. On OSX, it is best to build it from source with `configure && make && sudo make install`.
+
     git clone https://github.com/jdeolive/jeo
     cd jeo
     mvn install

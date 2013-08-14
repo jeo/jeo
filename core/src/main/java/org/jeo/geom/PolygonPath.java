@@ -16,8 +16,7 @@ public class PolygonPath extends CoordinatePath {
     /** ring index, -1 means outer */
     int r;
 
-    PolygonPath(Polygon poly, boolean generalize, double dx, double dy) {
-        super(generalize, dx, dy);
+    PolygonPath(Polygon poly) {
         this.poly = poly;
         doReset();
     }

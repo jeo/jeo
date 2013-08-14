@@ -12,8 +12,7 @@ public class LineStringPath extends CoordinatePath {
     /** coordinate index */
     int i;
 
-    LineStringPath(LineString line, boolean generalize, double dx, double dy) {
-        super(generalize, dx, dy);
+    LineStringPath(LineString line) {
         this.line = line;
         doReset();
     }

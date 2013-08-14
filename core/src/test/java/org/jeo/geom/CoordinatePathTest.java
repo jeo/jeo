@@ -47,7 +47,7 @@ public class CoordinatePathTest {
     @Test
     public void testLineStringGeneralize() throws Exception {
         LineString l = gb.points(1,1,2,2,3,3,4,4,5,5,6,6).toLineString();
-        CoordinatePath li = CoordinatePath.create(l, true, 2, 2);
+        CoordinatePath li = CoordinatePath.create(l).generalize(2, 2);
 
         assertSequence(li, 1,1,MOVE_TO, 3,3,LINE_TO, 5,5,LINE_TO);
     }
@@ -64,7 +64,7 @@ public class CoordinatePathTest {
     @Test
     public void testPolygonGeneralize() {
         Polygon p = gb.points(1,1,2,2,3,3,4,4,5,5,6,6,1,1).ring().toPolygon();
-        CoordinatePath pi = CoordinatePath.create(p, true, 2, 2);
+        CoordinatePath pi = CoordinatePath.create(p).generalize(2, 2);
 
         assertSequence(pi, 1,1,MOVE_TO, 3,3,LINE_TO, 5,5,LINE_TO, 1,1,CLOSE);
     }
@@ -86,7 +86,7 @@ public class CoordinatePathTest {
             0,10,0,8, 0,5, 0,3, 0,0).ring().points(3,3, 5,3, 8,3,  8,5, 8,8,  5,8, 3,8,  3,5, 3,3)
             .ring().toPolygon();
         
-        CoordinatePath pi = CoordinatePath.create(p, true, 4, 4);
+        CoordinatePath pi = CoordinatePath.create(p).generalize(4, 4);
         assertSequence(pi, 0,0,MOVE_TO, 5,0,LINE_TO, 10,0,LINE_TO, 10,5,LINE_TO, 10,10,LINE_TO, 
             5,10,LINE_TO, 0,10,LINE_TO, 0,5,LINE_TO, 0,0,CLOSE, 3,3,MOVE_TO, 8,3,LINE_TO, 
             8,8,LINE_TO, 3,8,LINE_TO, 3,3,CLOSE);

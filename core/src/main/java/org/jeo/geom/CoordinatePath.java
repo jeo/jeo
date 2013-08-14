@@ -3,6 +3,7 @@ package org.jeo.geom;
 import java.util.Iterator;
 
 import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.CoordinateFilter;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryCollection;
 import com.vividsolutions.jts.geom.LineString;
@@ -35,27 +36,6 @@ public abstract class CoordinatePath implements Iterator<Coordinate> {
      * </p>
      */
     public static CoordinatePath create(Geometry g) {
-        return create(g, false, Double.NaN, Double.NaN);
-    }
-
-    /**
-     * Creates coordinate iterator for the specified geometry.
-     * <p>
-     * The <tt>generalize</tt> parameter specifies whether or not the geometry should be 
-     * generalized resulting in fewer coordinates being returned. When set to <tt>true</tt> the 
-     * <tt>dx</tt> and <tt>dy</tt> arguments are used as a tolerance to collapse coordinates. 
-     * Consecutive coordinates with both horizontal and vertical distance less than <tt>dx</tt> and
-     * <tt>dy</tt> respectively are collapsed.  
-     * </p> 
-     * @param g The geometry.
-     * @param generalize Generalization flag.
-     * @param dx Horizontal generalization distance, only taken into account when 
-     *   <tt>generalization</tt> is <tt>true</tt>
-     * @param dy Vertical generalization distance, only taken into account when 
-     *   <tt>generalization</tt> is <tt>true</tt>
-     * @return
-     */
-    public static CoordinatePath create(Geometry g, boolean generalize, double dx, double dy) {
         if (g == null || g.isEmpty()) {
             return new EmptyPath(g);
         }
@@ -64,14 +44,14 @@ public abstract class CoordinatePath implements Iterator<Coordinate> {
         case POINT:
             return new PointPath((Point) g);
         case LINESTRING:
-            return new LineStringPath((LineString)g, generalize, dx, dy);
+            return new LineStringPath((LineString)g);
         case POLYGON:
-            return new PolygonPath((Polygon)g, generalize, dx, dy);
+            return new PolygonPath((Polygon)g);
         case MULTIPOINT:
         case MULTILINESTRING:
         case MULTIPOLYGON:
         case GEOMETRYCOLLECTION:
-            return new GeometryCollectionPath((GeometryCollection) g, generalize, dx, dy);
+            return new GeometryCollectionPath((GeometryCollection) g);
         default:
             throw new IllegalArgumentException("Unsupported type: " + g);
         }
@@ -81,20 +61,50 @@ public abstract class CoordinatePath implements Iterator<Coordinate> {
 
     protected Coordinate prev, curr;
 
+    /**
+     * decimation/generalization
+     */
     protected boolean generalize = false;
-    protected double dx, dy;
-    
+    protected double dx = Double.NaN, dy = Double.NaN;
+
+    /**
+     * transform
+     */
+    protected CoordinateFilter tx;
+
     protected CoordinatePath() {
-        this(false, Double.NaN, Double.NaN);
-    }
-
-    protected CoordinatePath(boolean generalize, double dx, double dy) {
-        this.generalize = generalize;
-        this.dx = dx;
-        this.dy = dy;
-
         prev = new Coordinate(Double.NaN, Double.NaN);
         curr = new Coordinate(Double.NaN, Double.NaN);
+    }
+
+    /**
+     * Specifies that the coordinate path should be generalized skipping coordinates that 
+     * are close to one another.
+     * <p>
+     * The <tt>dx</tt> and <tt>dy</tt> arguments are used as a tolerance to collapse coordinates. 
+     * Consecutive coordinates with both horizontal and vertical distance less than <tt>dx</tt> and
+     * <tt>dy</tt> respectively are collapsed.
+     * </p> 
+     * @param dx Horizontal generalization distance, only taken into account when 
+     *   <tt>generalization</tt> is <tt>true</tt>
+     * @param dy Vertical generalization distance, only taken into account when 
+     *   <tt>generalization</tt> is <tt>true</tt>
+     */
+    public CoordinatePath generalize(double dx, double dy) {
+        this.generalize = true;
+        this.dx = dx;
+        this.dy = dy;
+        return this;
+    }
+
+    /**
+     * Applies a transformation to the coordinate path.
+     * 
+     * @param tx Transformation/filter to apply to coordinates before returning.
+     */
+    public CoordinatePath transform(CoordinateFilter tx) {
+        this.tx = tx;
+        return this;
     }
 
     public abstract Geometry getGeometry();
@@ -138,6 +148,11 @@ public abstract class CoordinatePath implements Iterator<Coordinate> {
 
         prev.x = curr.x;
         prev.y = curr.y;
+
+        // apply the filter
+        if (tx != null) {
+            tx.filter(curr);
+        }
 
         return curr;
     }

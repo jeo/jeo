@@ -11,8 +11,7 @@ public class GeometryCollectionPath extends CoordinatePath {
     CoordinatePath it;
     int i;
 
-    GeometryCollectionPath(GeometryCollection gcol, boolean generalize, double dx, double dy) {
-        super(generalize, dx, dy);
+    GeometryCollectionPath(GeometryCollection gcol) {
         this.gcol = gcol;
         doReset();
     }

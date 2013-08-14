@@ -20,7 +20,6 @@
     <module>geopkg</module>
     <module>mongo</module>
     <module>postgis</module>
-    <module>protobuf</module>
   </modules>
 
 </project>

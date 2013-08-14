@@ -45,11 +45,6 @@
     </dependency>
     <dependency>
       <groupId>org.jeo</groupId>
-      <artifactId>jeo-protobuf</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.jeo</groupId>
       <artifactId>jeo-nano</artifactId>
       <version>${project.version}</version>
     </dependency>
@@ -109,5 +104,18 @@
       </plugin>
     </plugins>
   </build>
+ 
+  <profiles>
+    <profile>
+      <id>protobuf</id>
+      <dependencies>
+        <dependency>
+          <groupId>org.jeo</groupId>
+          <artifactId>jeo-protobuf</artifactId>
+          <version>${project.version}</version>
+        </dependency>
+      </dependencies>
+    </profile>
+  </profiles>
 
 </project>

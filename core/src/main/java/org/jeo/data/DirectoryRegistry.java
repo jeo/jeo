@@ -81,7 +81,10 @@ public class DirectoryRegistry implements Registry {
                 }
             });
             for (String file : files) {
-                return Drivers.open(new File(baseDir, file), drivers);
+                Object obj = Drivers.open(new File(baseDir, file), drivers);
+                if (obj != null) {
+                    return obj;
+                }
             }
         }
         else {

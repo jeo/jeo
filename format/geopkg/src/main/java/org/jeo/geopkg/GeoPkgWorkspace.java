@@ -31,6 +31,7 @@ import org.jeo.data.Tile;
 import org.jeo.data.TilePyramid;
 import org.jeo.data.TilePyramidBuilder;
 import org.jeo.data.Workspace;
+import org.jeo.data.Cursor.Mode;
 import org.jeo.feature.Feature;
 import org.jeo.feature.Features;
 import org.jeo.feature.Field;
@@ -260,6 +261,12 @@ public class GeoPkgWorkspace implements Workspace, FileData {
 
     public Cursor<Feature> cursor(FeatureEntry entry, Query q) throws IOException {
         try {
+            Connection cx = db.getConnection();
+
+            if (q.getMode() == Mode.APPEND) {
+                return new FeatureAppendCursor(cx, entry, this);
+            }
+
             Schema schema = schema(entry);
 
             QueryPlan qp = new QueryPlan(q);
@@ -268,7 +275,7 @@ public class GeoPkgWorkspace implements Workspace, FileData {
             SQL sqlb = new SQL("SELECT * FROM ").name(entry.getTableName());
             List<Object> args = encodeQuery(sqlb, q, qp);
 
-            Connection cx = db.getConnection();
+            
             PreparedStatement ps = prepareStatement(log(sqlb.toString()), args, cx);
 
             ResultSet rs = ps.executeQuery();

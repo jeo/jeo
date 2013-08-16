@@ -33,7 +33,7 @@ public class RootHandler extends Handler {
             Driver<?> drv = item.getDriver();
             writer.key("driver").value(drv.getName());
 
-            if (Workspace.class.isAssignableFrom(drv.getClass())) {
+            if (Workspace.class.isAssignableFrom(drv.getType())) {
                 writer.key("datasets").array();
 
                 Workspace ws = (Workspace) reg.get(item.getName());

@@ -37,7 +37,7 @@ public class PostGIS implements Driver<PostGISWorkspace>{
      */
     public static final Key<Password> PASSWD = new Key<Password>("passwd", Password.class);
 
-    public PostGISWorkspace open(PostGISOpts opts) throws IOException {
+    public static PostGISWorkspace open(PostGISOpts opts) throws IOException {
         return new PostGISWorkspace(opts);
     }
 

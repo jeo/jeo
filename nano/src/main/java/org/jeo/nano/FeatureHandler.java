@@ -90,6 +90,11 @@ public class FeatureHandler extends Handler {
         Envelope bbox = parseBBOX(p.getProperty("bbox"));
 
         Query q = new Query().bounds(bbox);
+
+        if (p.containsKey("srs")) {
+            q.reproject(p.getProperty("srs"));
+        }
+
         if (p.containsKey("limit")) {
             q.limit(Integer.parseInt(p.getProperty("limit")));
         }
@@ -134,20 +139,27 @@ public class FeatureHandler extends Handler {
         Object obj = new GeoJSONReader().read(body);
 
         Cursor<Feature> c = layer.cursor(new Query().append());
-
-        if (obj instanceof Feature) {
-            Features.copy((Feature)obj, c.next());
-            c.write();
-        }
-        else if (obj instanceof List) {
-            for (Feature f : (List<Feature>)obj) {
-                Features.copy(f, c.next());
+        try {
+            if (obj instanceof Feature) {
+                Features.copy((Feature)obj, c.next());
                 c.write();
             }
+            else if (obj instanceof Iterable) {
+                for (Feature f : (Iterable<Feature>)obj) {
+                    Features.copy(f, c.next());
+                    c.write();
+                }
+            }
+            else {
+                return new Response(HTTP_BADREQUEST, MIME_PLAINTEXT, "unable to add features from: " + obj);
+            }
+    
+            //TODO: set Location header
+            return new Response(HTTP_CREATED, MIME_PLAINTEXT, "");
         }
-
-        //TODO: set Location header
-        return new Response(HTTP_CREATED, MIME_PLAINTEXT, "");
+        finally {
+            c.close();
+        }
     }
 
     VectorData findVectorLayer(Request request, NanoJeoServer server) throws IOException {

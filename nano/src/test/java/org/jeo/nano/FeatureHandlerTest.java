@@ -62,6 +62,8 @@ public class FeatureHandlerTest extends HandlerTestSupport {
         expect(c.next()).andReturn(f).once();
         c.write();
         expectLastCall().once();
+        c.close();
+        expectLastCall().once();
         replay(c);
 
         VectorData layer = createMock(VectorData.class);

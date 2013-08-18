@@ -8,10 +8,12 @@ import java.util.List;
 import java.util.Map;
 
 import org.jeo.data.FileDriver;
+import org.jeo.data.FileVectorDriver;
+import org.jeo.feature.Schema;
 import org.jeo.util.Key;
 import org.jeo.util.Password;
 
-public class GeoPackage extends FileDriver<GeoPkgWorkspace> {
+public class GeoPackage extends FileVectorDriver<GeoPkgWorkspace> {
 
     /**
      * User key, defaults to no user.
@@ -52,4 +54,10 @@ public class GeoPackage extends FileDriver<GeoPkgWorkspace> {
         return new GeoPkgWorkspace(GeoPkgOpts.fromMap(opts));
     }
 
+    @Override
+    protected GeoPkgWorkspace create(File file, Map<?, Object> opts, Schema schema) throws IOException {
+        GeoPkgWorkspace ws = open(file, opts);
+        ws.create(schema);
+        return ws;
+    }
 }

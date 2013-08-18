@@ -11,18 +11,14 @@ import org.jeo.util.Key;
 public class GeoGitOpts {
 
     File file;
-    boolean create = CREATE.getDefault();
+    
     String user = USER.getDefault();
-
     String email = EMAIL.getDefault();
     boolean emailIsSet = false;
 
     public static GeoGitOpts fromMap(Map<?,Object> map) {
         GeoGitOpts ggopts = new GeoGitOpts(FILE.get(map));
 
-        if (CREATE.has(map)) {
-            ggopts.create(CREATE.get(map));
-        }
         if (USER.has(map)) {
             ggopts.user(USER.get(map));
         }
@@ -41,15 +37,6 @@ public class GeoGitOpts {
         return file;
     }
     
-    public GeoGitOpts create(boolean create) {
-        this.create = create;
-        return this;
-    }
-
-    public boolean isCreate() {
-        return create;
-    }
-
     public GeoGitOpts user(String user) {
         this.user = user;
         if (!emailIsSet) {
@@ -75,7 +62,6 @@ public class GeoGitOpts {
     public Map<Key<?>,Object> toMap() {
         LinkedHashMap<Key<?>, Object> map = new LinkedHashMap<Key<?>, Object>();
         map.put(FILE, file);
-        map.put(CREATE, create);
         map.put(USER, user);
         map.put(EMAIL, email);
 

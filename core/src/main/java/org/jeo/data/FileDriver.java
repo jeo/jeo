@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.jeo.util.Key;
+import org.jeo.util.Messages;
 import org.jeo.util.Util;
 
 /**
@@ -39,17 +40,24 @@ public abstract class FileDriver<T> implements Driver<T> {
      * {@link #canOpen(File, Map)} 
      */
     @Override
-    public boolean canOpen(Map<?, Object> opts) {
+    public boolean canOpen(Map<?, Object> opts, Messages msgs) {
         if (!FILE.has(opts)) {
+            Messages.of(msgs).report("No " + FILE + " option specified");
             return false;
         }
 
         File file = file(opts);
         if (file == null) {
+            Messages.of(msgs).report("Unable to obtain file from " + FILE.raw(opts));
             return false;
         }
 
-        return canOpen(file, opts);
+        if (!file.canRead()) {
+            Messages.of(msgs).report("Unable to read file " + file.getPath());
+            return false;
+        }
+
+        return canOpen(file, opts, msgs);
     }
 
     /**
@@ -57,17 +65,18 @@ public abstract class FileDriver<T> implements Driver<T> {
      * 
      * @param file The file to open.
      * @param opts The original driver options.
+     * @param msgs Messages to report back.
      *
      */
-    public boolean canOpen(File file, Map<?, Object> opts) {
-        return file.canRead();
+    protected boolean canOpen(File file, Map<?, Object> opts, Messages msgs) {
+        return true;
     }
 
     /**
      * Parses the {@link FileDriver#FILE} key and calls through to {@link #open(File, Map)}. 
      */
     @Override
-    public T open(Map<?, Object> opts) throws IOException {
+    public final T open(Map<?, Object> opts) throws IOException {
         File file = file(opts);
         return file != null ? open(file, opts) : null;
     }
@@ -79,7 +88,7 @@ public abstract class FileDriver<T> implements Driver<T> {
      * @param opts The original driver options.
      *
      */
-    public abstract T open(File file, Map<?,Object> opts) throws IOException;
+    protected abstract T open(File file, Map<?,Object> opts) throws IOException;
 
     /**
      * Helper to pull file object out of option map.

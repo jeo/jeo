@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.jeo.util.Key;
+import org.jeo.util.Messages;
 
 /**
  * Format driver.
@@ -54,12 +55,16 @@ public interface Driver<T> {
     /**
      * Determines if this driver can open a connection to the data described by the specified
      * options.
-     *  
+     * <p>
+     * The <tt>messages</tt> list is optionally used for the driver to report back any messages
+     * or exceptions that prevent the driver from opening the specified data source.
+     * </p>
      * @param opts Options describing the data.
+     * @param messages Messages reported from the driver, optionally <code>null</code>.
      * 
      * @return True if the driver can open the data, otherwise false.
      */
-    boolean canOpen(Map<?,Object> opts);
+    boolean canOpen(Map<?,Object> opts, Messages messages);
 
     /**
      * Opens a connection to data described by the specified options.

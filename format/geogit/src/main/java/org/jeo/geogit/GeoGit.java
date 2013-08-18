@@ -12,19 +12,16 @@ import org.geogit.api.porcelain.ConfigOp.ConfigAction;
 import org.geogit.di.GeogitModule;
 import org.geogit.repository.Repository;
 import org.geogit.storage.bdbje.JEStorageModule;
-import org.jeo.data.FileDriver;
+import org.jeo.data.FileVectorDriver;
+import org.jeo.feature.Schema;
 import org.jeo.util.Key;
+import org.jeo.util.Messages;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.util.Modules;
 
-public class GeoGit extends FileDriver<GeoGitWorkspace> {
-
-    /**
-     * Key to create repository if it doesn't exist, defaults to <tt>false</tt>.
-     */
-    public static final Key<Boolean> CREATE = new Key<Boolean>("create", Boolean.class, true);
+public class GeoGit extends FileVectorDriver<GeoGitWorkspace> {
 
     /**
      * Username key, defaults to <tt>System.getProperty("user.name")</tt>
@@ -49,16 +46,7 @@ public class GeoGit extends FileDriver<GeoGitWorkspace> {
 
     @Override
     public List<Key<?>> getKeys() {
-        return (List) Arrays.asList(FILE, CREATE, USER, EMAIL);
-    }
-
-    @Override
-    public boolean canOpen(File file, Map<?,Object> opts) {
-        boolean create = CREATE.get(opts);
-        if (!create) {
-            return super.canOpen(file, opts) && file.isDirectory();
-        }
-        return true;
+        return (List) Arrays.asList(FILE, /*CREATE, */USER, EMAIL);
     }
 
     @Override
@@ -67,11 +55,43 @@ public class GeoGit extends FileDriver<GeoGitWorkspace> {
     }
 
     @Override
-    public GeoGitWorkspace open(File file, Map<?, Object> opts) throws IOException {
-        GeoGitOpts ggopts = new GeoGitOpts(file);
-        if (CREATE.has(opts)) {
-            ggopts.create(CREATE.get(opts));
+    protected boolean canOpen(File file, Map<?,Object> opts, Messages msgs) {
+        if (!super.canOpen(file, opts, msgs)) {
+            return false;
         }
+
+        if (!file.isDirectory()) {
+            Messages.of(msgs).report(file.getPath() + " is not a directory");
+            return false;
+        }
+
+        File dotgg = new File(file, ".geogit");
+        if (!dotgg.exists()) {
+            Messages.of(msgs).report(file.getPath() + " is not a geogit repository");
+            return false;
+        }
+
+        return true;
+    }
+
+    @Override
+    public GeoGitWorkspace open(File file, Map<?, Object> opts) throws IOException {
+        GeoGitOpts ggopts = ggopts(file, opts);
+        return new GeoGitWorkspace(newGeoGIT(ggopts), ggopts);
+    }
+
+    @Override
+    protected GeoGitWorkspace create(File file, Map<?, Object> opts, Schema schema) 
+        throws IOException {
+
+        GeoGitWorkspace ws = open(file, opts);
+        ws.create(schema);
+        return ws;
+    }
+
+    GeoGitOpts ggopts(File file, Map<?,Object> opts) {
+        GeoGitOpts ggopts = new GeoGitOpts(file);
+
         if (USER.has(opts)) {
             ggopts.user(USER.get(opts));
         }
@@ -79,16 +99,11 @@ public class GeoGit extends FileDriver<GeoGitWorkspace> {
             ggopts.email(EMAIL.get(opts));
         }
 
-        return new GeoGitWorkspace(newGeoGIT(ggopts), ggopts);
+        return ggopts;
     }
 
     static GeoGIT newGeoGIT(GeoGitOpts opts) throws IOException {
         File file = opts.getFile();
-        if (!file.exists() && opts.isCreate()) {
-            if (!file.mkdirs()) {
-                throw new IOException("Unable to create directory: " + file.getPath());
-            }
-        }
 
         //TODO: something about this
         Injector i = Guice.createInjector(

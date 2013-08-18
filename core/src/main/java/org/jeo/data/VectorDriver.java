@@ -4,10 +4,11 @@ import java.io.IOException;
 import java.util.Map;
 
 import org.jeo.feature.Schema;
+import org.jeo.util.Messages;
 
-public interface VectorDriver<T extends VectorData> extends Driver<T> {
+public interface VectorDriver<T> extends Driver<T> {
 
-    boolean canCreate(Map<?,Object> opts);
+    boolean canCreate(Map<?,Object> opts, Messages msgs);
 
     T create(Map<?,Object> opts, Schema schema) throws IOException;
 }

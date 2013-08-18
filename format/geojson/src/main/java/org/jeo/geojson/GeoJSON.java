@@ -6,8 +6,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-import org.jeo.data.FileDriver;
-import org.jeo.data.VectorDriver;
+import org.jeo.data.FileVectorDriver;
 import org.jeo.feature.Schema;
 
 /**
@@ -21,7 +20,7 @@ import org.jeo.feature.Schema;
  * 
  * @author Justin Deoliveira, OpenGeo
  */
-public class GeoJSON extends FileDriver<GeoJSONDataset> implements VectorDriver<GeoJSONDataset> {
+public class GeoJSON extends FileVectorDriver<GeoJSONDataset> {
 
     /**
      * Opens a file containing encoded GeoJSON.
@@ -46,18 +45,13 @@ public class GeoJSON extends FileDriver<GeoJSONDataset> implements VectorDriver<
     }
 
     @Override
-    public boolean canCreate(Map<?, Object> opts) {
-        return FILE.has(opts);
-    }
-
-    @Override
-    public GeoJSONDataset create(Map<?, Object> opts, Schema schema) throws IOException {
-        File file = FILE.get(opts);
+    public GeoJSONDataset open(File file, Map<?, Object> opts) throws IOException {
         return new GeoJSONDataset(file);
     }
 
     @Override
-    public GeoJSONDataset open(File file, Map<?, Object> opts) throws IOException {
+    protected GeoJSONDataset create(File file, Map<?, Object> opts, Schema schema) 
+        throws IOException {
         return new GeoJSONDataset(file);
     }
 }

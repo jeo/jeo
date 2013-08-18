@@ -300,7 +300,7 @@ public class Drivers {
 
         Map<String,Object> opts = parseURI(uri, d);
 
-        if (!d.canOpen(opts)) {
+        if (!d.canOpen(opts, null)) {
             throw new IllegalArgumentException(d.getName() + " driver can't open " + opts);
         }
 
@@ -331,14 +331,23 @@ public class Drivers {
             throw new IllegalArgumentException(d.getName() + " not a vector driver");
         }
 
-        VectorDriver<T> vd = (VectorDriver<T>) d;
+        VectorDriver<?> vd = (VectorDriver<?>) d;
         Map<String,Object> opts = parseURI(uri, d);
 
-        if (!vd.canCreate(opts)) {
+        if (!vd.canCreate(opts, null)) {
             throw new IllegalArgumentException(d.getName() + " driver can't open " + opts);
         }
 
-        return vd.create(opts, schema);
+        Object obj =  vd.create(opts, schema);
+        if (obj instanceof VectorData) {
+            return (T) obj;
+        }
+        else if (obj instanceof Workspace) {
+            Workspace ws = (Workspace) obj;
+            return (T) ws.get(schema.getName());
+        }
+
+        throw new IllegalArgumentException(d.getName() + " driver returned " + obj);
     }
 
     static Map<String,Object> parseURI(URI uri, Driver<?> d) {
@@ -380,7 +389,7 @@ public class Drivers {
                 continue;
             }
 
-            if (drv.canOpen(opts)) {
+            if (drv.canOpen(opts, null)) {
                 Object data = drv.open(opts);
                 if (data != null) {
                     return (T) data;

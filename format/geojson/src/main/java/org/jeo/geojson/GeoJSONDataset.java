@@ -118,7 +118,7 @@ public class GeoJSONDataset implements VectorData, FileData {
             throw new IOException("Update cursor not supported");
         }
         if (q.getMode() == Mode.APPEND) {
-            if (file.length() != 0) {
+            if (!Util.isEmpty(file)) {
                 throw new IOException("Can't append to non empty dataset");
             }
             return new GeoJSONAppendCursor(writer());

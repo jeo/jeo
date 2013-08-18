@@ -5,11 +5,13 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-import org.jeo.data.Driver;
+import org.jeo.data.VectorDriver;
+import org.jeo.feature.Schema;
 import org.jeo.util.Key;
+import org.jeo.util.Messages;
 import org.jeo.util.Password;
 
-public class PostGIS implements Driver<PostGISWorkspace>{
+public class PostGIS implements VectorDriver<PostGISWorkspace>{
 
     /**
      * Database key.
@@ -62,8 +64,13 @@ public class PostGIS implements Driver<PostGISWorkspace>{
     }
 
     @Override
-    public boolean canOpen(Map<?, Object> opts) {
-        return DB.has(opts);
+    public boolean canOpen(Map<?, Object> opts, Messages msgs) {
+        if (!DB.has(opts)) {
+            Messages.of(msgs).report("No " + DB + " option specified");
+            return false;
+        }
+
+        return true;
     }
 
     @Override
@@ -71,4 +78,14 @@ public class PostGIS implements Driver<PostGISWorkspace>{
         return new PostGISWorkspace(PostGISOpts.fromMap(opts));
     }
 
+    @Override
+    public boolean canCreate(Map<?, Object> opts, Messages msgs) {
+        Messages.of(msgs).report("Creation not suported");
+        return false;
+    }
+
+    @Override
+    public PostGISWorkspace create(Map<?, Object> opts, Schema schema) throws IOException {
+        throw new UnsupportedOperationException();
+    }
 }

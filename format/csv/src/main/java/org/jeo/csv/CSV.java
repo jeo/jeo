@@ -6,10 +6,12 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-import org.jeo.data.FileDriver;
+import org.jeo.data.FileVectorDriver;
+import org.jeo.feature.Schema;
 import org.jeo.util.Key;
+import org.jeo.util.Messages;
 
-public class CSV extends FileDriver<CSVDataset> {
+public class CSV extends FileVectorDriver<CSVDataset> {
 
     public static final Key<Delimiter> DELIM = 
         new Key<Delimiter>("delim", Delimiter.class, Delimiter.comma());
@@ -40,12 +42,32 @@ public class CSV extends FileDriver<CSVDataset> {
     }
 
     @Override
-    public boolean canOpen(File file, Map<?,Object> opts) {
-        return super.canOpen(file, opts) && file.isFile();
+    protected boolean canOpen(File file, Map<?,Object> opts, Messages msgs) {
+        if (!super.canOpen(file, opts, msgs)) {
+            return false;
+        }
+
+        if (!file.isFile()) {
+            msgs.report(file.getPath() + " is not a file");
+            return false;
+        }
+        return true;
     }
 
     @Override
     public CSVDataset open(File file, Map<?,Object> opts) throws IOException {
         return new CSVDataset(file, CSVOpts.fromMap(opts));
+    }
+
+    @Override
+    protected boolean canCreate(File file, Map<?, Object> opts, Messages msgs) {
+        //TODO: implement
+        Messages.of(msgs).report("Creation unsupported");
+        return false;
+    }
+
+    @Override
+    protected CSVDataset create(File file, Map<?, Object> opts, Schema schema) throws IOException {
+        throw new UnsupportedOperationException();
     }
 }

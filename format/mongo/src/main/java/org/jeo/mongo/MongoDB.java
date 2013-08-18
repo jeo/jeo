@@ -5,11 +5,13 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-import org.jeo.data.Driver;
+import org.jeo.data.VectorDriver;
+import org.jeo.feature.Schema;
 import org.jeo.util.Key;
+import org.jeo.util.Messages;
 import org.jeo.util.Password;
 
-public class MongoDB implements Driver<MongoWorkspace> {
+public class MongoDB implements VectorDriver<MongoWorkspace> {
 
     public static final Key<String> DB = new Key<String>("db", String.class);
     
@@ -47,8 +49,13 @@ public class MongoDB implements Driver<MongoWorkspace> {
     }
 
     @Override
-    public boolean canOpen(Map<?, Object> opts) {
-        return DB.has(opts);
+    public boolean canOpen(Map<?, Object> opts, Messages msgs) {
+        if (!DB.has(opts)) {
+            Messages.of(msgs).report("No " + DB + " option specified");
+            return false;
+        }
+
+        return true;
     }
 
     @Override
@@ -56,4 +63,14 @@ public class MongoDB implements Driver<MongoWorkspace> {
         return new MongoWorkspace(MongoOpts.fromMap(opts));
     }
 
+    @Override
+    public boolean canCreate(Map<?, Object> opts, Messages msgs) {
+        Messages.of(msgs).report("Creation not suported");
+        return false;
+    }
+
+    @Override
+    public MongoWorkspace create(Map<?, Object> opts, Schema schema) throws IOException {
+        throw new UnsupportedOperationException();
+    }
 }

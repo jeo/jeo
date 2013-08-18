@@ -5,7 +5,16 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+import org.jeo.geom.Geom;
+
 import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.geom.LineString;
+import com.vividsolutions.jts.geom.MultiLineString;
+import com.vividsolutions.jts.geom.MultiPoint;
+import com.vividsolutions.jts.geom.MultiPolygon;
+import com.vividsolutions.jts.geom.Point;
+import com.vividsolutions.jts.geom.Polygon;
 
 /**
  * Feature utility class.
@@ -13,6 +22,9 @@ import com.vividsolutions.jts.geom.Geometry;
  * @author Justin Deoliveira, OpenGeo
  */
 public class Features {
+
+    /** geometry factory */
+    static GeometryFactory gfac = new GeometryFactory();
 
     /**
      * Retypes a feature object to a new schema.
@@ -56,6 +68,64 @@ public class Features {
             }
         }
         return to;
+    }
+
+    /**
+     * Converts non geometry collection types in the schema to appropriate collection type.
+     * 
+     * @param schema The original schema.
+     * 
+     * @return The transformed schema.
+     */
+    public static Schema multify(Schema schema) {
+        SchemaBuilder b = Schema.build(schema.getName());
+        for (Field fld : schema) {
+            if (Geometry.class.isAssignableFrom(fld.getType())) {
+                Class<? extends Geometry> t = (Class<? extends Geometry>) fld.getType();
+                switch(Geom.Type.from(t)) {
+                case POINT:
+                    t = MultiPoint.class;
+                    break;
+                case LINESTRING:
+                    t = MultiLineString.class;
+                    break;
+                case POLYGON:
+                    t = MultiPolygon.class;
+                    break;
+                }
+                b.field(fld.getName(), t, fld.getCRS());
+            }
+            else {
+                b.field(fld);
+            }
+        }
+
+        return b.schema();
+    }
+
+    /**
+     * Converts non collection geometry objects to associated collection type.
+     * 
+     * @param feature The original feature.
+     * 
+     * @return The transformed feature.
+     */
+    public static Feature multify(Feature feature) {
+        return new GeometryTransformWrapper(feature) {
+            @Override
+            protected Geometry wrap(Geometry g) {
+                switch(Geom.Type.from(g)) {
+                case POINT:
+                    return gfac.createMultiPoint(new Point[]{(Point)g});
+                case LINESTRING:
+                    return gfac.createMultiLineString(new LineString[]{(LineString)g});
+                case POLYGON:
+                    return gfac.createMultiPolygon(new Polygon[]{(Polygon)g});
+                default:
+                    return g;
+                }
+            }
+        };
     }
 
     /**

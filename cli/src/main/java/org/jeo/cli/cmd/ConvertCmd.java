@@ -6,6 +6,7 @@ import java.util.List;
 import org.jeo.cli.ConsoleProgress;
 import org.jeo.cli.JeoCLI;
 import org.jeo.data.Cursor;
+import org.jeo.data.Cursors;
 import org.jeo.data.Dataset;
 import org.jeo.data.Disposable;
 import org.jeo.data.Drivers;
@@ -16,6 +17,7 @@ import org.jeo.data.VectorData;
 import org.jeo.data.Workspace;
 import org.jeo.feature.Feature;
 import org.jeo.feature.Features;
+import org.jeo.feature.Schema;
 import org.osgeo.proj4j.CoordinateReferenceSystem;
 
 import com.beust.jcommander.Parameter;
@@ -32,6 +34,9 @@ public class ConvertCmd extends JeoCmd {
 
     @Parameter(names = { "-tc", "--to-crs"}, description="Target CRS")
     CoordinateReferenceSystem toCRS;
+
+    @Parameter(names = {"--multify"}, description="Wrap single geometry objects in collection")
+    boolean multify = false;
 
     @Override
     protected void doCommand(JeoCLI cli) throws Exception {
@@ -60,15 +65,20 @@ public class ConvertCmd extends JeoCmd {
             throw new IllegalArgumentException("Destination dataset already exists");
         }
 
+        Schema schema = orig.getSchema();
+        if (multify) {
+            schema = Features.multify(schema);
+        }
+
         if (to == null) {
             //see if we can create a new dataset directly
-            dest = Drivers.create(orig.getSchema(), uri, VectorData.class);
+            dest = Drivers.create(schema, uri, VectorData.class);
             if (dest == null) {
                 throw new IllegalArgumentException("Unable to create dataset: " + uri);
             }
         }
         else if (to instanceof Workspace) {
-            dest = open((Workspace)to).create(orig.getSchema());
+            dest = open((Workspace)to).create(schema);
         }
         else {
             throw new IllegalArgumentException("Invalid destination: " + uri);
@@ -93,6 +103,11 @@ public class ConvertCmd extends JeoCmd {
                 q.reproject(fromCRS, toCRS);
             }
             o = orig.cursor(q);
+
+            //multification
+            if (multify) {
+                o = Cursors.multify(o);
+            }
 
             Transaction tx = null;
             if (dest instanceof Transactional) {

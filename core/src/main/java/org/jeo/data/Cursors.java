@@ -11,13 +11,21 @@ import java.util.Map;
 
 import org.jeo.feature.Feature;
 import org.jeo.feature.FeatureWrapper;
+import org.jeo.feature.Features;
+import org.jeo.feature.GeometryTransformWrapper;
 import org.jeo.filter.Filter;
+import org.jeo.geom.Geom;
 import org.jeo.proj.Proj;
 import org.osgeo.proj4j.CoordinateReferenceSystem;
 import org.osgeo.proj4j.CoordinateTransform;
 
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.GeometryCollection;
+import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.geom.LineString;
+import com.vividsolutions.jts.geom.Point;
+import com.vividsolutions.jts.geom.Polygon;
 
 /**
  * Utility class for {@link Cursor} objects.
@@ -306,23 +314,23 @@ public class Cursors {
         }
     }
 
-    public static <T> Cursor<T> reproject(Cursor<T> cursor, CoordinateReferenceSystem crs) {
+    public static Cursor<Feature> reproject(Cursor<Feature> cursor, CoordinateReferenceSystem crs) {
         return reproject(cursor, null, crs);
     }
     
-    public static <T> Cursor<T> reproject(Cursor<T> cursor, CoordinateReferenceSystem from, 
+    public static Cursor<Feature> reproject(Cursor<Feature> cursor, CoordinateReferenceSystem from, 
         CoordinateReferenceSystem to) {
 
         return from != null ? 
             new TransformCursor(cursor, from, to) : new ReprojectCursor(cursor, to);
     }
 
-    private static class ReprojectCursor<T extends Feature> extends CursorWrapper<T> {
+    private static class ReprojectCursor extends CursorWrapper<Feature> {
 
         Map<String, CoordinateTransform> transforms;
         CoordinateReferenceSystem target;
 
-        ReprojectCursor(Cursor<T> delegate, CoordinateReferenceSystem target) {
+        ReprojectCursor(Cursor<Feature> delegate, CoordinateReferenceSystem target) {
             super(delegate);
             if (delegate.getMode() != READ) {
                 throw new IllegalArgumentException(
@@ -334,8 +342,8 @@ public class Cursors {
         }
 
         @Override
-        public T next() throws IOException {
-            T next = delegate.next();
+        public Feature next() throws IOException {
+            Feature next = delegate.next();
             CoordinateReferenceSystem crs = next.crs();
             if (crs != null) {
                 CoordinateTransform tx = transforms.get(crs.getName());
@@ -343,25 +351,25 @@ public class Cursors {
                     tx = Proj.transform(crs, target);
                     transforms.put(crs.getName(), tx);
                 }
-                return (T) new TransformFeature(next, tx);
+                return new TransformFeature(next, tx);
             }
 
             return next;
         }
     }
 
-    private static class TransformCursor<T extends Feature> extends CursorWrapper<T> {
+    private static class TransformCursor extends CursorWrapper<Feature> {
 
         CoordinateTransform tx;
 
-        TransformCursor(Cursor<T> delegate, CoordinateReferenceSystem from, CoordinateReferenceSystem to) {
+        TransformCursor(Cursor<Feature> delegate, CoordinateReferenceSystem from, CoordinateReferenceSystem to) {
             super(delegate);
             tx = Proj.transform(from, to);
         }
 
         @Override
-        public T next() throws IOException {
-            return (T) new TransformFeature(super.next(), tx);
+        public Feature next() throws IOException {
+            return new TransformFeature(super.next(), tx);
         }
     }
 
@@ -416,16 +424,16 @@ public class Cursors {
         }
     }
 
-    public static <T> Cursor<T> intersects(Cursor<T> cursor, Envelope bbox) {
-        return new IntersectCursor<T>(cursor, bbox);
+    public static Cursor<Feature> intersects(Cursor<Feature> cursor, Envelope bbox) {
+        return new IntersectCursor(cursor, bbox);
     }
 
-    private static class IntersectCursor<T> extends CursorWrapper<T> {
+    private static class IntersectCursor extends CursorWrapper<Feature> {
 
         Envelope bbox;
-        T next;
+        Feature next;
 
-        IntersectCursor(Cursor<T> delegate, Envelope bbox) {
+        IntersectCursor(Cursor<Feature> delegate, Envelope bbox) {
             super(delegate);
             this.bbox = bbox;
         }
@@ -433,7 +441,7 @@ public class Cursors {
         @Override
         public boolean hasNext() throws IOException {
             while(delegate.hasNext() && next == null) {
-                T obj = delegate.next();
+                Feature obj = delegate.next();
                 if (intersects(obj)) {
                     next = obj;
                 }
@@ -442,19 +450,19 @@ public class Cursors {
         }
 
         @Override
-        public T next() throws IOException {
-            T obj = next;
+        public Feature next() throws IOException {
+            Feature obj = next;
             next = null;
             return obj;
         }
 
-        boolean intersects(T obj) {
+        boolean intersects(Feature obj) {
             return envelope(obj).intersects(bbox);
         }
     }
 
     public static <T> Cursor<T> filter(Cursor<T> cursor, Filter filter) {
-        return new FilterCursor(cursor, filter);
+        return new FilterCursor<T>(cursor, filter);
     }
 
     private static class FilterCursor<T> extends CursorWrapper<T> {
@@ -485,6 +493,29 @@ public class Cursors {
             return obj;
         }
     
+    }
+
+    /**
+     * Transforms non geometry collection objects from the specified cursor to the appropriate 
+     * geometry collection.
+     */
+    public static Cursor<Feature> multify(Cursor<Feature> cursor) {
+        return new MultifyingCursor(cursor);
+    }
+
+    static class MultifyingCursor extends CursorWrapper<Feature> {
+
+        GeometryFactory gfac;
+
+        MultifyingCursor(Cursor<Feature> delegate) {
+            super(delegate);
+            gfac = new GeometryFactory();
+        }
+    
+        @Override
+        public Feature next() throws IOException {
+            return Features.multify(super.next());
+        }
     }
 
     static Envelope envelope(Object obj) {

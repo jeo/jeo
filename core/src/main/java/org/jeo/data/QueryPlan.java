@@ -1,5 +1,6 @@
 package org.jeo.data;
 
+import org.jeo.feature.Feature;
 import org.jeo.filter.Filter;
 import org.jeo.geom.Envelopes;
 import org.jeo.util.Pair;
@@ -143,7 +144,7 @@ public class QueryPlan {
      * 
      * @return The augmented cursor.
      */
-    public <T> Cursor<T> apply(Cursor<T> cursor) {
+    public Cursor<Feature> apply(Cursor<Feature> cursor) {
 
         Envelope bounds = q.getBounds();
         if (!isBounded() && !Envelopes.isNull(bounds)) {

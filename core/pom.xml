@@ -22,6 +22,7 @@
       <groupId>org.osgeo</groupId>
       <artifactId>proj4j</artifactId>
       <version>0.1.0</version>
+      <classifier>jeo</classifier>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>

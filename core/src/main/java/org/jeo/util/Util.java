@@ -1,5 +1,6 @@
 package org.jeo.util;
 
+import java.io.File;
 import java.util.UUID;
 
 
@@ -33,5 +34,12 @@ public class Util {
     public static String extension(String filename) {
         int dot = filename.lastIndexOf('.');
         return dot != -1 ? filename.substring(dot+1).toLowerCase() : null;
+    }
+
+    /**
+     * Determines if the file is "empty", meaning it does not exists or has zero length.
+     */
+    public static boolean isEmpty(File file) {
+        return !file.exists() || file.length() == 0;
     }
 }

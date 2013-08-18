@@ -51,22 +51,23 @@ public class Key<T> {
      * </p>
      */
     public T get(Map<?,Object> map) {
-        Object obj = null;
-        if (map.containsKey(this)) {
-            obj = map.get(this);
-        }
-        else if (map.containsKey(name)) {
-            obj = map.get(name);
-        }
-        else {
+        if (!has(map)) {
             return def;
         }
 
+        Object obj = raw(map);
         if (obj == null) {
             return null;
         }
 
         return Convert.to(obj, type).get("Unable to convert " + obj + " to " + type.getName());
+    }
+
+    /**
+     * Returns the raw value in the map for the key, with no conversions.
+     */
+    public Object raw(Map<?,Object> map) {
+        return map.containsKey(this) ? map.get(this) : map.get(name);
     }
 
     /**

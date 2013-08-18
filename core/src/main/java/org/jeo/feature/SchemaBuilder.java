@@ -72,7 +72,18 @@ public class SchemaBuilder {
      * @return This builder.
      */
     public SchemaBuilder field(String name, Class<? extends Geometry> type, CoordinateReferenceSystem crs) {
-        fields.add(new Field(name, type, crs, props));
+        return field(new Field(name, type, crs, props));
+    }
+
+    /**
+     * Adds a field to the schema being built.
+     *  
+     * @param fld The field.
+     * 
+     * @return This builder.
+     */
+    public SchemaBuilder field(Field fld) {
+        fields.add(fld);
         props = null;
         return this;
     }

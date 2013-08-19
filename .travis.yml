@@ -1,2 +1,9 @@
 language: java
-
+services:
+ - mongodb
+notifications:
+  email:
+    recipients:
+      - jeo-dev@googlegroups.com
+    on_success: change
+    on_failure: always

@@ -1,6 +1,4 @@
 language: java
-services:
- - mongodb
 notifications:
   email:
     recipients:

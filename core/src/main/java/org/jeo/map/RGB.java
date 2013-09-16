@@ -329,7 +329,9 @@ public class RGB {
         }
 
         if (sb.length() == 3) {
-            sb.append(sb.toString());
+            sb.insert(2, sb.charAt(2));
+            sb.insert(1, sb.charAt(1));
+            sb.insert(0, sb.charAt(0));
         }
 
         if (sb.length() == 8) {

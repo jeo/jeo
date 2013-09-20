@@ -307,7 +307,11 @@ public class Rule {
         final int prime = 31;
         int result = 1;
         result = prime * result + ((props == null) ? 0 : props.hashCode());
-        result = prime * result + ((parts == null) ? 0 : parts.hashCode());
+
+        for (Rule part : parts) {
+            result = prime * result + ((part == null || part == this) ? 0 : part.hashCode());
+        }
+
         result = prime * result + ((selectors == null) ? 0 : selectors.hashCode());
         return result;
     }

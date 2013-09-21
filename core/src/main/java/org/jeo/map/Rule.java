@@ -328,8 +328,19 @@ public class Rule {
         if (parts == null) {
             if (other.parts != null)
                 return false;
-        } else if (!parts.equals(other.parts))
-            return false;
+        } else {
+            if (parts.size() != other.parts.size())
+                return false;
+
+            for (int i = 0; i < parts.size(); i++) {
+                if (parts.get(i) == this) {
+                    if (other.parts.get(i) != other)
+                        return false;
+                } else if (!parts.get(i).equals(other.parts.get(i))) {
+                    return false;
+                }
+            }
+        }
         if (props == null) {
             if (other.props != null)
                 return false;

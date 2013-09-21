@@ -10,6 +10,13 @@ import org.junit.Test;
 
 public class RuleTest {
 
+    private Style getStyle(){
+        return new StyleBuilder().rule().select("#widgets").filter("cost > 12")
+                .rule().select("::costly").filter("cost > 20").set("color", "yellow").endRule()
+                .rule().select("::expensive").filter("cost > 30").set("color", "red").endRule()
+                .set("color", "green").endRule().style();
+    }
+
     @Test
     public void testFlattenNoNested() {
         Style style = Style.build().select("*").style();
@@ -19,11 +26,20 @@ public class RuleTest {
     }
 
     @Test
+    public void testHashcode(){
+        assertEquals(getStyle().getRules().get(0).hashCode() > 0, true);
+    }
+
+    @Test
+    public void testEquals(){
+        Rule r1 = getStyle().getRules().get(0);
+        Rule r2 = getStyle().getRules().get(0);
+        assertEquals(r1.equals(r2), true);
+    }
+
+    @Test
     public void testFlatten() throws Exception {
-        Style style = new StyleBuilder().rule().select("#widgets").filter("cost > 12")
-            .rule().select("::costly").filter("cost > 20").set("color", "yellow").endRule()
-            .rule().select("::expensive").filter("cost > 30").set("color", "red").endRule()
-            .set("color", "green").endRule().style();
+        Style style = getStyle();
         
         assertEquals(1, style.getRules().size());
 

@@ -307,7 +307,11 @@ public class Rule {
         final int prime = 31;
         int result = 1;
         result = prime * result + ((props == null) ? 0 : props.hashCode());
-        result = prime * result + ((parts == null) ? 0 : parts.hashCode());
+
+        for (Rule part : parts) {
+            result = prime * result + ((part == null || part == this) ? 0 : part.hashCode());
+        }
+
         result = prime * result + ((selectors == null) ? 0 : selectors.hashCode());
         return result;
     }
@@ -324,8 +328,19 @@ public class Rule {
         if (parts == null) {
             if (other.parts != null)
                 return false;
-        } else if (!parts.equals(other.parts))
-            return false;
+        } else {
+            if (parts.size() != other.parts.size())
+                return false;
+
+            for (int i = 0; i < parts.size(); i++) {
+                if (parts.get(i) == this) {
+                    if (other.parts.get(i) != other)
+                        return false;
+                } else if (!parts.get(i).equals(other.parts.get(i))) {
+                    return false;
+                }
+            }
+        }
         if (props == null) {
             if (other.props != null)
                 return false;

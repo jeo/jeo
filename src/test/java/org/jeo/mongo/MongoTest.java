@@ -79,7 +79,7 @@ public class MongoTest {
         MongoDataset states = mongo.get("states");
         assertNotNull(states);
 
-        Schema schema = states.getSchema();
+        Schema schema = states.schema();
         assertNotNull(schema);
     }
 

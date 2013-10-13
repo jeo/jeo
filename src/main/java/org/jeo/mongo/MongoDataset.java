@@ -9,7 +9,7 @@ import org.jeo.data.Cursors;
 import org.jeo.data.Driver;
 import org.jeo.data.Query;
 import org.jeo.data.QueryPlan;
-import org.jeo.data.VectorData;
+import org.jeo.data.VectorDataset;
 import org.jeo.feature.Feature;
 import org.jeo.feature.Schema;
 import org.jeo.feature.SchemaBuilder;
@@ -25,7 +25,7 @@ import com.mongodb.DBObject;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 
-public class MongoDataset implements VectorData {
+public class MongoDataset implements VectorDataset {
 
     MongoWorkspace mongo;
     DBCollection dbcol;
@@ -80,7 +80,7 @@ public class MongoDataset implements VectorData {
     }
 
     @Override
-    public CoordinateReferenceSystem getCRS() {
+    public CoordinateReferenceSystem crs() {
         return Proj.EPSG_4326;
     }
 
@@ -90,7 +90,7 @@ public class MongoDataset implements VectorData {
     }
 
     @Override
-    public Schema getSchema() throws IOException {
+    public Schema schema() throws IOException {
         return schema;
     }
 

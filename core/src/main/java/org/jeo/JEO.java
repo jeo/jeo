@@ -28,24 +28,36 @@ public class JEO {
     public static String revision() {
         return property("revision");
     }
-    
+
+    /**
+     * Returns the git revision of this build.
+     */
+    public static String revisionShort() {
+        String rev = property("revision");
+        return rev != null ? rev.substring(0, 7) : null;
+    }
+
     /**
      * Returns the timestamp of this build.
      */
     public static Date buildDate() {
         String buildDate = property("buildDate"); 
         try {
-            return buildDate != null ? dateFormat().parse(buildDate) : null;
+            return buildDate != null ? dateFormatISO().parse(buildDate) : null;
         } catch (ParseException e) {
             LOG.debug("Error parsing build date: " + buildDate, e);
         }
         return null;
     }
 
-    static SimpleDateFormat dateFormat() {
-        return new SimpleDateFormat("yyyy-mm-dd'T'HH:mm:ssZ");
+    static SimpleDateFormat dateFormatISO() {
+        return new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
     }
 
+    static SimpleDateFormat dateFormatHuman() {
+        return new SimpleDateFormat("MMM dd yyyy");
+    }
+    
     static String property(String key) {
         try {
             InputStream in = JEO.class.getResourceAsStream("build.properties");
@@ -75,6 +87,7 @@ public class JEO {
      * Prints version info for the library.
      */
     public static void printVersionInfo(PrintStream out) {
-        out.println(String.format("jeo %s (%s)", version(), revision()));
+        out.println(String.format("jeo %s (%s, %s)", version(), revisionShort(), 
+            dateFormatHuman().format(buildDate())));
     }
 }

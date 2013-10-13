@@ -4,12 +4,12 @@ import java.io.File;
 
 import org.jeo.Tests;
 import org.jeo.data.VectorApiTestBase;
-import org.jeo.data.VectorData;
+import org.jeo.data.VectorDataset;
 
 public class CSVApiTest extends VectorApiTestBase {
 
     @Override
-    protected VectorData createVectorData() throws Exception {
+    protected VectorDataset createVectorData() throws Exception {
         File tmp = Tests.newTmpDir("states", "csv");
         Tests.unzip(getClass().getResourceAsStream("states.csv.zip"), tmp);
 

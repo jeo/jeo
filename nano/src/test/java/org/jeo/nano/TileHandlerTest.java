@@ -6,7 +6,7 @@ import static org.junit.Assert.assertTrue;
 
 import org.jeo.data.Registry;
 import org.jeo.data.Tile;
-import org.jeo.data.TileSet;
+import org.jeo.data.TileDataset;
 import org.jeo.data.Workspace;
 import org.jeo.nano.NanoHTTPD.Response;
 import org.junit.Test;
@@ -15,7 +15,7 @@ public class TileHandlerTest extends HandlerTestSupport {
 
     @Test
     public void testGet() throws Exception {
-        TileSet layer = createMock(TileSet.class);
+        TileDataset layer = createMock(TileDataset.class);
         expect(layer.read(1, 2, 3)).andReturn(new Tile(1,2,3,new byte[]{},"image/png")).once();
         replay(layer);
 

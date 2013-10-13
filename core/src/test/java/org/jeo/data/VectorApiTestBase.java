@@ -19,7 +19,7 @@ import com.google.common.collect.Sets;
 import com.vividsolutions.jts.geom.Envelope;
 
 /**
- * Abstract test case that exercises all aspects of the {@link VectorData} interface.
+ * Abstract test case that exercises all aspects of the {@link VectorDataset} interface.
  * <p>
  * This test uses the {@link TestData#states()} dataset as a basis for testing and test implementors
  * must override {@link #createVectorData()} and return an instance backed by the states data.
@@ -29,7 +29,7 @@ import com.vividsolutions.jts.geom.Envelope;
  */
 public abstract class VectorApiTestBase {
 
-    VectorData data;
+    VectorDataset data;
 
     @Before
     public final void setUp() throws Exception {
@@ -40,7 +40,7 @@ public abstract class VectorApiTestBase {
     protected void init() throws Exception {
     }
 
-    protected abstract VectorData createVectorData() throws Exception;
+    protected abstract VectorDataset createVectorData() throws Exception;
 
     @Test
     public void testGetName() {
@@ -49,7 +49,7 @@ public abstract class VectorApiTestBase {
 
     @Test
     public void testSchema() throws IOException {
-        Schema schema = data.getSchema();
+        Schema schema = data.schema();
         assertNotNull(schema);
 
         assertNotNull(schema.geometry());
@@ -79,7 +79,7 @@ public abstract class VectorApiTestBase {
 
         // count with spatial filters
         assertEquals(abbrs.size(), data.count(new Query().filter(String.format("INTERSECTS(%s, %s)", 
-            data.getSchema().geometry().getName(), Envelopes.toPolygon(bbox)))));
+            data.schema().geometry().getName(), Envelopes.toPolygon(bbox)))));
 
         // count with attribute filters
         assertEquals(1, data.count(new Query().filter("STATE_NAME = 'Texas'")));
@@ -108,7 +108,7 @@ public abstract class VectorApiTestBase {
 
         // spatial filter
         assertCovered(data.cursor(new Query().filter(String.format("INTERSECTS(%s, %s)", 
-            data.getSchema().geometry().getName(), Envelopes.toPolygon(bbox)))), 
+            data.schema().geometry().getName(), Envelopes.toPolygon(bbox)))), 
             "MO", "OK", "TX", "NM", "AR", "LA");
 
         // comparison filter

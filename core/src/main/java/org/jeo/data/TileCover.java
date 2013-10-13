@@ -87,7 +87,7 @@ public class TileCover {
      * 
      * @param tileset The tile source.
      */
-    public Cursor<Tile> cursor(TileSet tileset) throws IOException {
+    public Cursor<Tile> cursor(TileDataset tileset) throws IOException {
         return tileset.read(grid.getZ(), grid.getZ(), x0, x1, y0, y1);
     }
 
@@ -96,7 +96,7 @@ public class TileCover {
      * 
      * @param tileset The tile source.
      */
-    public void fill(TileSet tileset) throws IOException {
+    public void fill(TileDataset tileset) throws IOException {
         Cursor<Tile> cursor = cursor(tileset);
         try {
             for (Tile t : cursor) {
@@ -112,7 +112,7 @@ public class TileCover {
     /**
      * Returns a tile at the specified offsets into the coverage.
      * <p>
-     * The {@link #fill(TileSet)} method must be called before this method is called. The <tt>x</tt>
+     * The {@link #fill(TileDataset)} method must be called before this method is called. The <tt>x</tt>
      * and <tt>y</tt> values are specified relative to the lower left corner of the tile cover. 
      * Meaning x = 0, y = 0 is the most lower left tile in ths cover.
      * </p> 

@@ -51,7 +51,7 @@ public class GeoGitCursor extends Cursor<Feature> {
         Preconditions.checkState(f.isPresent());
 
         curr = GT.feature(
-            (SimpleFeature)featureBuilder.build(ref.name(), f.get()), dataset.getSchema());
+            (SimpleFeature)featureBuilder.build(ref.name(), f.get()), dataset.schema());
         return curr;
     }
 

@@ -20,7 +20,7 @@ import org.jeo.data.Cursors;
 import org.jeo.data.Driver;
 import org.jeo.data.Query;
 import org.jeo.data.QueryPlan;
-import org.jeo.data.VectorData;
+import org.jeo.data.VectorDataset;
 import org.jeo.feature.Feature;
 import org.jeo.feature.Field;
 import org.jeo.feature.Schema;
@@ -43,7 +43,7 @@ import com.vividsolutions.jts.geom.Polygon;
 import com.vividsolutions.jts.io.WKBReader;
 import com.vividsolutions.jts.io.WKTWriter;
 
-public class PostGISDataset implements VectorData {
+public class PostGISDataset implements VectorDataset {
 
     Table table;
     PostGISWorkspace pg;
@@ -83,25 +83,25 @@ public class PostGISDataset implements VectorData {
     }
 
     @Override
-    public Schema getSchema() {
+    public Schema schema() {
         return table.getSchema();
     }
 
     @Override
-    public CoordinateReferenceSystem getCRS() {
-        return getSchema().crs();
+    public CoordinateReferenceSystem crs() {
+        return schema().crs();
     }
 
     @Override
     public Envelope bounds() throws IOException {
-        if (getSchema().geometry() == null) {
+        if (schema().geometry() == null) {
             return null;
         }
 
         return pg.run(new DbOP<Envelope>() {
             @Override
             protected Envelope doRun(Connection cx) throws Exception {
-                Schema schema = getSchema();
+                Schema schema = schema();
 
                 String sql = new SQL("SELECT st_asbinary(st_force_2d(st_extent(")
                     .name(schema.geometry().getName()).add(")))")
@@ -122,7 +122,7 @@ public class PostGISDataset implements VectorData {
         //save original query
         QueryPlan qp = new QueryPlan(q);
 
-        final SQL sql = new SQL("SELECT count(*) FROM ").name(getSchema().getName());
+        final SQL sql = new SQL("SELECT count(*) FROM ").name(schema().getName());
         final List<Pair<Object,Integer>> args = new ArrayList<Pair<Object,Integer>>();
 
         encodeQuery(sql, q, qp, args);
@@ -156,13 +156,13 @@ public class PostGISDataset implements VectorData {
                 return new PostGISAppendCursor(this, cx);
             }
     
-            Schema schema = getSchema();
+            Schema schema = schema();
     
             SQL sql = new SQL("SELECT ");
             
             if (q.getFields().isEmpty()) {
                 //grab all from the schema
-                for (Field f : getSchema()) {
+                for (Field f : schema()) {
                     encodeFieldForSelect(f, sql);
                     sql.add(", ");
                 }
@@ -174,7 +174,7 @@ public class PostGISDataset implements VectorData {
                 // it, etc...
                 boolean geom = false;
                 for (String prop : q.getFields()) {
-                    Field f = getSchema().field(prop);
+                    Field f = schema().field(prop);
                     if (f == null) {
                         throw new IllegalArgumentException("No such field: " + prop);
                     }
@@ -228,7 +228,7 @@ public class PostGISDataset implements VectorData {
     }
 
     void encodeQuery(SQL sql, Query q, QueryPlan qp, List<Pair<Object,Integer>> args) {
-        Schema schema = getSchema();
+        Schema schema = schema();
 
         if (schema.geometry() != null && !Envelopes.isNull(q.getBounds())) {
             qp.bounded();
@@ -285,7 +285,7 @@ public class PostGISDataset implements VectorData {
         pg.run(new DbOP<Boolean>() {
             @Override
             protected Boolean doRun(Connection cx) throws Exception {
-                Schema schema = getSchema();
+                Schema schema = schema();
                 List<Pair<Object,Integer>> values = new ArrayList<Pair<Object,Integer>>();
 
                 SQL sql = new SQL("UPDATE ").name(schema.getName()).add(" SET ");
@@ -325,7 +325,7 @@ public class PostGISDataset implements VectorData {
         pg.run(new DbOP<Boolean>() {
             @Override
             protected Boolean doRun(Connection cx) throws Exception {
-                Schema schema = getSchema();
+                Schema schema = schema();
                 List<Pair<Object,Integer>> values = new ArrayList<Pair<Object,Integer>>();
 
                 PrimaryKey pkey = getTable().getPrimaryKey();
@@ -404,7 +404,7 @@ public class PostGISDataset implements VectorData {
                 @Override
                 protected Number doRun(Connection cx) throws Exception {
                     SQL sql = new SQL("SELECT max(").name(pkcol.getName()).add(")+1 FROM ")
-                        .name(getSchema().getName());
+                        .name(schema().getName());
 
                     Statement st = open(cx.createStatement());
                     ResultSet rs = open(st.executeQuery(sql.toString()));
@@ -418,7 +418,7 @@ public class PostGISDataset implements VectorData {
         }
         else {
             throw new IllegalArgumentException(String.format(
-                "Unable to generate value for %s.%s", getSchema().getName(), pkcol.getName()));
+                "Unable to generate value for %s.%s", schema().getName(), pkcol.getName()));
         }
     }
 

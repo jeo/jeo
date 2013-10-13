@@ -7,27 +7,27 @@ import com.vividsolutions.jts.geom.Envelope;
 
 public class TileSetView implements Disposable {
 
-    TileSet tiles;
+    TileDataset tiles;
 
-    public TileSetView(TileSet tiles) {
+    public TileSetView(TileDataset tiles) {
         this.tiles = tiles;
     }
 
     public TileGrid grid(int z) throws IOException {
-        return tiles.getPyramid().grid(z);
+        return tiles.pyramid().grid(z);
     }
 
     public TileGrid gridr(int i) throws IOException {
-        List<TileGrid> grids = tiles.getPyramid().getGrids(); 
+        List<TileGrid> grids = tiles.pyramid().getGrids(); 
         return i < grids.size() ? grids.get(i) : null;
     }
 
     public Cursor<Tile> cursor(Envelope bbox, int width, int height) throws IOException {
-        return tiles.getPyramid().cover(bbox, width, height).cursor(tiles);
+        return tiles.pyramid().cover(bbox, width, height).cursor(tiles);
     }
     
     public Cursor<Tile> cursor(Envelope bbox, double resx, double resy) throws IOException {
-        return tiles.getPyramid().cover(bbox, resx, resy).cursor(tiles);
+        return tiles.pyramid().cover(bbox, resx, resy).cursor(tiles);
     }
 
     @Override

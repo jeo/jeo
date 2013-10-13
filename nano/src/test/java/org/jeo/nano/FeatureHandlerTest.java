@@ -8,7 +8,7 @@ import org.jeo.data.Cursor;
 import org.jeo.data.Cursors;
 import org.jeo.data.Query;
 import org.jeo.data.Registry;
-import org.jeo.data.VectorData;
+import org.jeo.data.VectorDataset;
 import org.jeo.data.Workspace;
 import org.jeo.feature.Feature;
 import org.jeo.feature.Schema;
@@ -22,7 +22,7 @@ public class FeatureHandlerTest extends HandlerTestSupport {
 
     @Test
     public void testGet() throws Exception {
-        VectorData layer = createMock(VectorData.class);
+        VectorDataset layer = createMock(VectorDataset.class);
         expect(layer.cursor(new Query().bounds(new Envelope(-180,180,-90,90))))
             .andReturn(Cursors.empty(Feature.class)).once();
         replay(layer);
@@ -66,7 +66,7 @@ public class FeatureHandlerTest extends HandlerTestSupport {
         expectLastCall().once();
         replay(c);
 
-        VectorData layer = createMock(VectorData.class);
+        VectorDataset layer = createMock(VectorDataset.class);
         expect(layer.cursor((Query)anyObject())).andReturn(c).once();
         replay(layer);
 
@@ -97,7 +97,7 @@ public class FeatureHandlerTest extends HandlerTestSupport {
 
     @Test
     public void testPostCreateLayer() throws Exception {
-        VectorData layer = createMock(VectorData.class);
+        VectorDataset layer = createMock(VectorDataset.class);
         replay(layer);
 
         Workspace ws = createMock(Workspace.class);

@@ -31,7 +31,7 @@ import org.jeo.data.DataRef;
 import org.jeo.data.Dataset;
 import org.jeo.data.Query;
 import org.jeo.data.Transaction;
-import org.jeo.data.VectorData;
+import org.jeo.data.VectorDataset;
 import org.jeo.feature.Feature;
 import org.jeo.feature.Schema;
 import org.jeo.feature.SchemaBuilder;
@@ -84,7 +84,7 @@ public class GeoGitTest {
         }
     }
 
-    void addShp(VectorData data, Repository repo) throws IOException {
+    void addShp(VectorDataset data, Repository repo) throws IOException {
         String name = data.getName();
         repo.getWorkingTree().insert(name, GT.iterator(data.cursor(new Query())), 
             new NullProgressListener(), null, null);
@@ -119,13 +119,13 @@ public class GeoGitTest {
         Iterables.find(ws.list(), new Predicate<DataRef<Dataset>>() {
             @Override
             public boolean apply(DataRef<Dataset> input) {
-                return input.first().equals("states");
+                return input.getName().equals("states");
             }
         });
         Iterables.find(ws.list(), new Predicate<DataRef<Dataset>>() {
             @Override
             public boolean apply(DataRef<Dataset> input) {
-                return input.first().equals("point");
+                return input.getName().equals("point");
             }
         });
         //assertTrue(layers.contains("line"));

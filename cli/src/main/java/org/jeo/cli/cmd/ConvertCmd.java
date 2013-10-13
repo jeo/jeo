@@ -13,7 +13,7 @@ import org.jeo.data.Drivers;
 import org.jeo.data.Query;
 import org.jeo.data.Transaction;
 import org.jeo.data.Transactional;
-import org.jeo.data.VectorData;
+import org.jeo.data.VectorDataset;
 import org.jeo.data.Workspace;
 import org.jeo.feature.Feature;
 import org.jeo.feature.Features;
@@ -41,15 +41,15 @@ public class ConvertCmd extends JeoCmd {
     @Override
     protected void doCommand(JeoCLI cli) throws Exception {
         Object from = Drivers.open(parseDataURI(datas.get(0)));
-        if (!(from instanceof VectorData)) {
+        if (!(from instanceof VectorDataset)) {
             throw new IllegalArgumentException("from must be a vector dataset");
         }
 
-        VectorData orig = open((VectorData) from);
+        VectorDataset orig = open((VectorDataset) from);
 
         URI uri = parseDataURI(datas.get(1));
 
-        VectorData dest = null;
+        VectorDataset dest = null;
         
         //first see if dest is a workspace
         Object to = null;
@@ -65,14 +65,14 @@ public class ConvertCmd extends JeoCmd {
             throw new IllegalArgumentException("Destination dataset already exists");
         }
 
-        Schema schema = orig.getSchema();
+        Schema schema = orig.schema();
         if (multify) {
             schema = Features.multify(schema);
         }
 
         if (to == null) {
             //see if we can create a new dataset directly
-            dest = Drivers.create(schema, uri, VectorData.class);
+            dest = Drivers.create(schema, uri, VectorDataset.class);
             if (dest == null) {
                 throw new IllegalArgumentException("Unable to create dataset: " + uri);
             }
@@ -95,7 +95,7 @@ public class ConvertCmd extends JeoCmd {
 
             // reprojection
             if (toCRS != null) {
-                if (fromCRS == null && orig.getCRS() == null) {
+                if (fromCRS == null && orig.crs() == null) {
                     throw new IllegalArgumentException(
                         "Could not determine source crs, must supply it with --src-crs");
                 }

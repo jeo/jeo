@@ -28,7 +28,7 @@ public class PostGISAppendCursor extends Cursor<Feature> {
     
     @Override
     public Feature next() throws IOException {
-        return next = new ListFeature(null, null, dataset.getSchema());
+        return next = new ListFeature(null, null, dataset.schema());
     }
 
     @Override

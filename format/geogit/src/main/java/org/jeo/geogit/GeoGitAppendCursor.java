@@ -31,7 +31,7 @@ public class GeoGitAppendCursor extends Cursor<Feature> {
 
     @Override
     public Feature next() throws IOException {
-        curr = GT.feature(featureBuilder.buildFeature(null), dataset.getSchema());
+        curr = GT.feature(featureBuilder.buildFeature(null), dataset.schema());
         return curr;
     }
 

@@ -14,7 +14,7 @@ import org.jeo.data.Cursors;
 import org.jeo.data.FileData;
 import org.jeo.data.Query;
 import org.jeo.data.QueryPlan;
-import org.jeo.data.VectorData;
+import org.jeo.data.VectorDataset;
 import org.jeo.feature.Feature;
 import org.jeo.feature.ListFeature;
 import org.jeo.feature.Schema;
@@ -26,7 +26,7 @@ import org.osgeo.proj4j.CoordinateReferenceSystem;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 
-public class CSVDataset implements VectorData, FileData {
+public class CSVDataset implements VectorDataset, FileData {
 
     /** the csv file */
     File file;
@@ -105,12 +105,12 @@ public class CSVDataset implements VectorData, FileData {
     }
 
     @Override
-    public Schema getSchema() throws IOException {
+    public Schema schema() throws IOException {
         return schema; 
     }
 
     @Override
-    public CoordinateReferenceSystem getCRS() {
+    public CoordinateReferenceSystem crs() {
         return null;
     }
 

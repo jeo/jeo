@@ -50,7 +50,7 @@ public class CachedRegistry implements Registry {
     }
 
     @Override
-    public Iterable<Item> list() {
+    public Iterable<DataRef<?>> list() {
         //TODO: might want to cache this
         return reg.list();
     }
@@ -98,7 +98,7 @@ public class CachedRegistry implements Registry {
         }
 
         @Override
-        public VectorData create(Schema schema) throws IOException {
+        public VectorDataset create(Schema schema) throws IOException {
             return ws.create(schema);
         }
 

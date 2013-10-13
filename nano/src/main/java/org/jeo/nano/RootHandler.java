@@ -27,7 +27,7 @@ public class RootHandler extends Handler {
 
         GeoJSONWriter writer = new GeoJSONWriter(out);
         writer.object();
-        for (Registry.Item item : reg.list()) {
+        for (DataRef<?> item : reg.list()) {
             writer.key(item.getName()).object();
 
             Driver<?> drv = item.getDriver();
@@ -39,7 +39,7 @@ public class RootHandler extends Handler {
                 Workspace ws = (Workspace) reg.get(item.getName());
                 try {
                     for (DataRef<?> ref : ws.list()) {
-                        writer.value(ref.first());
+                        writer.value(ref.getName());
                     }
                 }
                 finally {

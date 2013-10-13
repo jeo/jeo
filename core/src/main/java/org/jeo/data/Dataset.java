@@ -13,8 +13,8 @@ import com.vividsolutions.jts.geom.Envelope;
  * 
  * @author Justin Deoliveira, OpenGeo
  *
- * @see VectorData
- * @see TileSet
+ * @see VectorDataset
+ * @see TileDataset
  */
 public interface Dataset extends Disposable {
 
@@ -49,7 +49,7 @@ public interface Dataset extends Disposable {
     /**
      * The native coordinate reference system of the layer, or <code>null</code> if unknown. 
      */
-    CoordinateReferenceSystem getCRS() throws IOException;
+    CoordinateReferenceSystem crs() throws IOException;
 
     /**
      * The extent of the dataset in its native coordinate reference system.

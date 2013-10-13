@@ -16,7 +16,7 @@ import org.jeo.data.Dataset;
 import org.jeo.data.Registry;
 import org.jeo.data.Tile;
 import org.jeo.data.TileGrid;
-import org.jeo.data.TileSet;
+import org.jeo.data.TileDataset;
 import org.jeo.nano.NanoHTTPD.Response;
 
 public class TileHandler extends Handler {
@@ -48,13 +48,13 @@ public class TileHandler extends Handler {
             Registry reg = server.getRegistry();
             Dataset l = findDataset(m.group(1), reg);
     
-            if (!(l instanceof TileSet)) {
+            if (!(l instanceof TileDataset)) {
                 // not a tile set
                 return new Response(HTTP_BADREQUEST, MIME_PLAINTEXT, 
                     "Layer " + m.group(2) + " not a tile set");
             }
     
-            TileSet ts = (TileSet) l;
+            TileDataset ts = (TileDataset) l;
     
             //get teh tile index
             long z = Long.parseLong(m.group(2));
@@ -64,7 +64,7 @@ public class TileHandler extends Handler {
             //check for flipy flag
             Properties q = request.getParms();
             if (q != null && q.containsKey("flipy") && Boolean.valueOf(q.getProperty("flipy"))) {
-                TileGrid g =  ts.getPyramid().grid((int)z);
+                TileGrid g =  ts.pyramid().grid((int)z);
                 if (g == null) {
                     return new Response(HTTP_INTERNALERROR, MIME_PLAINTEXT, "No tile grid for zoom level " + z);
                 }

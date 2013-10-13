@@ -32,17 +32,17 @@ public class MemWorkspace implements Workspace {
 
     @Override
     public Dataset get(String layer) throws IOException {
-        return data.get(new DataRef<Dataset>(Dataset.class, layer));
+        return data.get(new DataRef<Dataset>(layer, Dataset.class));
     }
 
     public void put(String layer, Dataset dataset) {
-        data.put(new DataRef<Dataset>(Dataset.class, layer), dataset);
+        data.put(new DataRef<Dataset>(layer, Dataset.class), dataset);
     }
 
     @Override
     public MemVector create(Schema schema) throws IOException, UnsupportedOperationException {
         MemVector v = new MemVector(schema);
-        data.put(new DataRef<Dataset>(Dataset.class, schema.getName()), v);
+        data.put(new DataRef<Dataset>(schema.getName(), Dataset.class), v);
         return v;
     }
 

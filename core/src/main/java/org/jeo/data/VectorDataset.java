@@ -10,12 +10,12 @@ import org.jeo.feature.Schema;
  *
  * @author Justin Deoliveira, OpenGeo
  */
-public interface VectorData extends Dataset {
+public interface VectorDataset extends Dataset {
 
     /**
      * The schema for the layer.
      */
-    Schema getSchema() throws IOException;
+    Schema schema() throws IOException;
 
     /**
      * Counts features in the layer.

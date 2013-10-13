@@ -39,10 +39,10 @@ public class MemoryTest {
             .field("name", String.class)
             .field("cost", Double.class).schema();
         MemVector data = mem.create(schema);
-        data.add(Features.create(null, data.getSchema(), gb.point(0,0).toPoint(), 1, "anvil", 10.99));
-        data.add(Features.create(null, data.getSchema(), 
+        data.add(Features.create(null, data.schema(), gb.point(0,0).toPoint(), 1, "anvil", 10.99));
+        data.add(Features.create(null, data.schema(), 
             gb.points(10,10,20,20).toLineString(), 2, "bomb", 11.99));
-        data.add(Features.create(null, data.getSchema(), 
+        data.add(Features.create(null, data.schema(), 
             gb.point(100,100).toPoint().buffer(10), 3, "dynamate", 12.99));
     }
 
@@ -51,7 +51,7 @@ public class MemoryTest {
         assertTrue(Iterables.any(mem.list(), new Predicate<DataRef<? extends Dataset>>() {
             @Override
             public boolean apply(DataRef<? extends Dataset> input) {
-                return "widgets".equals(input.first());
+                return "widgets".equals(input.getName());
             }
         }));
     }

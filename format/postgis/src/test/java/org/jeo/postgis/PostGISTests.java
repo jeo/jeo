@@ -1,10 +1,8 @@
 package org.jeo.postgis;
 
 import java.sql.Connection;
-import java.sql.SQLException;
 
 import org.junit.Assume;
-import org.junit.BeforeClass;
 import org.postgresql.ds.PGPoolingDataSource;
 
 public class PostGISTests {

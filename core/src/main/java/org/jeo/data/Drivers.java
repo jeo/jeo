@@ -312,12 +312,12 @@ public class Drivers {
         return clazz.cast(data);
     }
 
-    public static <T extends VectorData> T create(Schema schema, URI uri, Class<T> clazz) 
+    public static <T extends VectorDataset> T create(Schema schema, URI uri, Class<T> clazz) 
         throws IOException {
         return create(schema, uri, clazz, REGISTRY);
     }
 
-    public static <T extends VectorData> T create(Schema schema, URI uri, Class<T> clazz, 
+    public static <T extends VectorDataset> T create(Schema schema, URI uri, Class<T> clazz, 
         DriverRegistry registry) throws IOException {
         
         uri = convertFileURI(uri);
@@ -339,7 +339,7 @@ public class Drivers {
         }
 
         Object obj =  vd.create(opts, schema);
-        if (obj instanceof VectorData) {
+        if (obj instanceof VectorDataset) {
             return (T) obj;
         }
         else if (obj instanceof Workspace) {

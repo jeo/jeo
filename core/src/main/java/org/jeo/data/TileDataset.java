@@ -7,12 +7,12 @@ import java.io.IOException;
  * 
  * @author Justin Deoliveira, OpenGeo
  */
-public interface TileSet extends Dataset {
+public interface TileDataset extends Dataset {
 
     /**
      * The pyramid describing the tile structure of the dataset. 
      */
-    TilePyramid getPyramid() throws IOException;
+    TilePyramid pyramid() throws IOException;
 
     /**
      * Reads a single tile from the layer by tile index.

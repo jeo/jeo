@@ -17,7 +17,7 @@ import org.jeo.data.Cursors;
 import org.jeo.data.DataRef;
 import org.jeo.data.Dataset;
 import org.jeo.data.Query;
-import org.jeo.data.VectorData;
+import org.jeo.data.VectorDataset;
 import org.jeo.feature.Feature;
 import org.jeo.feature.Schema;
 import org.jeo.feature.SchemaBuilder;
@@ -114,17 +114,17 @@ public class PostGISTest {
         return new Predicate<DataRef<Dataset>>() {
             @Override
             public boolean apply(DataRef<Dataset> input) {
-                return name.equals(input.first());
+                return name.equals(input.getName());
             }
         };
     }
 
     @Test
     public void testSchema() throws Exception {
-        VectorData states = pg.get("states");
+        VectorDataset states = pg.get("states");
         assertNotNull(states);
         
-        Schema schema = states.getSchema();
+        Schema schema = states.schema();
 
         assertNotNull(schema.field("STATE_NAME"));
         assertNotNull(schema.geometry());
@@ -136,7 +136,7 @@ public class PostGISTest {
 
     @Test
     public void testBounds() throws Exception {
-        VectorData states = pg.get("states");
+        VectorDataset states = pg.get("states");
 
         Envelope bounds = states.bounds();
         assertNotNull(bounds);
@@ -149,13 +149,13 @@ public class PostGISTest {
 
     @Test
     public void testCount() throws Exception {
-        VectorData states = pg.get("states");
+        VectorDataset states = pg.get("states");
         assertEquals(49, states.count(new Query()));
     }
     
     @Test
     public void testCountWithBounds() throws Exception {
-        VectorData states = pg.get("states");
+        VectorDataset states = pg.get("states");
         Set<String> abbrs = Sets.newHashSet("MO", "OK", "TX", "NM", "AR", "LA"); 
 
         Envelope bbox = new Envelope(-106.649513, -93.507217, 25.845198, 36.493877);
@@ -164,7 +164,7 @@ public class PostGISTest {
 
     @Test
     public void testCursorRead() throws Exception {
-        VectorData states = pg.get("states");
+        VectorDataset states = pg.get("states");
 
         Cursor<Feature> c = states.cursor(new Query());
         
@@ -187,13 +187,13 @@ public class PostGISTest {
 
     @Test
     public void testCursorFilter() throws Exception {
-        VectorData states = pg.get("states");
+        VectorDataset states = pg.get("states");
         assertEquals(1, Cursors.size(states.cursor(new Query().filter("STATE_NAME = 'Texas'"))));
     }
 
     @Test
     public void testCursorUpdate() throws Exception {
-        VectorData states = pg.get("states");
+        VectorDataset states = pg.get("states");
         
         Cursor<Feature> c = states.cursor(new Query().update());
         while(c.hasNext()) {
@@ -218,8 +218,8 @@ public class PostGISTest {
 
     @Test
     public void testCursorInsert() throws Exception {
-        VectorData states = pg.get("states");
-        Schema schema = states.getSchema();
+        VectorDataset states = pg.get("states");
+        Schema schema = states.schema();
 
         Cursor<Feature> c = states.cursor(new Query().append());
         Feature f = c.next();

@@ -18,7 +18,7 @@ import org.jeo.data.Driver;
 import org.jeo.data.FileData;
 import org.jeo.data.Query;
 import org.jeo.data.QueryPlan;
-import org.jeo.data.VectorData;
+import org.jeo.data.VectorDataset;
 import org.jeo.feature.Feature;
 import org.jeo.feature.Schema;
 import org.jeo.geojson.parser.CRSFinder;
@@ -33,7 +33,7 @@ import org.osgeo.proj4j.CoordinateReferenceSystem;
 
 import com.vividsolutions.jts.geom.Envelope;
 
-public class GeoJSONDataset implements VectorData, FileData {
+public class GeoJSONDataset implements VectorDataset, FileData {
 
     File file;
 
@@ -72,7 +72,7 @@ public class GeoJSONDataset implements VectorData, FileData {
     }
 
     @Override
-    public Schema getSchema() throws IOException {
+    public Schema schema() throws IOException {
         Optional<Feature> f = first();
         if (f.has()) {
             return Schema.build(getName()).fields(f.get().schema().getFields()).schema();
@@ -81,7 +81,7 @@ public class GeoJSONDataset implements VectorData, FileData {
     }
 
     @Override
-    public CoordinateReferenceSystem getCRS() throws IOException {
+    public CoordinateReferenceSystem crs() throws IOException {
         CoordinateReferenceSystem crs = null;
 
         //first scan for a crs property

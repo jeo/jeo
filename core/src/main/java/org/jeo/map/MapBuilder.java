@@ -135,7 +135,7 @@ public class MapBuilder {
                         }
                     }
                     if (!crs) {
-                        CoordinateReferenceSystem c = l.getData().getCRS();
+                        CoordinateReferenceSystem c = l.getData().crs();
                         if (c != null) {
                             view.setCRS(c);
                             crs = true;

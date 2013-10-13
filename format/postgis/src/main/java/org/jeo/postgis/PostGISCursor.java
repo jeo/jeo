@@ -55,7 +55,7 @@ public class PostGISCursor extends Cursor<Feature> {
                     Object obj = rs.getObject(i+1);
                     String col = md.getColumnName(i+1);
 
-                    if (dataset.getSchema().field(col).isGeometry()) {
+                    if (dataset.schema().field(col).isGeometry()) {
                         obj = new WKBReader().read(rs.getBytes(i+1));
                     }
 
@@ -71,7 +71,7 @@ public class PostGISCursor extends Cursor<Feature> {
                     sb.setLength(sb.length()-1);
                 }
 
-                next = new MapFeature(sb.toString(), map, dataset.getSchema());
+                next = new MapFeature(sb.toString(), map, dataset.schema());
                 return next = mode == Cursor.UPDATE ? new DiffFeature(next) : next;
             }
             catch(Exception e) {

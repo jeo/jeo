@@ -9,9 +9,9 @@ import org.jeo.filter.cql.ParseException;
 
 public class VectorDataView {
 
-    VectorData data;
+    VectorDataset data;
 
-    public VectorDataView(VectorData data) {
+    public VectorDataView(VectorDataset data) {
         this.data = data;
     }
 

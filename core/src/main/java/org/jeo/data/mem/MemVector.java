@@ -11,7 +11,7 @@ import org.jeo.data.Cursor;
 import org.jeo.data.Cursors;
 import org.jeo.data.Query;
 import org.jeo.data.QueryPlan;
-import org.jeo.data.VectorData;
+import org.jeo.data.VectorDataset;
 import org.jeo.feature.DiffFeature;
 import org.jeo.feature.Feature;
 import org.jeo.feature.Field;
@@ -25,7 +25,7 @@ import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.index.SpatialIndex;
 import com.vividsolutions.jts.index.quadtree.Quadtree;
 
-public class MemVector implements VectorData {
+public class MemVector implements VectorDataset {
 
     Schema schema;
     List<Feature> features = new ArrayList<Feature>();
@@ -64,7 +64,7 @@ public class MemVector implements VectorData {
     }
     
     @Override
-    public CoordinateReferenceSystem getCRS() {
+    public CoordinateReferenceSystem crs() {
         return schema.crs();
     }
     
@@ -92,7 +92,7 @@ public class MemVector implements VectorData {
     }
     
     @Override
-    public Schema getSchema() {
+    public Schema schema() {
         return schema;
     }
     

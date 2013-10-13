@@ -49,7 +49,7 @@ public class DirectoryRegistry implements Registry {
     }
     
     @Override
-    public Iterable<Item> list() {
+    public Iterable<DataRef<?>> list() {
         // list all files, possibily filtering by extension
         String[] files = exts == null ? baseDir.list() : baseDir.list(new FilenameFilter() {
             @Override
@@ -59,11 +59,11 @@ public class DirectoryRegistry implements Registry {
         });
 
         // process files to see what ones we have drivers for
-        LinkedHashSet<Item> items = new LinkedHashSet<Item>();
+        LinkedHashSet<DataRef<?>> items = new LinkedHashSet<DataRef<?>>();
         for (String fn : files) {
             Driver<?> drv = Drivers.find(new File(baseDir, fn).toURI(), drivers);
             if (drv != null) {
-                items.add(new Item(Util.base(fn), drv));
+                items.add(new DataRef(Util.base(fn), drv));
             }
         }
 

@@ -102,7 +102,7 @@ public class GeoGitWorkspace implements Workspace, FileData {
         return Iterables.transform(trees, new Function<NodeRef, DataRef<Dataset>>() {
             @Override
             public DataRef<Dataset> apply(NodeRef input) {
-                return new DataRef<Dataset>(Dataset.class, NodeRef.nodeFromPath(input.path()));
+                return new DataRef<Dataset>(NodeRef.nodeFromPath(input.path()), Dataset.class);
             }
         });
     }

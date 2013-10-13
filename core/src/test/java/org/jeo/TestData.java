@@ -2,7 +2,7 @@ package org.jeo;
 
 import java.util.Arrays;
 
-import org.jeo.data.VectorData;
+import org.jeo.data.VectorDataset;
 import org.jeo.data.mem.MemVector;
 import org.jeo.feature.Feature;
 import org.jeo.feature.ListFeature;
@@ -22,7 +22,7 @@ public class TestData {
     /**
      * A simple point dataset, taken from the GeoServer SLD cookbook.
      */
-    public static VectorData point() {
+    public static VectorDataset point() {
         Schema schema = new SchemaBuilder("point").field("geometry", Point.class, "epsg:4326")
             .field("name", String.class).field("pop", Integer.class).schema();
 
@@ -41,7 +41,7 @@ public class TestData {
     /**
      * A simple line dataset, taken from the GeoServer SLD cookbook.
      */
-    public static VectorData line() {
+    public static VectorDataset line() {
         Schema schema = new SchemaBuilder("line").field("geometry", LineString.class, "epsg:4326")
             .field("name", String.class).field("type", Integer.class).schema();
 
@@ -77,7 +77,7 @@ public class TestData {
     /**
      * A simple polygon dataset, taken from the GeoServer SLD cookbook.
      */
-    public static VectorData polygon() {
+    public static VectorDataset polygon() {
         Schema schema = new SchemaBuilder("polygon").field("geometry", Polygon.class, "epsg:4326")
             .field("name", String.class).field("pop", Integer.class).schema();
 
@@ -98,7 +98,7 @@ public class TestData {
      * Returns the U.S. Census Bureau "states" dataset file consisting of 49 states, excluding
      * Alaska and Hawaii, including Distinct of Columbia.
      */
-    public static VectorData states() {
+    public static VectorDataset states() {
         Schema schema = new SchemaBuilder("states")
             .field("geometry", MultiPolygon.class, "epsg:4326")
             .field("STATE_NAME", String.class).field("STATE_ABBR", String.class)

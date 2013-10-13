@@ -34,7 +34,7 @@ public class MemCursor extends Cursor<Feature> {
     @Override
     public Feature next() throws IOException {
         if (mode == APPEND) {
-            curr = new ListFeature(null, new ArrayList<Object>(), dataset.getSchema());
+            curr = new ListFeature(null, new ArrayList<Object>(), dataset.schema());
         }
         else {
             curr = cursor.next();

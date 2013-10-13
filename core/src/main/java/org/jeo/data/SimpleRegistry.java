@@ -39,8 +39,8 @@ public class SimpleRegistry implements Registry {
     }
 
     @Override
-    public Iterable<Item> list() {
-        List<Item> items = new ArrayList<Item>();
+    public Iterable<DataRef<?>> list() {
+        List<DataRef<?>> items = new ArrayList<DataRef<?>>();
         for (String name : reg.keySet()) {
             Object obj = reg.get(name);
             Driver<?> drv = null;
@@ -51,7 +51,7 @@ public class SimpleRegistry implements Registry {
                 drv = ((Workspace)obj).getDriver();
             }
 
-            items.add(new Item(name, drv));
+            items.add(new DataRef(name, drv));
         }
         return items;
     }

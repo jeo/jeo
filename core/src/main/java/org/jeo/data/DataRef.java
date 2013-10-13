@@ -2,8 +2,6 @@ package org.jeo.data;
 
 import java.io.IOException;
 import java.io.Serializable;
-import java.util.Arrays;
-import java.util.List;
 
 /**
  * Reference to a data object.
@@ -15,53 +13,38 @@ public class DataRef<T> implements Serializable {
     /** serialVersionUID */
     private static final long serialVersionUID = 1L;
 
-    public static <T> DataRef<T> create(Class<T> type, String path) {
-        return create(type, "/", path);
-    }
-
-    public static <T> DataRef<T> create(Class<T> type, String sep, String path) {
-        return new DataRef<T>(type, path.split(sep));
-    }
-
     Class<T> type;
-    String[] path;
+    Driver<? super T> driver;
+    String name;
 
-    public DataRef(Class<T> type, String... path) {
-        this.type = type;
-        this.path = path;
-
-        if (path.length == 0) {
-            throw new IllegalArgumentException("path must not be empty");
+    public DataRef(String name, Class<T> type, Driver<? super T> driver) {
+        if (name == null) {
+            throw new NullPointerException("name must not be null");
         }
+
+        this.name = name;
+        this.type = type;
+        this.driver = driver;
+    }
+
+    public DataRef(String name, Class<T> type) {
+        this(name, type, null);
+    }
+
+    public DataRef(String name, Driver<T> driver) {
+        this(name, driver != null ? driver.getType() : null, driver);
+    }
+
+    public String getName() {
+        return name;
     }
 
     public Class<T> getType() {
         return type;
     }
 
-    public List<String> getPath() {
-        return Arrays.asList(path);
-    }
-
-    public String get() {
-        if (path.length == 1) {
-            return path[0];
-        }
-
-        StringBuilder sb = new StringBuilder();
-        for (String p : path) {
-            sb.append(p).append("/");
-        }
-        sb.setLength(sb.length()-1);
-        return sb.toString();
-    }
-
-    public String first() {
-        return path[0];
-    }
-
-    public String last() {
-        return path[path.length-1];
+    public Driver<? super T> getDriver() {
+        return driver;
     }
 
     /**
@@ -72,13 +55,7 @@ public class DataRef<T> implements Serializable {
      * @return The data object, or <code>null</code> if it doesn't exist.
      */
     public T resolve(Registry registry) throws IOException {
-        Object result = registry.get(first());
-
-        if (result != null && path.length > 1) {
-            Workspace ws = (Workspace) result;
-            result = ws.get(path[1]); 
-        }
-
+        Object result = registry.get(name);
         return check(result);
     }
 
@@ -90,7 +67,7 @@ public class DataRef<T> implements Serializable {
      * @return The data object, or <code>null</code> if it doesn't exist.
      */
     public T resolve(Workspace workspace) throws IOException {
-        return check(workspace.get(last()));
+        return check(workspace.get(name));
     }
 
     T check(Object obj) {
@@ -108,19 +85,12 @@ public class DataRef<T> implements Serializable {
         return type.cast(obj);
     }
 
-    public <S> DataRef<S> append(Class<S> type, String part) {
-        String[] arr = new String[path.length+1];
-        System.arraycopy(path, 0, arr, 0, path.length);
-        arr[arr.length-1] = part;
-
-        return new DataRef<S>(type, arr);
-    }
-
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + Arrays.hashCode(path);
+        result = prime * result + ((driver == null) ? 0 : driver.hashCode());
+        result = prime * result + ((name == null) ? 0 : name.hashCode());
         result = prime * result + ((type == null) ? 0 : type.hashCode());
         return result;
     }
@@ -134,7 +104,15 @@ public class DataRef<T> implements Serializable {
         if (getClass() != obj.getClass())
             return false;
         DataRef other = (DataRef) obj;
-        if (!Arrays.equals(path, other.path))
+        if (driver == null) {
+            if (other.driver != null)
+                return false;
+        } else if (!driver.equals(other.driver))
+            return false;
+        if (name == null) {
+            if (other.name != null)
+                return false;
+        } else if (!name.equals(other.name))
             return false;
         if (type == null) {
             if (other.type != null)
@@ -146,6 +124,7 @@ public class DataRef<T> implements Serializable {
 
     @Override
     public String toString() {
-        return type.getSimpleName() + "[" + get() + "]";
+        return String.format("%s[%s,%s]", name, type != null ? type.getSimpleName() : "?", 
+            driver != null ? driver.getName() : "?");
     }
 }

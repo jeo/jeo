@@ -15,11 +15,10 @@ import org.jeo.data.Dataset;
 import org.jeo.data.DirectoryRegistry;
 import org.jeo.data.Drivers;
 import org.jeo.data.Query;
-import org.jeo.data.Registry;
 import org.jeo.data.TileGrid;
 import org.jeo.data.TilePyramid;
-import org.jeo.data.TileSet;
-import org.jeo.data.VectorData;
+import org.jeo.data.TileDataset;
+import org.jeo.data.VectorDataset;
 import org.jeo.data.Workspace;
 import org.jeo.feature.Field;
 import org.jeo.feature.Schema;
@@ -41,8 +40,6 @@ public class InfoCmd extends JeoCmd {
 
     @Override
     protected void doCommand(JeoCLI cli) throws Exception {
-        ConsoleReader console = cli.getConsole();
-
         for (String data : datas) {
             URI uri = parseDataURI(data);
 
@@ -58,8 +55,13 @@ public class InfoCmd extends JeoCmd {
                 File f = new File(uri);
                 if (f.exists() && f.isDirectory()) {
                     DirectoryRegistry reg = new DirectoryRegistry(f);
-                    for (Registry.Item it : reg.list()) {
-                        print(reg.get(it.getName()), cli);
+                    try {
+                        for (DataRef<?> it : reg.list()) {
+                            print(reg.get(it.getName()), cli);
+                        }
+                    }
+                    finally {
+                        reg.close();
                     }
                 }
                 else {
@@ -73,11 +75,11 @@ public class InfoCmd extends JeoCmd {
         if (obj instanceof Workspace) {
             print((Workspace)obj, cli);
         }
-        else if (obj instanceof VectorData) {
-            print((VectorData)obj, cli);
+        else if (obj instanceof VectorDataset) {
+            print((VectorDataset)obj, cli);
         }
-        else if (obj instanceof TileSet) {
-            print((TileSet)obj, cli);
+        else if (obj instanceof TileDataset) {
+            print((TileDataset)obj, cli);
         }
         else {
             throw new IllegalArgumentException(
@@ -95,14 +97,14 @@ public class InfoCmd extends JeoCmd {
         console.println("Bounds: " + String.format("%f, %f, %f, %f",
             bbox.getMinX(), bbox.getMinY(), bbox.getMaxX(), bbox.getMaxY()));
 
-        CoordinateReferenceSystem crs = dataset.getCRS();
+        CoordinateReferenceSystem crs = dataset.crs();
         console.println("CRS:    " + (crs != null ? crs.getName() : "None"));
         if (crs != null) {
             print(crs, cli);
         }
     }
 
-    void print(VectorData dataset, JeoCLI cli) throws IOException {
+    void print(VectorDataset dataset, JeoCLI cli) throws IOException {
         ConsoleReader console = cli.getConsole();
         try {
             print((Dataset) dataset, cli);
@@ -110,7 +112,7 @@ public class InfoCmd extends JeoCmd {
             console.println("Count:  " + dataset.count(new Query()));
             console.println("Schema:");
 
-            Schema schema = dataset.getSchema();
+            Schema schema = dataset.schema();
             int size = new Ordering<Field>() {
                 public int compare(Field left, Field right) {
                     return Ints.compare(left.getName().length(), right.getName().length());
@@ -127,17 +129,17 @@ public class InfoCmd extends JeoCmd {
         }
     }
 
-    void print(TileSet dataset, JeoCLI cli) throws IOException {
+    void print(TileDataset dataset, JeoCLI cli) throws IOException {
         ConsoleReader console = cli.getConsole();
         try {
             print((Dataset) dataset, cli);
 
-            TilePyramid pyr = dataset.getPyramid();
+            TilePyramid pyr = dataset.pyramid();
 
             console.println(
                 String.format("Tilesize: %d, %d", pyr.getTileWidth(), pyr.getTileHeight()));
             console.println("Tilesets:");
-            for (TileGrid grid : dataset.getPyramid().getGrids()) {
+            for (TileGrid grid : dataset.pyramid().getGrids()) {
                 int width = grid.getWidth();
                 int height = grid.getHeight();
                 
@@ -159,7 +161,7 @@ public class InfoCmd extends JeoCmd {
 
             for (DataRef<? extends Dataset> ref : workspace.list()) {
                 console.print("\t");
-                console.println(ref.last());
+                console.println(ref.getName());
             }
         }
         finally {

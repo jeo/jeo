@@ -1,12 +1,9 @@
 package org.jeo.postgis;
 
-import java.io.IOException;
-
 import org.jeo.data.VectorApiTestBase;
-import org.jeo.data.VectorData;
+import org.jeo.data.VectorDataset;
 import org.junit.After;
 import org.junit.Assume;
-import org.junit.Before;
 import org.junit.BeforeClass;
 
 public class PostGISApiTest extends VectorApiTestBase {
@@ -29,7 +26,7 @@ public class PostGISApiTest extends VectorApiTestBase {
     }
 
     @Override
-    protected VectorData createVectorData() throws Exception {
+    protected VectorDataset createVectorData() throws Exception {
         return pg.get("states");
     }
 

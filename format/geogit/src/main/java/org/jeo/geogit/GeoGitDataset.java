@@ -22,7 +22,7 @@ import org.jeo.data.Cursors;
 import org.jeo.data.Query;
 import org.jeo.data.QueryPlan;
 import org.jeo.data.Transactional;
-import org.jeo.data.VectorData;
+import org.jeo.data.VectorDataset;
 import org.jeo.feature.Feature;
 import org.jeo.feature.Schema;
 import org.jeo.geom.Envelopes;
@@ -36,7 +36,7 @@ import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.vividsolutions.jts.geom.Envelope;
 
-public class GeoGitDataset implements VectorData, Transactional {
+public class GeoGitDataset implements VectorDataset, Transactional {
 
     Pair<NodeRef,RevCommit> ref;
     GeoGitWorkspace geogit;
@@ -77,12 +77,12 @@ public class GeoGitDataset implements VectorData, Transactional {
     }
 
     @Override
-    public Schema getSchema() throws IOException {
+    public Schema schema() throws IOException {
         return schema;
     }
 
     @Override
-    public CoordinateReferenceSystem getCRS() {
+    public CoordinateReferenceSystem crs() {
         return schema.crs();
     }
 

@@ -13,9 +13,9 @@ import org.jeo.data.Dataset;
 import org.jeo.data.Drivers;
 import org.jeo.data.Query;
 import org.jeo.data.Tile;
-import org.jeo.data.TileSet;
+import org.jeo.data.TileDataset;
 import org.jeo.data.TileSetView;
-import org.jeo.data.VectorData;
+import org.jeo.data.VectorDataset;
 import org.jeo.feature.Feature;
 import org.jeo.filter.Filter;
 import org.jeo.geom.Envelopes;
@@ -62,17 +62,17 @@ public class QueryCmd extends JeoCmd {
                 throw new IllegalArgumentException("Unable to open data source: " + data);
             }
 
-            if (dataset instanceof VectorData) {
-                query((VectorData)dataset, cli);
+            if (dataset instanceof VectorDataset) {
+                query((VectorDataset)dataset, cli);
             }
             else {
-                query((TileSet)dataset, cli);
+                query((TileDataset)dataset, cli);
             }
 
         }
     }
 
-    void query(VectorData dataset, JeoCLI cli) throws Exception {
+    void query(VectorDataset dataset, JeoCLI cli) throws Exception {
         ConsoleReader console = cli.getConsole();
 
         Query q = new Query();
@@ -111,7 +111,7 @@ public class QueryCmd extends JeoCmd {
         }
     }
 
-    void query(TileSet dataset, JeoCLI cli) throws Exception {
+    void query(TileDataset dataset, JeoCLI cli) throws Exception {
         if (bbox == null) {
             throw new IllegalArgumentException("Tile query must specify bbox");
         }

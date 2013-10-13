@@ -23,7 +23,7 @@ import java.util.regex.Pattern;
 import org.jeo.data.Cursor;
 import org.jeo.data.Dataset;
 import org.jeo.data.Query;
-import org.jeo.data.VectorData;
+import org.jeo.data.VectorDataset;
 import org.jeo.data.Workspace;
 import org.jeo.feature.Feature;
 import org.jeo.feature.Features;
@@ -79,7 +79,7 @@ public class FeatureHandler extends Handler {
     }
 
     Response handleGet(Request request, NanoJeoServer server) throws IOException {
-        VectorData layer = findVectorLayer(request, server);
+        VectorDataset layer = findVectorLayer(request, server);
 
         //parse the bbox
         Properties p = request.getParms();
@@ -134,7 +134,7 @@ public class FeatureHandler extends Handler {
     }
 
     Response handlePostAddFeatures(Request request, InputStream body, NanoJeoServer server) throws IOException {
-        VectorData layer = findVectorLayer(request, server);
+        VectorDataset layer = findVectorLayer(request, server);
 
         Object obj = new GeoJSONReader().read(body);
 
@@ -162,16 +162,16 @@ public class FeatureHandler extends Handler {
         }
     }
 
-    VectorData findVectorLayer(Request request, NanoJeoServer server) throws IOException {
+    VectorDataset findVectorLayer(Request request, NanoJeoServer server) throws IOException {
         Matcher m = (Matcher) request.getContext().get(Matcher.class);
 
         Dataset l = findDataset(m.group(1), server.getRegistry());
-        if (l == null || !(l instanceof VectorData)) {
+        if (l == null || !(l instanceof VectorDataset)) {
             //no such layer
             throw new HttpException(HTTP_NOTFOUND, "No such feature layer: " + m.group(0));
         }
 
-        return (VectorData) l;
+        return (VectorDataset) l;
     }
 
     Envelope parseBBOX(String bbox) {

@@ -26,9 +26,9 @@ public class RootHandler extends Handler {
         StringWriter out = new StringWriter();
 
         GeoJSONWriter writer = new GeoJSONWriter(out);
-        writer.obj();
+        writer.object();
         for (Registry.Item item : reg.list()) {
-            writer.key(item.getName()).obj();
+            writer.key(item.getName()).object();
 
             Driver<?> drv = item.getDriver();
             writer.key("driver").value(drv.getName());
@@ -49,10 +49,10 @@ public class RootHandler extends Handler {
                 writer.endArray();
             }
             
-            writer.endObj();
+            writer.endObject();
 
         }
-        writer.endObj();
+        writer.endObject();
         writer.flush();
 
         return new Response(HTTP_OK, MIME_JSON, out.toString());

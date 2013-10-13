@@ -1,1 +1,2 @@
 org.jeo.data.mem.Memory
+org.jeo.geojson.GeoJSON

@@ -16,7 +16,6 @@
   <modules>
     <module>csv</module>
     <module>geogit</module>
-    <module>geojson</module>
     <module>geopkg</module>
     <module>mongo</module>
     <module>postgis</module>

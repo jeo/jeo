@@ -4,12 +4,12 @@
 
   <parent>
     <groupId>org.jeo</groupId>
-    <artifactId>jeo</artifactId>
+    <artifactId>jeo-parent</artifactId>
     <version>0-SNAPSHOT</version>
   </parent>
 
-  <artifactId>jeo-core</artifactId>
-  <name>Java Geo Core</name>
+  <artifactId>jeo</artifactId>
+  <name>JEO Core</name>
   <packaging>jar</packaging>
 
   <dependencies>

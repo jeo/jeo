@@ -15,7 +15,7 @@
   <dependencies>
     <dependency>
       <groupId>org.jeo</groupId>
-      <artifactId>jeo-core</artifactId>
+      <artifactId>jeo</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
@@ -30,7 +30,7 @@
     </dependency>
     <dependency>
       <groupId>org.jeo</groupId>
-      <artifactId>jeo-core</artifactId>
+      <artifactId>jeo</artifactId>
       <version>${project.version}</version>
       <scope>test</scope>
       <classifier>tests</classifier>

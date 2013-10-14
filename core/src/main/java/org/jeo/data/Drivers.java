@@ -357,11 +357,9 @@ public class Drivers {
         String first = uri.getHost() != null ? uri.getHost() : uri.getPath();
         if (first != null) {
             //use the first key
-            if (d.getKeys().isEmpty()) {
-                throw new IllegalArgumentException(d.getName() + " declared no keys");
+            if (!d.getKeys().isEmpty()) {
+                opts.put(d.getKeys().get(0).getName(), first);
             }
-
-            opts.put(d.getKeys().get(0).getName(), first);
         }
 
         // parse query string

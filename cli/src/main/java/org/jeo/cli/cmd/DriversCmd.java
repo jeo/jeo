@@ -2,11 +2,10 @@ package org.jeo.cli.cmd;
 
 import java.util.Iterator;
 
-import jline.console.ConsoleReader;
-
 import org.jeo.cli.JeoCLI;
 import org.jeo.data.Driver;
 import org.jeo.data.Drivers;
+import org.jeo.geojson.GeoJSONWriter;
 
 import com.beust.jcommander.Parameters;
 
@@ -15,16 +14,24 @@ public class DriversCmd extends JeoCmd {
 
     @Override
     protected void doCommand(JeoCLI cli) throws Exception {
-        ConsoleReader console = cli.getConsole();
-
         Iterator<Driver<?>> it = Drivers.list();
-        console.println();
-        console.println("Drivers:");
-        console.println();
+
+        GeoJSONWriter w = new GeoJSONWriter(cli.getConsole().getOutput(), 2);
+        w.array();
         while(it.hasNext()) {
-            console.print("\t");
-            console.println(it.next().getName());
+            Driver<?> drv = it.next();
+            w.object();
+
+            w.key("name").value(drv.getName());
+             
+            w.key("aliases").array();
+            for (String a : drv.getAliases()) {
+                w.value(a);
+            }
+            w.endArray();
+            w.endObject();
         }
+        w.endArray();
     }
 
 }

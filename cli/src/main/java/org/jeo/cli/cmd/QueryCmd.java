@@ -18,6 +18,7 @@ import org.jeo.data.TileSetView;
 import org.jeo.data.VectorDataset;
 import org.jeo.feature.Feature;
 import org.jeo.filter.Filter;
+import org.jeo.geojson.GeoJSONWriter;
 import org.jeo.geom.Envelopes;
 
 import com.beust.jcommander.Parameter;
@@ -73,7 +74,7 @@ public class QueryCmd extends JeoCmd {
     }
 
     void query(VectorDataset dataset, JeoCLI cli) throws Exception {
-        ConsoleReader console = cli.getConsole();
+        GeoJSONWriter w = new GeoJSONWriter(cli.getConsole().getOutput(), 2);
 
         Query q = new Query();
         if (bbox != null) {
@@ -87,27 +88,10 @@ public class QueryCmd extends JeoCmd {
         }
 
         if (summary) {
-            console.println(String.format("Query matched %d features", dataset.count(q)));
+            w.object().key("count").value(dataset.count(q)).endObject();
         }
         else {
-            for (Feature f : dataset.cursor(q)) {
-                console.println("Feature " + f.getId());
-                Map<String,Object> map = f.map();
-
-                int padd = new Ordering<String>() {
-                    @Override
-                    public int compare(String left, String right) {
-                        return Ints.compare(left.length(), right.length());
-                    }
-                }.max(map.keySet()).length();
-
-                for (Map.Entry<String, Object> kv : f.map().entrySet()) {
-                    console.print(Strings.padStart(kv.getKey(), padd, ' '));
-                    console.println("\t=\t" + kv.getValue());
-                }
-
-                console.println();
-            }
+            w.featureCollection(dataset.cursor(q));
         }
     }
 
@@ -116,7 +100,7 @@ public class QueryCmd extends JeoCmd {
             throw new IllegalArgumentException("Tile query must specify bbox");
         }
 
-        ConsoleReader console = cli.getConsole();
+        GeoJSONWriter w = new GeoJSONWriter(cli.getConsole().getOutput(), 2);
 
         Cursor<Tile> cursor = new TileSetView(dataset).cursor(bbox, 1024, 1024);
         if (count != null) {
@@ -124,12 +108,14 @@ public class QueryCmd extends JeoCmd {
         }
 
         if (summary) {
-            console.println(String.format("Query matched %d tiles", Cursors.single(cursor)));
+            w.object().key("count").value(Cursors.size(cursor)).endObject();
         }
         else {
+            w.array();
             for (Tile t : cursor) {
-                console.println(String.format("%d, %d, %d", t.getZ(), t.getX(), t.getY()));
+                w.array().value(t.getZ()).value(t.getX()).value(t.getY());
             }
+            w.endArray();
         }
     }
 }

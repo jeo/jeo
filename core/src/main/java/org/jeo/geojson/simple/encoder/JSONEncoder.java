@@ -19,6 +19,7 @@ public class JSONEncoder {
     final ArrayDeque<Thing> stack = new ArrayDeque<Thing>();
 
     String indent;
+    String space;
     String newline;
 
     /**
@@ -40,6 +41,7 @@ public class JSONEncoder {
         this.out = out;
 
         indent = spaces(indentSize); 
+        space = indentSize > 0 ? " " : "";
         newline = indentSize > 0 ? "\n" : "";
     }
 
@@ -74,7 +76,6 @@ public class JSONEncoder {
                 if (a.size > 0) {
                     out.write(',');
                 }
-                a.size++;
             }
             else {
                 Obj o = (Obj) t;
@@ -82,6 +83,7 @@ public class JSONEncoder {
                     throw new IllegalArgumentException("no key for object");
                 }
             }
+            t.size++;
         }
 
         stack.push(new Obj());
@@ -98,18 +100,20 @@ public class JSONEncoder {
      */
     public JSONEncoder array() throws IOException {
         Thing t = peek();
-        if (t instanceof Arr) {
-            Arr a = (Arr) t;
-            if (a.size > 0) {
-                out.write(',');
+        if (t != null) {
+            if (t instanceof Arr) {
+                Arr a = (Arr) t;
+                if (a.size > 0) {
+                    out.write(',');
+                }
             }
-            a.size++;
-        }
-        else if (t instanceof Obj) {
-            Obj o = (Obj) t;
-            if (!o.key) {
-                throw new IllegalStateException("no key");
+            else if (t instanceof Obj) {
+                Obj o = (Obj) t;
+                if (!o.key) {
+                    throw new IllegalStateException("no key");
+                }
             }
+            t.size++;
         }
 
         stack.push(new Arr());
@@ -147,6 +151,7 @@ public class JSONEncoder {
         out.write("\"");
         out.write(JSONValue.escape(key));
         out.write("\":");
+        out.write(space);
         return this;
     }
 

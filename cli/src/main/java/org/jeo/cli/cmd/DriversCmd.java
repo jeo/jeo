@@ -6,8 +6,10 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.jeo.cli.JeoCLI;
+import org.jeo.data.Dataset;
 import org.jeo.data.Driver;
 import org.jeo.data.Drivers;
+import org.jeo.data.Workspace;
 import org.jeo.geojson.GeoJSONWriter;
 import org.jeo.util.Key;
 
@@ -38,7 +40,17 @@ public class DriversCmd extends JeoCmd {
                 w.object();
                 printBrief(drv, w);
 
-                w.key("type").value(drv.getType().getSimpleName());
+                w.key("type");
+                Class<?> type = drv.getType();
+                if (Workspace.class.isAssignableFrom(type)) {
+                    w.value("workspace");
+                }
+                else if (Dataset.class.isAssignableFrom(type)) {
+                    w.value("dataset");
+                }
+                else {
+                    w.value(drv.getType().getSimpleName());
+                }
 
                 w.key("keys").object();
                 for (Key<?> key : drv.getKeys()) {

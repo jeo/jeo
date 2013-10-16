@@ -19,6 +19,7 @@ import org.jeo.data.Workspace;
 import org.jeo.feature.Field;
 import org.jeo.geojson.GeoJSONWriter;
 import org.jeo.geom.Envelopes;
+import org.jeo.map.Style;
 import org.osgeo.proj4j.CoordinateReferenceSystem;
 
 import com.beust.jcommander.Parameter;
@@ -75,6 +76,9 @@ public class InfoCmd extends JeoCmd {
         }
         else if (obj instanceof TileDataset) {
             print((TileDataset)obj, w, cli);
+        }
+        else if (obj instanceof Style) {
+            print((Style)obj, w, cli);
         }
         else {
             throw new IllegalArgumentException(
@@ -178,5 +182,9 @@ public class InfoCmd extends JeoCmd {
         }
     
         w.endArray();
+    }
+
+    void print(Style style, GeoJSONWriter w, JeoCLI cli) throws IOException {
+        cli.getConsole().getOutput().write(style.toString());
     }
 }

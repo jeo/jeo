@@ -50,7 +50,7 @@ public class DefaultMapper implements MongoMapper {
 
     @Override
     public DBObject object(Feature f, MongoDataset data) {
-        return ((MongoFeature)f).obj;
+        return ((MongoFeature)f).object();
     }
 
     @Override

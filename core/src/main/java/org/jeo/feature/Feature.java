@@ -10,8 +10,7 @@ import com.vividsolutions.jts.geom.Geometry;
 /**
  * An object consisting of a set of named attributes, any of which may be a vector geometry. 
  * 
- * @see ListFeature
- * @see MapFeature
+ * @see BasicFeature
  * 
  * @author Justin Deoliveira, OpenGeo
  */
@@ -59,6 +58,15 @@ public interface Feature {
     Object get(String key);
 
     /**
+     * Gets an attribute of the feature by index.
+     * 
+     * @param index The attribute index.
+     * 
+     * @return The attribute value.
+     */
+    Object get(int index);
+
+    /**
      * Geometry of the feature.
      *
      * @return a {@link Geometry} object, or <code>null</code> if the feature has no geometry.
@@ -72,6 +80,14 @@ public interface Feature {
      * @param val The new value of the attribute. 
      */
     void put(String key, Object val);
+
+    /**
+     * Sets a feature attribute by index.
+     * 
+     * @param index The attribute index.
+     * @param val The new value.
+     */
+    void set(int index, Object val);
 
     /**
      * Sets the geometry of the feature.

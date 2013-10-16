@@ -39,6 +39,10 @@ public class FeatureWrapper implements Feature {
         return delegate.get(key);
     }
 
+    public Object get(int index) {
+        return delegate.get(index);
+    }
+
     public void put(String key, Object val) {
         delegate.put(key, val);
     }
@@ -46,6 +50,10 @@ public class FeatureWrapper implements Feature {
     @Override
     public void put(Geometry g) {
         delegate.put(g);
+    }
+
+    public void set(int index, Object val) {
+        delegate.set(index, val);
     }
 
     public Geometry geometry() {

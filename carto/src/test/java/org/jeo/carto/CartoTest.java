@@ -5,8 +5,9 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.util.List;
+import java.util.Map;
 
-import org.jeo.feature.MapFeature;
+import org.jeo.feature.BasicFeature;
 import org.jeo.filter.cql.CQL;
 import org.jeo.map.RGB;
 import org.jeo.map.Rule;
@@ -14,6 +15,7 @@ import org.jeo.map.Selector;
 import org.jeo.map.Style;
 import org.junit.Test;
 
+import com.google.common.collect.Maps;
 import com.metaweb.lessen.Utilities;
 import com.metaweb.lessen.tokenizers.CondensingTokenizer;
 import com.metaweb.lessen.tokenizers.Tokenizer;
@@ -212,8 +214,10 @@ public class CartoTest {
         Rule r = result.getRules().get(0);
         assertEquals("foo", r.getSelectors().get(0).getClasses().get(0));
 
+        Map<String,Object> map = Maps.newHashMap();
+        map.put("attr", "1");
         assertEquals(Integer.valueOf(1), 
-            r.eval(MapFeature.create("attr", "1"), "line-width", Integer.class));
+            r.eval(new BasicFeature(null, map), "line-width", Integer.class));
     }
 
     @Test
@@ -318,7 +322,11 @@ public class CartoTest {
         assertEquals(1, result.getRules().size());
 
         r = result.getRules().get(0);
-        assertNotNull(r.eval(MapFeature.create("foo", 500), "polygon-fill", RGB.class));
+
+        Map<String,Object> map = Maps.newHashMap();
+        map.put("foo", 500);
+
+        assertNotNull(r.eval(new BasicFeature(null, map), "polygon-fill", RGB.class));
     }
 
     void dumpTokens(String css) {

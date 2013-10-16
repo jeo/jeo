@@ -43,7 +43,7 @@ public class Features {
             values.add(feature.get(f.getName()));
         }
 
-        return new ListFeature(feature.getId(), values, schema);
+        return new BasicFeature(feature.getId(), values, schema);
     }
 
     /**
@@ -131,14 +131,14 @@ public class Features {
     /**
      * Creates a feature object from a map with an explicit schema.
      */
-    public static MapFeature create(String id, Schema schema, Map<String, Object> map) {
-        return new MapFeature(id, map, schema);
+    public static Feature create(String id, Schema schema, Map<String, Object> map) {
+        return new BasicFeature(id, map, schema);
     }
 
     /**
      * Creates a feature object from a list with an explicit schema.
      */
-    public static ListFeature create(String id, Schema schema, Object... values) {
-        return new ListFeature(id, Arrays.asList(values), schema);
+    public static Feature create(String id, Schema schema, Object... values) {
+        return new BasicFeature(id, Arrays.asList(values), schema);
     }
 }

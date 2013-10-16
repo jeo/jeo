@@ -4,8 +4,8 @@ import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import org.jeo.feature.BasicFeature;
 import org.jeo.feature.Feature;
-import org.jeo.feature.MapFeature;
 import org.jeo.geojson.simple.parser.ParseException;
 import org.osgeo.proj4j.CoordinateReferenceSystem;
 
@@ -56,7 +56,7 @@ public class FeatureHandler extends BaseHandler {
 
         String id = node.consume("id", String.class).or(null);
 
-        Feature f = new MapFeature(id, props);
+        Feature f = new BasicFeature(id, props);
         f.setCRS(node.consume("crs", CoordinateReferenceSystem.class).or(null));
 
         node.setValue(f);

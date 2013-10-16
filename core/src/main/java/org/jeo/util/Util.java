@@ -1,6 +1,9 @@
 package org.jeo.util;
 
 import java.io.File;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.UUID;
 
 
@@ -41,5 +44,39 @@ public class Util {
      */
     public static boolean isEmpty(File file) {
         return !file.exists() || file.length() == 0;
+    }
+
+    public static <K,V> V get(Map<K,V> map, int index) {
+        checkIndex(index, map);
+        Iterator<V> it = map.values().iterator();
+        for (int i = 0; it.hasNext() && i < index; i++, it.next());
+
+        return it.next();
+    }
+
+    public static <K,V> void set(Map<K,V> map, int index, V value) {
+        checkIndex(index, map);
+        Iterator<K> it = map.keySet().iterator();
+        for (int i = 0; it.hasNext() && i < index; i++, it.next());
+
+        map.put(it.next(), value);
+    }
+
+    static void checkIndex(int index, Map<?,?> map) {
+        if (index >= map.size()) {
+            throw new IndexOutOfBoundsException(
+                String.format("index: %d, size: %d", index, map.size())); 
+        }
+    }
+
+    public static Map<Object,Object> map(Object... kv) {
+        if (kv.length % 2 != 0) {
+            throw new IllegalArgumentException("odd number of argumets");
+        }
+        LinkedHashMap<Object, Object> map = new LinkedHashMap<Object, Object>();
+        for (int i = 0; i < kv.length; i+=2) {
+            map.put(kv[i].toString(), kv[i+1]);
+        }
+        return map;
     }
 }

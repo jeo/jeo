@@ -15,8 +15,8 @@ import org.jeo.data.FileData;
 import org.jeo.data.Query;
 import org.jeo.data.QueryPlan;
 import org.jeo.data.VectorDataset;
+import org.jeo.feature.BasicFeature;
 import org.jeo.feature.Feature;
-import org.jeo.feature.ListFeature;
 import org.jeo.feature.Schema;
 import org.jeo.feature.SchemaBuilder;
 import org.jeo.util.Key;
@@ -151,7 +151,7 @@ public class CSVDataset implements VectorDataset, FileData {
         values.add(handler.geom(row));
         values.addAll(row);
 
-        return new ListFeature(String.valueOf(i), values, schema);
+        return new BasicFeature(String.valueOf(i), values, schema);
     }
 
     String[] row(String line) {

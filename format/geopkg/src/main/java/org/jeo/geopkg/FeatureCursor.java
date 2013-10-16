@@ -9,9 +9,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.jeo.data.Cursor;
+import org.jeo.feature.BasicFeature;
 import org.jeo.feature.Feature;
 import org.jeo.feature.Field;
-import org.jeo.feature.ListFeature;
 import org.jeo.feature.Schema;
 import org.jeo.geopkg.geom.GeoPkgGeomReader;
 
@@ -65,7 +65,7 @@ public class FeatureCursor extends Cursor<Feature> {
                     }
     
                     //TODO: feature id
-                    return new ListFeature(null, values, schema);
+                    return new BasicFeature(null, values, schema);
                 }
                 finally {
                     next = null;

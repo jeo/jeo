@@ -12,8 +12,8 @@ import java.util.List;
 
 import org.jeo.data.Cursor;
 import org.jeo.data.Cursors;
+import org.jeo.feature.BasicFeature;
 import org.jeo.feature.Feature;
-import org.jeo.feature.ListFeature;
 import org.jeo.geom.GeomBuilder;
 import org.junit.Before;
 import org.junit.Test;
@@ -382,7 +382,7 @@ public class GeoJSONReadWriteTest {
         l.add(val + 0.1);
         l.add(toString(val));
         
-        return new ListFeature("feature."+val, l);
+        return new BasicFeature("feature."+val, l);
     }
 
     String featureText(int val) {

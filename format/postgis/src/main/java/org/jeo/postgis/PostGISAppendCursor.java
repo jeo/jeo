@@ -5,8 +5,8 @@ import java.sql.Connection;
 import java.sql.SQLException;
 
 import org.jeo.data.Cursor;
+import org.jeo.feature.BasicFeature;
 import org.jeo.feature.Feature;
-import org.jeo.feature.ListFeature;
 
 public class PostGISAppendCursor extends Cursor<Feature> {
 
@@ -28,7 +28,7 @@ public class PostGISAppendCursor extends Cursor<Feature> {
     
     @Override
     public Feature next() throws IOException {
-        return next = new ListFeature(null, null, dataset.schema());
+        return next = new BasicFeature(null, dataset.schema());
     }
 
     @Override

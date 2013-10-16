@@ -6,9 +6,9 @@ import java.util.List;
 
 import org.jeo.data.Cursor;
 import org.jeo.data.Cursors;
+import org.jeo.feature.BasicFeature;
 import org.jeo.feature.DiffFeature;
 import org.jeo.feature.Feature;
-import org.jeo.feature.ListFeature;
 
 public class MemCursor extends Cursor<Feature> {
 
@@ -34,7 +34,7 @@ public class MemCursor extends Cursor<Feature> {
     @Override
     public Feature next() throws IOException {
         if (mode == APPEND) {
-            curr = new ListFeature(null, new ArrayList<Object>(), dataset.schema());
+            curr = new BasicFeature(null, new ArrayList<Object>(), dataset.schema());
         }
         else {
             curr = cursor.next();

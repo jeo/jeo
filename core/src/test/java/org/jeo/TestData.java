@@ -4,8 +4,8 @@ import java.util.Arrays;
 
 import org.jeo.data.VectorDataset;
 import org.jeo.data.mem.MemVector;
+import org.jeo.feature.BasicFeature;
 import org.jeo.feature.Feature;
-import org.jeo.feature.ListFeature;
 import org.jeo.feature.Schema;
 import org.jeo.feature.SchemaBuilder;
 
@@ -160,7 +160,7 @@ public class TestData {
     }
 
     static Feature feature(Schema schema, Object... values) {
-        return new ListFeature(null, Arrays.asList(values), schema);
+        return new BasicFeature(null, Arrays.asList(values), schema);
     }
 
     static Geometry geom(String wkt) {

@@ -1,14 +1,17 @@
 package org.jeo.geotools;
 import static org.junit.Assert.*;
 
+import java.util.Map;
+
 import org.geotools.feature.simple.SimpleFeatureBuilder;
 import org.geotools.feature.simple.SimpleFeatureTypeBuilder;
 import org.geotools.geometry.jts.GeometryBuilder;
+import org.jeo.feature.BasicFeature;
 import org.jeo.feature.Feature;
-import org.jeo.feature.MapFeature;
 import org.jeo.feature.Schema;
 import org.jeo.feature.SchemaBuilder;
 import org.jeo.proj.Proj;
+import org.jeo.util.Util;
 import org.junit.Test;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
@@ -82,8 +85,8 @@ public class GTTest {
 
     @Test
     public void testFromFeature() {
-        Feature f = MapFeature.create("geometry", new GeometryBuilder().point(0,0), 
-            "id", 1, "name", "bomb", "price", 10.99);
+        Feature f = new BasicFeature(null, (Map)Util.map("geometry", new GeometryBuilder().point(0,0), 
+            "id", 1, "name", "bomb", "price", 10.99));
         SimpleFeature sf = GT.feature(f);
 
         assertNotNull(sf.getAttribute("geometry"));

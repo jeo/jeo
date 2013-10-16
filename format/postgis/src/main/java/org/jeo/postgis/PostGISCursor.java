@@ -10,9 +10,9 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.jeo.data.Cursor;
+import org.jeo.feature.BasicFeature;
 import org.jeo.feature.DiffFeature;
 import org.jeo.feature.Feature;
-import org.jeo.feature.MapFeature;
 import org.jeo.sql.PrimaryKey;
 import org.jeo.sql.PrimaryKeyColumn;
 
@@ -71,7 +71,7 @@ public class PostGISCursor extends Cursor<Feature> {
                     sb.setLength(sb.length()-1);
                 }
 
-                next = new MapFeature(sb.toString(), map, dataset.schema());
+                next = new BasicFeature(sb.toString(), map, dataset.schema());
                 return next = mode == Cursor.UPDATE ? new DiffFeature(next) : next;
             }
             catch(Exception e) {

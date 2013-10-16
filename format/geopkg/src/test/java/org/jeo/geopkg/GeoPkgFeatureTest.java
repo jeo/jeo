@@ -15,9 +15,9 @@ import java.util.List;
 import org.apache.commons.io.FileUtils;
 import org.jeo.data.Cursor;
 import org.jeo.data.Query;
+import org.jeo.feature.BasicFeature;
 import org.jeo.feature.Feature;
 import org.jeo.feature.Features;
-import org.jeo.feature.ListFeature;
 import org.jeo.feature.Schema;
 import org.jeo.feature.SchemaBuilder;
 import org.jeo.geom.Geom;
@@ -116,7 +116,7 @@ public class GeoPkgFeatureTest extends GeoPkgTestSupport {
         Schema schema = geopkg.schema(entry);
 
         Geometry g = Geom.point(0,0).buffer(1);
-        Feature f = new ListFeature(null, null, schema);
+        Feature f = new BasicFeature(null, schema);
         f.put(schema.geometry().getName(), g);
         f.put("STATE_NAME", "JEOLAND");
         geopkg.add(entry, f);

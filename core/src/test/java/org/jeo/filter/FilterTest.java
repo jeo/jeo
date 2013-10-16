@@ -7,8 +7,8 @@ import static org.junit.Assert.assertTrue;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.jeo.feature.BasicFeature;
 import org.jeo.feature.Feature;
-import org.jeo.feature.MapFeature;
 import org.junit.Test;
 
 public class FilterTest {
@@ -25,7 +25,7 @@ public class FilterTest {
         map.put("foo", "bar");
 
         Property p = new Property("foo");
-        assertEquals("bar", p.evaluate(MapFeature.create(map)));
+        assertEquals("bar", p.evaluate(new BasicFeature(null, map)));
     }
 
     @Test
@@ -34,7 +34,7 @@ public class FilterTest {
         map.put("str", "one");
         map.put("int", 1);
 
-        Feature f = MapFeature.create(map);
+        Feature f = new BasicFeature(null, map);
 
         Comparison c = new Comparison(Comparison.Type.EQUAL, 
             new Property("str"), new Literal("one"));
@@ -77,7 +77,7 @@ public class FilterTest {
         map.put("str", "one");
         map.put("int", 1);
 
-        Feature f = MapFeature.create(map);
+        Feature f = new BasicFeature(null, map);
 
         Comparison c1 = new Comparison(Comparison.Type.EQUAL, 
                 new Property("str"), new Literal("one"));

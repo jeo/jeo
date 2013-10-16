@@ -5,8 +5,8 @@ import java.io.Writer;
 import java.util.HashMap;
 
 import org.jeo.data.Cursor;
+import org.jeo.feature.BasicFeature;
 import org.jeo.feature.Feature;
-import org.jeo.feature.MapFeature;
 
 import com.vividsolutions.jts.geom.Geometry;
 
@@ -28,7 +28,7 @@ public class GeoJSONAppendCursor extends Cursor<Feature> {
     
     @Override
     public Feature next() throws IOException {
-        return next = new MapFeature(null, new HashMap<String, Object>()) {
+        return next = new BasicFeature(null, new HashMap<String, Object>()) {
             @Override
             public void put(Geometry g) {
                 //hack

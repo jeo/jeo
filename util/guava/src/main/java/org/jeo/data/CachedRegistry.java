@@ -50,7 +50,7 @@ public class CachedRegistry implements Registry {
     }
 
     @Override
-    public Iterable<DataRef<?>> list() {
+    public Iterable<DataRef<?>> list() throws IOException {
         //TODO: might want to cache this
         return reg.list();
     }

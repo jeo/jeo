@@ -12,7 +12,7 @@ public interface Registry extends Disposable {
     /**
      * The names of all items of the registry.
      */
-    Iterable<DataRef<?>> list();
+    Iterable<DataRef<?>> list() throws IOException;
 
     /**
      * Returns a registry object by name.

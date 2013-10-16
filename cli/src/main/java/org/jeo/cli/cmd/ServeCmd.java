@@ -8,6 +8,7 @@ import jline.console.ConsoleReader;
 
 import org.jeo.cli.JeoCLI;
 import org.jeo.data.DirectoryRegistry;
+import org.jeo.data.JSONRegistry;
 import org.jeo.data.Registry;
 import org.jeo.data.SimpleRegistry;
 import org.jeo.nano.NanoJeoServer;
@@ -45,10 +46,6 @@ public class ServeCmd extends JeoCmd {
             return new DirectoryRegistry(f);
         }
 
-        ConsoleReader console = cli.getConsole();
-        console.println("Unable to process " + f);
-        console.flush();
-
-        return new SimpleRegistry();
+        return new JSONRegistry(f);
     }
 }

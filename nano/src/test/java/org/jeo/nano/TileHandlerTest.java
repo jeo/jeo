@@ -27,7 +27,7 @@ public class TileHandlerTest extends HandlerTestSupport {
         expect(reg.get("foo")).andReturn(ws).once();
         replay(reg);
 
-        NanoJeoServer server = createMock(NanoJeoServer.class);
+        NanoServer server = createMock(NanoServer.class);
         expect(server.getRegistry()).andReturn(reg).anyTimes();
         replay(server);
 

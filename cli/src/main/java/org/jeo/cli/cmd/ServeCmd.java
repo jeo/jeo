@@ -11,7 +11,7 @@ import org.jeo.data.DirectoryRegistry;
 import org.jeo.data.JSONRegistry;
 import org.jeo.data.Registry;
 import org.jeo.data.SimpleRegistry;
-import org.jeo.nano.NanoJeoServer;
+import org.jeo.nano.NanoServer;
 import org.jeo.util.Util;
 
 import com.beust.jcommander.Parameter;
@@ -36,7 +36,7 @@ public class ServeCmd extends JeoCmd {
         File f = new File(reg.get(0));
         Registry registry = registry(f, cli);
         
-        NanoJeoServer server = new NanoJeoServer(port, null, registry);
+        NanoServer server = new NanoServer(port, null, registry);
         server.join();
 
     }

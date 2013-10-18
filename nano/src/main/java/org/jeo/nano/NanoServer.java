@@ -16,14 +16,14 @@ import org.jeo.data.SimpleRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class NanoJeoServer extends NanoHTTPD {
+public class NanoServer extends NanoHTTPD {
 
-    static final Logger LOG = LoggerFactory.getLogger(NanoJeoServer.class);
+    static final Logger LOG = LoggerFactory.getLogger(NanoServer.class);
 
     Registry reg;
     List<Handler> handlers;
 
-    public NanoJeoServer(int port, File wwwRoot, Registry reg, Handler... handlers) 
+    public NanoServer(int port, File wwwRoot, Registry reg, Handler... handlers) 
         throws IOException {
         super(port, wwwRoot);
 
@@ -111,7 +111,7 @@ public class NanoJeoServer extends NanoHTTPD {
         }
 
         try {
-            new NanoJeoServer(port, wwwRoot, loadRegistry());
+            new NanoServer(port, wwwRoot, loadRegistry());
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -124,7 +124,7 @@ public class NanoJeoServer extends NanoHTTPD {
     }
 
     static void usage() {
-        System.out.println(NanoJeoServer.class.getCanonicalName() + " <port> [<wwwRoot>]");
+        System.out.println(NanoServer.class.getCanonicalName() + " <port> [<wwwRoot>]");
         System.exit(1);
     }
 }

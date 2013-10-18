@@ -15,12 +15,12 @@ import org.jeo.nano.NanoHTTPD.Response;
 public class RootHandler extends Handler {
 
     @Override
-    public boolean canHandle(Request request, NanoJeoServer server) {
+    public boolean canHandle(Request request, NanoServer server) {
         return "/".equals(request.getUri());
     }
     
     @Override
-    public Response handle(Request request, NanoJeoServer server) throws Exception {
+    public Response handle(Request request, NanoServer server) throws Exception {
         Registry reg = server.getRegistry();
 
         StringWriter out = new StringWriter();

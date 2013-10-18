@@ -49,7 +49,7 @@ import com.vividsolutions.jts.geom.Envelope;
 
 public class FeatureHandler extends Handler {
 
-    static final Logger LOG = LoggerFactory.getLogger(NanoJeoServer.class);
+    static final Logger LOG = LoggerFactory.getLogger(NanoServer.class);
 
     // /features/<workspace>[/<layer>]
     static final Pattern FEATURES_URI_RE = 
@@ -57,7 +57,7 @@ public class FeatureHandler extends Handler {
         Pattern.compile("/features/((?:\\w+/)?\\w+)(?:\\.(\\w+))?/?", Pattern.CASE_INSENSITIVE);
 
     @Override
-    public boolean canHandle(Request request, NanoJeoServer server) {
+    public boolean canHandle(Request request, NanoServer server) {
         Matcher m = FEATURES_URI_RE.matcher(request.getUri());
         if (m.matches()) {
             //save the matcher
@@ -68,7 +68,7 @@ public class FeatureHandler extends Handler {
     }
 
     @Override
-    public Response handle(Request request, NanoJeoServer server) {
+    public Response handle(Request request, NanoServer server) {
         try {
             if ("GET".equalsIgnoreCase(request.getMethod())) {
                 return handleGet(request, server);
@@ -84,7 +84,7 @@ public class FeatureHandler extends Handler {
         }
     }
 
-    Response handleGet(Request request, NanoJeoServer server) throws IOException {
+    Response handleGet(Request request, NanoServer server) throws IOException {
         VectorDataset layer = findVectorLayer(request, server);
         String format = parseFormat(request);
 
@@ -96,7 +96,7 @@ public class FeatureHandler extends Handler {
         }
     }
 
-    Response getAsJSON(VectorDataset layer, Request request, NanoJeoServer server) 
+    Response getAsJSON(VectorDataset layer, Request request, NanoServer server) 
         throws IOException {
 
         Properties p = request.getParms();
@@ -134,7 +134,7 @@ public class FeatureHandler extends Handler {
         return new Response(HTTP_OK, MIME_JSON, GeoJSONWriter.toString(c));
     }
 
-    Response getAsHTML(VectorDataset layer, Request request, NanoJeoServer server) 
+    Response getAsHTML(VectorDataset layer, Request request, NanoServer server) 
         throws IOException {
 
         Map<String,String> vars = new HashMap<String, String>();
@@ -180,7 +180,7 @@ public class FeatureHandler extends Handler {
         return new Response(HTTP_OK, MIME_HTML, renderTemplate("feature.html", vars));
     }
 
-    Response handlePost(Request request, NanoJeoServer server) throws IOException {
+    Response handlePost(Request request, NanoServer server) throws IOException {
         Matcher m = (Matcher) request.getContext().get(Matcher.class);
         String key = m.group(1);
 
@@ -199,7 +199,7 @@ public class FeatureHandler extends Handler {
         }
     }
 
-    Response handlePostCreateLayer(Request request, InputStream body, NanoJeoServer server) throws IOException {
+    Response handlePostCreateLayer(Request request, InputStream body, NanoServer server) throws IOException {
         Matcher m = (Matcher) request.getContext().get(Matcher.class);
         Workspace ws = findWorkspace(m.group(1), server.getRegistry());
         
@@ -210,7 +210,7 @@ public class FeatureHandler extends Handler {
         return new Response(HTTP_CREATED, MIME_PLAINTEXT, "");
     }
 
-    Response handlePostAddFeatures(Request request, InputStream body, NanoJeoServer server) throws IOException {
+    Response handlePostAddFeatures(Request request, InputStream body, NanoServer server) throws IOException {
         VectorDataset layer = findVectorLayer(request, server);
 
         Object obj = new GeoJSONReader().read(body);
@@ -239,7 +239,7 @@ public class FeatureHandler extends Handler {
         }
     }
 
-    VectorDataset findVectorLayer(Request request, NanoJeoServer server) throws IOException {
+    VectorDataset findVectorLayer(Request request, NanoServer server) throws IOException {
         String path = parseLayerPath(request);
         Dataset l = findDataset(path, server.getRegistry());
         if (l == null || !(l instanceof VectorDataset)) {

@@ -34,7 +34,7 @@ import com.vividsolutions.jts.geom.Envelope;
 
 public class MapHandler extends Handler {
 
-    static final Logger LOG = LoggerFactory.getLogger(NanoJeoServer.class);
+    static final Logger LOG = LoggerFactory.getLogger(NanoServer.class);
 
     static final String MIME_PNG = "image/png";
             
@@ -50,7 +50,7 @@ public class MapHandler extends Handler {
     }
 
     @Override
-    public boolean canHandle(Request request, NanoJeoServer server) {
+    public boolean canHandle(Request request, NanoServer server) {
         Matcher m = MAP_URI_RE.matcher(request.getUri());
         if (m.matches()) {
             //save the matcher
@@ -61,7 +61,7 @@ public class MapHandler extends Handler {
     }
 
     @Override
-    public Response handle(Request request, NanoJeoServer server) {
+    public Response handle(Request request, NanoServer server) {
         try {
             if ("GET".equalsIgnoreCase(request.getMethod())) {
                 return handleGet(request, server);
@@ -74,7 +74,7 @@ public class MapHandler extends Handler {
         }
     }
 
-    Response handleGet(Request request, NanoJeoServer server) throws IOException {
+    Response handleGet(Request request, NanoServer server) throws IOException {
         VectorDataset layer = findVectorLayer(request, server);
         String format = parseFormat(request);
 
@@ -86,7 +86,7 @@ public class MapHandler extends Handler {
         }
     }
 
-    Response getAsHTML(VectorDataset layer, Request request, NanoJeoServer server) 
+    Response getAsHTML(VectorDataset layer, Request request, NanoServer server) 
             throws IOException {
 
         Properties p = request.getParms();
@@ -133,7 +133,7 @@ public class MapHandler extends Handler {
         return new Response(HTTP_OK, MIME_HTML, renderTemplate("map.html", vars));
     }
 
-    Response getAsImage(VectorDataset layer, Request request, NanoJeoServer server) 
+    Response getAsImage(VectorDataset layer, Request request, NanoServer server) 
             throws IOException {
 
         // create the map
@@ -190,7 +190,7 @@ public class MapHandler extends Handler {
         return new Response(HTTP_OK, MIME_PNG, new ByteArrayInputStream(bout.toByteArray()));
     }
 
-    VectorDataset findVectorLayer(Request request, NanoJeoServer server) throws IOException {
+    VectorDataset findVectorLayer(Request request, NanoServer server) throws IOException {
         Matcher m = (Matcher) request.getContext().get(Matcher.class);
 
         Dataset l = findDataset(m.group(1), server.getRegistry());

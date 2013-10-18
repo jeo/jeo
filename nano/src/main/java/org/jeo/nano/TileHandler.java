@@ -33,7 +33,7 @@ public class TileHandler extends Handler {
         "/tiles/((?:[^/]+/)?[^/]+)/(\\d+)/+(\\d+)/+(\\d+).(\\w+)", Pattern.CASE_INSENSITIVE);
     
     @Override
-    public boolean canHandle(Request request, NanoJeoServer server) {
+    public boolean canHandle(Request request, NanoServer server) {
         Matcher m = TILES_URI_RE.matcher(request.getUri());
         if (m.matches()) {
             //save the matcher
@@ -44,7 +44,7 @@ public class TileHandler extends Handler {
     }
     
     @Override
-    public Response handle(Request request, NanoJeoServer server) {
+    public Response handle(Request request, NanoServer server) {
         try {
             TileDataset layer = findTileLayer(request, server);
 
@@ -83,7 +83,7 @@ public class TileHandler extends Handler {
         }
     }
     
-    public Response getAsHTML(Tile tile, TileDataset layer, Request request, NanoJeoServer server) 
+    public Response getAsHTML(Tile tile, TileDataset layer, Request request, NanoServer server) 
         throws IOException {
 
         Map<String,String> vars = new HashMap<String, String>();
@@ -96,7 +96,7 @@ public class TileHandler extends Handler {
         return new Response(HTTP_OK, MIME_HTML, renderTemplate("tile.html", vars));
     }
 
-    public Response getAsImage(Tile tile, TileDataset layer, Request request, NanoJeoServer server) {
+    public Response getAsImage(Tile tile, TileDataset layer, Request request, NanoServer server) {
         try {
            
             Tile t = layer.read(tile.getZ(), tile.getX(), tile.getY());
@@ -112,7 +112,7 @@ public class TileHandler extends Handler {
         }
     }
 
-    TileDataset findTileLayer(Request request, NanoJeoServer server) throws IOException {
+    TileDataset findTileLayer(Request request, NanoServer server) throws IOException {
         String path = parseLayerPath(request);
         Dataset l = findDataset(path, server.getRegistry());
         

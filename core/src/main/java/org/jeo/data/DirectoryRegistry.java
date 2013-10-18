@@ -1,6 +1,7 @@
 package org.jeo.data;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.Arrays;
@@ -43,13 +44,21 @@ public class DirectoryRegistry implements Registry {
      * @param exts Optional file name extensions to restrict look ups to.
      */
     public DirectoryRegistry(File baseDir, DriverRegistry drivers, String... exts) {
+        if (baseDir == null) {
+            throw new NullPointerException("baseDir must not be null");
+        }
+        if (!baseDir.exists()) {
+            throw (IllegalArgumentException) new IllegalArgumentException()
+                .initCause(new FileNotFoundException(baseDir.getPath()));
+        }
+
         this.baseDir = baseDir;
         this.drivers = drivers;
         this.exts = exts.length > 0 ? Arrays.asList(exts) : null; 
     }
     
     @Override
-    public Iterable<DataRef<?>> list() {
+    public Iterable<DataRef<?>> list() throws IOException {
         // list all files, possibily filtering by extension
         String[] files = exts == null ? baseDir.list() : baseDir.list(new FilenameFilter() {
             @Override

@@ -20,13 +20,13 @@ public class MapBuilder {
     static Logger LOG = LoggerFactory.getLogger(MapBuilder.class);
 
     Map map;
-    Viewport view;
+    View view;
    
     boolean size = false, bounds = false, crs = false;
 
     public MapBuilder() {
         map = new Map();
-        view = new Viewport(map);
+        view = new View(map);
     }
 
     public MapBuilder size(int width, int height) {
@@ -151,7 +151,7 @@ public class MapBuilder {
             //set from bounds
             Envelope e = view.getBounds();
             if (e != null) {
-                view.setWidth(Viewport.DEFAULT_WIDTH);
+                view.setWidth(View.DEFAULT_WIDTH);
                 view.setHeight((int)(view.getWidth() * e.getHeight() / e.getWidth()));
             }
         }

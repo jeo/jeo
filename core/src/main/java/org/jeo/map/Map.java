@@ -52,7 +52,7 @@ public class Map implements Disposable {
 
     Style style = new Style();
 
-    Viewport view;
+    View view;
 
     List<Disposable> cleanup = new ArrayList<Disposable>(); 
     Set<Listener> callbacks = new LinkedHashSet<Listener>();
@@ -61,7 +61,7 @@ public class Map implements Disposable {
      * Creates a new empty map.
      */
     public Map() {
-        view = new Viewport(this);
+        view = new View(this);
     }
 
     /**
@@ -87,11 +87,11 @@ public class Map implements Disposable {
         fireStyleChanged(oldStyle);
     }
 
-    public Viewport getView() {
+    public View getView() {
         return view;
     }
 
-    public void setView(Viewport view) {
+    public void setView(View view) {
         this.view = view;
     }
 

@@ -15,7 +15,7 @@ import com.vividsolutions.jts.geom.Envelope;
  *  
  * @author Justin Deoliveira, OpenGeo
  */
-public class Viewport {
+public class View {
 
     /**
      * Listener interface that receives callbacks on changes to the viewport.
@@ -28,7 +28,7 @@ public class Viewport {
          * @param bounds The new bounds of the view.
          * @param old The old bounds of the view, possibly <tt>null</tt>.
          */
-        void onBoundsChanged(Viewport view, Envelope bounds, Envelope old);
+        void onBoundsChanged(View view, Envelope bounds, Envelope old);
     
         /**
          * Callback fired when the projection of the view are changed.
@@ -37,7 +37,7 @@ public class Viewport {
          * @param crs The new projection of the view.
          * @param old The old projection of the view, possibly <tt>null</tt>.
          */
-        void onCRSChanged(Viewport view, CoordinateReferenceSystem crs, CoordinateReferenceSystem old);
+        void onCRSChanged(View view, CoordinateReferenceSystem crs, CoordinateReferenceSystem old);
     
         /**
          * Callback fired when the dimensions of the view are changed.
@@ -48,7 +48,7 @@ public class Viewport {
          * @param oldWidth The old width of the view, possibly <tt>-1</tt>.
          * @param oldHeight The old height of the view, possibly <tt>-1</tt>.
          */
-        void onSizeChanged(Viewport view, int width, int height, int oldWidth, int oldHeight);
+        void onSizeChanged(View view, int width, int height, int oldWidth, int oldHeight);
     }
 
     /**
@@ -72,7 +72,7 @@ public class Viewport {
 
     Set<Listener> callbacks = new LinkedHashSet<Listener>();
 
-    Viewport(Map map) {
+    View(Map map) {
         this.map = map;
     }
 
@@ -121,7 +121,7 @@ public class Viewport {
     /**
      * Changes the dimensions of the view.
      * <p>
-     * This method results in {@link Listener#onSizeChanged(Viewport, int, int, int, int)} 
+     * This method results in {@link Listener#onSizeChanged(View, int, int, int, int)} 
      * being fired.
      * </p>
      * @param newWidth The new width of the view.
@@ -157,7 +157,7 @@ public class Viewport {
     /**
      * Changes the spatial/world extent of the view.
      * <p>
-     * This method results in {@link Listener#onBoundsChanged(Viewport, Envelope, Envelope)} 
+     * This method results in {@link Listener#onBoundsChanged(View, Envelope, Envelope)} 
      * being fired.
      * </p>
      * @param newBounds The new extent.
@@ -191,7 +191,7 @@ public class Viewport {
      * Changes the projection of the view.
      * <p>
      * This method results in 
-     * {@link Listener#onCRSChanged(Viewport, CoordinateReferenceSystem, CoordinateReferenceSystem)} 
+     * {@link Listener#onCRSChanged(View, CoordinateReferenceSystem, CoordinateReferenceSystem)} 
      * being fired.
      * </p>
      * @param newCRS The new projection of the view.
@@ -269,8 +269,8 @@ public class Viewport {
     }
 
     @Override
-    public Viewport clone() {
-        Viewport v = new Viewport(map);
+    public View clone() {
+        View v = new View(map);
         v.setBounds(bounds);
         v.setCRS(crs);
         v.setWidth(width);

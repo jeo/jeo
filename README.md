@@ -1,4 +1,4 @@
-# jeo - A Java Geo Library
+# jeo - A lightweight spatial library for the JVM 
 
 ## Building
 

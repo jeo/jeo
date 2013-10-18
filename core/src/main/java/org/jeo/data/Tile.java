@@ -15,8 +15,16 @@ public class Tile {
      * Constructs an empty tile object.
      */
     public Tile() {
+        this(null, null, null);
     }
 
+    /**
+     * Constructs an tile object from an index.
+     */
+    public Tile(Integer z, Integer x, Integer y) {
+        this(z, x, y, null, null);
+    }
+   
     /**
      * Constructs a tile object from its tile index, bounds, and image data.
      */
@@ -27,6 +35,13 @@ public class Tile {
         this.y = y;
         this.data = data;
         this.mimeType = mimeType;
+    }
+
+    /**
+     * Constructs a tile by copying another tile.
+     */
+    public Tile(Tile t) {
+        this(t.z, t.x, t.y, t.data, t.mimeType);
     }
 
     /**

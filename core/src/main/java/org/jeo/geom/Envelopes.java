@@ -95,7 +95,7 @@ public class Envelopes {
      * Encodes an envelope as a string of the form <tt>&lt;x1>,&lt;y1>,&lt;x2,&lt;y2></tt>.
      */
     public static String toString(Envelope e) {
-        return String.format("%d,%d,%d,%d", e.getMinX(),e.getMinY(),e.getMaxX(),e.getMaxY());
+        return String.format("%f,%f,%f,%f", e.getMinX(),e.getMinY(),e.getMaxX(),e.getMaxY());
     }
 
     /**

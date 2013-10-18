@@ -33,12 +33,12 @@ public class NanoJeoServer extends NanoHTTPD {
         this.handlers.add(new RootHandler());
 
         if (handlers == null || handlers.length == 0) {
-            handlers = new Handler[]{new TileHandler(), new FeatureHandler()};
+            handlers = new Handler[]{new RootHandler(), new TileHandler(), new FeatureHandler()};
         }
 
         this.handlers.addAll(Arrays.asList(handlers));
         if (wwwRoot != null) {
-            this.handlers.add(new WWWHandler());
+            this.handlers.add(new AppsHandler());
         }
     }
 
@@ -120,17 +120,7 @@ public class NanoJeoServer extends NanoHTTPD {
     }
 
     static Registry loadRegistry() {
-        SimpleRegistry reg = new SimpleRegistry(); 
-
-//        try {
-//            reg.put("ne", new org.jeo.geopkg.GeoPackage(new File("/Users/jdeolive/ne.db")));
-//        } catch (Exception e) {
-//            throw new RuntimeException(e);
-//        }
-//
-//        return new org.jeo.data.CachedRegistry(reg);
-
-        return reg;
+        return new SimpleRegistry();
     }
 
     static void usage() {

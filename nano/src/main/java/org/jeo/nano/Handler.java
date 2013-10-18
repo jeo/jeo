@@ -2,7 +2,10 @@ package org.jeo.nano;
 
 import static org.jeo.nano.NanoHTTPD.HTTP_NOTFOUND;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.Map;
 
 import org.jeo.data.Dataset;
 import org.jeo.data.Registry;
@@ -42,5 +45,25 @@ public abstract class Handler {
         }
 
         return (Dataset)obj;
+    }
+
+    protected String renderTemplate(String template, Map<String,String> vars) throws IOException {
+        BufferedReader in = 
+            new BufferedReader(new InputStreamReader(getClass().getResourceAsStream(template)));
+        try {
+            StringBuilder sb = new StringBuilder();
+
+            String line = null;
+            while((line = in.readLine()) != null) {
+                for (Map.Entry<String,String> e: vars.entrySet()) {
+                    line = line.replace("%" + e.getKey() + "%", e.getValue());
+                }
+                sb.append(line).append("\n");
+            }
+            return sb.toString();
+        }
+        finally {
+            in.close();
+        }
     }
 }

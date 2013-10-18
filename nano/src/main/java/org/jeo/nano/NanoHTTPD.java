@@ -759,7 +759,7 @@ public class NanoHTTPD
 				String e = st.nextToken();
 				int sep = e.indexOf( '=' );
 				if ( sep >= 0 )
-					p.put( decodePercent( e.substring( 0, sep )).trim(),
+					p.put( decodePercent( e.substring( 0, sep )).trim().toLowerCase(),
 						   decodePercent( e.substring( sep+1 )));
 			}
 		}

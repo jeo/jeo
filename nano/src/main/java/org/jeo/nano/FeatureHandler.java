@@ -5,17 +5,21 @@ import static org.jeo.nano.NanoHTTPD.HTTP_CREATED;
 import static org.jeo.nano.NanoHTTPD.HTTP_METHOD_NOT_ALLOWED;
 import static org.jeo.nano.NanoHTTPD.HTTP_NOTFOUND;
 import static org.jeo.nano.NanoHTTPD.HTTP_OK;
+import static org.jeo.nano.NanoHTTPD.MIME_HTML;
 import static org.jeo.nano.NanoHTTPD.MIME_JSON;
 import static org.jeo.nano.NanoHTTPD.MIME_PLAINTEXT;
 
 import java.io.BufferedInputStream;
+import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -33,8 +37,10 @@ import org.jeo.geojson.GeoJSONReader;
 import org.jeo.geojson.GeoJSONWriter;
 import org.jeo.geojson.simple.JSONObject;
 import org.jeo.geojson.simple.JSONValue;
+import org.jeo.geom.Envelopes;
 import org.jeo.geom.Geom;
 import org.jeo.nano.NanoHTTPD.Response;
+import org.jeo.proj.Proj;
 import org.osgeo.proj4j.CoordinateReferenceSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,8 +53,8 @@ public class FeatureHandler extends Handler {
 
     // /features/<workspace>[/<layer>]
     static final Pattern FEATURES_URI_RE = 
-        //Pattern.compile("/features/([^/]+)(?:/([^/]+))?/?", Pattern.CASE_INSENSITIVE);
-        Pattern.compile("/features/((?:[^/]+/)?[^/]+)/?", Pattern.CASE_INSENSITIVE);
+        //Pattern.compile("/features/((?:[^/]+/)?[^/]+)/?", Pattern.CASE_INSENSITIVE);
+        Pattern.compile("/features/((?:\\w+/)?\\w+)(?:\\.(\\w+))?/?", Pattern.CASE_INSENSITIVE);
 
     @Override
     public boolean canHandle(Request request, NanoJeoServer server) {
@@ -80,27 +86,98 @@ public class FeatureHandler extends Handler {
 
     Response handleGet(Request request, NanoJeoServer server) throws IOException {
         VectorDataset layer = findVectorLayer(request, server);
+        String format = parseFormat(request);
+
+        if ("html".equalsIgnoreCase(format)) {
+            return getAsHTML(layer, request, server);
+        }
+        else {
+            return getAsJSON(layer, request, server);
+        }
+    }
+
+    Response getAsJSON(VectorDataset layer, Request request, NanoJeoServer server) 
+        throws IOException {
+
+        Properties p = request.getParms();
 
         //parse the bbox
-        Properties p = request.getParms();
-        if (!p.containsKey("bbox")) {
-            return new Response(HTTP_BADREQUEST, MIME_PLAINTEXT, "Request must specify bbox");
+        Envelope bbox = null;
+
+        if (p.containsKey("bbox")) {
+            bbox = parseBBOX(p.getProperty("bbox"));
         }
 
-        Envelope bbox = parseBBOX(p.getProperty("bbox"));
-
-        Query q = new Query().bounds(bbox);
+        Query q = new Query();
 
         if (p.containsKey("srs")) {
-            q.reproject(p.getProperty("srs"));
+            CoordinateReferenceSystem to = Proj.crs(p.getProperty("srs"));
+            CoordinateReferenceSystem from = layer.crs();
+
+            // may have to back eproject bbox
+            if (bbox != null && from != null && !Proj.equal(from, to)) {
+                bbox = Proj.reproject(bbox, to, from);
+            }
+
+            q.reproject(from, to);
         }
 
+        if (bbox != null) {
+            q.bounds(bbox);
+        }
+        
         if (p.containsKey("limit")) {
             q.limit(Integer.parseInt(p.getProperty("limit")));
         }
         
         Cursor<Feature> c = layer.cursor(q);
         return new Response(HTTP_OK, MIME_JSON, GeoJSONWriter.toString(c));
+    }
+
+    Response getAsHTML(VectorDataset layer, Request request, NanoJeoServer server) 
+        throws IOException {
+
+        Map<String,String> vars = new HashMap<String, String>();
+        vars.put("name", layer.getName());
+        vars.put("path", parseLayerPath(request));
+
+        Properties p = request.getParms();
+
+        Envelope bbox = p.containsKey("bbox") ? parseBBOX(p.getProperty("bbox")) : null;
+        CoordinateReferenceSystem crs = 
+            p.containsKey("srs") ? Proj.crs(p.getProperty("srs")) : null;
+
+        if (bbox == null) {
+            //use layer bounds
+            bbox = layer.bounds();
+
+            // may have to reproject it
+            if (crs != null) {
+                CoordinateReferenceSystem lcrs = layer.crs();
+                if (lcrs != null && !Proj.equal(crs, lcrs)) {
+                    bbox = Proj.reproject(bbox, lcrs, crs);
+                }
+            }
+        }
+        vars.put("bbox", Envelopes.toString(bbox));
+
+        if (p.containsKey("srs")) {
+            vars.put("srs", p.getProperty("srs"));
+        }
+        else {
+            crs = layer.crs();
+            String srs = null;
+            if (crs != null) {
+                Integer epsg = Proj.epsgCode(crs);
+                if (epsg != null) {
+                    srs = "epsg:" + epsg; 
+                }
+            }
+            
+            vars.put("srs", srs != null ? srs : "epsg:4326");
+        }
+
+        return new Response(HTTP_OK, MIME_HTML, renderTemplate("feature.html", vars));
     }
 
     Response handlePost(Request request, NanoJeoServer server) throws IOException {
@@ -163,15 +240,29 @@ public class FeatureHandler extends Handler {
     }
 
     VectorDataset findVectorLayer(Request request, NanoJeoServer server) throws IOException {
-        Matcher m = (Matcher) request.getContext().get(Matcher.class);
-
-        Dataset l = findDataset(m.group(1), server.getRegistry());
+        String path = parseLayerPath(request);
+        Dataset l = findDataset(path, server.getRegistry());
         if (l == null || !(l instanceof VectorDataset)) {
             //no such layer
-            throw new HttpException(HTTP_NOTFOUND, "No such feature layer: " + m.group(0));
+            throw new HttpException(HTTP_NOTFOUND, "No such feature layer: " + path);
         }
 
         return (VectorDataset) l;
+    }
+
+    String parseLayerPath(Request request) {
+        Matcher m = (Matcher) request.getContext().get(Matcher.class);
+        return m.group(1);
+    }
+
+    String parseFormat(Request request) throws IOException {
+        Matcher m = (Matcher) request.getContext().get(Matcher.class);
+
+        if (m.groupCount() > 1 && m.group(2) != null) {
+            return m.group(2);
+        }
+
+        return null;
     }
 
     Envelope parseBBOX(String bbox) {

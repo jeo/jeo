@@ -195,6 +195,63 @@ public class TilePyramid {
     }
 
     /**
+     * Realigns a tile with the pyramid.
+     * 
+     * @param t The tile to rebase.
+     * @param o The original origin of the tile.
+     * 
+     * @return A newly realigned tile, or null if the t did not map to a grid in the pyramid.
+     */
+    public Tile realign(Tile t, Origin o) {
+        TileGrid grid = grid(t.getZ());
+        if (grid == null) {
+            return null;
+        }
+
+        int w = grid.getWidth();
+        int h = grid.getHeight();
+
+        Tile u = new Tile(t);
+        
+        switch(origin) {
+        case BOTTOM_LEFT:
+            if (o == Origin.BOTTOM_RIGHT || o == Origin.TOP_RIGHT) {
+                u.setX(w - (t.getX()+1));
+            }
+            if (o == Origin.TOP_LEFT || o == Origin.TOP_RIGHT) {
+                u.setY(h - (t.getY()+1));
+            }
+            break;
+        case BOTTOM_RIGHT:
+            if (o == Origin.BOTTOM_LEFT || o == Origin.TOP_LEFT) {
+                u.setX(w - (t.getX()+1));
+            }
+            if (o == Origin.TOP_LEFT || o == Origin.TOP_RIGHT) {
+                u.setY(h - (t.getY()+1));
+            }
+            break;
+        case TOP_LEFT:
+            if (o == Origin.BOTTOM_RIGHT || o == Origin.TOP_RIGHT) {
+                u.setX(w - (t.getX()+1));
+            }
+            if (o == Origin.BOTTOM_LEFT || o == Origin.BOTTOM_RIGHT) {
+                u.setY(h - (t.getY()+1));
+            }
+            break;
+        case TOP_RIGHT:
+            if (o == Origin.BOTTOM_LEFT || o == Origin.TOP_LEFT) {
+                u.setX(w - (t.getX()+1));
+            }
+            if (o == Origin.BOTTOM_LEFT || o == Origin.BOTTOM_RIGHT) {
+                u.setY(h - (t.getY()+1));
+            }
+            break;
+        }
+
+        return u;
+    }
+
+    /**
      * Creates a tile cover for the specified bounds using the specified width, height to 
      * determine the appropriate tile resolution.
      */

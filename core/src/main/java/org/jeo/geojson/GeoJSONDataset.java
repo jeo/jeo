@@ -20,7 +20,9 @@ import org.jeo.data.Query;
 import org.jeo.data.QueryPlan;
 import org.jeo.data.VectorDataset;
 import org.jeo.feature.Feature;
+import org.jeo.feature.Field;
 import org.jeo.feature.Schema;
+import org.jeo.feature.SchemaBuilder;
 import org.jeo.geojson.parser.CRSFinder;
 import org.jeo.geojson.parser.RootHandler;
 import org.jeo.geojson.simple.parser.JSONParser;
@@ -32,6 +34,7 @@ import org.jeo.util.Util;
 import org.osgeo.proj4j.CoordinateReferenceSystem;
 
 import com.vividsolutions.jts.geom.Envelope;
+import com.vividsolutions.jts.geom.Geometry;
 
 public class GeoJSONDataset implements VectorDataset, FileData {
 
@@ -75,7 +78,17 @@ public class GeoJSONDataset implements VectorDataset, FileData {
     public Schema schema() throws IOException {
         Optional<Feature> f = first();
         if (f.has()) {
-            return Schema.build(getName()).fields(f.get().schema().getFields()).schema();
+            Schema schema = f.get().schema();
+            SchemaBuilder sb = Schema.build(getName());
+            for (Field fld : schema) {
+                if (fld.isGeometry() && fld.getCRS() == null) {
+                    sb.field(fld.getName(), (Class<Geometry>) fld.getType(), crs());
+                }
+                else {
+                    sb.field(fld);
+                }
+            }
+            return sb.schema();
         }
         return null;
     }

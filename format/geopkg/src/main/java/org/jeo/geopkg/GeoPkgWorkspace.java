@@ -79,12 +79,6 @@ public class GeoPkgWorkspace implements Workspace, FileData {
     /** name of tile matrix metadata table */
     static final String TILE_MATRIX_METADATA = "tile_matrix_metadata";
 
-    /** date format */
-    static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-mm-dd'T'HH:MM:ss.SSS'Z'");
-    static {
-        DATE_FORMAT.setTimeZone(TimeZone.getTimeZone("GMT"));
-    }
-
     /** creation options */
     GeoPkgOpts opts;
 
@@ -409,7 +403,7 @@ public class GeoPkgWorkspace implements Workspace, FileData {
             e.setGeometryType(findGeometryType(schema));
         }
         //mark changed
-        e.setLastChange(new Date());
+        e.lastChange(new Date());
 
         //create the feature table
         try {
@@ -501,7 +495,7 @@ public class GeoPkgWorkspace implements Workspace, FileData {
                 }
 
                 if (entry.getLastChange() != null) {
-                    ps.setString(i++, DATE_FORMAT.format(entry.getLastChange()));
+                    ps.setString(i++, entry.getLastChange());
                 }
                 if (entry.getBounds() != null) {
                     Envelope b = entry.getBounds();
@@ -767,12 +761,7 @@ public class GeoPkgWorkspace implements Workspace, FileData {
         e.setTableName(rs.getString(1));
         e.setIdentifier(rs.getString(3));
         e.setDescription(rs.getString(4));
-
-        try {
-            e.setLastChange(DATE_FORMAT.parse(rs.getString(5)));
-        } catch (ParseException ex) {
-            throw new RuntimeException(ex);
-        }
+        e.setLastChange(rs.getString(5));
         e.setBounds(new Envelope(
             rs.getDouble(6), rs.getDouble(8), rs.getDouble(7), rs.getDouble(9)));
         e.setSrid(rs.getInt(10));

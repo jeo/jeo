@@ -1,6 +1,9 @@
 package org.jeo.geopkg;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.TimeZone;
 
 import com.vividsolutions.jts.geom.Envelope;
 
@@ -28,11 +31,17 @@ public class Entry {
         }
     }
 
+    static SimpleDateFormat dateFormat() {
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-mm-dd'T'HH:MM:ss.SSS'Z'");
+        format.setTimeZone(TimeZone.getTimeZone("GMT"));
+        return format;
+    }
+
     protected String tableName;
     protected DataType dataType;
     protected String identifier;
     protected String description;
-    protected Date lastChange;
+    protected String lastChange;
     protected Envelope bounds;
     protected Integer srid;
 
@@ -68,12 +77,24 @@ public class Entry {
         this.description = description;
     }
 
-    public Date getLastChange() {
+    public String getLastChange() {
         return lastChange;
     }
 
-    public void setLastChange(Date lastChange) {
+    public Date lastChange() {
+        try {
+            return lastChange != null ? dateFormat().parse(lastChange) : null;
+        } catch (ParseException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void setLastChange(String lastChange) {
         this.lastChange = lastChange;
+    }
+
+    public void lastChange(Date date) {
+        lastChange = dateFormat().format(date);
     }
 
     public Envelope getBounds() {

@@ -57,7 +57,7 @@ public class MongoWorkspace implements Workspace {
         List<DataRef<Dataset>> refs = new ArrayList<DataRef<Dataset>>(); 
         for (String name : db.getCollectionNames()) {
             if (!name.startsWith("system.")) {
-                refs.add(new DataRef<Dataset>(name, Dataset.class));
+                refs.add(new DataRef<Dataset>(name, Dataset.class, getDriver(), this));
             }
         }
         return refs;

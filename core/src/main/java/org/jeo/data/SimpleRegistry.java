@@ -51,7 +51,7 @@ public class SimpleRegistry implements Registry {
                 drv = ((Workspace)obj).getDriver();
             }
 
-            items.add(new DataRef(name, drv));
+            items.add(new DataRef(name, obj.getClass(), drv, this));
         }
         return items;
     }

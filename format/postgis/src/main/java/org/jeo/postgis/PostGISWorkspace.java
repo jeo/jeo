@@ -100,7 +100,8 @@ public class PostGISWorkspace implements Workspace {
                     String tbl = tables.getString("TABLE_NAME");
                     String schema = tables.getString("TABLE_SCHEM");
                     if (includeTable(tbl, schema)) {
-                        l.add(new DataRef<Dataset>(tbl, Dataset.class));
+                        l.add(new DataRef<Dataset>(tbl, Dataset.class, getDriver(), 
+                            PostGISWorkspace.this));
                     }
                 }
 

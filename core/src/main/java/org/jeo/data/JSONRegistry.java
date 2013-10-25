@@ -5,7 +5,6 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -47,15 +46,26 @@ public class JSONRegistry implements Registry {
 
     JSONObject reg;
     File regFile;
+    DriverRegistry drivers;
 
     public JSONRegistry(JSONObject reg) {
+        this(reg, Drivers.REGISTRY);
+    }
+
+    public JSONRegistry(JSONObject reg, DriverRegistry drivers) {
         this.reg = reg;
+        this.drivers = drivers;
     }
 
     public JSONRegistry(File file) {
-        this.regFile = file;
+        this(file, Drivers.REGISTRY);
     }
-    
+
+    public JSONRegistry(File file, DriverRegistry drivers) {
+        this.regFile = file;
+        this.drivers = drivers;
+    }
+
     @Override
     public Iterable<DataRef<?>> list() throws IOException {
         JSONObject reg = reg();
@@ -78,13 +88,13 @@ public class JSONRegistry implements Registry {
             }
 
             String driver = obj.get("driver").toString();
-            Driver<?> drv = Drivers.find(driver);
+            Driver<?> drv = Drivers.find(driver, drivers);
             if (drv == null) {
                 LOG.debug("unable to load driver: " + driver);
                 return null;
             }
 
-            list.add(new DataRef(key, drv));
+            list.add(new DataRef(key, drv.getType(), drv, this));
         }
         return list;
     }
@@ -103,7 +113,7 @@ public class JSONRegistry implements Registry {
         }
 
         String driver = obj.get("driver").toString();
-        Driver<?> drv = Drivers.find(driver);
+        Driver<?> drv = Drivers.find(driver, drivers);
         if (drv == null) {
             throw new IOException("unable to load driver: " + driver);
         }

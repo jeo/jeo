@@ -22,4 +22,5 @@ public interface Registry extends Disposable {
      * @return The object or <code>null</code> if so such object matching the name exists.
      */
     Object get(String name) throws IOException;
+
 }

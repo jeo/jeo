@@ -24,7 +24,7 @@ public class Drivers {
     static final Logger LOG = LoggerFactory.getLogger(Drivers.class);
 
     /** driver registry */
-    static final DriverRegistry REGISTRY = new ServiceLoaderDriverRegistry();
+    public static final DriverRegistry REGISTRY = new ServiceLoaderDriverRegistry();
 
     /**
      * Lists all registered drivers.

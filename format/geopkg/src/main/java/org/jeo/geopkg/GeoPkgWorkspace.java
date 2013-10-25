@@ -140,7 +140,8 @@ public class GeoPkgWorkspace implements Workspace, FileData {
                 ResultSet rs = open(open(cx.createStatement()).executeQuery(sql));
                 List<DataRef<Dataset>> refs = new ArrayList<DataRef<Dataset>>();
                 while(rs.next()) {
-                    refs.add(new DataRef<Dataset>(rs.getString(1), Dataset.class));
+                    refs.add(new DataRef<Dataset>(rs.getString(1), Dataset.class, getDriver(), 
+                        GeoPkgWorkspace.this));
                 }
                 return refs;
             }

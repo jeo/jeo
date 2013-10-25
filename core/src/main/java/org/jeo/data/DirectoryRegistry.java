@@ -72,7 +72,7 @@ public class DirectoryRegistry implements Registry {
         for (String fn : files) {
             Driver<?> drv = Drivers.find(new File(baseDir, fn).toURI(), drivers);
             if (drv != null) {
-                items.add(new DataRef(Util.base(fn), drv));
+                items.add(new DataRef(Util.base(fn), drv.getType(), drv, this));
             }
         }
 

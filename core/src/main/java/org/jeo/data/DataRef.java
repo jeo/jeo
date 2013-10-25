@@ -2,22 +2,51 @@ package org.jeo.data;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Reference to a data object.
  * 
  * @author Justin Deoliveira, OpenGeo
  */
-public class DataRef<T> implements Serializable {
+public class DataRef<T> implements Serializable, Disposable {
 
     /** serialVersionUID */
     private static final long serialVersionUID = 1L;
 
+    /** logger */
+    static Logger LOG = LoggerFactory.getLogger(DataRef.class);
+
+    /**
+     * type of reference
+     */
     Class<T> type;
-    Driver<? super T> driver;
+
+    /**
+     * driver for the data
+     */
+    Driver<?> driver;
+
+    /**
+     * object name
+     */
     String name;
 
-    public DataRef(String name, Class<T> type, Driver<? super T> driver) {
+    /**
+     * parent object
+     */
+    Object parent;
+
+    /**
+     * resources to close
+     */
+    List<Object> close = new ArrayList<Object>();
+
+    public DataRef(String name, Class<T> type, Driver<?> driver, Object parent) {
         if (name == null) {
             throw new NullPointerException("name must not be null");
         }
@@ -25,14 +54,7 @@ public class DataRef<T> implements Serializable {
         this.name = name;
         this.type = type;
         this.driver = driver;
-    }
-
-    public DataRef(String name, Class<T> type) {
-        this(name, type, null);
-    }
-
-    public DataRef(String name, Driver<T> driver) {
-        this(name, driver != null ? driver.getType() : null, driver);
+        this.parent = parent;
     }
 
     public String getName() {
@@ -43,31 +65,66 @@ public class DataRef<T> implements Serializable {
         return type;
     }
 
-    public Driver<? super T> getDriver() {
+    public Driver<?> getDriver() {
         return driver;
     }
 
     /**
-     * Resolves the reference relative to the specified registry.
+     * Resolves the reference.
+     * <p>
+     * Client code that calls this method must be sure to call {@link #close()}. 
+     * </p>
      * 
      * @param registry The registry to look up the reference in.
      * 
      * @return The data object, or <code>null</code> if it doesn't exist.
      */
-    public T resolve(Registry registry) throws IOException {
-        Object result = registry.get(name);
-        return check(result);
+    public T resolve() throws IOException {
+        return resolve(parent);
     }
 
-    /**
-     * Resolves the reference relative to the specified workspace.
-     * 
-     * @param workspace The workspace to look up the reference in.
-     * 
-     * @return The data object, or <code>null</code> if it doesn't exist.
-     */
-    public T resolve(Workspace workspace) throws IOException {
-        return check(workspace.get(name));
+    public T resolve(Object parent) throws IOException {
+        if (parent == null) {
+            throw new IllegalArgumentException("reference has no parent");
+        }
+
+        // check if the parent itself is a reference
+        Object p = parent;
+        if (p instanceof DataRef) {
+            // resolve the parent reference
+            p = ((DataRef) parent).resolve();
+            if (p != null) {
+                // keep the object around to close it
+                close.add(p);
+            }
+        }
+
+        Object r = null;
+        if (p instanceof Registry) {
+            r = check(((Registry) p).get(name));
+        }
+        else if (p instanceof Workspace) {
+            r = check(((Workspace) p).get(name));
+        }
+
+        if (r == null) { 
+            throw new IllegalArgumentException(
+                    "Unable to resolve reference " + name + " relative to: " + p);
+        }
+
+        close.add(0, r);
+        return type.cast(r);
+    }
+
+    public void close() {
+        for (Object obj : close) {
+            if (obj instanceof Disposable) {
+                ((Disposable) obj).close();
+            }
+            else {
+                LOG.debug("Unable to close object: " + obj);
+            }
+        }
     }
 
     T check(Object obj) {
@@ -107,7 +164,7 @@ public class DataRef<T> implements Serializable {
         if (driver == null) {
             if (other.driver != null)
                 return false;
-        } else if (!driver.equals(other.driver))
+        } else if (!driver.getClass().equals(other.driver.getClass()))
             return false;
         if (name == null) {
             if (other.name != null)

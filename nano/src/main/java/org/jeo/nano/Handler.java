@@ -14,6 +14,9 @@ import org.jeo.nano.NanoHTTPD.Response;
 
 public abstract class Handler {
 
+    public void init(NanoServer server) {
+    }
+    
     public abstract boolean canHandle(Request request, NanoServer server);
 
     public abstract Response handle(Request request, NanoServer server) throws Exception;

@@ -23,6 +23,11 @@ public class NanoServer extends NanoHTTPD {
     Registry reg;
     List<Handler> handlers;
 
+    public NanoServer(int port, File wwwRoot, Registry reg, List<Handler> handlers) throws IOException {
+        this(port, wwwRoot, reg, 
+            handlers != null ? handlers.toArray(new Handler[handlers.size()]) : new Handler[]{});
+    }
+
     public NanoServer(int port, File wwwRoot, Registry reg, Handler... handlers) 
         throws IOException {
         super(port, wwwRoot);
@@ -31,14 +36,29 @@ public class NanoServer extends NanoHTTPD {
 
         this.handlers = new ArrayList<Handler>();
         this.handlers.add(new RootHandler());
+        this.handlers.add(new PingHandler());
 
         if (handlers == null || handlers.length == 0) {
-            handlers = new Handler[]{new RootHandler(), new TileHandler(), new FeatureHandler()};
+            handlers = new Handler[]{new TileHandler(), new FeatureHandler()};
         }
 
         this.handlers.addAll(Arrays.asList(handlers));
         if (wwwRoot != null) {
-            this.handlers.add(new AppsHandler());
+            boolean addAppHandler = true;
+            for (Handler h : handlers) {
+                if (h instanceof AppsHandler) {
+                    addAppHandler = false;
+                    break;
+                }
+            }
+
+            if (addAppHandler) {
+                this.handlers.add(new AppsHandler());
+            }
+        }
+
+        for (Handler h : handlers) {
+            h.init(this);
         }
     }
 
@@ -111,7 +131,8 @@ public class NanoServer extends NanoHTTPD {
         }
 
         try {
-            new NanoServer(port, wwwRoot, loadRegistry());
+            new NanoServer(port, wwwRoot, loadRegistry(), 
+                new AppsHandler(new File("/Users/jdeolive/Projects/jeo/apps")));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

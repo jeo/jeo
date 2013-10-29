@@ -23,8 +23,11 @@ public class ServeCmd extends JeoCmd {
     @Parameter(description="registry", arity=1, required=true)
     List<String> reg;
 
-    @Parameter(names = {"-p", "-port" }, description="Port to listen on")
+    @Parameter(names = {"-p", "--port" }, description="Port to listen on")
     Integer port = 8000;
+
+    @Parameter(names = {"-t", "--threads" }, description="Size of server thread pool")
+    Integer nThreads = NanoServer.DEFAULT_NUM_THREADS;
 
     @Override
     protected void doCommand(JeoCLI cli) throws Exception {
@@ -36,7 +39,7 @@ public class ServeCmd extends JeoCmd {
         File f = new File(reg.get(0));
         Registry registry = registry(f, cli);
         
-        NanoServer server = new NanoServer(port, null, registry);
+        NanoServer server = new NanoServer(port, null, nThreads, registry);
         server.join();
 
     }

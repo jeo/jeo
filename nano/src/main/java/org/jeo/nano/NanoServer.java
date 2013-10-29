@@ -13,30 +13,33 @@ import java.util.Properties;
 
 import org.jeo.data.Registry;
 import org.jeo.data.SimpleRegistry;
+import org.jeo.nano.NanoHTTPD.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class NanoServer extends NanoHTTPD {
+
+    public static final int DEFAULT_NUM_THREADS = 25;
 
     static final Logger LOG = LoggerFactory.getLogger(NanoServer.class);
 
     Registry reg;
     List<Handler> handlers;
 
-    public NanoServer(int port, File wwwRoot, Registry reg, List<Handler> handlers) throws IOException {
-        this(port, wwwRoot, reg, 
+    public NanoServer(int port, File wwwRoot, int nThreads, Registry reg, List<Handler> handlers) 
+        throws IOException {
+        this(port, wwwRoot, nThreads, reg, 
             handlers != null ? handlers.toArray(new Handler[handlers.size()]) : new Handler[]{});
     }
 
-    public NanoServer(int port, File wwwRoot, Registry reg, Handler... handlers) 
+    public NanoServer(int port, File wwwRoot, int nThreads, Registry reg, Handler... handlers) 
         throws IOException {
-        super(port, wwwRoot);
+        super(port, wwwRoot, nThreads);
 
         this.reg = reg;
 
         this.handlers = new ArrayList<Handler>();
         this.handlers.add(new RootHandler());
-        this.handlers.add(new PingHandler());
 
         if (handlers == null || handlers.length == 0) {
             handlers = new Handler[]{new TileHandler(), new FeatureHandler()};
@@ -76,6 +79,11 @@ public class NanoServer extends NanoHTTPD {
 
         if (uri == null) {
             uri = "";
+        }
+
+        // handle a "ping"
+        if (uri.toLowerCase().startsWith("/ping")) {
+            return new Response(NanoHTTPD.HTTP_OK, NanoHTTPD.MIME_PLAINTEXT, "");
         }
 
         LOG.debug(method + " " + uri + "?" + parms);
@@ -130,8 +138,9 @@ public class NanoServer extends NanoHTTPD {
             wwwRoot = new File(args[1]);
         }
 
+        // make number of threads configurable
         try {
-            new NanoServer(port, wwwRoot, loadRegistry(), 
+            new NanoServer(port, wwwRoot, DEFAULT_NUM_THREADS, loadRegistry(), 
                 new AppsHandler(new File("/Users/jdeolive/Projects/jeo/apps")));
         } catch (IOException e) {
             throw new RuntimeException(e);

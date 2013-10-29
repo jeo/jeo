@@ -23,6 +23,8 @@ import java.util.Properties;
 import java.util.StringTokenizer;
 import java.util.TimeZone;
 import java.util.Vector;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * A simple, tiny, nicely embeddable HTTP 1.0 (partially 1.1) server in Java
@@ -220,10 +222,12 @@ public class NanoHTTPD
 	 * Starts a HTTP server to given port.<p>
 	 * Throws an IOException if the socket is already in use
 	 */
-	public NanoHTTPD( int port, File wwwroot ) throws IOException
+	public NanoHTTPD( int port, File wwwroot, int nthreads) throws IOException
 	{
 		myTcpPort = port;
 		this.myRootDir = wwwroot;
+		myThreadPool = Executors.newFixedThreadPool(nthreads);
+
 		myServerSocket = new ServerSocket( myTcpPort );
 		myThread = new Thread( new Runnable()
 			{
@@ -250,9 +254,15 @@ public class NanoHTTPD
 		try
 		{
 			myServerSocket.close();
+		}
+		catch( IOException ioe) {}
+		try {
+			myThreadPool.shutdown();
+		}
+		catch( Exception e) {} 
+		try {
 			myThread.join();
 		}
-		catch ( IOException ioe ) {}
 		catch ( InterruptedException e ) {}
 	}
 
@@ -289,7 +299,7 @@ public class NanoHTTPD
 
 		try
 		{
-			new NanoHTTPD( port, wwwroot );
+			new NanoHTTPD( port, wwwroot, 25);
 		}
 		catch( IOException ioe )
 		{
@@ -864,6 +874,8 @@ public class NanoHTTPD
 	private final ServerSocket myServerSocket;
 	private Thread myThread;
 	private File myRootDir;
+
+	private ExecutorService myThreadPool;
 
 	// ==================================================
 	// File server code

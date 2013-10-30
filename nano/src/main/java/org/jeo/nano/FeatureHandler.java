@@ -364,8 +364,8 @@ public class FeatureHandler extends Handler {
     }
 
     String parseLayerPath(Request request) {
-        Matcher m = (Matcher) request.getContext().get(Matcher.class);
-        return m.group(1);
+            Matcher m = (Matcher) request.getContext().get(Matcher.class);
+            return m.group(1);
     }
 
     String parseFormat(Request request) throws IOException {

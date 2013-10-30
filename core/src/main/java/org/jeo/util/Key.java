@@ -55,12 +55,16 @@ public class Key<T> {
             return def;
         }
 
-        Object obj = raw(map);
-        if (obj == null) {
+        Object raw = raw(map);
+        if (raw == null) {
             return null;
         }
 
-        return Convert.to(obj, type).get("Unable to convert " + obj + " to " + type.getName());
+        T obj = parse(raw);
+        if (obj == null) {
+            obj = Convert.to(raw, type).get("Unable to convert " + raw + " to " + type.getName());
+        }
+        return obj;
     }
 
     /**
@@ -75,6 +79,14 @@ public class Key<T> {
      */
     public boolean has(Map<?,Object> map) {
         return map.containsKey(this) || map.containsKey(name);
+    }
+
+    /**
+     * Subclass hook to parse raw object.
+     *
+     */
+    protected T parse(Object raw) {
+        return null;
     }
 
     @Override

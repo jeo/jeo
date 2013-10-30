@@ -5,18 +5,14 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 
-import org.jeo.data.DirectoryRegistry;
 import org.jeo.data.Registry;
 import org.jeo.data.SimpleRegistry;
-import org.jeo.java2d.Java2D;
-import org.jeo.map.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -153,15 +149,15 @@ public class NanoServer extends NanoHTTPD {
 
         // make number of threads configurable
         try {
-            new NanoServer(port, wwwRoot, DEFAULT_NUM_THREADS, loadRegistry(), 
-                //(List)Arrays.asList(new AppsHandler(new File("/Users/jdeolive/Projects/jeo/apps")))
-                null,
+            new NanoServer(port, wwwRoot, DEFAULT_NUM_THREADS, loadRegistry(),
+                null, null);
+                /*(List)Arrays.asList(new AppsHandler(new File("/Users/jdeolive/Projects/jeo/apps")))
                 new MapRenderer() {
                     @Override
                     public void render(Map map, OutputStream output) throws IOException {
                         Java2D.render(map, output);
                     }
-                });
+                });*/
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -170,8 +166,8 @@ public class NanoServer extends NanoHTTPD {
     }
 
     static Registry loadRegistry() {
-        return new DirectoryRegistry(new File("/Users/jdeolive/Documents/GeoData"));
-        //return new SimpleRegistry();
+        //return new DirectoryRegistry(new File("/Users/jdeolive/Documents/GeoData"));
+        return new SimpleRegistry();
     }
 
     static void usage() {

@@ -136,7 +136,7 @@ public class InfoCmd extends JeoCmd {
 
     void print(TileDataset dataset, GeoJSONWriter w, JeoCLI cli) throws IOException {
         w.object();
-        w.key("type").value("tileset");
+        w.key("type").value("tile");
     
         try {
             print((Dataset) dataset, w, cli);

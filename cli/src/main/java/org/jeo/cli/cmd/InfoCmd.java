@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.util.List;
+import java.util.Map;
 
 import org.jeo.cli.JeoCLI;
 import org.jeo.data.DataRef;
@@ -48,8 +49,14 @@ public class InfoCmd extends JeoCmd {
                 print(obj, w, cli);
             }
             catch(Exception e) {
-                File f = new File(uri);
-                if (f.exists() && f.isDirectory()) {
+                // try to parse input as file
+                File f = null;
+                try {
+                    f = new File(uri);
+                }
+                catch(Exception e2) {}
+
+                if (f != null && f.exists() && f.isDirectory()) {
                     DirectoryRegistry reg = new DirectoryRegistry(f);
                     try {
                         for (DataRef<?> it : reg.list()) {
@@ -61,6 +68,7 @@ public class InfoCmd extends JeoCmd {
                     }
                 }
                 else {
+                    // no luck, return original exception
                     throw e;
                 }
             }

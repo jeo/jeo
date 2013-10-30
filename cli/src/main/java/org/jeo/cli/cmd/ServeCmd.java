@@ -39,7 +39,7 @@ public class ServeCmd extends JeoCmd {
         File f = new File(reg.get(0));
         Registry registry = registry(f, cli);
         
-        NanoServer server = new NanoServer(port, null, nThreads, registry);
+        NanoServer server = new NanoServer(port, null, nThreads, registry, null);
         server.join();
 
     }

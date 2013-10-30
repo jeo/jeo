@@ -1,8 +1,15 @@
 package org.jeo.nano;
 
-import static org.easymock.classextension.EasyMock.*;
-
-import static org.junit.Assert.*;
+import static org.easymock.EasyMock.anyObject;
+import static org.easymock.EasyMock.expect;
+import static org.easymock.EasyMock.expectLastCall;
+import static org.easymock.classextension.EasyMock.createMock;
+import static org.easymock.classextension.EasyMock.createNiceMock;
+import static org.easymock.classextension.EasyMock.replay;
+import static org.easymock.classextension.EasyMock.verify;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import org.jeo.data.Cursor;
 import org.jeo.data.Cursors;
@@ -25,10 +32,14 @@ public class FeatureHandlerTest extends HandlerTestSupport {
         VectorDataset layer = createMock(VectorDataset.class);
         expect(layer.cursor(new Query().bounds(new Envelope(-180,180,-90,90))))
             .andReturn(Cursors.empty(Feature.class)).once();
+        layer.close();
+        expectLastCall().once();
         replay(layer);
 
         Workspace ws = createMock(Workspace.class);
         expect(ws.get("bar")).andReturn(layer).once();
+        ws.close();
+        expectLastCall().once();
         replay(ws);
 
         Registry reg = createMock(Registry.class);
@@ -68,10 +79,14 @@ public class FeatureHandlerTest extends HandlerTestSupport {
 
         VectorDataset layer = createMock(VectorDataset.class);
         expect(layer.cursor((Query)anyObject())).andReturn(c).once();
+        layer.close();
+        expectLastCall().once();
         replay(layer);
 
         Workspace ws = createMock(Workspace.class);
         expect(ws.get("bar")).andReturn(layer).once();
+        ws.close();
+        expectLastCall().once();
         replay(ws);
 
         Registry reg = createMock(Registry.class);

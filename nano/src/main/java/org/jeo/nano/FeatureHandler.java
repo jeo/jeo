@@ -2,15 +2,18 @@ package org.jeo.nano;
 
 import static org.jeo.nano.NanoHTTPD.HTTP_BADREQUEST;
 import static org.jeo.nano.NanoHTTPD.HTTP_CREATED;
+import static org.jeo.nano.NanoHTTPD.HTTP_FORBIDDEN;
 import static org.jeo.nano.NanoHTTPD.HTTP_METHOD_NOT_ALLOWED;
 import static org.jeo.nano.NanoHTTPD.HTTP_NOTFOUND;
 import static org.jeo.nano.NanoHTTPD.HTTP_OK;
 import static org.jeo.nano.NanoHTTPD.MIME_HTML;
 import static org.jeo.nano.NanoHTTPD.MIME_JSON;
 import static org.jeo.nano.NanoHTTPD.MIME_PLAINTEXT;
+import static org.jeo.nano.NanoHTTPD.MIME_PNG;
 
 import java.io.BufferedInputStream;
-import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -33,14 +36,21 @@ import org.jeo.feature.Feature;
 import org.jeo.feature.Features;
 import org.jeo.feature.Field;
 import org.jeo.feature.Schema;
+import org.jeo.filter.Filter;
+import org.jeo.filter.cql.CQL;
+import org.jeo.filter.cql.ParseException;
 import org.jeo.geojson.GeoJSONReader;
 import org.jeo.geojson.GeoJSONWriter;
 import org.jeo.geojson.simple.JSONObject;
 import org.jeo.geojson.simple.JSONValue;
 import org.jeo.geom.Envelopes;
 import org.jeo.geom.Geom;
+import org.jeo.map.CartoCSS;
+import org.jeo.map.MapBuilder;
+import org.jeo.map.Style;
 import org.jeo.nano.NanoHTTPD.Response;
 import org.jeo.proj.Proj;
+import org.jeo.util.Pair;
 import org.osgeo.proj4j.CoordinateReferenceSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,15 +66,26 @@ public class FeatureHandler extends Handler {
         //Pattern.compile("/features/((?:[^/]+/)?[^/]+)/?", Pattern.CASE_INSENSITIVE);
         Pattern.compile("/features/((?:\\w+/)?\\w+)(?:\\.(\\w+))?/?", Pattern.CASE_INSENSITIVE);
 
+    MapRenderer renderer;
+
+    public FeatureHandler() {
+        this(null);
+    }
+
+    public FeatureHandler(MapRenderer renderer) {
+        this.renderer = renderer;
+    }
+
+    @Override
+    public void init(NanoServer server) {
+        if (renderer == null) {
+            renderer = server.getRenderer();
+        }
+    }
+
     @Override
     public boolean canHandle(Request request, NanoServer server) {
-        Matcher m = FEATURES_URI_RE.matcher(request.getUri());
-        if (m.matches()) {
-            //save the matcher
-            request.getContext().put(Matcher.class, m);
-            return true;
-        }
-        return false;
+        return match(request, FEATURES_URI_RE);
     }
 
     @Override
@@ -85,14 +106,28 @@ public class FeatureHandler extends Handler {
     }
 
     Response handleGet(Request request, NanoServer server) throws IOException {
-        VectorDataset layer = findVectorLayer(request, server);
+        Pair<VectorDataset,Workspace> p = findVectorLayer(request, server);
         String format = parseFormat(request);
 
-        if ("html".equalsIgnoreCase(format)) {
-            return getAsHTML(layer, request, server);
+        VectorDataset layer = p.first();
+        try {
+            if ("html".equalsIgnoreCase(format)) {
+                return getAsHTML(layer, request, server);
+            }
+            else if ("png".equalsIgnoreCase(format)) {
+                return getAsPNG(layer, request, server);
+            }
+            else {
+                return getAsJSON(layer, request, server);
+            }
         }
-        else {
-            return getAsJSON(layer, request, server);
+        finally {
+            layer.close();
+
+            Workspace ws = p.second();
+            if (ws != null) {
+                ws.close();
+            }
         }
     }
 
@@ -128,6 +163,10 @@ public class FeatureHandler extends Handler {
         
         if (p.containsKey("limit")) {
             q.limit(Integer.parseInt(p.getProperty("limit")));
+        }
+
+        if (p.containsKey("filter")) {
+            q.filter(parseFilter(p.getProperty("filter")));
         }
         
         Cursor<Feature> c = layer.cursor(q);
@@ -180,6 +219,70 @@ public class FeatureHandler extends Handler {
         return new Response(HTTP_OK, MIME_HTML, renderTemplate("feature.html", vars));
     }
 
+    Response getAsPNG(VectorDataset layer, Request request, NanoServer server) throws IOException {
+        if (renderer == null) {
+            throw new HttpException(HTTP_FORBIDDEN, "No rendering engine avaialble, map endpoint unavailable"); 
+        }
+
+        Properties p = request.getParms();
+        Filter filter = null;
+        
+        // create the map, and add the layer
+        if (p.containsKey("filter")) {
+            filter = parseFilter(p.getProperty("filter"));
+        }
+
+        MapBuilder mb = new MapBuilder().layer(layer, filter);
+
+        Schema schema = layer.schema();
+
+        if (p.containsKey("srs")) {
+            mb.crs(Proj.crs(p.getProperty("srs")));
+        }
+
+        if (p.containsKey("bbox")) {
+            mb.bounds(parseBBOX(p.getProperty("bbox")));
+        }
+
+        //parse the image dimensions
+        Integer width = p.containsKey("width") ? Integer.parseInt(p.getProperty("width")) : 256;
+        Integer height = p.containsKey("height") ? Integer.parseInt(p.getProperty("height")) : width;
+        mb.size(width, height);
+
+        Style style = null;
+        if (p.containsKey("style") && !p.getProperty("style").isEmpty()) {
+            String s = p.getProperty("style");
+            style = (Style) server.getRegistry().get(s);
+            if (style == null) {
+                throw new HttpException(HTTP_NOTFOUND, "No such style: " + s);
+            }
+        }
+        else {
+            // create some style
+            if (schema.geometry() != null) {
+                switch(Geom.Type.from(schema.geometry().getType())) {
+                case POINT:
+                case MULTIPOINT:
+                    style = Style.build().select("*").set(CartoCSS.MARKER_FILE, "black").style();
+                    break;
+                case POLYGON:
+                case MULTIPOLYGON:
+                    style = Style.build().select("*")
+                        .set(CartoCSS.POLYGON_FILL, "gray").set(CartoCSS.POLYGON_OPACITY, 0.75).style();
+                    break;
+                default:
+                    style = Style.build().select("*").set(CartoCSS.LINE_COLOR, "black").style();
+                }
+            }
+        }
+        mb.style(style);
+
+        ByteArrayOutputStream bout = new ByteArrayOutputStream();
+        renderer.render(mb.map(), bout);
+
+        return new Response(HTTP_OK, MIME_PNG, new ByteArrayInputStream(bout.toByteArray()));
+    }
+
     Response handlePost(Request request, NanoServer server) throws IOException {
         Matcher m = (Matcher) request.getContext().get(Matcher.class);
         String key = m.group(1);
@@ -211,43 +314,53 @@ public class FeatureHandler extends Handler {
     }
 
     Response handlePostAddFeatures(Request request, InputStream body, NanoServer server) throws IOException {
-        VectorDataset layer = findVectorLayer(request, server);
+        Pair<VectorDataset,Workspace> p = findVectorLayer(request, server);
 
         Object obj = new GeoJSONReader().read(body);
 
-        Cursor<Feature> c = layer.cursor(new Query().append());
+        VectorDataset layer = p.first();
         try {
-            if (obj instanceof Feature) {
-                Features.copy((Feature)obj, c.next());
-                c.write();
-            }
-            else if (obj instanceof Iterable) {
-                for (Feature f : (Iterable<Feature>)obj) {
-                    Features.copy(f, c.next());
+            Cursor<Feature> c = layer.cursor(new Query().append());
+            try {
+                if (obj instanceof Feature) {
+                    Features.copy((Feature)obj, c.next());
                     c.write();
                 }
+                else if (obj instanceof Iterable) {
+                    for (Feature f : (Iterable<Feature>)obj) {
+                        Features.copy(f, c.next());
+                        c.write();
+                    }
+                }
+                else {
+                    return new Response(HTTP_BADREQUEST, MIME_PLAINTEXT, "unable to add features from: " + obj);
+                }
+        
+                //TODO: set Location header
+                return new Response(HTTP_CREATED, MIME_PLAINTEXT, "");
             }
-            else {
-                return new Response(HTTP_BADREQUEST, MIME_PLAINTEXT, "unable to add features from: " + obj);
+            finally {
+                c.close();
             }
-    
-            //TODO: set Location header
-            return new Response(HTTP_CREATED, MIME_PLAINTEXT, "");
         }
         finally {
-            c.close();
+            layer.close();
+            Workspace ws = p.second();
+            if (ws != null ) {
+                ws.close();
+            }
         }
     }
 
-    VectorDataset findVectorLayer(Request request, NanoServer server) throws IOException {
+    Pair<VectorDataset,Workspace> findVectorLayer(Request request, NanoServer server) throws IOException {
         String path = parseLayerPath(request);
-        Dataset l = findDataset(path, server.getRegistry());
-        if (l == null || !(l instanceof VectorDataset)) {
+        Pair<Dataset,Workspace> p = findDataset(path, server.getRegistry());
+        if (p == null || !(p.first() instanceof VectorDataset)) {
             //no such layer
             throw new HttpException(HTTP_NOTFOUND, "No such feature layer: " + path);
         }
 
-        return (VectorDataset) l;
+        return Pair.of((VectorDataset) p.first(), p.second());
     }
 
     String parseLayerPath(Request request) {
@@ -269,6 +382,17 @@ public class FeatureHandler extends Handler {
         String[] split = bbox.split(",");
         return new Envelope(Double.parseDouble(split[0]), Double.parseDouble(split[2]), 
             Double.parseDouble(split[1]), Double.parseDouble(split[3]));
+    }
+
+    Filter parseFilter(String cql) {
+        try {
+            return CQL.parse(cql);
+        } catch (ParseException e) {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Error parsing cql filter", e);
+            }
+            throw new HttpException(HTTP_BADREQUEST, "Unsupported cql filter: " + cql);
+        }
     }
 
     JSONObject parseJSON(InputStream body) throws IOException {

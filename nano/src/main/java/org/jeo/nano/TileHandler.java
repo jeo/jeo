@@ -1,6 +1,5 @@
 package org.jeo.nano;
 
-import static org.jeo.nano.NanoHTTPD.HTTP_BADREQUEST;
 import static org.jeo.nano.NanoHTTPD.HTTP_INTERNALERROR;
 import static org.jeo.nano.NanoHTTPD.HTTP_NOTFOUND;
 import static org.jeo.nano.NanoHTTPD.HTTP_OK;
@@ -16,14 +15,13 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.jeo.data.Dataset;
-import org.jeo.data.Registry;
 import org.jeo.data.Tile;
-import org.jeo.data.TileGrid;
 import org.jeo.data.TileDataset;
-import org.jeo.data.TilePyramid;
 import org.jeo.data.TilePyramid.Origin;
+import org.jeo.data.Workspace;
 import org.jeo.geom.Envelopes;
 import org.jeo.nano.NanoHTTPD.Response;
+import org.jeo.util.Pair;
 
 public class TileHandler extends Handler {
 
@@ -34,48 +32,52 @@ public class TileHandler extends Handler {
     
     @Override
     public boolean canHandle(Request request, NanoServer server) {
-        Matcher m = TILES_URI_RE.matcher(request.getUri());
-        if (m.matches()) {
-            //save the matcher
-            request.getContext().put(Matcher.class, m);
-            return true;
-        }
-        return false;
+        return match(request, TILES_URI_RE);
     }
     
     @Override
     public Response handle(Request request, NanoServer server) {
         try {
-            TileDataset layer = findTileLayer(request, server);
+            Pair<TileDataset,Workspace> p = findTileLayer(request, server);
+            TileDataset layer = p.first();
 
-            //get the tile index
-            Tile t = parseTileIndex(request);
-
-            //check for tile origin and map if necessary
-            Properties q = request.getParms();
-            if (q != null && q.containsKey("origin")) {
-                String o = q.getProperty("origin").toUpperCase();
-                Origin origin = Origin.valueOf(o);
-                if (origin == null) {
-                    return new Response(HTTP_INTERNALERROR, MIME_PLAINTEXT, 
-                        "Illegal origin parameter: " + o + ", must be one of: " + Origin.values());
-                }
-
-                Tile u = layer.pyramid().realign(t, origin);
-                if (u == null) {
-                    return new Response(HTTP_INTERNALERROR, MIME_PLAINTEXT, 
-                        "No tile grid for zoom level " + t.getZ());
-                }
-                t = u;
-            }
-
-            String format = parseFormat(request);
+            try {
+                //get the tile index
+                Tile t = parseTileIndex(request);
     
-            if ("html".equalsIgnoreCase(format)) {
-                return getAsHTML(t, layer, request, server);
+                //check for tile origin and map if necessary
+                Properties q = request.getParms();
+                if (q != null && q.containsKey("origin")) {
+                    String o = q.getProperty("origin").toUpperCase();
+                    Origin origin = Origin.valueOf(o);
+                    if (origin == null) {
+                        return new Response(HTTP_INTERNALERROR, MIME_PLAINTEXT, 
+                            "Illegal origin parameter: " + o + ", must be one of: " + Origin.values());
+                    }
+    
+                    Tile u = layer.pyramid().realign(t, origin);
+                    if (u == null) {
+                        return new Response(HTTP_INTERNALERROR, MIME_PLAINTEXT, 
+                            "No tile grid for zoom level " + t.getZ());
+                    }
+                    t = u;
+                }
+    
+                String format = parseFormat(request);
+        
+                if ("html".equalsIgnoreCase(format)) {
+                    return getAsHTML(t, layer, request, server);
+                }
+                else {
+                    return getAsImage(t, layer, request, server);
+                }
             }
-            else {
-                return getAsImage(t, layer, request, server);
+            finally {
+                layer.close();
+                Workspace ws = p.second();
+                if (ws != null) {
+                    ws.close();
+                }
             }
         }
         catch(Exception e) {
@@ -112,16 +114,17 @@ public class TileHandler extends Handler {
         }
     }
 
-    TileDataset findTileLayer(Request request, NanoServer server) throws IOException {
+    Pair<TileDataset,Workspace> findTileLayer(Request request, NanoServer server) throws IOException {
         String path = parseLayerPath(request);
-        Dataset l = findDataset(path, server.getRegistry());
+        Pair<Dataset,Workspace> p = findDataset(path, server.getRegistry());
         
+        Dataset l = p.first();
         if (!(l instanceof TileDataset)) {
             // not a tile set
             throw new HttpException(HTTP_NOTFOUND, "No such tile layer: " + path);
         }
 
-        return (TileDataset) l;
+        return Pair.of((TileDataset)l, p.second());
     }
 
     String parseLayerPath(Request request) {

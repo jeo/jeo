@@ -4,6 +4,7 @@ import static org.jeo.nano.NanoHTTPD.HTTP_OK;
 import static org.jeo.nano.NanoHTTPD.MIME_JSON;
 
 import java.io.StringWriter;
+import java.util.regex.Pattern;
 
 import org.jeo.data.DataRef;
 import org.jeo.data.Driver;
@@ -12,11 +13,14 @@ import org.jeo.data.Workspace;
 import org.jeo.geojson.GeoJSONWriter;
 import org.jeo.nano.NanoHTTPD.Response;
 
-public class RootHandler extends Handler {
+public class DataHandler extends Handler {
+
+    static final Pattern DATA_URI_RE =
+        Pattern.compile("/data/((?:\\w+/)?\\w+)(?:\\.(\\w+))?/?", Pattern.CASE_INSENSITIVE);
 
     @Override
     public boolean canHandle(Request request, NanoServer server) {
-        return "/".equals(request.getUri());
+        return request.getUri().startsWith("/data");
     }
     
     @Override

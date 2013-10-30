@@ -13,7 +13,6 @@ import java.util.Properties;
 
 import org.jeo.data.Registry;
 import org.jeo.data.SimpleRegistry;
-import org.jeo.nano.NanoHTTPD.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,26 +25,28 @@ public class NanoServer extends NanoHTTPD {
     Registry reg;
     List<Handler> handlers;
 
+    MapRenderer renderer;
+
     public NanoServer(int port, File wwwRoot, int nThreads, Registry reg, List<Handler> handlers) 
         throws IOException {
-        this(port, wwwRoot, nThreads, reg, 
-            handlers != null ? handlers.toArray(new Handler[handlers.size()]) : new Handler[]{});
+        this(port, wwwRoot, nThreads, reg, handlers, null);
     }
-
-    public NanoServer(int port, File wwwRoot, int nThreads, Registry reg, Handler... handlers) 
-        throws IOException {
+    
+    public NanoServer(int port, File wwwRoot, int nThreads, Registry reg, List<Handler> handlers, 
+        MapRenderer renderer) throws IOException {
         super(port, wwwRoot, nThreads);
 
         this.reg = reg;
+        this.renderer = renderer;
 
         this.handlers = new ArrayList<Handler>();
-        this.handlers.add(new RootHandler());
+        this.handlers.add(new DataHandler());
 
-        if (handlers == null || handlers.length == 0) {
-            handlers = new Handler[]{new TileHandler(), new FeatureHandler()};
+        if (handlers == null || handlers.isEmpty()) {
+            handlers = Arrays.asList(new TileHandler(), new FeatureHandler());
         }
 
-        this.handlers.addAll(Arrays.asList(handlers));
+        this.handlers.addAll(handlers);
         if (wwwRoot != null) {
             boolean addAppHandler = true;
             for (Handler h : handlers) {
@@ -73,6 +74,14 @@ public class NanoServer extends NanoHTTPD {
         return getRootDir();
     }
 
+    public MapRenderer getRenderer() {
+        return renderer;
+    }
+
+    public void setRenderer(MapRenderer renderer) {
+        this.renderer = renderer;
+    }
+
     @Override
     public Response serve(String uri, String method, Properties header, Properties parms, 
         Properties files) {
@@ -82,7 +91,7 @@ public class NanoServer extends NanoHTTPD {
         }
 
         // handle a "ping"
-        if (uri.toLowerCase().startsWith("/ping")) {
+        if (uri.equals("/")) {
             return new Response(NanoHTTPD.HTTP_OK, NanoHTTPD.MIME_PLAINTEXT, "");
         }
 
@@ -141,7 +150,14 @@ public class NanoServer extends NanoHTTPD {
         // make number of threads configurable
         try {
             new NanoServer(port, wwwRoot, DEFAULT_NUM_THREADS, loadRegistry(), 
-                new AppsHandler(new File("/Users/jdeolive/Projects/jeo/apps")));
+                (List)Arrays.asList(new AppsHandler(new File("/Users/jdeolive/Projects/jeo/apps")))
+                /*null,
+                new MapRenderer() {
+                    @Override
+                    public void render(Map map, OutputStream output) throws IOException {
+                        Java2D.render(map, output);
+                    }
+                }*/);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -150,6 +166,7 @@ public class NanoServer extends NanoHTTPD {
     }
 
     static Registry loadRegistry() {
+        //return new DirectoryRegistry(new File("/Users/jdeolive/Documents/GeoData"));
         return new SimpleRegistry();
     }
 

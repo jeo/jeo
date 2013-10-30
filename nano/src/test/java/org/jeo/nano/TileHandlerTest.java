@@ -17,10 +17,14 @@ public class TileHandlerTest extends HandlerTestSupport {
     public void testGet() throws Exception {
         TileDataset layer = createMock(TileDataset.class);
         expect(layer.read(1, 2, 3)).andReturn(new Tile(1,2,3,new byte[]{},"image/png")).once();
+        layer.close();
+        expectLastCall().once();
         replay(layer);
 
         Workspace ws = createMock(Workspace.class);
         expect(ws.get("bar")).andReturn(layer).once();
+        ws.close();
+        expectLastCall().once();
         replay(ws);
 
         Registry reg = createMock(Registry.class);

@@ -1,6 +1,7 @@
 package org.jeo.map;
 
 import org.jeo.data.Dataset;
+import org.jeo.filter.Filter;
 
 /**
  * A layer of a map.
@@ -12,6 +13,7 @@ public class Layer {
     String name;
     String title;
     Dataset data;
+    Filter filter;
 
     boolean visible = true;
 
@@ -64,6 +66,20 @@ public class Layer {
      */
     public void setData(Dataset data) {
         this.data = data;
+    }
+
+    /**
+     * Filter for data access.
+     */
+    public Filter getFilter() {
+        return filter;
+    }
+
+    /**
+     * Sets filter for data access.
+     */
+    public void setFilter(Filter filter) {
+        this.filter = filter;
     }
 
     /**

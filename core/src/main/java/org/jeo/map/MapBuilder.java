@@ -9,6 +9,7 @@ import org.jeo.data.Drivers;
 import org.jeo.data.Workspace;
 import org.jeo.data.mem.MemVector;
 import org.jeo.feature.Feature;
+import org.jeo.filter.Filter;
 import org.osgeo.proj4j.CoordinateReferenceSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,15 +57,24 @@ public class MapBuilder {
         return layer(data.getName(), data);
     }
 
-    public MapBuilder layer(String name, Dataset data) {
-        return layer(name, name, data);
+    public MapBuilder layer(Dataset data, Filter filter) {
+        return layer(data.getName(), data, filter);
     }
 
-    public MapBuilder layer(String name, String title, Dataset data) {
+    public MapBuilder layer(String name, Dataset data) {
+        return layer(name, name, data, null);
+    }
+
+    public MapBuilder layer(String name, Dataset data, Filter filter) {
+        return layer(name, name, data, filter);
+    }
+    
+    public MapBuilder layer(String name, String title, Dataset data, Filter filter) {
         Layer l = new Layer();
         l.setName(name);
         l.setTitle(title);
         l.setData(data);
+        l.setFilter(filter);
 
         map.getLayers().add(l);
         return this;
@@ -89,7 +99,7 @@ public class MapBuilder {
                 "No dataset named " + name + " in worksoace: " + params);
         }
 
-        layer(name, title, data);
+        layer(name, title, data, null);
         map.getCleanup().add(ws);
         return this;
     }

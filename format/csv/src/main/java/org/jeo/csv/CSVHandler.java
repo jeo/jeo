@@ -10,7 +10,7 @@ import com.vividsolutions.jts.geom.Geometry;
  */
 public abstract class CSVHandler {
 
-    public abstract void header(String[] head);
+    public abstract void header(List<String> head);
 
     public abstract Geometry geom(List<Object> row) throws IOException;
 }

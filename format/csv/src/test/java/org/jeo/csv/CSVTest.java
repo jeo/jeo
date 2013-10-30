@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import org.jeo.Tests;
+import org.jeo.data.Cursors;
 import org.jeo.data.Query;
 import org.junit.Before;
 import org.junit.Test;
@@ -24,20 +25,27 @@ public class CSVTest {
 
     @Test
     public void testCount() throws Exception {
-        assertEquals(3, csv.count(new Query()));
+        assertEquals(4, csv.count(new Query()));
     }
 
     @Test
     public void testBounds() throws Exception {
-        assertEquals(new Envelope(2, 6, 0, 5), csv.bounds());
+        assertEquals(new Envelope(2, 8, 1, 7), csv.bounds());
+    }
+
+    @Test
+    public void testChunks() throws Exception {
+        assertEquals(1, Cursors.size(csv.cursor(new Query().filter("name = 'fire,cracker'"))));
     }
 
     InputStream csv() {
         StringBuilder sb = new StringBuilder();
-        sb.append("name, ").append("cost, ").append("lat, ").append("lon").append("\n");
-        sb.append("bomb, ").append("1.99, ").append("0,").append("2").append("\n");
-        sb.append("dynamite, ").append("2.99, ").append("3,").append("4").append("\n");
-        sb.append("anvil, ").append("3.99,").append("5,").append("6").append("\n");
+        
+        sb.append("name, cost, lat, lon").append("\n");
+        sb.append("bomb, 1.99, 1,2").append("\n");
+        sb.append("dynamite, 2.99, 3,4").append("\n");
+        sb.append("anvil, 3.99,5,6").append("\n");
+        sb.append("\"fire,cracker\", 4.99,7, 8").append("\n");
 
         return new ByteArrayInputStream(sb.toString().getBytes());
     }

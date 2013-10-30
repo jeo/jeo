@@ -22,14 +22,15 @@ public class XYHandler extends CSVHandler {
     }
 
     @Override
-    public void header(String[] head) {
+    public void header(List<String> head) {
         if (opts.getX() == null) {
             Integer x = null, y = null;
-            for (int i = 0; i < head.length; i++) {
-                if (head[i].equalsIgnoreCase(opts.getXcol())) {
+            for (int i = 0; i < head.size(); i++) {
+                String s = head.get(i);
+                if (s.equalsIgnoreCase(opts.getXcol())) {
                     x = i;
                 }
-                if (head[i].equalsIgnoreCase(opts.getYcol())) {
+                if (s.equalsIgnoreCase(opts.getYcol())) {
                     y = i;
                 }
             }

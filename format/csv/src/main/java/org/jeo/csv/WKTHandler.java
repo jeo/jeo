@@ -16,11 +16,11 @@ public class WKTHandler extends CSVHandler {
     }
 
     @Override
-    public void header(String[] head) {
+    public void header(List<String> head) {
         if (opts.getWkt() == null) {
             Integer wkt = null;
-            for (int i = 0; i < head.length; i++) {
-                if (head[i].equalsIgnoreCase(opts.getWktCol())) {
+            for (int i = 0; i < head.size(); i++) {
+                if (head.get(i).equalsIgnoreCase(opts.getWktCol())) {
                     wkt = i;
                     break;
                 }

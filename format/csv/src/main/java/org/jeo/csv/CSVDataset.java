@@ -1,13 +1,16 @@
 package org.jeo.csv;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Scanner;
 
 import org.jeo.data.Cursor;
 import org.jeo.data.Cursors;
@@ -74,7 +77,7 @@ public class CSVDataset implements VectorDataset, FileData {
             //read first row
             BufferedReader r = reader();
             try {
-                String[] row = row(r.readLine());
+                List<String> row = row(r.readLine());
                 handler.header(row);
 
                 for (String col : row) {
@@ -130,9 +133,9 @@ public class CSVDataset implements VectorDataset, FileData {
             throw new IllegalArgumentException("write cursors not supported");
         }
 
-        BufferedReader reader = reader();
+        Scanner reader = scanner();
         if (opts.hasHeader()) {
-            reader.readLine();
+            reader.next();
         }
 
         return new QueryPlan(q).apply(new CSVCursor(reader, this));
@@ -141,6 +144,10 @@ public class CSVDataset implements VectorDataset, FileData {
     public void close() {
     }
     
+    Scanner scanner() throws FileNotFoundException {
+        return new Scanner(new BufferedInputStream(new FileInputStream(file))).useDelimiter("\n");
+    }
+
     BufferedReader reader() throws FileNotFoundException {
         return new BufferedReader(new FileReader(file));
     }
@@ -154,8 +161,31 @@ public class CSVDataset implements VectorDataset, FileData {
         return new BasicFeature(String.valueOf(i), values, schema);
     }
 
-    String[] row(String line) {
-        return opts.getDelimiter().split(line);
+    List<String> row(String line) {
+
+        //TODO: this routine isn't very robust, it won't handle escaped quotes
+
+        List<String> row = new ArrayList<String>();
+
+        String[] chunks = line.split("\"");
+        for (int i = 0; i < chunks.length; i++) {
+            if (i % 2 == 0) {
+                String[] split = opts.getDelimiter().split(chunks[i]);
+                for (int j = 0; j < split.length; j++) {
+                    String str = split[j];
+                    if ((j == 0 || j == str.length()-1) && str.isEmpty()) {
+                        continue;
+                    }
+                    
+                    row.add(str);
+                }
+            }
+            else {
+                row.add(chunks[i]);
+            }
+        }
+
+        return row;
     }
 
     List<Object> parseRow(String line) {

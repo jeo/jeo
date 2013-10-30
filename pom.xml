@@ -242,6 +242,12 @@
         <module>assembly</module>
       </modules>
     </profile>
+    <profile>
+      <id>ext</id>
+      <modules>
+        <module>ext</module>
+      </modules>
+    </profile>
   </profiles>
 
   <modules>

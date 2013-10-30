@@ -1,0 +1,31 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>org.jeo</groupId>
+    <artifactId>jeo-parent</artifactId>
+    <version>0-SNAPSHOT</version>
+  </parent>
+
+  <groupId>org.jeo</groupId>
+  <artifactId>ext</artifactId>
+  <packaging>pom</packaging>
+  <name>Extra Modules</name>
+
+  <profiles>
+    <profile>
+      <id>android</id>
+      <modules>
+        <module>android</module>
+      </modules>
+    </profile>
+    <profile>
+      <id>java2d</id>
+      <modules>
+        <module>java2d</module>
+      </modules>
+    </profile>
+  </profiles>
+
+</project>

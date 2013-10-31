@@ -66,6 +66,7 @@ public class PostGISTest {
             "DELETE FROM states WHERE \"STATE_NAME\" = 'JEOLAND' OR \"STATE_NAME\" is null");
         st.executeUpdate("UPDATE states set \"STATE_ABBR\" = upper(\"STATE_ABBR\")");
         st.executeUpdate("DROP TABLE IF EXISTS widgets");
+        st.executeUpdate("DELETE FROM geometry_columns WHERE f_table_name = 'widgets'");
         st.close();
         cx.close();
         ds.close();

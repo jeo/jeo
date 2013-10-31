@@ -263,7 +263,7 @@ public class FeatureHandler extends Handler {
                 switch(Geom.Type.from(schema.geometry().getType())) {
                 case POINT:
                 case MULTIPOINT:
-                    style = Style.build().select("*").set(CartoCSS.MARKER_FILE, "black").style();
+                    style = Style.build().select("*").set(CartoCSS.MARKER_FILL, "gray").style();
                     break;
                 case POLYGON:
                 case MULTIPOLYGON:
@@ -271,7 +271,7 @@ public class FeatureHandler extends Handler {
                         .set(CartoCSS.POLYGON_FILL, "gray").set(CartoCSS.POLYGON_OPACITY, 0.75).style();
                     break;
                 default:
-                    style = Style.build().select("*").set(CartoCSS.LINE_COLOR, "black").style();
+                    style = Style.build().select("*").set(CartoCSS.LINE_COLOR, "gray").style();
                 }
             }
         }

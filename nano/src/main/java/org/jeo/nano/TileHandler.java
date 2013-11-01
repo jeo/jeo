@@ -10,7 +10,6 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.NoSuchElementException;
 import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -24,7 +23,6 @@ import org.jeo.data.TilePyramid;
 import org.jeo.data.TilePyramid.Origin;
 import org.jeo.data.Workspace;
 import org.jeo.geom.Envelopes;
-import org.jeo.geopkg.TileCursor;
 import org.jeo.nano.NanoHTTPD.Response;
 import org.jeo.util.Pair;
 

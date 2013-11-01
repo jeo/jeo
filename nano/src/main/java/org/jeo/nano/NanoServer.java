@@ -91,11 +91,9 @@ public class NanoServer extends NanoHTTPD {
         }
 
         // handle a "ping"
-        if (uri.equals("/")) {
+        if (uri.equals("/ping")) {
             return new Response(NanoHTTPD.HTTP_OK, NanoHTTPD.MIME_PLAINTEXT, "");
         }
-
-        LOG.debug(method + " " + uri + "?" + parms);
 
         Request request = new Request(uri, method, header, parms, files);
          
@@ -105,6 +103,7 @@ public class NanoServer extends NanoHTTPD {
             return new Response(HTTP_NOTFOUND, MIME_PLAINTEXT, "No handler for request");
         }
 
+        LOG.debug(method + " " + uri + "?" + parms);
         try {
             return h.handle(request, this);
         }

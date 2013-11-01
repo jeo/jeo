@@ -10,16 +10,21 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.jeo.data.Cursor;
 import org.jeo.data.Dataset;
 import org.jeo.data.Tile;
 import org.jeo.data.TileDataset;
+import org.jeo.data.TileGrid;
+import org.jeo.data.TilePyramid;
 import org.jeo.data.TilePyramid.Origin;
 import org.jeo.data.Workspace;
 import org.jeo.geom.Envelopes;
+import org.jeo.geopkg.TileCursor;
 import org.jeo.nano.NanoHTTPD.Response;
 import org.jeo.util.Pair;
 
@@ -28,7 +33,7 @@ public class TileHandler extends Handler {
     /* /tiles/<workspace>/<layer>/<z>/<x>/<y>.<format.  */
     static final Pattern TILES_URI_RE = Pattern.compile( 
         //"/tiles/([^/]+)/([^/]+)/(\\d+)/+(\\d+)/+(\\d+).(\\w+)", Pattern.CASE_INSENSITIVE);
-        "/tiles/((?:[^/]+/)?[^/]+)/(\\d+)/+(\\d+)/+(\\d+).(\\w+)", Pattern.CASE_INSENSITIVE);
+        "/tiles/((?:[\\w]+/)?[\\w]+)(?:/(\\d+)/+(\\d+)/+(\\d+))?.(\\w+)", Pattern.CASE_INSENSITIVE);
     
     @Override
     public boolean canHandle(Request request, NanoServer server) {
@@ -44,7 +49,11 @@ public class TileHandler extends Handler {
             try {
                 //get the tile index
                 Tile t = parseTileIndex(request);
-    
+                if (t == null) {
+                    // no tile index specified pick the first one
+                    t = getFirstTile(layer);
+                }
+
                 //check for tile origin and map if necessary
                 Properties q = request.getParms();
                 if (q != null && q.containsKey("origin")) {
@@ -85,6 +94,23 @@ public class TileHandler extends Handler {
         }
     }
     
+    Tile getFirstTile(TileDataset layer) throws IOException {
+        TilePyramid pyr = layer.pyramid();
+        TileGrid grid = pyr.getGrids().get(0);
+
+        Cursor<Tile> c = layer.read(grid.getZ(), grid.getZ(), -1, -1, -1, -1);
+        try {
+            if (c.hasNext()) {
+                return c.next();
+            }
+        }
+        finally {
+            c.close();
+        }
+
+        throw new HttpException(HTTP_NOTFOUND, "unable to locate first tile");
+    }
+
     public Response getAsHTML(Tile tile, TileDataset layer, Request request, NanoServer server) 
         throws IOException {
 
@@ -134,21 +160,19 @@ public class TileHandler extends Handler {
 
     String parseFormat(Request request) throws IOException {
         Matcher m = (Matcher) request.getContext().get(Matcher.class);
-
-        if (m.groupCount() > 1 && m.group(2) != null) {
-            return m.group(5);
-        }
-
-        return null;
+        return m.group(5);
     }
 
     Tile parseTileIndex(Request request) throws IOException {
         Matcher m = (Matcher) request.getContext().get(Matcher.class);
 
-        int z = Integer.parseInt(m.group(2));
-        int x = Integer.parseInt(m.group(3));
-        int y = Integer.parseInt(m.group(4));
-
-        return new Tile(z, x, y);
+        if (m.group(2) != null) {
+            int z = Integer.parseInt(m.group(2));
+            int x = Integer.parseInt(m.group(3));
+            int y = Integer.parseInt(m.group(4));
+            return new Tile(z, x, y);   
+        }
+        
+        return null;
     }
 }

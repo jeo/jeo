@@ -4,12 +4,11 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.util.List;
-import java.util.Map;
 
 import org.jeo.cli.JeoCLI;
-import org.jeo.data.DataRef;
 import org.jeo.data.Dataset;
-import org.jeo.data.DirectoryRegistry;
+import org.jeo.data.DatasetHandle;
+import org.jeo.data.DirectoryRepository;
 import org.jeo.data.Drivers;
 import org.jeo.data.Query;
 import org.jeo.data.TileDataset;
@@ -17,6 +16,7 @@ import org.jeo.data.TileGrid;
 import org.jeo.data.TilePyramid;
 import org.jeo.data.VectorDataset;
 import org.jeo.data.Workspace;
+import org.jeo.data.WorkspaceHandle;
 import org.jeo.feature.Field;
 import org.jeo.geojson.GeoJSONWriter;
 import org.jeo.geom.Envelopes;
@@ -57,10 +57,10 @@ public class InfoCmd extends JeoCmd {
                 catch(Exception e2) {}
 
                 if (f != null && f.exists() && f.isDirectory()) {
-                    DirectoryRegistry reg = new DirectoryRegistry(f);
+                    DirectoryRepository reg = new DirectoryRepository(f);
                     try {
-                        for (DataRef<?> it : reg.list()) {
-                            print(reg.get(it.getName()), w, cli);
+                        for (WorkspaceHandle h : reg.list()) {
+                            print(reg.get(h.getName()), w, cli);
                         }
                     }
                     finally {
@@ -170,8 +170,8 @@ public class InfoCmd extends JeoCmd {
             w.key("driver").value(workspace.getDriver().getName());
             w.key("datasets").array();
     
-            for (DataRef<? extends Dataset> ref : workspace.list()) {
-                w.value(ref.getName());
+            for (DatasetHandle h : workspace.list()) {
+                w.value(h.getName());
             }
     
             w.endArray();

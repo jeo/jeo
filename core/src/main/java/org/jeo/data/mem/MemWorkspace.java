@@ -7,15 +7,26 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.jeo.data.DataRef;
 import org.jeo.data.Dataset;
+import org.jeo.data.DatasetHandle;
 import org.jeo.data.Workspace;
 import org.jeo.feature.Schema;
 import org.jeo.util.Key;
 
 public class MemWorkspace implements Workspace {
 
-    Map<String,Dataset> data = new LinkedHashMap<String, Dataset>();
+    Map<String,Dataset> map;
+
+    public MemWorkspace() {
+        this(Collections.EMPTY_MAP);
+    }
+
+    public MemWorkspace(Dataset dataset) {
+        this(Collections.singletonMap(dataset.getName(), dataset));
+    }
+    public MemWorkspace(Map<String,Dataset> map) {
+        this.map = new LinkedHashMap<String, Dataset>(map);
+    }
 
     @Override
     public Memory getDriver() {
@@ -28,32 +39,32 @@ public class MemWorkspace implements Workspace {
     }
 
     @Override
-    public Iterable<DataRef<Dataset>> list() throws IOException {
-        List<DataRef<Dataset>> list = new ArrayList<DataRef<Dataset>>();
-        for (String key : data.keySet()) {
-            list.add(new DataRef<Dataset>(key, Dataset.class, getDriver(), this));
+    public Iterable<DatasetHandle> list() throws IOException {
+        List<DatasetHandle> list = new ArrayList<DatasetHandle>();
+        for (String key : map.keySet()) {
+            list.add(new DatasetHandle(key, Dataset.class, getDriver(), this));
         }
         return list;
     }
 
     @Override
     public Dataset get(String layer) throws IOException {
-        return data.get(layer);
+        return map.get(layer);
     }
 
     public void put(String layer, Dataset dataset) {
-        data.put(layer, dataset);
+        map.put(layer, dataset);
     }
 
     @Override
     public MemVector create(Schema schema) throws IOException, UnsupportedOperationException {
         MemVector v = new MemVector(schema);
-        data.put(schema.getName(), v);
+        map.put(schema.getName(), v);
         return v;
     }
 
     @Override
     public void close() {
-        data.clear();
+        map.clear();
     }
 }

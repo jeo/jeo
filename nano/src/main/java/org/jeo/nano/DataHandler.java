@@ -10,17 +10,18 @@ import java.io.StringWriter;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.jeo.data.DataRef;
 import org.jeo.data.Dataset;
+import org.jeo.data.DatasetHandle;
 import org.jeo.data.Disposable;
 import org.jeo.data.Driver;
 import org.jeo.data.Query;
-import org.jeo.data.Registry;
+import org.jeo.data.DataRepository;
 import org.jeo.data.TileDataset;
 import org.jeo.data.TileGrid;
 import org.jeo.data.TilePyramid;
 import org.jeo.data.VectorDataset;
 import org.jeo.data.Workspace;
+import org.jeo.data.WorkspaceHandle;
 import org.jeo.feature.Field;
 import org.jeo.geojson.GeoJSONWriter;
 import org.jeo.geom.Envelopes;
@@ -43,7 +44,7 @@ public class DataHandler extends Handler {
 
     @Override
     public Response handle(Request request, NanoServer server) throws Exception {
-        Registry reg = server.getRegistry();
+        DataRepository reg = server.getRegistry();
 
         Pair<Object,Object> p = findObject(request, reg);
 
@@ -80,10 +81,10 @@ public class DataHandler extends Handler {
         return new Response(HTTP_OK, MIME_JSON, out.toString());
     }
 
-    void handleAll(Registry reg, GeoJSONWriter w) throws IOException {
+    void handleAll(DataRepository reg, GeoJSONWriter w) throws IOException {
         w.object();
         
-        for (DataRef<?> item : reg.list()) {
+        for (WorkspaceHandle item : reg.list()) {
             w.key(item.getName()).object();
 
             w.key("type");
@@ -117,7 +118,7 @@ public class DataHandler extends Handler {
         w.key("driver").value(ws.getDriver().getName());
         w.key("datasets").array();
 
-        for (DataRef<? extends Dataset> ref : ws.list()) {
+        for (DatasetHandle ref : ws.list()) {
             w.value(ref.getName());
         }
 
@@ -211,7 +212,7 @@ public class DataHandler extends Handler {
           .endObject();
     }
 
-    Pair<Object,Object> findObject(Request request, Registry reg) throws IOException {
+    Pair<Object,Object> findObject(Request request, DataRepository reg) throws IOException {
         Matcher m = (Matcher) request.getContext().get(Matcher.class);
         String first = m.group(1);
         if (first != null) {
@@ -235,7 +236,7 @@ public class DataHandler extends Handler {
                 }
             }
             else {
-                return Pair.of(reg.get(first), null);
+                return Pair.of((Object)reg.get(first), null);
             }
         }
         else {

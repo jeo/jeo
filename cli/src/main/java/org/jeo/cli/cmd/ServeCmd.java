@@ -7,12 +7,10 @@ import java.util.List;
 import jline.console.ConsoleReader;
 
 import org.jeo.cli.JeoCLI;
-import org.jeo.data.DirectoryRegistry;
-import org.jeo.data.JSONRegistry;
-import org.jeo.data.Registry;
-import org.jeo.data.SimpleRegistry;
+import org.jeo.data.DirectoryRepository;
+import org.jeo.data.DataRepository;
+import org.jeo.data.JSONRepository;
 import org.jeo.nano.NanoServer;
-import org.jeo.util.Util;
 
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.Parameters;
@@ -37,18 +35,18 @@ public class ServeCmd extends JeoCmd {
         console.flush();
 
         File f = new File(reg.get(0));
-        Registry registry = registry(f, cli);
+        DataRepository registry = registry(f, cli);
         
         NanoServer server = new NanoServer(port, null, nThreads, registry, null);
         server.join();
 
     }
 
-    Registry registry(File f, JeoCLI cli) throws IOException {
+    DataRepository registry(File f, JeoCLI cli) throws IOException {
         if (f.isDirectory()) {
-            return new DirectoryRegistry(f);
+            return new DirectoryRepository(f);
         }
 
-        return new JSONRegistry(f);
+        return new JSONRepository(f);
     }
 }

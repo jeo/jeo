@@ -10,7 +10,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.jeo.data.Dataset;
-import org.jeo.data.Registry;
+import org.jeo.data.DataRepository;
 import org.jeo.data.Workspace;
 import org.jeo.nano.NanoHTTPD.Response;
 import org.jeo.util.Pair;
@@ -34,7 +34,7 @@ public abstract class Handler {
         return false;
     }
 
-    protected Workspace findWorkspace(String key, Registry reg) throws IOException {
+    protected Workspace findWorkspace(String key, DataRepository reg) throws IOException {
         Object obj = reg.get(key);
         if (obj == null || !(obj instanceof Workspace)) {
             //no such layer
@@ -43,7 +43,7 @@ public abstract class Handler {
         return (Workspace) obj;
     }
 
-    protected Pair<Dataset, Workspace> findDataset(String key, Registry reg) throws IOException {
+    protected Pair<Dataset, Workspace> findDataset(String key, DataRepository reg) throws IOException {
         Workspace ws = null;
         Object obj = null;
 

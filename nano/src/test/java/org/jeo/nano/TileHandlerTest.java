@@ -4,7 +4,7 @@ import static org.easymock.classextension.EasyMock.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import org.jeo.data.Registry;
+import org.jeo.data.DataRepository;
 import org.jeo.data.Tile;
 import org.jeo.data.TileDataset;
 import org.jeo.data.Workspace;
@@ -27,7 +27,7 @@ public class TileHandlerTest extends HandlerTestSupport {
         expectLastCall().once();
         replay(ws);
 
-        Registry reg = createMock(Registry.class);
+        DataRepository reg = createMock(DataRepository.class);
         expect(reg.get("foo")).andReturn(ws).once();
         replay(reg);
 

@@ -10,7 +10,7 @@ import java.io.IOException;
 public interface DataRepository extends Disposable {
 
     /**
-     * The names of all items of the registry.
+     * Collection of handles for workspaces in the repository.
      */
     Iterable<WorkspaceHandle> list() throws IOException;
 

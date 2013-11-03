@@ -6,12 +6,16 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import org.jeo.data.Driver;
 import org.jeo.data.VectorDriver;
 import org.jeo.feature.Schema;
 import org.jeo.util.Key;
 import org.jeo.util.Messages;
 
+/**
+ * Driver for in memory feature objects.
+ * 
+ * @author Justin Deoliveira, Boundless
+ */
 public class Memory implements VectorDriver<MemWorkspace> {
 
     public static MemWorkspace open() {

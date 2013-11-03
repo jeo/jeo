@@ -11,7 +11,7 @@ import org.jeo.util.Messages;
  * Format driver.
  * <p>
  * The job of a driver is to create a "connection" to data in a particular format. A driver can 
- * return either one of a dataset, or a workspace containing many datasets. The data 
+ * return either one of a dataset, or a workspace containing many datasets. 
  * </p>
  * <p>
  * Driver implementations must adhere to the following guidelines:

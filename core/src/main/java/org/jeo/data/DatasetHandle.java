@@ -6,6 +6,11 @@ import org.osgeo.proj4j.CoordinateReferenceSystem;
 
 import com.vividsolutions.jts.geom.Envelope;
 
+/**
+ * Handle for a {@link Dataset} object.
+ * 
+ * @author Justin Deoliveira, Boundless
+ */
 public class DatasetHandle extends Handle<Dataset> {
 
     Workspace parent;

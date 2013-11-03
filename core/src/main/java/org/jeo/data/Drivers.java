@@ -15,6 +15,13 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Driver utility class.
+ * <p>
+ * This class is used to abstract away driver specifics when interacting with data. For example it
+ * can be used to create a data object from a file.
+ * <pre><code>
+ *   Driver.open(new File("states.json"));
+ * </code></pre>
+ * </p>
  * 
  * @author Justin Deoliveira, OpenGeo
  */

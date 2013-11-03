@@ -11,8 +11,16 @@ import java.util.Properties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Build information about the library.
+ * 
+ * @author Justin Deoliveira, Boundless
+ */
 public class JEO {
 
+    /**
+     * logger
+     */
     public static Logger LOG = LoggerFactory.getLogger(JEO.class);
 
     /**

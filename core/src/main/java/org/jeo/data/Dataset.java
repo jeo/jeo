@@ -10,7 +10,13 @@ import com.vividsolutions.jts.geom.Envelope;
 
 /**
  * A geospatial dataset.
- * 
+ * <p>
+ * Base interface for dataset objects that contains the following properties:
+ * <ul>
+ *  <li>{@link #bounds()} - The spatial extent of data in the dataset
+ *  <li>{@link #crs()} - The projection / coordinate reference system of the data
+ * </ul>
+ * </p>
  * @author Justin Deoliveira, OpenGeo
  *
  * @see VectorDataset

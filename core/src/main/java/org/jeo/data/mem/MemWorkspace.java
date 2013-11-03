@@ -13,6 +13,13 @@ import org.jeo.data.Workspace;
 import org.jeo.feature.Schema;
 import org.jeo.util.Key;
 
+/**
+ * A repository that stores dataset objects in a {@link Map} in memory.
+ * <p>
+ * The {@link #put(String, Dataset)} method is used to register datasets.
+ * </p>
+ * @author Justin Deoliveira, OpenGeo
+ */
 public class MemWorkspace implements Workspace {
 
     Map<String,Dataset> map;

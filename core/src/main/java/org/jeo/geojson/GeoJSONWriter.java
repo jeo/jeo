@@ -26,7 +26,18 @@ import com.vividsolutions.jts.geom.impl.CoordinateArraySequence;
 
 /**
  * Writes out GeoJSON objects as defined by {@linkplain http://www.geojson.org/geojson-spec.html}.
- *  
+ * <p>
+ * Example:
+ * <pre><code>
+ * Writer w = ...;
+ * Point p = ...;
+ * 
+ * GeoJSONWriter writer = new GeoJSONWriter(w);
+ * writer.object()
+ * writer.key("location").point(p);
+ * writer.endObject();
+ * </code></pre>
+ * </p>
  * @author Justin Deoliveira, OpenGeo
  */
 public class GeoJSONWriter extends JSONEncoder {

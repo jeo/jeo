@@ -1,5 +1,10 @@
 package org.jeo.filter;
 
+/**
+ * Visitor for filter classes.
+ * 
+ * @author Justin Deoliveira, Boundless
+ */
 public class FilterVisitor {
 
     public Object visit(Literal literal, Object obj) {

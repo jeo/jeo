@@ -2,7 +2,6 @@ package org.jeo.data.mem;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -14,7 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * A basic registry that stores workspace objects in a {@link HashMap}.
+ * A repository that stores workspace objects in a {@link Map} in memory.
  * <p>
  * The {@link #put(String, Workspace)} method is used to register workspaces.
  * </p>

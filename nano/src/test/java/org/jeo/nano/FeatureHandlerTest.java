@@ -71,8 +71,8 @@ public class FeatureHandlerTest extends HandlerTestSupport {
 
         Cursor<Feature> c = createMock(Cursor.class);
         expect(c.next()).andReturn(f).once();
-        c.write();
-        expectLastCall().once();
+        expect(c.write()).andReturn(c).once();
+
         c.close();
         expectLastCall().once();
         replay(c);

@@ -97,12 +97,13 @@ public abstract class Cursor<T> implements Closeable, Iterable<T> {
      * {@link IllegalStateException} in {@link Mode#READ} mode. 
      * </p>
      */
-    public void write() throws IOException {
+    public Cursor<T> write() throws IOException {
         if (mode == Mode.READ) {
             throw new IllegalStateException("Cursor is read only");
         }
 
         doWrite();
+        return this;
     }
 
     protected void doWrite() throws IOException {
@@ -116,12 +117,13 @@ public abstract class Cursor<T> implements Closeable, Iterable<T> {
      * in other modes. 
      * </p>
      */
-    public void remove() throws IOException {
+    public Cursor<T> remove() throws IOException {
         if (mode != Mode.UPDATE) {
             throw new IllegalStateException("Cursor not in update mode");
         }
 
         doRemove();
+        return this;
     }
 
     protected void doRemove() throws IOException {

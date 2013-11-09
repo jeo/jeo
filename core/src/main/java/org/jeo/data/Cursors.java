@@ -234,13 +234,13 @@ public class Cursors {
         }
 
         @Override
-        public void write() throws IOException {
-            delegate.write();
+        public Cursor<T> write() throws IOException {
+            return delegate.write();
         }
 
         @Override
-        public void remove() throws IOException {
-            delegate.remove();
+        public Cursor<T> remove() throws IOException {
+            return delegate.remove();
         }
 
         @Override

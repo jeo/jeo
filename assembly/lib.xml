@@ -13,19 +13,6 @@
       <includes>
         <include>*.jar</include>
       </includes>
-      <excludes>
-        <exclude>jeo-*.jar</exclude>
-      </excludes>
-    </fileSet>
-    <fileSet>
-      <outputDirectory>lib</outputDirectory>
-      <directory>assembly/target</directory>
-      <includes>
-        <include>jeo-*.jar</include>
-      </includes>
-      <excludes>
-        <exclude>jeo-assembly-*.jar</exclude>
-      </excludes>
     </fileSet>
   </fileSets>
   <files>

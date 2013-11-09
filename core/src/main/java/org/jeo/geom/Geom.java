@@ -2,6 +2,8 @@ package org.jeo.geom;
 
 import java.util.Iterator;
 
+import org.jeo.geojson.GeoJSONWriter;
+
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryCollection;
@@ -263,5 +265,18 @@ public class Geom {
         public void remove() {
             throw new UnsupportedOperationException();
         }
+    }
+
+    /**
+     * Returns the GeoJSON representation of the Geometry object.
+     * 
+     * @param g The geometry.
+     * 
+     * @return The GeoJSON string.
+     * 
+     * @see {@Link GeoJSONWriter}
+     */
+    public String json(Geometry g) {
+        return GeoJSONWriter.toString(g);
     }
 }

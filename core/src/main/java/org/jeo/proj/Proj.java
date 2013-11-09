@@ -165,6 +165,28 @@ public class Proj {
     /**
      * Reprojects a geometry object between two coordinate reference systems.
      * <p>
+     * This method is convenience for:
+     * <pre><code>
+     *   reproject(g, crs(from), crs(to));
+     * </code></pre>
+     * </p>
+     * 
+     * @param g The geometry to reproject.
+     * @param from The source crs, as defined by {@link #crs(String)}
+     * @param to The target crs, as defined by {@link #crs(String)}
+     * 
+     * @return The reprojected geometry.
+     * 
+     * @see {@link #crs(String)}
+     * @see {@link #reproject(Geometry, CoordinateReferenceSystem, CoordinateReferenceSystem)}
+     */
+    public static <T extends Geometry> T reproject(T g, String from, String to) {
+        return reproject(g, crs(from), crs(to));
+    }
+
+    /**
+     * Reprojects a geometry object between two coordinate reference systems.
+     * <p>
      * In the event a transformation between the two crs objects can not be found this method throws
      * {@link IllegalArgumentException}.
      * 
@@ -192,6 +214,29 @@ public class Proj {
 
         g.apply((CoordinateSequenceFilter) new CoordinateTransformer(tx));
         return g;
+    }
+
+    /**
+     * Reprojects an envelope between two coordinate reference systems.
+     * <p>
+     * This method is convenience for:
+     * <pre><code>
+     *   reproject(e, crs(from), crs(to));
+     * </code></pre>
+     * </p>
+     * 
+     * @param e The envelope to reproject.
+     * @param from The source crs, as defined by {@link #crs(String)}
+     * @param to The target crs, as defined by {@link #crs(String)}
+     * 
+     * @return The reprojected envelope.
+     * 
+     * @see {@link #crs(String)}
+     * @see {@link #reproject(Envelope, CoordinateReferenceSystem, CoordinateReferenceSystem)}
+     * 
+     */
+    public static Envelope reproject(Envelope e, String from, String to) {
+        return reproject(e, crs(from), crs(to));
     }
 
     /**

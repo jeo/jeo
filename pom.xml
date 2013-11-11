@@ -187,6 +187,14 @@
               org.jeo.data.mem:org.jeo.csv:org.jeo.postgis:org.jeo.mongo:org.jeo.geojson:org.jeo.geogit
              </packages>
           </group>
+          <group>
+            <title>Styling &amp; Rendering</title>
+            <packages>org.jeo.map:org.jeo.carto</packages>
+          </group>
+          <group>
+            <title>Command Line Tools </title>
+            <packages>org.jeo.cli*</packages>
+          </group>
         </groups>
       </configuration>
     </plugin>

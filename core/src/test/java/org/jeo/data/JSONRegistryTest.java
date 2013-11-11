@@ -7,8 +7,8 @@ import java.io.IOException;
 
 import org.jeo.data.mem.MemWorkspace;
 import org.jeo.data.mem.Memory;
-import org.jeo.geojson.simple.JSONObject;
-import org.jeo.geojson.simple.JSONValue;
+import org.jeo.json.JSONObject;
+import org.jeo.json.JSONValue;
 import org.junit.Before;
 import org.junit.Test;
 

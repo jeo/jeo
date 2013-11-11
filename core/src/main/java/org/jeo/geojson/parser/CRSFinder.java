@@ -2,7 +2,7 @@ package org.jeo.geojson.parser;
 
 import java.io.IOException;
 
-import org.jeo.geojson.simple.parser.ParseException;
+import org.jeo.json.parser.ParseException;
 import org.osgeo.proj4j.CoordinateReferenceSystem;
 
 public class CRSFinder extends BaseHandler {

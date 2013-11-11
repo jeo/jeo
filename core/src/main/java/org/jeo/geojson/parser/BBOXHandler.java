@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.jeo.geojson.simple.parser.ParseException;
+import org.jeo.json.parser.ParseException;
 
 import com.vividsolutions.jts.geom.Envelope;
 

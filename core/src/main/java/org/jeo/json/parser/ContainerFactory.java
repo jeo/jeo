@@ -1,4 +1,4 @@
-package org.jeo.geojson.simple.parser;
+package org.jeo.json.parser;
 
 import java.util.List;
 import java.util.Map;

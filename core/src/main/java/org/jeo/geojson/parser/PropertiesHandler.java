@@ -6,7 +6,7 @@ import java.util.Deque;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import org.jeo.geojson.simple.parser.ParseException;
+import org.jeo.json.parser.ParseException;
 
 /**
  * TODO: handle nested objects and arrays

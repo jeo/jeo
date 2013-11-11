@@ -2,7 +2,7 @@
  * $Id: JSONParser.java,v 1.1 2006/04/15 14:10:48 platform Exp $
  * Created on 2006-4-15
  */
-package org.jeo.geojson.simple.parser;
+package org.jeo.json.parser;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -11,8 +11,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import org.jeo.geojson.simple.JSONArray;
-import org.jeo.geojson.simple.JSONObject;
+import org.jeo.json.JSONArray;
+import org.jeo.json.JSONObject;
 
 
 /**

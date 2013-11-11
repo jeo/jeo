@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.jeo.feature.Feature;
-import org.jeo.geojson.simple.parser.ParseException;
+import org.jeo.json.parser.ParseException;
 import org.osgeo.proj4j.CoordinateReferenceSystem;
 
 import com.vividsolutions.jts.geom.Envelope;

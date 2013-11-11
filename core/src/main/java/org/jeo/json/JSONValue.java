@@ -2,7 +2,7 @@
  * $Id: JSONValue.java,v 1.1 2006/04/15 14:37:04 platform Exp $
  * Created on 2006-4-15
  */
-package org.jeo.geojson.simple;
+package org.jeo.json;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -13,8 +13,8 @@ import java.util.Collection;
 // import java.util.List;
 import java.util.Map;
 
-import org.jeo.geojson.simple.parser.JSONParser;
-import org.jeo.geojson.simple.parser.ParseException;
+import org.jeo.json.parser.JSONParser;
+import org.jeo.json.parser.ParseException;
 
 
 /**

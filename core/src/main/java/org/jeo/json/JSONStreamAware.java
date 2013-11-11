@@ -1,4 +1,4 @@
-package org.jeo.geojson.simple;
+package org.jeo.json;
 
 import java.io.IOException;
 import java.io.Writer;

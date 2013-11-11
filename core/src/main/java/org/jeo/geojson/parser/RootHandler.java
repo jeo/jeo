@@ -2,8 +2,8 @@ package org.jeo.geojson.parser;
 
 import java.io.IOException;
 
-import org.jeo.geojson.simple.parser.ContentHandler;
-import org.jeo.geojson.simple.parser.ParseException;
+import org.jeo.json.parser.ContentHandler;
+import org.jeo.json.parser.ParseException;
 
 public class RootHandler implements ContentHandler {
 

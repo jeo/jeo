@@ -1,4 +1,4 @@
-package org.jeo.geojson.simple.parser;
+package org.jeo.json.parser;
 
 /**
  * ParseException explains why and where the error occurs in source JSON text.

@@ -3,8 +3,8 @@ package org.jeo.geojson.parser;
 import java.io.IOException;
 import java.util.List;
 
-import org.jeo.geojson.simple.parser.ParseException;
 import org.jeo.geom.Geom;
+import org.jeo.json.parser.ParseException;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.CoordinateSequence;

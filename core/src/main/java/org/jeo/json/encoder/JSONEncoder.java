@@ -1,10 +1,10 @@
-package org.jeo.geojson.simple.encoder;
+package org.jeo.json.encoder;
 
 import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayDeque;
 
-import org.jeo.geojson.simple.JSONValue;
+import org.jeo.json.JSONValue;
 
 public class JSONEncoder {
 

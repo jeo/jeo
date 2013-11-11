@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.Map;
 
-import org.jeo.geojson.simple.parser.ParseException;
+import org.jeo.json.parser.ParseException;
 import org.jeo.proj.Proj;
 
 public class CRSHandler extends BaseHandler {

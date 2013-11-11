@@ -5,10 +5,10 @@ import static org.junit.Assert.*;
 import java.io.IOException;
 import java.io.StringWriter;
 
-import org.jeo.geojson.simple.JSONArray;
-import org.jeo.geojson.simple.JSONObject;
-import org.jeo.geojson.simple.JSONValue;
 import org.jeo.geom.Geom;
+import org.jeo.json.JSONArray;
+import org.jeo.json.JSONObject;
+import org.jeo.json.JSONValue;
 import org.junit.Before;
 import org.junit.Test;
 

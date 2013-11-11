@@ -13,8 +13,8 @@ import org.jeo.geojson.parser.FeatureHandler;
 import org.jeo.geojson.parser.GeometryHandler;
 import org.jeo.geojson.parser.RootHandler;
 import org.jeo.geojson.parser.UnkownHandler;
-import org.jeo.geojson.simple.parser.JSONParser;
-import org.jeo.geojson.simple.parser.ParseException;
+import org.jeo.json.parser.JSONParser;
+import org.jeo.json.parser.ParseException;
 import org.jeo.util.Convert;
 
 import com.vividsolutions.jts.geom.Geometry;

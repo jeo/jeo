@@ -9,8 +9,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.jeo.geojson.simple.JSONObject;
-import org.jeo.geojson.simple.JSONValue;
+import org.jeo.json.JSONObject;
+import org.jeo.json.JSONValue;
 import org.jeo.util.Convert;
 import org.jeo.util.Optional;
 import org.slf4j.Logger;

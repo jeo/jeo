@@ -7,8 +7,8 @@ import org.jeo.data.Cursor;
 import org.jeo.feature.Feature;
 import org.jeo.geojson.parser.FeatureCollectionHandler;
 import org.jeo.geojson.parser.RootHandler;
-import org.jeo.geojson.simple.parser.JSONParser;
-import org.jeo.geojson.simple.parser.ParseException;
+import org.jeo.json.parser.JSONParser;
+import org.jeo.json.parser.ParseException;
 
 public class GeoJSONCursor extends Cursor<Feature> {
 

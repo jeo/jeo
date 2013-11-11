@@ -1,4 +1,4 @@
-package org.jeo.geojson.simple;
+package org.jeo.json;
 
 /**
  * Beans that support customized output of JSON text shall implement this interface.  

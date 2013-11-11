@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.jeo.geojson.simple.parser.ParseException;
+import org.jeo.json.parser.ParseException;
 
 public class UnkownHandler extends BaseHandler {
 

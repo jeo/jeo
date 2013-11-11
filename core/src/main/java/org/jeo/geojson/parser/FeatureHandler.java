@@ -6,7 +6,7 @@ import java.util.Map;
 
 import org.jeo.feature.BasicFeature;
 import org.jeo.feature.Feature;
-import org.jeo.geojson.simple.parser.ParseException;
+import org.jeo.json.parser.ParseException;
 import org.osgeo.proj4j.CoordinateReferenceSystem;
 
 import com.vividsolutions.jts.geom.Geometry;

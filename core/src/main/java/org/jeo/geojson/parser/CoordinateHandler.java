@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.Deque;
 import java.util.List;
 
-import org.jeo.geojson.simple.parser.ParseException;
+import org.jeo.json.parser.ParseException;
 
 public class CoordinateHandler extends BaseHandler {
 

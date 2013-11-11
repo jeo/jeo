@@ -8,22 +8,15 @@
   </formats>
   <fileSets>
     <fileSet>
-      <outputDirectory>/doc</outputDirectory>
-      <directory>doc/build/html</directory>
-      <includes>
-        <include>**/*</include>
-      </includes>
-    </fileSet>
-    <fileSet>
-      <outputDirectory>/doc/api</outputDirectory>
+      <outputDirectory>/api</outputDirectory>
       <directory>target/site/apidocs</directory>
       <includes>
         <include>**/*</include>
       </includes>
     </fileSet>
     <fileSet>
-      <outputDirectory>/doc/api</outputDirectory>
-      <directory>doc/source/_static</directory>
+      <outputDirectory>/api</outputDirectory>
+      <directory>assembly/doc/</directory>
       <includes>
         <include>*.css</include>
       </includes>

@@ -70,6 +70,13 @@ public class MemWorkspace implements Workspace {
         return v;
     }
 
+    /**
+     * Clears the workspace.
+     */
+    public void clear() {
+        map.clear();
+    }
+
     @Override
     public void close() {
         map.clear();

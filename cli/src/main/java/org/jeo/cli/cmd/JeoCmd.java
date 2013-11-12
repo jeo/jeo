@@ -6,6 +6,9 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayDeque;
 import java.util.Deque;
+import java.util.logging.ConsoleHandler;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.jeo.cli.JeoCLI;
 import org.jeo.data.Disposable;
@@ -30,6 +33,9 @@ public abstract class JeoCmd {
             return;
         }
 
+        if (debug) {
+            setUpDebugLogging();
+        }
         try {
             doCommand(cli);
         }
@@ -55,6 +61,18 @@ public abstract class JeoCmd {
         cli.getConsole().flush();
     }
     
+    void setUpDebugLogging() {
+        // check for jdk logging property, if present don't do anything
+        if (System.getProperty("java.util.logging.config.file") == null) {
+            Logger log = Logger.getLogger("org.jeo");
+            log.setLevel(Level.ALL);
+
+            ConsoleHandler handler = new ConsoleHandler();
+            handler.setLevel(Level.ALL);
+            log.addHandler(handler);
+        }
+    }
+
     protected abstract void doCommand(JeoCLI cli) throws Exception;
 
     public void usage(JeoCLI cli) {

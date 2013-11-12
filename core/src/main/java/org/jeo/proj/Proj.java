@@ -204,16 +204,44 @@ public class Proj {
     public static <T extends Geometry> T reproject(T g, CoordinateReferenceSystem from, 
         CoordinateReferenceSystem to) {
 
-        return reproject(g, transform(from, to));
+        return transform(g, transform(from, to));
     }
-    
-    public static <T extends Geometry> T reproject(T g, CoordinateTransform tx) {
+
+    /**
+     * Transforms a geometry object using an explicit transformation.
+     * 
+     * @param g The geometry.
+     * @param tx The transform to to apply.
+     * 
+     * @return The transformed geometry.
+     */
+    public static <T extends Geometry> T transform(T g, CoordinateTransform tx) {
+        return transform(g, tx, false);
+    }
+
+    /**
+     * Transforms a geometry object using an explicit transformation with the option to do an 
+     * in place transformation.
+     * <p>
+     * When <tt>inPlace</tt> is set to true the geometry coordinates will be modified directly. When
+     * set to false a clone of the geometry is made and modified. Since cloning a geometry can be a
+     * very expensive operation doing an in place transform can be much more efficient but has the
+     * downside of modifying the geometry directly.
+     * </p>
+     * 
+     * @param g The geometry.
+     * @param tx The transform to to apply.
+     * 
+     * @return The transformed geometry.
+     */
+    public static <T extends Geometry> T transform(T g, CoordinateTransform tx, boolean inPlace) {
         if (tx instanceof IdentityCoordinateTransform) {
             return g;
         }
 
-        g.apply((CoordinateSequenceFilter) new CoordinateTransformer(tx));
-        return g;
+        T h = inPlace ? g : (T) g.clone();
+        h.apply((CoordinateSequenceFilter) new CoordinateTransformer(tx));
+        return h;
     }
 
     /**

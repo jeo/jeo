@@ -477,7 +477,7 @@ public class Cursors {
         }
 
         Geometry reproject(Geometry g) {
-            return Proj.reproject(g, transform);
+            return Proj.transform(g, transform);
         }
     }
 

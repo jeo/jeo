@@ -65,6 +65,32 @@ public class Cursors {
     }
 
     /**
+     * Returns the first element of a cursor, returning <code>null</code> if the cursor has no 
+     * more objects.
+     * <p>
+     * This method closed the cursor after attempting to obtain a feature therefore intended to be 
+     * be used only in cases where this method is the only code accessing the cursor.
+     * </p>
+     * 
+     * @param cursor The cursor.
+     * 
+     * @return The first available object, or <code>null</code> if no available.
+     * 
+     */
+    public static <T> T first(Cursor<T> cursor) throws IOException {
+        try {
+            if (cursor.hasNext()) {
+                return cursor.next();
+            }
+
+            return null;
+        }
+        finally {
+            cursor.close();
+        }
+    }
+
+    /**
      * Returns an {@link Iterator} for a cursor object.
      * <p>
      * This method should be typically used by cursor implementors implementing the {@link Iterable} 

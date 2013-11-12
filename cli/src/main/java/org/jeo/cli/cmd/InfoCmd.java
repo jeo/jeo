@@ -35,7 +35,7 @@ public class InfoCmd extends JeoCmd {
 
     @Override
     protected void doCommand(JeoCLI cli) throws Exception {
-        GeoJSONWriter w = new GeoJSONWriter(cli.getConsole().getOutput(), 2);
+        GeoJSONWriter w = cli.newGeoJSONWriter();
 
         for (String data : datas) {
             URI uri = parseDataURI(data);

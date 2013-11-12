@@ -1,5 +1,6 @@
 package org.jeo.cli.cmd;
 
+import java.io.IOException;
 import java.net.URI;
 import java.util.List;
 
@@ -18,10 +19,13 @@ import org.jeo.data.Workspace;
 import org.jeo.feature.Feature;
 import org.jeo.feature.Features;
 import org.jeo.feature.Schema;
+import org.jeo.filter.Filter;
+import org.jeo.geojson.GeoJSONWriter;
 import org.osgeo.proj4j.CoordinateReferenceSystem;
 
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.Parameters;
+import com.vividsolutions.jts.geom.Envelope;
 
 @Parameters(commandNames="convert", commandDescription="Converts between data sets")
 public class ConvertCmd extends JeoCmd {
@@ -29,13 +33,19 @@ public class ConvertCmd extends JeoCmd {
     @Parameter(description="source target", arity = 2, required=true)
     List<String> datas;
 
+    @Parameter(names = {"-b", "--bbox"}, description = "Bounding box (xmin,ymin,xmax,ymax)")
+    Envelope bbox;
+
+    @Parameter(names = {"-f", "--filter"}, description = "Predicate used to constrain results")
+    Filter filter;
+
     @Parameter(names = { "-fc", "--from-crs"}, description="Source CRS override")
     CoordinateReferenceSystem fromCRS;
 
     @Parameter(names = { "-tc", "--to-crs"}, description="Target CRS")
     CoordinateReferenceSystem toCRS;
 
-    @Parameter(names = {"--multify"}, description="Wrap single geometry objects in collection")
+    @Parameter(names = {"-mu", "--multify"}, description="Wrap single geometry objects in collection")
     boolean multify = false;
 
     @Override
@@ -46,62 +56,81 @@ public class ConvertCmd extends JeoCmd {
         }
 
         VectorDataset orig = open((VectorDataset) from);
-
-        URI uri = parseDataURI(datas.get(1));
-
-        VectorDataset dest = null;
-        
-        //first see if dest is a workspace
-        Object to = null;
-        try {
-            to = open((Disposable)Drivers.open(uri));
-        }
-        catch(Exception e) {
-            if (debug) {
-                print(e, cli);
-            }
-        }
-        if (to instanceof Dataset) {
-            throw new IllegalArgumentException("Destination dataset already exists");
-        }
-
         Schema schema = orig.schema();
+
+        // choose a sink, if user specified a destination dataset copy over otherwise just
+        // output as geojson
+        Sink sink = null;
+
+        if (datas.size() > 1) {
+            URI uri = parseDataURI(datas.get(1));
+    
+            VectorDataset dest = null;
+            
+            //first see if dest is a workspace
+            Object to = null;
+            try {
+                to = open((Disposable)Drivers.open(uri));
+            }
+            catch(Exception e) {
+                if (debug) {
+                    print(e, cli);
+                }
+            }
+            if (to instanceof Dataset) {
+                throw new IllegalArgumentException("Destination dataset already exists");
+            }
+
+            if (to == null) {
+                //see if we can create a new dataset directly
+                if (uri.getFragment() != null) {
+                    schema = Schema.build(uri.getFragment()).fields(schema.getFields()).schema();
+                }
+                dest = Drivers.create(schema, uri, VectorDataset.class);
+                if (dest == null) {
+                    throw new IllegalArgumentException("Unable to create dataset: " + uri);
+                }
+            }
+            else if (to instanceof Workspace) {
+                dest = open((Workspace)to).create(schema);
+            }
+            else {
+                throw new IllegalArgumentException("Invalid destination: " + uri);
+            }
+            
+            sink = new ToDataset(dest, orig);
+        }
+        else {
+            sink = new ToGeoJSON();
+        }
+        
         if (multify) {
             schema = Features.multify(schema);
         }
 
-        if (to == null) {
-            //see if we can create a new dataset directly
-            dest = Drivers.create(schema, uri, VectorDataset.class);
-            if (dest == null) {
-                throw new IllegalArgumentException("Unable to create dataset: " + uri);
-            }
+        // create query for source
+        Query q = new Query();
+
+        if (bbox != null) {
+            //TODO: make it clear that bbox is in source data coordinates
+            q.bounds(bbox);
         }
-        else if (to instanceof Workspace) {
-            dest = open((Workspace)to).create(schema);
-        }
-        else {
-            throw new IllegalArgumentException("Invalid destination: " + uri);
+        if (filter != null) {
+            q.filter(filter);
         }
 
-        Cursor<Feature> o = null, d = null;
+        // reprojection
+        if (toCRS != null) {
+            if (fromCRS == null && orig.crs() == null) {
+                throw new IllegalArgumentException(
+                    "Could not determine source crs, must supply it with --src-crs");
+            }
+
+            q.reproject(fromCRS, toCRS);
+        }
+
+        Cursor<Feature> o = null;
         try {
-
-            ConsoleProgress progress = 
-                new ConsoleProgress(cli.getConsole(), (int) orig.count(new Query()));
-
-            // create query for source
-            Query q = new Query();
-
-            // reprojection
-            if (toCRS != null) {
-                if (fromCRS == null && orig.crs() == null) {
-                    throw new IllegalArgumentException(
-                        "Could not determine source crs, must supply it with --src-crs");
-                }
-
-                q.reproject(fromCRS, toCRS);
-            }
             o = orig.cursor(q);
 
             //multification
@@ -109,38 +138,121 @@ public class ConvertCmd extends JeoCmd {
                 o = Cursors.multify(o);
             }
 
-            Transaction tx = null;
-            if (dest instanceof Transactional) {
-                tx = ((Transactional) dest).transaction(null);
-            }
-
-            d = dest.cursor(new Query().append().transaction(tx));
+            sink.start(orig, cli);
 
             try {
                 while(o.hasNext()) {
-                    Feature a = o.next();
-                    Feature b = d.next();
-        
-                    Features.copy(a, b);
-                    d.write();
-    
-                    progress.progress(1);
+                    sink.handle(o.next(), cli);
                 }
     
-                if (tx != null) {
-                    tx.commit();
-                }
+                sink.finish(cli);
             }
             catch(Exception e) {
-                if (tx != null) tx.rollback();
+                sink.error(e, cli);
                 throw e;
             }
         }
         finally {
             if (o != null) o.close();
-            if (d != null) d.close();
+            sink.cleanup(cli);
         }
 
     }
 
+    interface Sink {
+        void start(VectorDataset data, JeoCLI cli) throws IOException;
+
+        void handle(Feature f, JeoCLI cli) throws IOException;
+
+        void error(Exception e, JeoCLI cli) throws IOException;
+
+        void finish(JeoCLI cli) throws IOException;
+
+        void cleanup(JeoCLI cli) throws IOException;
+    }
+    
+    class ToDataset implements Sink {
+
+        VectorDataset to;
+        ConsoleProgress progress;
+        Transaction tx;
+        Cursor<Feature> d;
+
+        ToDataset(VectorDataset to, VectorDataset from) {
+            this.to = to;
+        }
+
+        @Override
+        public void start(VectorDataset data, JeoCLI cli) throws IOException {
+            progress = new ConsoleProgress(cli.getConsole(), (int) data.count(new Query()));
+
+            if (to instanceof Transactional) {
+                tx = ((Transactional) to).transaction(null);
+            }
+
+            d = to.cursor(new Query().append().transaction(tx));
+        }
+
+        @Override
+        public void handle(Feature f, JeoCLI cli) throws IOException {
+            Feature b = d.next();
+            
+            Features.copy(f, b);
+            d.write();
+
+            progress.progress(1);
+        }
+
+        @Override
+        public void error(Exception e, JeoCLI cli) throws IOException {
+            if (tx != null) {
+                tx.rollback();
+            }
+        }
+
+        @Override
+        public void finish(JeoCLI cli) throws IOException {
+            if (tx != null) {
+                tx.commit();
+            }
+        }
+
+        @Override
+        public void cleanup(JeoCLI cli) throws IOException {
+            if (d != null) {
+                d.close();
+                d = null;
+            }
+        }
+    }
+
+    class ToGeoJSON implements Sink {
+
+        GeoJSONWriter out;
+
+        @Override
+        public void start(VectorDataset data, JeoCLI cli) throws IOException {
+            out = cli.newGeoJSONWriter();
+            out.featureCollection();
+        }
+
+        @Override
+        public void handle(Feature f, JeoCLI cli) throws IOException {
+            out.feature(f);
+        }
+
+        @Override
+        public void error(Exception e, JeoCLI cli) throws IOException {
+        }
+
+        @Override
+        public void finish(JeoCLI cli) throws IOException {
+            out.endFeatureCollection();
+        }
+    
+        @Override
+        public void cleanup(JeoCLI cli) throws IOException {
+            out.flush();
+        }
+    }
 }

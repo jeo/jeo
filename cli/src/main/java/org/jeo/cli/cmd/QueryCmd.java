@@ -74,7 +74,7 @@ public class QueryCmd extends JeoCmd {
     }
 
     void query(VectorDataset dataset, JeoCLI cli) throws Exception {
-        GeoJSONWriter w = new GeoJSONWriter(cli.getConsole().getOutput(), 2);
+        GeoJSONWriter w = cli.newGeoJSONWriter();
 
         Query q = new Query();
         if (bbox != null) {
@@ -100,7 +100,7 @@ public class QueryCmd extends JeoCmd {
             throw new IllegalArgumentException("Tile query must specify bbox");
         }
 
-        GeoJSONWriter w = new GeoJSONWriter(cli.getConsole().getOutput(), 2);
+        GeoJSONWriter w = cli.newGeoJSONWriter();
 
         Cursor<Tile> cursor = new TileSetView(dataset).cursor(bbox, 1024, 1024);
         if (count != null) {

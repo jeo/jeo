@@ -16,6 +16,7 @@ import org.jeo.cli.cmd.QueryCmd;
 import org.jeo.cli.cmd.RootCmd;
 import org.jeo.cli.cmd.ServeCmd;
 import org.jeo.cli.conv.JeoCLIConverterFactory;
+import org.jeo.geojson.GeoJSONWriter;
 
 import com.beust.jcommander.JCommander;
 import com.google.common.base.Strings;
@@ -76,7 +77,14 @@ public class JeoCLI {
             }
         });
     }
-    
+
+    /**
+     * Returns a new GeoJSON writer connected to the console output stream.
+     */
+    public GeoJSONWriter newGeoJSONWriter() {
+        return new GeoJSONWriter(getConsole().getOutput(), 2);
+    }
+
     JCommander initJCommander() {
         root = new RootCmd();
         JCommander jcmdr = new JCommander(root);

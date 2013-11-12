@@ -10,7 +10,16 @@ public class TileGrid {
     Integer z;
     Integer width, height;
     Double xRes, yRes;
-    
+
+    /**
+     * Constructs a tile grid object.
+     * 
+     * @param z Zoom level of the grid.
+     * @param width Number of tiles horizontally in the grid.
+     * @param height Number of tiles vertically in the grid.
+     * @param xRes The x resolution of tiles.
+     * @param yRes The y resolution of tiles.
+     */
     public TileGrid(Integer z, Integer width, Integer height, Double xRes, Double yRes) {
         super();
         this.z = z;

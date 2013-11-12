@@ -15,48 +15,41 @@ import com.google.common.cache.LoadingCache;
 import com.google.common.cache.RemovalListener;
 import com.google.common.cache.RemovalNotification;
 
-public class CachedRegistry implements Registry {
+public class CachedRepository implements DataRepository {
 
-    static Logger LOG = LoggerFactory.getLogger(CachedRegistry.class);
+    static Logger LOG = LoggerFactory.getLogger(CachedRepository.class);
 
-    Registry reg;
-    LoadingCache<String, Object> wsCache;
+    DataRepository reg;
+    LoadingCache<String, Workspace> wsCache;
 
-    public CachedRegistry(Registry reg) {
+    public CachedRepository(DataRepository reg) {
         this(reg, 20);
     }
 
-    public CachedRegistry(Registry reg, final int cacheSize) {
+    public CachedRepository(DataRepository reg, final int cacheSize) {
         this.reg = reg;
         wsCache = CacheBuilder.newBuilder().maximumSize(cacheSize)
-            .removalListener(new RemovalListener<String, Object>() {
+            .removalListener(new RemovalListener<String, Workspace>() {
                 @Override
-                public void onRemoval(RemovalNotification<String, Object> n) {
-                    Object val = n.getValue();
-                    if (val instanceof Disposable) {
-                        ((Disposable) val).close();
-                    }
+                public void onRemoval(RemovalNotification<String, Workspace> n) {
+                    n.getValue().close();
                 }
-            }).build(new CacheLoader<String, Object>() {
+            }).build(new CacheLoader<String, Workspace>() {
                 @Override
-                public Object load(String key) throws Exception {
-                    Object obj = CachedRegistry.this.reg.get(key);
-                    if (obj instanceof Workspace) {
-                        return new CachedWorkspace((Workspace) obj, cacheSize);
-                    }
-                    return obj;
+                public Workspace load(String key) throws Exception {
+                    return new CachedWorkspace(CachedRepository.this.reg.get(key), cacheSize);
                 }
             });
     }
 
     @Override
-    public Iterable<DataRef<?>> list() throws IOException {
+    public Iterable<WorkspaceHandle> list() throws IOException {
         //TODO: might want to cache this
         return reg.list();
     }
 
     @Override
-    public Object get(String key) throws IOException {
+    public Workspace get(String key) throws IOException {
         try {
             return wsCache.get(key);
         } catch (ExecutionException e) {
@@ -103,7 +96,7 @@ public class CachedRegistry implements Registry {
         }
 
         @Override
-        public Iterable<DataRef<Dataset>> list() throws IOException {
+        public Iterable<DatasetHandle> list() throws IOException {
             return ws.list();
         }
 

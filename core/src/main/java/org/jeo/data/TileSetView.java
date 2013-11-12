@@ -3,8 +3,11 @@ package org.jeo.data;
 import java.io.IOException;
 import java.util.List;
 
+import org.jeo.Pending;
+
 import com.vividsolutions.jts.geom.Envelope;
 
+@Pending
 public class TileSetView implements Disposable {
 
     TileDataset tiles;

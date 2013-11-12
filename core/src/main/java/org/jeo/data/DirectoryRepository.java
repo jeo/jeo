@@ -10,13 +10,17 @@ import java.util.List;
 
 import org.jeo.data.mem.MemWorkspace;
 import org.jeo.util.Util;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
- * A registry that loads workspaces from files in a specified directory.
+ * A repository that loads workspaces from files in a specified directory.
  *  
  * @author Justin Deoliveira, OpenGeo
  */
-public class DirectoryRegistry implements Registry {
+public class DirectoryRepository implements DataRepository {
+
+    static Logger LOG = LoggerFactory.getLogger(DirectoryRepository.class);
 
     /** base directory */
     File baseDir;
@@ -33,7 +37,7 @@ public class DirectoryRegistry implements Registry {
      * @param baseDir The directory to search for files in.
      * @param exts Optional file name extensions to restrict look ups to.
      */
-    public DirectoryRegistry(File baseDir, String... exts) {
+    public DirectoryRepository(File baseDir, String... exts) {
          this(baseDir, Drivers.REGISTRY, exts);
     }
 
@@ -43,7 +47,7 @@ public class DirectoryRegistry implements Registry {
      * @param baseDir The directory to search for files in.
      * @param exts Optional file name extensions to restrict look ups to.
      */
-    public DirectoryRegistry(File baseDir, DriverRegistry drivers, String... exts) {
+    public DirectoryRepository(File baseDir, DriverRegistry drivers, String... exts) {
         if (baseDir == null) {
             throw new NullPointerException("baseDir must not be null");
         }
@@ -58,7 +62,7 @@ public class DirectoryRegistry implements Registry {
     }
     
     @Override
-    public Iterable<DataRef<?>> list() throws IOException {
+    public Iterable<WorkspaceHandle> list() throws IOException {
         // list all files, possibily filtering by extension
         String[] files = exts == null ? baseDir.list() : baseDir.list(new FilenameFilter() {
             @Override
@@ -68,11 +72,14 @@ public class DirectoryRegistry implements Registry {
         });
 
         // process files to see what ones we have drivers for
-        LinkedHashSet<DataRef<?>> items = new LinkedHashSet<DataRef<?>>();
+        LinkedHashSet<WorkspaceHandle> items = new LinkedHashSet<WorkspaceHandle>();
         for (String fn : files) {
             Driver<?> drv = Drivers.find(new File(baseDir, fn).toURI(), drivers);
             if (drv != null) {
-                items.add(new DataRef(Util.base(fn), drv.getType(), drv, this));
+                Class<?> t = drv.getType();
+                if (Workspace.class.isAssignableFrom(t) || Dataset.class.isAssignableFrom(t)) {
+                    items.add(new WorkspaceHandle(fn, drv, this));
+                }
             }
         }
 
@@ -80,7 +87,7 @@ public class DirectoryRegistry implements Registry {
     }
 
     @Override
-    public Object get(final String key) throws IOException {
+    public Workspace get(final String key) throws IOException {
         if (exts == null) {
             //search for any file with this base name
             String[] files = baseDir.list(new FilenameFilter() {
@@ -90,10 +97,7 @@ public class DirectoryRegistry implements Registry {
                 }
             });
             for (String file : files) {
-                Object obj = Drivers.open(new File(baseDir, file), drivers);
-                if (obj != null) {
-                    return obj;
-                }
+                return newWorkspaceOrNull(new File(baseDir, file));
             }
         }
         else {
@@ -101,7 +105,7 @@ public class DirectoryRegistry implements Registry {
             for (String ext : exts) {
                 File f = new File(baseDir, key + "." + ext);
                 if (f.exists()) {
-                    return Drivers.open(f, drivers);
+                    return newWorkspaceOrNull(f);
                 }
             }
         }
@@ -109,20 +113,27 @@ public class DirectoryRegistry implements Registry {
         return null;
     }
 
-    Workspace workspace(File file) throws IOException {
+    Workspace newWorkspaceOrNull(File file) throws IOException {
         Object obj = Drivers.open(file);
-        if (obj instanceof Workspace) {
-            return (Workspace) obj;
-        }
-        else if (obj instanceof Dataset) {
-            Dataset data = (Dataset) obj;
-            MemWorkspace mem = new MemWorkspace();
-            mem.put(data.getName(), data);
-            return mem;
+        if (obj == null) {
+            if (obj instanceof Workspace) {
+                return (Workspace) obj;
+            }
+            else if (obj instanceof Dataset) {
+                return new MemWorkspace((Dataset)obj);
+            }
+            else {
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug(
+                        "object: " + obj + " not a workspace or dataset, file: " + file.getPath());
+                }
+            }
         }
         else {
-            return null;
+            LOG.debug("Unable to open file: " + file.getPath());
         }
+        
+        return null;
     }
 
     public void close() {

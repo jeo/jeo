@@ -6,7 +6,7 @@ import java.io.IOException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.jeo.data.Registry;
+import org.jeo.data.DataRepository;
 import org.jeo.map.Style;
 import org.jeo.nano.NanoHTTPD.Response;
 
@@ -29,7 +29,7 @@ public class StyleHandler extends Handler {
         return new Response(HTTP_OK, MIME_CSS, s.toString());
     }
 
-    Style findStyle(Request request, Registry data) throws IOException {
+    Style findStyle(Request request, DataRepository data) throws IOException {
         Matcher m = (Matcher) request.getContext().get(Matcher.class);
         String s = m.group(1);
         try {

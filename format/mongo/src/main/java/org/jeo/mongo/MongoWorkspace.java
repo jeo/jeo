@@ -2,13 +2,11 @@ package org.jeo.mongo;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
-import org.jeo.data.DataRef;
 import org.jeo.data.Dataset;
+import org.jeo.data.DatasetHandle;
 import org.jeo.data.Driver;
 import org.jeo.data.Workspace;
 import org.jeo.feature.Schema;
@@ -53,11 +51,11 @@ public class MongoWorkspace implements Workspace {
     }
 
     @Override
-    public Iterable<DataRef<Dataset>> list() throws IOException {
-        List<DataRef<Dataset>> refs = new ArrayList<DataRef<Dataset>>(); 
+    public Iterable<DatasetHandle> list() throws IOException {
+        List<DatasetHandle> refs = new ArrayList<DatasetHandle>(); 
         for (String name : db.getCollectionNames()) {
             if (!name.startsWith("system.")) {
-                refs.add(new DataRef<Dataset>(name, Dataset.class, getDriver(), this));
+                refs.add(new DatasetHandle(name, Dataset.class, getDriver(), this));
             }
         }
         return refs;

@@ -9,21 +9,18 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.TimeZone;
 
 import javax.sql.DataSource;
 
 import org.jeo.data.Cursor;
 import org.jeo.data.Cursors;
-import org.jeo.data.DataRef;
 import org.jeo.data.Dataset;
+import org.jeo.data.DatasetHandle;
 import org.jeo.data.FileData;
 import org.jeo.data.Query;
 import org.jeo.data.QueryPlan;
@@ -130,17 +127,17 @@ public class GeoPkgWorkspace implements Workspace, FileData {
     }
 
     @Override
-    public Iterable<DataRef<Dataset>> list() throws IOException {
-        return run(new DbOP<List<DataRef<Dataset>>>() {
+    public Iterable<DatasetHandle> list() throws IOException {
+        return run(new DbOP<List<DatasetHandle>>() {
             @Override
-            protected List<DataRef<Dataset>> doRun(Connection cx) throws Exception {
+            protected List<DatasetHandle> doRun(Connection cx) throws Exception {
                 String sql = format("SELECT table_name FROM %s", GEOPACKAGE_CONTENTS);
                 log(sql);
 
                 ResultSet rs = open(open(cx.createStatement()).executeQuery(sql));
-                List<DataRef<Dataset>> refs = new ArrayList<DataRef<Dataset>>();
+                List<DatasetHandle> refs = new ArrayList<DatasetHandle>();
                 while(rs.next()) {
-                    refs.add(new DataRef<Dataset>(rs.getString(1), Dataset.class, getDriver(), 
+                    refs.add(new DatasetHandle(rs.getString(1), Dataset.class, getDriver(), 
                         GeoPkgWorkspace.this));
                 }
                 return refs;

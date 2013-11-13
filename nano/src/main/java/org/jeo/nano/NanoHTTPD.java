@@ -237,8 +237,9 @@ public class NanoHTTPD
 				{
 					try
 					{
-						while( true )
-							new HTTPSession( myServerSocket.accept());
+						while( true ) {
+                            myThreadPool.submit(new HTTPSession(myServerSocket.accept()));
+                        }
 					}
 					catch ( IOException ioe )
 					{}
@@ -324,9 +325,6 @@ public class NanoHTTPD
 		public HTTPSession( Socket s )
 		{
 			mySocket = s;
-			Thread t = new Thread( this );
-			t.setDaemon( true );
-			t.start();
 		}
 
 		public void run()

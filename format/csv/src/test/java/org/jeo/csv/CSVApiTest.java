@@ -13,7 +13,6 @@ public class CSVApiTest extends VectorApiTestBase {
         File tmp = Tests.newTmpDir("states", "csv");
         Tests.unzip(getClass().getResourceAsStream("states.csv.zip"), tmp);
 
-        return CSV.open(new File(tmp, "states.csv"), new CSVOpts().wkt("wkt")
-            .delimiter(Delimiter.character(';')));
+        return CSV.open(new File(tmp, "states.csv"), new CSVOpts().wkt("wkt").delimiter(';'));
     }
 }

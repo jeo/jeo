@@ -11,7 +11,7 @@ import org.jeo.util.Pair;
 
 public class CSVOpts {
 
-    Delimiter delim = DELIM.getDefault();
+    Character delim = DELIM.getDefault();
     boolean header = HEADER.getDefault();
 
     String xcol, ycol, wktcol;
@@ -34,11 +34,11 @@ public class CSVOpts {
         return csvOpts;
     }
 
-    public Delimiter getDelimiter() {
+    public Character getDelimiter() {
         return delim;
     }
 
-    public CSVOpts delimiter(Delimiter delim) {
+    public CSVOpts delimiter(Character delim) {
         this.delim = delim;
         return this;
     }

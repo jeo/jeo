@@ -3,6 +3,7 @@ package org.jeo.csv;
 import java.io.IOException;
 import java.util.List;
 
+import com.csvreader.CsvReader;
 import com.vividsolutions.jts.geom.Geometry;
 
 /**
@@ -10,7 +11,7 @@ import com.vividsolutions.jts.geom.Geometry;
  */
 public abstract class CSVHandler {
 
-    public abstract void header(List<String> head);
+    public abstract void header(CsvReader r) throws IOException;
 
-    public abstract Geometry geom(List<Object> row) throws IOException;
+    public abstract Geometry geom(CsvReader r) throws IOException;
 }

@@ -1,9 +1,12 @@
 package org.jeo.csv;
 
+import java.io.IOException;
 import java.util.List;
 
 import org.jeo.geom.GeomBuilder;
+import org.jeo.util.Convert;
 
+import com.csvreader.CsvReader;
 import com.vividsolutions.jts.geom.Geometry;
 
 /**
@@ -22,11 +25,11 @@ public class XYHandler extends CSVHandler {
     }
 
     @Override
-    public void header(List<String> head) {
+    public void header(CsvReader r) throws IOException {
         if (opts.getX() == null) {
             Integer x = null, y = null;
-            for (int i = 0; i < head.size(); i++) {
-                String s = head.get(i);
+            for (int i = 0; i < r.getHeaderCount(); i++) {
+                String s = r.getHeader(i);
                 if (s.equalsIgnoreCase(opts.getXcol())) {
                     x = i;
                 }
@@ -45,9 +48,9 @@ public class XYHandler extends CSVHandler {
     }
 
     @Override
-    public Geometry geom(List<Object> row) {
-        Number x = (Number) row.get(opts.getX());
-        Number y = (Number) row.get(opts.getY());
+    public Geometry geom(CsvReader r) throws IOException {
+        Number x = Convert.toNumber(r.get(opts.getX())).get();
+        Number y = Convert.toNumber(r.get(opts.getY())).get();
         return gb.point(x.doubleValue(), y.doubleValue()).toPoint();
     }
 }

@@ -7,14 +7,16 @@ import java.util.Scanner;
 import org.jeo.data.Cursor;
 import org.jeo.feature.Feature;
 
+import com.csvreader.CsvReader;
+
 public class CSVCursor extends Cursor<Feature> {
 
     CSVDataset csv;
-    Scanner reader;
-    String next;
+    CsvReader reader;
+    Feature next;
     int i;
 
-    public CSVCursor(Scanner reader, CSVDataset csv) throws FileNotFoundException {
+    public CSVCursor(CsvReader reader, CSVDataset csv) throws FileNotFoundException {
         this.reader = reader;
         this.csv = csv;
         next = null;
@@ -23,8 +25,8 @@ public class CSVCursor extends Cursor<Feature> {
 
     @Override
     public boolean hasNext() throws IOException {
-        if (next == null && reader.hasNext()) {
-            next = reader.next();
+        if (next == null && reader.readRecord()) {
+            next = csv.feature(i++, reader);
         }
 
         return next != null;
@@ -32,12 +34,8 @@ public class CSVCursor extends Cursor<Feature> {
 
     @Override
     public Feature next() throws IOException {
-        if (next == null) {
-            return null;
-        }
-
         try {
-            return csv.feature(i++, next);
+            return next;
         }
         finally {
             next = null;

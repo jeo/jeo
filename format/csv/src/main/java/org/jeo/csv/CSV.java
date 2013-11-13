@@ -13,8 +13,7 @@ import org.jeo.util.Messages;
 
 public class CSV extends FileVectorDriver<CSVDataset> {
 
-    public static final Key<Delimiter> DELIM = 
-        new Key<Delimiter>("delim", Delimiter.class, Delimiter.comma());
+    public static final Key<Character> DELIM = new Key<Character>("delim", Character.class, ',');
 
     public static final Key<Boolean> HEADER = new Key<Boolean>("header", Boolean.class, true);
 

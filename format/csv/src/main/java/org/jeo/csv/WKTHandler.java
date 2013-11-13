@@ -1,8 +1,8 @@
 package org.jeo.csv;
 
 import java.io.IOException;
-import java.util.List;
 
+import com.csvreader.CsvReader;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.io.ParseException;
 import com.vividsolutions.jts.io.WKTReader;
@@ -16,11 +16,12 @@ public class WKTHandler extends CSVHandler {
     }
 
     @Override
-    public void header(List<String> head) {
+    public void header(CsvReader r) throws IOException {
         if (opts.getWkt() == null) {
             Integer wkt = null;
-            for (int i = 0; i < head.size(); i++) {
-                if (head.get(i).equalsIgnoreCase(opts.getWktCol())) {
+            for (int i = 0; i < r.getHeaderCount(); i++) {
+                String col = r.getHeader(i);
+                if (col.equalsIgnoreCase(opts.getWktCol())) {
                     wkt = i;
                     break;
                 }
@@ -36,8 +37,8 @@ public class WKTHandler extends CSVHandler {
     }
 
     @Override
-    public Geometry geom(List<Object> row) throws IOException {
-        String wkt = (String) row.get(opts.getWkt());
+    public Geometry geom(CsvReader r) throws IOException {
+        String wkt = r.get(opts.getWkt());
         if ("".equals(wkt)) {
             return null;
         }

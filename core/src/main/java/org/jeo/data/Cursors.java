@@ -12,20 +12,14 @@ import java.util.Map;
 import org.jeo.feature.Feature;
 import org.jeo.feature.FeatureWrapper;
 import org.jeo.feature.Features;
-import org.jeo.feature.GeometryTransformWrapper;
 import org.jeo.filter.Filter;
-import org.jeo.geom.Geom;
 import org.jeo.proj.Proj;
 import org.osgeo.proj4j.CoordinateReferenceSystem;
 import org.osgeo.proj4j.CoordinateTransform;
 
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.GeometryCollection;
 import com.vividsolutions.jts.geom.GeometryFactory;
-import com.vividsolutions.jts.geom.LineString;
-import com.vividsolutions.jts.geom.Point;
-import com.vividsolutions.jts.geom.Polygon;
 
 /**
  * Utility class for {@link Cursor} objects.
@@ -249,6 +243,14 @@ public class Cursors {
         }
     }
 
+    /**
+     * Wraps a cursor limiting the number of objects returned to a fixed size.
+     * 
+     * @param cursor The original cursor.
+     * @param limit The maximum number of objects to return.
+     * 
+     * @return The wrapped cursor.
+     */
     public static <T> Cursor<T> limit(Cursor<T> cursor, Integer limit) {
         return new LimitCursor<T>(cursor, limit);
     }
@@ -284,6 +286,14 @@ public class Cursors {
         }
     }
 
+    /**
+     * Wraps a cursor skipping a specified number of objects. 
+     * 
+     * @param cursor The original cursor.
+     * @param limit The number of objects of the original cursor to skip before returning objects.
+     * 
+     * @return The wrapped cursor.
+     */
     public static <T> Cursor<T> offset(Cursor<T> cursor, Integer offset) {
         return new OffsetCursor<T>(cursor, offset);
     }
@@ -314,10 +324,31 @@ public class Cursors {
         }
     }
 
+    /**
+     * Wraps a cursor reprojecting objects to a specified coordinate reference system.
+     * <p>
+     * This method determines the source crs from objects in the underlying cursor. Use 
+     * {@link #reproject(Cursor, CoordinateReferenceSystem, CoordinateReferenceSystem)} to 
+     * explicitly specify the source crs.  
+     * </p>
+     * @param cursor The original cursor.
+     * @param crs The crs to reproject to.
+     * 
+     * @return The wrapped cursor.
+     */
     public static Cursor<Feature> reproject(Cursor<Feature> cursor, CoordinateReferenceSystem crs) {
         return reproject(cursor, null, crs);
     }
-    
+
+    /**
+     * Wraps a cursor reprojecting objects between two specified coordinate reference systems.
+     *
+     * @param cursor The original cursor.
+     * @param from The source crs.
+     * @param to The destination crs.
+     * 
+     * @return The wrapped cursor.
+     */
     public static Cursor<Feature> reproject(Cursor<Feature> cursor, CoordinateReferenceSystem from, 
         CoordinateReferenceSystem to) {
 
@@ -424,6 +455,14 @@ public class Cursors {
         }
     }
 
+    /**
+     * Wraps a cursor returning objects that intersect the specified bounding box.
+     *
+     * @param cursor The original cursor.
+     * @param bbox The bounding box filter.
+     * 
+     * @return The wrapped cursor.
+     */
     public static Cursor<Feature> intersects(Cursor<Feature> cursor, Envelope bbox) {
         return new IntersectCursor(cursor, bbox);
     }
@@ -461,6 +500,14 @@ public class Cursors {
         }
     }
 
+    /**
+     * Wraps a cursor returning objects that pass an attribute filter.
+     *
+     * @param cursor The original cursor.
+     * @param filter The attribute filter.
+     * 
+     * @return The wrapped cursor.
+     */
     public static <T> Cursor<T> filter(Cursor<T> cursor, Filter filter) {
         return new FilterCursor<T>(cursor, filter);
     }

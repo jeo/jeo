@@ -11,19 +11,20 @@ import java.util.Map;
 
 import org.jeo.json.JSONObject;
 import org.jeo.json.JSONValue;
+import org.jeo.data.mem.MemWorkspace;
 import org.jeo.util.Convert;
 import org.jeo.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Registry defined by a JSON file.
+ * Repository defined by a JSON object.
  * <p>
- * The registry contains a JSON object whose keys are names of the items in the registry. Each key 
- * maps to an object that contains the following properties.
+ * The repository is made up a JSON object whose keys are names of the workspaces in the repo. Each 
+ * key maps to an object that contains the following properties.
  * <ul>
- *   <li>driver - The name or alias identifying the driver for the item.
- *   <li>keys - Object containing the key / values pairs defining the connection options.   
+ *   <li>driver - The name or alias identifying the driver for the workspace.
+ *   <li>keys - Object containing the key / values pairs defining the connection options.
  * </ul>
  * The following is an example consisting of a single GeoJSON dataset.
  * <code><pre>
@@ -40,37 +41,37 @@ import org.slf4j.LoggerFactory;
  * @author Justin Deoliveira, Boundless
  *
  */
-public class JSONRegistry implements Registry {
+public class JSONRepository implements DataRepository {
 
-    static Logger LOG = LoggerFactory.getLogger(JSONRegistry.class);
+    static Logger LOG = LoggerFactory.getLogger(JSONRepository.class);
 
-    JSONObject reg;
-    File regFile;
+    JSONObject obj;
+    File file;
     DriverRegistry drivers;
 
-    public JSONRegistry(JSONObject reg) {
-        this(reg, Drivers.REGISTRY);
+    public JSONRepository(JSONObject obj) {
+        this(obj, Drivers.REGISTRY);
     }
 
-    public JSONRegistry(JSONObject reg, DriverRegistry drivers) {
-        this.reg = reg;
+    public JSONRepository(JSONObject obj, DriverRegistry drivers) {
+        this.obj = obj;
         this.drivers = drivers;
     }
 
-    public JSONRegistry(File file) {
+    public JSONRepository(File file) {
         this(file, Drivers.REGISTRY);
     }
 
-    public JSONRegistry(File file, DriverRegistry drivers) {
-        this.regFile = file;
+    public JSONRepository(File file, DriverRegistry drivers) {
+        this.file = file;
         this.drivers = drivers;
     }
 
     @Override
-    public Iterable<DataRef<?>> list() throws IOException {
-        JSONObject reg = reg();
+    public Iterable<WorkspaceHandle> list() throws IOException {
+        JSONObject reg = obj();
 
-        List<DataRef<?>> list = new ArrayList<DataRef<?>>();
+        List<WorkspaceHandle> list = new ArrayList<WorkspaceHandle>();
         
         for (Object k : reg.keySet()) {
             String key = k.toString();
@@ -94,46 +95,46 @@ public class JSONRegistry implements Registry {
                 return null;
             }
 
-            list.add(new DataRef(key, drv.getType(), drv, this));
+            list.add(new WorkspaceHandle(key, drv, this));
         }
         return list;
     }
 
     @Override
-    public Object get(String name) throws IOException {
-        JSONObject reg = reg();
+    public Workspace get(String name) throws IOException {
+        JSONObject reg = obj();
 
-        JSONObject obj = (JSONObject) reg.get(name);
-        if (obj == null) {
+        JSONObject wsObj = (JSONObject) reg.get(name);
+        if (wsObj == null) {
             return null;
         }
 
-        if (!obj.containsKey("driver")) {
+        if (!wsObj.containsKey("driver")) {
             throw new IOException(name + " does not define a 'driver' key");
         }
 
-        String driver = obj.get("driver").toString();
+        String driver = wsObj.get("driver").toString();
         Driver<?> drv = Drivers.find(driver, drivers);
         if (drv == null) {
             throw new IOException("unable to load driver: " + driver);
         }
 
         Map<Object,Object> opts = new HashMap<Object,Object>();
-        if (obj.containsKey("keys")) {
-            opts.putAll((Map)obj.get("keys"));
+        if (wsObj.containsKey("keys")) {
+            opts.putAll((Map)wsObj.get("keys"));
         }
-        else if (obj.containsKey("file")){
-            opts.put("file", obj.get("file"));
+        else if (wsObj.containsKey("file")){
+            opts.put("file", wsObj.get("file"));
         }
 
-        // look for any file keys, make relative paths relative to the registry file
-        if (regFile != null) {
+        // look for any file keys, make relative paths relative to the Repository file
+        if (file != null) {
             for (Map.Entry<Object, Object> kv : opts.entrySet()) {
                 if ("file".equalsIgnoreCase(kv.getKey().toString())) {
                     Optional<File> file = Convert.toFile(kv.getValue());
                     if (file.has()) {
                         if (!file.get().isAbsolute()) {
-                            File f = new File(regFile.getParentFile(), file.get().getPath());
+                            File f = new File(this.file.getParentFile(), file.get().getPath());
                             kv.setValue(f);
                         }
                     }
@@ -141,24 +142,41 @@ public class JSONRegistry implements Registry {
             }
         }
         
-        return drv.open(opts);
+        Object data = drv.open(opts);
+        if (data != null) {
+            if (data instanceof Workspace) {
+                return (Workspace) data;
+            }
+            else if (data instanceof Dataset) {
+                return new MemWorkspace((Dataset)data);
+            }
+            else {
+                LOG.debug(
+                    "object: " + obj + " not a workspace or dataset, opts: " + opts);
+            }
+        }
+        else {
+            LOG.debug("Unable to open from options: " + opts);
+        }
+
+        return null;
     }
     
     @Override
     public void close() {
     }
 
-    JSONObject reg() throws IOException {
-        if (reg != null) {
-            return reg;
+    JSONObject obj() throws IOException {
+        if (obj != null) {
+            return obj;
         }
 
-        BufferedReader r = new BufferedReader(new FileReader(regFile));
+        BufferedReader r = new BufferedReader(new FileReader(file));
         try {
             return (JSONObject) JSONValue.parseWithException(r);
         }
         catch(Exception e) {
-            throw new IOException("Error parsing json registry: " + regFile.getPath(), e);
+            throw new IOException("Error parsing json file: " + file.getPath(), e);
         }
         finally {
             r.close();

@@ -11,8 +11,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 
-import org.jeo.data.Registry;
-import org.jeo.data.SimpleRegistry;
+import org.jeo.data.DataRepository;
+import org.jeo.data.mem.MemRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,17 +22,17 @@ public class NanoServer extends NanoHTTPD {
 
     static final Logger LOG = LoggerFactory.getLogger(NanoServer.class);
 
-    Registry reg;
+    DataRepository reg;
     List<Handler> handlers;
 
     MapRenderer renderer;
 
-    public NanoServer(int port, File wwwRoot, int nThreads, Registry reg, List<Handler> handlers) 
+    public NanoServer(int port, File wwwRoot, int nThreads, DataRepository reg, List<Handler> handlers) 
         throws IOException {
         this(port, wwwRoot, nThreads, reg, handlers, null);
     }
     
-    public NanoServer(int port, File wwwRoot, int nThreads, Registry reg, List<Handler> handlers, 
+    public NanoServer(int port, File wwwRoot, int nThreads, DataRepository reg, List<Handler> handlers, 
         MapRenderer renderer) throws IOException {
         super(port, wwwRoot, nThreads);
 
@@ -66,7 +66,7 @@ public class NanoServer extends NanoHTTPD {
         }
     }
 
-    public Registry getRegistry() {
+    public DataRepository getRegistry() {
         return reg;
     }
 
@@ -164,9 +164,9 @@ public class NanoServer extends NanoHTTPD {
         try { System.in.read(); } catch( Throwable t ) {}
     }
 
-    static Registry loadRegistry() {
-        //return new DirectoryRegistry(new File("/Users/jdeolive/Documents/GeoData"));
-        return new SimpleRegistry();
+    static DataRepository loadRegistry() {
+        return new org.jeo.data.DirectoryRepository(new File("/Users/jdeolive/Documents/Geodata"));
+        //return new MemRepository();
     }
 
     static void usage() {

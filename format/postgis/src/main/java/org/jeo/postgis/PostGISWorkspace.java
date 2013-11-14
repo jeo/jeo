@@ -15,8 +15,8 @@ import java.util.Map;
 
 import javax.sql.DataSource;
 
-import org.jeo.data.DataRef;
 import org.jeo.data.Dataset;
+import org.jeo.data.DatasetHandle;
 import org.jeo.data.Driver;
 import org.jeo.data.Workspace;
 import org.jeo.feature.Field;
@@ -86,21 +86,21 @@ public class PostGISWorkspace implements Workspace {
     }
 
     @Override
-    public Iterable<DataRef<Dataset>> list() throws IOException {
-        return run(new DbOP<List<DataRef<Dataset>>>() {
+    public Iterable<DatasetHandle> list() throws IOException {
+        return run(new DbOP<List<DatasetHandle>>() {
             @Override
-            protected List<DataRef<Dataset>> doRun(Connection cx) throws Exception {
+            protected List<DatasetHandle> doRun(Connection cx) throws Exception {
                 DatabaseMetaData md = cx.getMetaData();
                 ResultSet tables = 
                     open(md.getTables(null, "", null, new String[]{"TABLE", "VIEW"}));
 
                 //TODO: avoid pulling all into list
-                List<DataRef<Dataset>> l = new ArrayList<DataRef<Dataset>>();
+                List<DatasetHandle> l = new ArrayList<DatasetHandle>();
                 while(tables.next()) {
                     String tbl = tables.getString("TABLE_NAME");
                     String schema = tables.getString("TABLE_SCHEM");
                     if (includeTable(tbl, schema)) {
-                        l.add(new DataRef<Dataset>(tbl, Dataset.class, getDriver(), 
+                        l.add(new DatasetHandle(tbl, Dataset.class, getDriver(), 
                             PostGISWorkspace.this));
                     }
                 }

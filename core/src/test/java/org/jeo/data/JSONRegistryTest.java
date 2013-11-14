@@ -3,8 +3,6 @@ package org.jeo.data;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-import java.io.IOException;
-
 import org.jeo.data.mem.MemWorkspace;
 import org.jeo.data.mem.Memory;
 import org.jeo.json.JSONObject;
@@ -17,7 +15,7 @@ import com.google.common.collect.Iterables;
 
 public class JSONRegistryTest {
 
-    JSONRegistry reg;
+    JSONRepository repo;
 
     @Before
     public void setUp() throws Exception {
@@ -27,23 +25,23 @@ public class JSONRegistryTest {
           "}" + 
         "}";
 
-        reg = new JSONRegistry((JSONObject) JSONValue.parseWithException(json));
+        repo = new JSONRepository((JSONObject) JSONValue.parseWithException(json));
     }
 
     @Test
     public void testList() throws Exception {
-        Iterables.find(reg.list(), new Predicate<DataRef>() {
+        Iterables.find(repo.list(), new Predicate<WorkspaceHandle>() {
             @Override
-            public boolean apply(DataRef ref) {
-                return "foo".equals(ref.getName()) 
-                    && Memory.class.isAssignableFrom(ref.getDriver().getClass());
+            public boolean apply(WorkspaceHandle h) {
+                return "foo".equals(h.getName()) 
+                    && Memory.class.isAssignableFrom(h.getDriver().getClass());
             }
         });
     }
 
     @Test
     public void testGet() throws Exception {
-        Workspace obj = (Workspace) reg.get("foo");
+        Workspace obj = (Workspace) repo.get("foo");
         assertNotNull(obj);
 
         assertTrue(obj instanceof MemWorkspace);

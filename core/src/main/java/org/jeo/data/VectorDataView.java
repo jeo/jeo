@@ -2,11 +2,13 @@ package org.jeo.data;
 
 import java.io.IOException;
 
+import org.jeo.Pending;
 import org.jeo.feature.Feature;
 import org.jeo.filter.Filter;
 import org.jeo.filter.cql.CQL;
 import org.jeo.filter.cql.ParseException;
 
+@Pending
 public class VectorDataView {
 
     VectorDataset data;

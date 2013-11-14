@@ -7,6 +7,11 @@ import org.osgeo.proj4j.CoordinateReferenceSystem;
 
 import com.vividsolutions.jts.geom.Geometry;
 
+/**
+ * Wrapper class for {@link Feature}.
+ * 
+ * @author Justin Deoliveira, Boundless
+ */
 public class FeatureWrapper implements Feature {
 
     protected Feature delegate;

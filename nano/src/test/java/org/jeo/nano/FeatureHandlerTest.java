@@ -14,7 +14,7 @@ import static org.junit.Assert.assertTrue;
 import org.jeo.data.Cursor;
 import org.jeo.data.Cursors;
 import org.jeo.data.Query;
-import org.jeo.data.Registry;
+import org.jeo.data.DataRepository;
 import org.jeo.data.VectorDataset;
 import org.jeo.data.Workspace;
 import org.jeo.feature.Feature;
@@ -42,7 +42,7 @@ public class FeatureHandlerTest extends HandlerTestSupport {
         expectLastCall().once();
         replay(ws);
 
-        Registry reg = createMock(Registry.class);
+        DataRepository reg = createMock(DataRepository.class);
         expect(reg.get("foo")).andReturn(ws).once();
         replay(reg);
 
@@ -89,7 +89,7 @@ public class FeatureHandlerTest extends HandlerTestSupport {
         expectLastCall().once();
         replay(ws);
 
-        Registry reg = createMock(Registry.class);
+        DataRepository reg = createMock(DataRepository.class);
         expect(reg.get("foo")).andReturn(ws).once();
         replay(reg);
 
@@ -119,7 +119,7 @@ public class FeatureHandlerTest extends HandlerTestSupport {
         expect(ws.create((Schema)anyObject())).andReturn(layer).once();
         replay(ws);
 
-        Registry reg = createMock(Registry.class);
+        DataRepository reg = createMock(DataRepository.class);
         expect(reg.get("foo")).andReturn(ws).once();
         replay(reg);
 

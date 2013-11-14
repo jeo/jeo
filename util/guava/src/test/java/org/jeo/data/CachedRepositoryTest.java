@@ -7,18 +7,18 @@ import java.io.IOException;
 
 import org.junit.Test;
 
-public class CachedRegistryTest {
+public class CachedRepositoryTest {
 
     @Test
     public void testWorkspace() throws IOException {
         Workspace ws = createMock(Workspace.class);
 
-        Registry reg = createMock(Registry.class);
+        DataRepository reg = createMock(DataRepository.class);
         expect(reg.get("foo")).andReturn(ws).once();
 
         replay(ws, reg);
 
-        CachedRegistry cached = new CachedRegistry(reg);
+        CachedRepository cached = new CachedRepository(reg);
         assertNotNull(cached.get("foo"));
         assertNotNull(cached.get("foo"));
         assertNotNull(cached.get("foo"));
@@ -33,12 +33,12 @@ public class CachedRegistryTest {
         Workspace ws = createMock(Workspace.class);
         expect(ws.get("bar")).andReturn(l).once();
 
-        Registry reg = createMock(Registry.class);
+        DataRepository reg = createMock(DataRepository.class);
         expect(reg.get("foo")).andReturn(ws).once();
 
         replay(l, ws, reg);
 
-        CachedRegistry cached = new CachedRegistry(reg);
+        CachedRepository cached = new CachedRepository(reg);
         assertNotNull(((Workspace)cached.get("foo")).get("bar"));
         assertNotNull(((Workspace)cached.get("foo")).get("bar"));
         assertNotNull(((Workspace)cached.get("foo")).get("bar"));

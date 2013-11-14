@@ -18,7 +18,7 @@ import org.junit.Test;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
-import com.sun.xml.internal.xsom.impl.scd.Iterators;
+import com.google.common.collect.Iterators;
 
 public class DirectoryRepositoryTest {
 
@@ -70,7 +70,7 @@ public class DirectoryRepositoryTest {
         expect(drvreg.list()).andAnswer(new IAnswer<Iterator<Driver<?>>>() {
             @Override
             public Iterator<Driver<?>> answer() throws Throwable {
-                return (Iterator) Iterators.singleton(new GeoJSON());
+                return (Iterator) Iterators.singletonIterator(new GeoJSON());
             }
         }).times(3);
         replay(drvreg);

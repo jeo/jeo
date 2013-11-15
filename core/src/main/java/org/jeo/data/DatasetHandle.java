@@ -18,8 +18,8 @@ public class DatasetHandle extends Handle<Dataset> {
     CoordinateReferenceSystem crs;
     Envelope bounds;
 
-    public DatasetHandle(String name, Class<Dataset> type, Driver<?> driver, Workspace parent) {
-        super(name, type, driver);
+    public DatasetHandle(String name, Class<? extends Dataset> type, Driver<?> driver, Workspace parent) {
+        super(name, (Class<Dataset>) type, driver);
         this.parent = parent;
     }
 

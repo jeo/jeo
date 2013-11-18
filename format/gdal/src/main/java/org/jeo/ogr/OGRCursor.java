@@ -13,7 +13,9 @@ public class OGRCursor extends Cursor<Feature> {
     Layer layer;
     DataSource dataSource;
     Schema schema;
-    Feature next;
+    org.gdal.ogr.Feature next;
+    Feature curr;
+    boolean complete;
 
     public OGRCursor(Layer layer, DataSource dataSource, Schema schema) {
         this.layer = layer;
@@ -21,30 +23,36 @@ public class OGRCursor extends Cursor<Feature> {
         this.schema = schema;
 
         layer.ResetReading();
+        complete = false;
     }
 
     @Override
     public boolean hasNext() throws IOException {
-        if (next != null) {
+        if (complete) {
+            return false;
+        }
+
+        if (curr != null) {
             return true;
         }
 
-        org.gdal.ogr.Feature f = layer.GetNextFeature();
-        if (f != null) {
-            next = new OGRFeature(f, schema);
-            return true;
+        next = layer.GetNextFeature();
+        if (next == null) {
+            complete = true;
+            return false;
         }
 
-        return false;
+        curr = new OGRFeature(next, schema);
+        return true;
     }
 
     @Override
     public Feature next() throws IOException {
         try {
-            return next;
+            return curr;
         }
         finally {
-            next = null;
+            curr = null;
         }
     }
 

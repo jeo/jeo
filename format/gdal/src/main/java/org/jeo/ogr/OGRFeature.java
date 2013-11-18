@@ -34,7 +34,7 @@ public class OGRFeature extends BasicFeature {
     }
     
     static class OGRFeatureStorage extends BasicFeature.Storage {
-        
+
         Feature f;
 
         OGRFeatureStorage(Feature f, Schema schema) {

@@ -148,7 +148,7 @@ public class JSONRepository implements DataRepository {
                 return (Workspace) data;
             }
             else if (data instanceof Dataset) {
-                return new MemWorkspace((Dataset)data);
+                return new SingleWorkspace((Dataset)data);
             }
             else {
                 LOG.debug(

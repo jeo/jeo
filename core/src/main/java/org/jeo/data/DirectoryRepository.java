@@ -128,7 +128,7 @@ public class DirectoryRepository implements DataRepository {
                 return (Workspace) obj;
             }
             else if (obj instanceof Dataset) {
-                return new MemWorkspace((Dataset)obj);
+                return new SingleWorkspace((Dataset)obj);
             }
             else {
                 if (LOG.isDebugEnabled()) {

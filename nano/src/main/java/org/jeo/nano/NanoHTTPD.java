@@ -471,18 +471,17 @@ public class NanoHTTPD
 				in.close();
 				is.close();
 			}
-			catch ( IOException ioe )
-			{
-				try
-				{
-					sendError( HTTP_INTERNALERROR, "SERVER INTERNAL ERROR: IOException: " + ioe.getMessage());
-				}
-				catch ( Throwable t ) {}
-			}
-			catch ( InterruptedException ie )
-			{
-				// Thrown by sendError, ignore and exit the thread.
-			}
+            catch (Throwable ioe) {
+                if (ioe instanceof InterruptedException) {
+                    // allow thread to die
+                } else {
+                    try {
+                        sendError(HTTP_INTERNALERROR, "SERVER INTERNAL ERROR: " + ioe.getMessage());
+                    } catch (Throwable t) {
+                        // we tried
+                    }
+                }
+            }
 		}
 
 		/**

@@ -1,7 +1,5 @@
 package org.jeo.nano;
 
-import static org.jeo.nano.NanoHTTPD.HTTP_NOTFOUND;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -12,6 +10,8 @@ import java.util.regex.Pattern;
 import org.jeo.data.Dataset;
 import org.jeo.data.DataRepository;
 import org.jeo.data.Workspace;
+import static org.jeo.nano.NanoHTTPD.HTTP_BADREQUEST;
+import static org.jeo.nano.NanoHTTPD.HTTP_NOTFOUND;
 import org.jeo.nano.NanoHTTPD.Response;
 import org.jeo.util.Pair;
 
@@ -34,6 +34,12 @@ public abstract class Handler {
         return false;
     }
 
+    protected String createPath(Request request) {
+        Matcher m = (Matcher) request.getContext().get(Matcher.class);
+        String second = m.group(2);
+        return m.group(1) + (second == null ? "" : "/" + second);
+    }
+
     protected Workspace findWorkspace(String key, DataRepository reg) throws IOException {
         Object obj = reg.get(key);
         if (obj == null || !(obj instanceof Workspace)) {
@@ -43,25 +49,44 @@ public abstract class Handler {
         return (Workspace) obj;
     }
 
-    protected Pair<Dataset, Workspace> findDataset(String key, DataRepository reg) throws IOException {
-        Workspace ws = null;
-        Object obj = null;
+    protected Pair<Dataset, Workspace> findDataset(Request request, DataRepository reg) throws IOException {
+        Pair<Object, Object> found = findObject(request, reg);
+        if (found == null || !(found.first() instanceof Dataset)) {
+            throw new HttpException(HTTP_NOTFOUND, "No such dataset at: " + request.getUri());
+        }
+        return Pair.of((Dataset) found.first(), (Workspace) found.second());
+    }
 
-        String[] split = key.split("/");
-        if (split.length == 1) {
-            obj = reg.get(split[0]);
+    protected Pair<Object,Object> findObject(Request request, DataRepository reg) throws IOException {
+        Matcher m = (Matcher) request.getContext().get(Matcher.class);
+        String first = m.group(1);
+        if (first != null) {
+            String second = m.group(2);
+            if (second != null) {
+                try {
+                    Workspace ws = (Workspace) reg.get(first);
+                    if (ws == null) {
+                        throw new HttpException(HTTP_NOTFOUND, "no such workspace: " + first);
+                    }
+
+                    Dataset ds = ws.get(second);
+                    if (ds == null) {
+                        throw new HttpException(HTTP_NOTFOUND,
+                            "no such dataset: " + second + " in workspace: " + first);
+                    }
+
+                    return new Pair<Object,Object>(ds, ws);
+                } catch (ClassCastException e) {
+                    throw new HttpException(HTTP_BADREQUEST, first + " is not a workspace");
+                }
+            }
+            else {
+                return Pair.of((Object)reg.get(first), null);
+            }
         }
         else {
-            ws = findWorkspace(split[0], reg);
-            obj = ws.get(split[1]);
+            return null;
         }
-
-        if (obj == null || !(obj instanceof Dataset)) {
-            //no such layer
-            throw new HttpException(HTTP_NOTFOUND, "No such layer: " + key);
-        }
-
-        return Pair.of((Dataset)obj, ws);
     }
 
     protected String renderTemplate(String template, Map<String,String> vars) throws IOException {

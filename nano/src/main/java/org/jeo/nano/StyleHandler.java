@@ -13,7 +13,8 @@ import org.jeo.nano.NanoHTTPD.Response;
 public class StyleHandler extends Handler {
 
     static final Pattern STYLE_URI_RE =
-            Pattern.compile("/styles/(\\w+)/?", Pattern.CASE_INSENSITIVE);
+            Pattern.compile("/styles/([\\w-]+)/?", Pattern.CASE_INSENSITIVE);
+
     @Override
     public boolean canHandle(Request request, NanoServer server) {
         return match(request, STYLE_URI_RE);

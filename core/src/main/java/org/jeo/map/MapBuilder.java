@@ -118,8 +118,12 @@ public class MapBuilder {
         MemVector mem = new MemVector(first.schema());
         mem.add(first);
 
-        for (Feature f : cursor) {
-            mem.add(f);
+        try {
+            for (Feature f : cursor) {
+                mem.add(f);
+            }
+        } finally {
+            cursor.close();
         }
 
         return layer(mem);

@@ -1,148 +1,141 @@
 package org.jeo.nano;
 
-import static org.easymock.EasyMock.anyObject;
-import static org.easymock.EasyMock.expect;
-import static org.easymock.EasyMock.expectLastCall;
 import static org.easymock.classextension.EasyMock.createMock;
-import static org.easymock.classextension.EasyMock.createNiceMock;
-import static org.easymock.classextension.EasyMock.replay;
-import static org.easymock.classextension.EasyMock.verify;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import org.jeo.data.Cursor;
-import org.jeo.data.Cursors;
-import org.jeo.data.Query;
-import org.jeo.data.DataRepository;
-import org.jeo.data.VectorDataset;
-import org.jeo.data.Workspace;
 import org.jeo.feature.Feature;
-import org.jeo.feature.Schema;
 import org.jeo.geojson.GeoJSONReader;
 import org.jeo.nano.NanoHTTPD.Response;
+import org.junit.Before;
 import org.junit.Test;
 
-import com.vividsolutions.jts.geom.Envelope;
 
 public class FeatureHandlerTest extends HandlerTestSupport {
 
+    @Before
+    public void init() {
+        handler = new FeatureHandler();
+    }
+
     @Test
-    public void testGet() throws Exception {
-        VectorDataset layer = createMock(VectorDataset.class);
-        expect(layer.cursor(new Query().bounds(new Envelope(-180,180,-90,90))))
-            .andReturn(Cursors.empty(Feature.class)).once();
-        layer.close();
-        expectLastCall().once();
-        replay(layer);
+    public void testPattern() {
+        testWorkspaceDataPattern(FeatureHandler.FEATURES_URI_RE, "/features", false, true);
+    }
 
-        Workspace ws = createMock(Workspace.class);
-        expect(ws.get("bar")).andReturn(layer).once();
-        ws.close();
-        expectLastCall().once();
-        replay(ws);
+    @Test
+    public void testGetWorkspaceDatasetJSON() throws Exception {
+        mock = MockServer.create()
+                .withVectorLayer()
+                    .withNoFeatures()
+                .replay();
 
-        DataRepository reg = createMock(DataRepository.class);
-        expect(reg.get("foo")).andReturn(ws).once();
-        replay(reg);
-
-        NanoServer server = createMock(NanoServer.class);
-        expect(server.getRegistry()).andReturn(reg).anyTimes();
-        replay(server);
-
-        Request req = 
-            new Request("/features/foo/bar", "GET", null, q("bbox=-180,-90,180,90"), null);
-        FeatureHandler h = new FeatureHandler();
-        assertTrue(h.canHandle(req, server));
-
-        Response res = h.handle(req, server);
-        assertEquals(NanoHTTPD.HTTP_OK, res.status);
+        Response res = makeRequest(
+                new Request("/features/foo/bar", "GET", null, q("bbox","-180,-90,180,90"), null),
+                NanoHTTPD.HTTP_OK,
+                NanoHTTPD.MIME_JSON
+        );
         
         Cursor<Feature> features = (Cursor<Feature>) new GeoJSONReader().read(res.data);
         assertFalse(features.hasNext());
 
-        verify(layer, ws, reg);
+        mock.verify();
+    }
+
+    @Test
+    public void testGetWorkspaceDatasetHTML() throws Exception {
+        mock = MockServer.create()
+                .withVectorLayer()
+                    .withMoreDetails()
+                .replay();
+
+        Response res = makeRequest(
+            new Request("/features/foo/bar.html", "GET", null, q(), null),
+            NanoHTTPD.HTTP_OK,
+            NanoHTTPD.MIME_HTML
+        );
+
+        String body = read(res);
+        assertContains(body, "url: '/features/foo/bar'");
+
+        mock.verify();
+    }
+
+    @Test
+    public void testGetWorkspaceDatasetPNG() throws Exception {
+        mock = MockServer.create()
+                .withVectorLayer()
+                    .withPointGeometry()
+                .replay();
+
+        MapRenderer renderer = createMock(MapRenderer.class);
+        handler = new FeatureHandler(renderer);
+
+        makeRequest(
+                new Request("/features/foo/bar.png", "GET", null, q(), null),
+                NanoHTTPD.HTTP_OK,
+                NanoHTTPD.MIME_PNG
+        );
+
+        mock.verify();
     }
 
     @Test
     public void testPostAddFeatures() throws Exception {
-        Feature f = createNiceMock(Feature.class);
-        replay(f);
-
-        Cursor<Feature> c = createMock(Cursor.class);
-        expect(c.next()).andReturn(f).once();
-        expect(c.write()).andReturn(c).once();
-
-        c.close();
-        expectLastCall().once();
-        replay(c);
-
-        VectorDataset layer = createMock(VectorDataset.class);
-        expect(layer.cursor((Query)anyObject())).andReturn(c).once();
-        layer.close();
-        expectLastCall().once();
-        replay(layer);
-
-        Workspace ws = createMock(Workspace.class);
-        expect(ws.get("bar")).andReturn(layer).once();
-        ws.close();
-        expectLastCall().once();
-        replay(ws);
-
-        DataRepository reg = createMock(DataRepository.class);
-        expect(reg.get("foo")).andReturn(ws).once();
-        replay(reg);
-
-        NanoServer server = createMock(NanoServer.class);
-        expect(server.getRegistry()).andReturn(reg).anyTimes();
-        replay(server);
+        mock = MockServer.create()
+                    .withVectorLayer()
+                        .withSingleFeature()
+                .replay();
 
         String json = dequote("{'type':'Feature','geometry':{'type':'Point','coordinates':[0.0,0.0]}," +
             "'properties':{'name':'zero'}}");
-        Request req = new Request("/features/foo/bar", "POST", h("Content-type: application/json"), 
-            null, body(json));
-        FeatureHandler h = new FeatureHandler();
-        assertTrue(h.canHandle(req, server));
+        makeRequest(
+                new Request("/features/foo/bar", "POST", h("Content-type", "application/json"), null, body(json)),
+                NanoHTTPD.HTTP_CREATED,
+                NanoHTTPD.MIME_PLAINTEXT
+        );
 
-        Response res = h.handle(req, server);
-        assertEquals(NanoHTTPD.HTTP_CREATED, res.status);
-
-        verify(layer, ws, reg);
+        mock.verify();
     }
 
     @Test
     public void testPostCreateLayer() throws Exception {
-        VectorDataset layer = createMock(VectorDataset.class);
-        replay(layer);
-
-        Workspace ws = createMock(Workspace.class);
-        expect(ws.create((Schema)anyObject())).andReturn(layer).once();
-        replay(ws);
-
-        DataRepository reg = createMock(DataRepository.class);
-        expect(reg.get("foo")).andReturn(ws).once();
-        replay(reg);
-
-        NanoServer server = createMock(NanoServer.class);
-        expect(server.getRegistry()).andReturn(reg).anyTimes();
-        replay(server);
+        mock = MockServer.create()
+                    .withWorkspace()
+                    .expectSchemaCreated()
+                .replay();
 
         String json = dequote("{ 'type': 'schema','name': 'widgets', 'properties': { 'geometry': { 'type': 'Point' }, " +
             "'name': { 'type': 'string' } } }");
 
-        Request req = new Request("/features/foo", "POST", h("Content-type: application/json"), 
-            null, body(json));
+        makeRequest(
+                new Request("/features/foo", "POST", h("Content-type", "application/json"), null, body(json)),
+                NanoHTTPD.HTTP_CREATED,
+                NanoHTTPD.MIME_PLAINTEXT
+        );
 
-        FeatureHandler h = new FeatureHandler();
-        assertTrue(h.canHandle(req, server));
-
-        Response res = h.handle(req, server);
-        assertEquals(NanoHTTPD.HTTP_CREATED, res.status);
-
-        verify(layer, ws, reg);
+        mock.verify();
     }
 
-    String dequote(String json) {
-        return json.replaceAll("'", "\"");
+    @Test
+    public void testBadRequests() throws Exception {
+        mock = MockServer.create()
+                    .withVectorLayer()
+                .replay();
+
+        makeBadRequest(
+                new Request("/features/baz", "GET", null, q(), null),
+                NanoHTTPD.HTTP_NOTFOUND,
+                "No such dataset at: /features/baz"
+        );
+
+        makeBadRequest(
+                new Request("/features/foo/baz", "GET", null, q(), null),
+                NanoHTTPD.HTTP_NOTFOUND,
+                "no such dataset: baz in workspace: foo"
+        );
     }
+
 }

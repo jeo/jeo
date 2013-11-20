@@ -391,7 +391,9 @@ public class FeatureHandler extends Handler {
             if (LOG.isDebugEnabled()) {
                 LOG.debug("Error parsing cql filter", e);
             }
-            throw new HttpException(HTTP_BADREQUEST, "Unsupported cql filter: " + cql);
+            String message = "Unsupported cql filter: " + cql + "\n";
+            message += e.getMessage();
+            throw new HttpException(HTTP_BADREQUEST, message);
         }
     }
 

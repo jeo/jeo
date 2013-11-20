@@ -5,6 +5,7 @@ import static org.junit.Assert.assertTrue;
 
 import org.jeo.data.mem.MemWorkspace;
 import org.jeo.data.mem.Memory;
+import org.jeo.filter.Filters;
 import org.jeo.json.JSONObject;
 import org.jeo.json.JSONValue;
 import org.junit.Before;
@@ -30,9 +31,9 @@ public class JSONRegistryTest {
 
     @Test
     public void testList() throws Exception {
-        Iterables.find(repo.list(), new Predicate<WorkspaceHandle>() {
+        Iterables.find(repo.query(Filters.all()), new Predicate<Handle<Object>>() {
             @Override
-            public boolean apply(WorkspaceHandle h) {
+            public boolean apply(Handle<Object> h) {
                 return "foo".equals(h.getName()) 
                     && Memory.class.isAssignableFrom(h.getDriver().getClass());
             }

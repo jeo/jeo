@@ -11,6 +11,7 @@ import java.util.Iterator;
 import org.apache.commons.io.FileUtils;
 import org.easymock.IAnswer;
 import org.jeo.Tests;
+import org.jeo.filter.Filters;
 import org.jeo.geojson.GeoJSON;
 import org.junit.After;
 import org.junit.Before;
@@ -40,19 +41,19 @@ public class DirectoryRepositoryTest {
 
     @Test
     public void testList() throws Exception {
-        assertEquals(2, Iterables.size(repo.list()));
-        Iterables.find(repo.list(), new Predicate<WorkspaceHandle>() {
+        assertEquals(2, Iterables.size(repo.query(Filters.all())));
+        Iterables.find(repo.query(Filters.all()), new Predicate<Handle<Object>>() {
             @Override
-            public boolean apply(WorkspaceHandle input) {
+            public boolean apply(Handle<Object> input) {
                 return "foo".equals(input.getName()) 
-                    && Workspace.class.isAssignableFrom(input.getType());
+                    && Dataset.class.isAssignableFrom(input.getType());
             }
         });
-        Iterables.find(repo.list(), new Predicate<WorkspaceHandle>() {
+        Iterables.find(repo.query(Filters.all()), new Predicate<Handle<Object>>() {
             @Override
-            public boolean apply(WorkspaceHandle input) {
+            public boolean apply(Handle<Object> input) {
                 return "bar".equals(input.getName())
-                    && Workspace.class.isAssignableFrom(input.getType());
+                    && Dataset.class.isAssignableFrom(input.getType());
             }
         });
     }
@@ -76,7 +77,7 @@ public class DirectoryRepositoryTest {
         replay(drvreg);
 
         repo = new DirectoryRepository(repo.getDirectory(), drvreg);
-        repo.list();
+        repo.query(Filters.all());
         repo.get("foo");
 
         verify(drvreg);

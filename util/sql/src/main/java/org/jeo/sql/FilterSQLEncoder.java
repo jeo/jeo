@@ -83,7 +83,7 @@ public class FilterSQLEncoder extends FilterVisitor {
         this.prepared = prepared;
     }
 
-    public String encode(Filter filter, Object obj) {
+    public String encode(Filter<?> filter, Object obj) {
         sql.clear();
         args.clear();
 
@@ -177,17 +177,17 @@ public class FilterSQLEncoder extends FilterVisitor {
         return null;
     }
 
-    public final Object visit(All all, Object obj) {
+    public final Object visit(All<?> all, Object obj) {
         sql.add("1 = 1");
         return obj;
     }
 
-    public Object visit(None none, Object obj) {
+    public Object visit(None<?> none, Object obj) {
         sql.add("1 = 0");
         return obj;
     }
 
-    public Object visit(Id id, Object obj) {
+    public Object visit(Id<?> id, Object obj) {
         if (pkey == null) {
             abort(id, "Id filter requires primary key");
         }
@@ -205,7 +205,7 @@ public class FilterSQLEncoder extends FilterVisitor {
         return obj;
     }
 
-    public Object visit(Logic logic, Object obj) {
+    public Object visit(Logic<?> logic, Object obj) {
         switch(logic.getType()) {
         case NOT:
             sql.add("NOT (");
@@ -214,7 +214,7 @@ public class FilterSQLEncoder extends FilterVisitor {
             break;
         default:
             String op = logic.getType().name();
-            for (Filter f : logic.getParts()) {
+            for (Filter<?> f : logic.getParts()) {
                 sql.add("(");
                 f.accept(this, obj);
                 sql.add(") ").add(op).add(" ");
@@ -225,7 +225,7 @@ public class FilterSQLEncoder extends FilterVisitor {
         return obj;
     }
 
-    public Object visit(Comparison compare, Object obj) {
+    public Object visit(Comparison<?> compare, Object obj) {
         Field fld = field(compare.getLeft(), compare.getRight());
 
         compare.getLeft().accept(this, fld);
@@ -234,7 +234,7 @@ public class FilterSQLEncoder extends FilterVisitor {
         return obj;
     }
 
-    public Object visit(Spatial spatial, Object obj) {
+    public Object visit(Spatial<?> spatial, Object obj) {
         Field fld = field(spatial.getLeft(), spatial.getRight());
         
         String function = null;

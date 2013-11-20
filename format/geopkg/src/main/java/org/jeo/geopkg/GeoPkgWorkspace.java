@@ -20,8 +20,8 @@ import javax.sql.DataSource;
 import org.jeo.data.Cursor;
 import org.jeo.data.Cursors;
 import org.jeo.data.Dataset;
-import org.jeo.data.DatasetHandle;
 import org.jeo.data.FileData;
+import org.jeo.data.Handle;
 import org.jeo.data.Query;
 import org.jeo.data.QueryPlan;
 import org.jeo.data.Tile;
@@ -35,6 +35,7 @@ import org.jeo.feature.Field;
 import org.jeo.feature.Schema;
 import org.jeo.feature.SchemaBuilder;
 import org.jeo.filter.Filter;
+import org.jeo.filter.Filters;
 import org.jeo.geom.Envelopes;
 import org.jeo.geom.Geom;
 import org.jeo.geopkg.Entry.DataType;
@@ -127,18 +128,22 @@ public class GeoPkgWorkspace implements Workspace, FileData {
     }
 
     @Override
-    public Iterable<DatasetHandle> list() throws IOException {
-        return run(new DbOP<List<DatasetHandle>>() {
+    public Iterable<Handle<Dataset>> list() throws IOException {
+        return run(new DbOP<List<Handle<Dataset>>>() {
             @Override
-            protected List<DatasetHandle> doRun(Connection cx) throws Exception {
+            protected List<Handle<Dataset>> doRun(Connection cx) throws Exception {
                 String sql = format("SELECT table_name FROM %s", GEOPACKAGE_CONTENTS);
                 log(sql);
 
                 ResultSet rs = open(open(cx.createStatement()).executeQuery(sql));
-                List<DatasetHandle> refs = new ArrayList<DatasetHandle>();
+                List<Handle<Dataset>> refs = new ArrayList<Handle<Dataset>>();
                 while(rs.next()) {
-                    refs.add(new DatasetHandle(rs.getString(1), Dataset.class, getDriver(), 
-                        GeoPkgWorkspace.this));
+                    refs.add(new Handle<Dataset>(rs.getString(1), Dataset.class, getDriver()) {
+                        @Override
+                        protected Dataset doResolve() throws IOException {
+                            return get(name);
+                        }
+                    });
                 }
                 return refs;
             }
@@ -289,7 +294,7 @@ public class GeoPkgWorkspace implements Workspace, FileData {
         GeoPkgFilterSQLEncoder sqlfe = new GeoPkgFilterSQLEncoder();
         sqlfe.setDbTypes(dbtypes);
 
-        if (!Filter.isTrueOrNull(q.getFilter())) {
+        if (!Filters.isTrueOrNull(q.getFilter())) {
             try {
                 sql.add(" WHERE ").add(sqlfe.encode(q.getFilter(), null));
                 qp.filtered();

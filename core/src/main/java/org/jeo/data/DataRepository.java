@@ -2,6 +2,8 @@ package org.jeo.data;
 
 import java.io.IOException;
 
+import org.jeo.filter.Filter;
+
 /**
  * A repository of workspace objects. 
  * 
@@ -10,20 +12,17 @@ import java.io.IOException;
 public interface DataRepository extends Disposable {
 
     /**
-     * Collection of handles for workspaces in the repository.
+     * Queries handles present in the repository.
      */
-    Iterable<WorkspaceHandle> list() throws IOException;
+    Iterable<Handle<Object>> query(Filter<? super Handle<Object>> filter) throws IOException;
 
     /**
-     * Returns a workspace object by name.
-     * <p>
-     * If the repository supports a "default" workspace in the repository it should return it from
-     * this method when the empty string is passed as the <tt>name</tt>.
-     * </p>
-     * @param name The name of the workspace.
+     * Returns a data object object by name.
+     *
+     * @param name The name of the object.
      * 
-     * @return The workspace or <code>null</code> if so such object matching the name exists.
+     * @return The object or <code>null</code> if so such object matching the name exists.
      */
-    Workspace get(String name) throws IOException;
+    Object get(String name) throws IOException;
 
 }

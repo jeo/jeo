@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 import org.jeo.feature.Schema;
+import org.jeo.filter.Filter;
 import org.jeo.util.Key;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,7 +21,7 @@ public class CachedRepository implements DataRepository {
     static Logger LOG = LoggerFactory.getLogger(CachedRepository.class);
 
     DataRepository reg;
-    LoadingCache<String, Workspace> wsCache;
+    LoadingCache<String, Object> objCache;
 
     public CachedRepository(DataRepository reg) {
         this(reg, 20);
@@ -28,30 +29,39 @@ public class CachedRepository implements DataRepository {
 
     public CachedRepository(DataRepository reg, final int cacheSize) {
         this.reg = reg;
-        wsCache = CacheBuilder.newBuilder().maximumSize(cacheSize)
-            .removalListener(new RemovalListener<String, Workspace>() {
+        objCache = CacheBuilder.newBuilder().maximumSize(cacheSize)
+            .removalListener(new RemovalListener<String, Object>() {
                 @Override
-                public void onRemoval(RemovalNotification<String, Workspace> n) {
-                    n.getValue().close();
+                public void onRemoval(RemovalNotification<String, Object> n) {
+                    Object obj = n.getValue();
+                    if (obj instanceof Disposable) {
+                        ((Disposable)obj).close();
+                    }
                 }
-            }).build(new CacheLoader<String, Workspace>() {
+            }).build(new CacheLoader<String, Object>() {
                 @Override
-                public Workspace load(String key) throws Exception {
-                    return new CachedWorkspace(CachedRepository.this.reg.get(key), cacheSize);
+                public Object load(String key) throws Exception {
+                    Object obj = CachedRepository.this.reg.get(key);
+                    if (obj instanceof Workspace) {
+                        return new CachedWorkspace((Workspace)obj, cacheSize);
+                    }
+                    
+                    return obj;
                 }
             });
     }
 
     @Override
-    public Iterable<WorkspaceHandle> list() throws IOException {
-        //TODO: might want to cache this
-        return reg.list();
+    public Iterable<Handle<Object>> query(Filter<? super Handle<Object>> filter)
+            throws IOException {
+        //TODO: check for FIlter.all and cache it
+        return reg.query(filter);
     }
 
     @Override
-    public Workspace get(String key) throws IOException {
+    public Object get(String key) throws IOException {
         try {
-            return wsCache.get(key);
+            return objCache.get(key);
         } catch (ExecutionException e) {
             LOG.warn("Error loading object from cache", e);
             return reg.get(key);
@@ -60,7 +70,7 @@ public class CachedRepository implements DataRepository {
 
     @Override
     public void close() {
-        wsCache.invalidateAll();
+        objCache.invalidateAll();
         reg.close();
     }
 
@@ -96,7 +106,7 @@ public class CachedRepository implements DataRepository {
         }
 
         @Override
-        public Iterable<DatasetHandle> list() throws IOException {
+        public Iterable<Handle<Dataset>> list() throws IOException {
             return ws.list();
         }
 

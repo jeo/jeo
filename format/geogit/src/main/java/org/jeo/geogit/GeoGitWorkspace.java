@@ -30,8 +30,8 @@ import org.geogit.api.porcelain.LogOp;
 import org.geogit.repository.Repository;
 import org.geogit.repository.WorkingTree;
 import org.jeo.data.Dataset;
-import org.jeo.data.DatasetHandle;
 import org.jeo.data.FileData;
+import org.jeo.data.Handle;
 import org.jeo.data.Workspace;
 import org.jeo.feature.Schema;
 import org.jeo.geotools.GT;
@@ -93,17 +93,22 @@ public class GeoGitWorkspace implements Workspace, FileData {
     }
 
     @Override
-    public Iterable<DatasetHandle> list() throws IOException {
+    public Iterable<Handle<Dataset>> list() throws IOException {
         return layers(branch());
     }
 
-    public Iterable<DatasetHandle> layers(String rev) throws IOException {
+    public Iterable<Handle<Dataset>> layers(String rev) throws IOException {
         List<NodeRef> trees = typeRefs(rev);
-        return Iterables.transform(trees, new Function<NodeRef, DatasetHandle>() {
+        return Iterables.transform(trees, new Function<NodeRef, Handle<Dataset>>() {
             @Override
-            public DatasetHandle apply(NodeRef input) {
-                return new DatasetHandle(NodeRef.nodeFromPath(input.path()), Dataset.class, 
-                    getDriver(), GeoGitWorkspace.this);
+            public Handle<Dataset> apply(NodeRef input) {
+                return new Handle<Dataset>(NodeRef.nodeFromPath(input.path()), Dataset.class, 
+                    getDriver()) {
+                    @Override
+                    protected Dataset doResolve() throws IOException {
+                        return get(name);
+                    }
+                };
             }
         });
     }

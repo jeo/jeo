@@ -57,7 +57,7 @@ public class MapBuilder {
         return layer(data.getName(), data);
     }
 
-    public MapBuilder layer(Dataset data, Filter filter) {
+    public MapBuilder layer(Dataset data, Filter<Object> filter) {
         return layer(data.getName(), data, filter);
     }
 
@@ -65,11 +65,11 @@ public class MapBuilder {
         return layer(name, name, data, null);
     }
 
-    public MapBuilder layer(String name, Dataset data, Filter filter) {
+    public MapBuilder layer(String name, Dataset data, Filter<Object> filter) {
         return layer(name, name, data, filter);
     }
     
-    public MapBuilder layer(String name, String title, Dataset data, Filter filter) {
+    public MapBuilder layer(String name, String title, Dataset data, Filter<Object> filter) {
         Layer l = new Layer();
         l.setName(name);
         l.setTitle(title);

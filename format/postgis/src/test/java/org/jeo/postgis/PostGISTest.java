@@ -14,7 +14,8 @@ import java.util.Set;
 
 import org.jeo.data.Cursor;
 import org.jeo.data.Cursors;
-import org.jeo.data.DatasetHandle;
+import org.jeo.data.Dataset;
+import org.jeo.data.Handle;
 import org.jeo.data.Query;
 import org.jeo.data.VectorDataset;
 import org.jeo.feature.Feature;
@@ -110,10 +111,10 @@ public class PostGISTest {
         catch(NoSuchElementException e) {}
     }
 
-    Predicate<DatasetHandle> refFor(final String name) {
-        return new Predicate<DatasetHandle>() {
+    Predicate<Handle<Dataset>> refFor(final String name) {
+        return new Predicate<Handle<Dataset>>() {
             @Override
-            public boolean apply(DatasetHandle input) {
+            public boolean apply(Handle<Dataset> input) {
                 return name.equals(input.getName());
             }
         };

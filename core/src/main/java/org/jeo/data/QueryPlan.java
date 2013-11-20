@@ -2,6 +2,7 @@ package org.jeo.data;
 
 import org.jeo.feature.Feature;
 import org.jeo.filter.Filter;
+import org.jeo.filter.Filters;
 import org.jeo.geom.Envelopes;
 import org.jeo.util.Pair;
 import org.osgeo.proj4j.CoordinateReferenceSystem;
@@ -151,8 +152,8 @@ public class QueryPlan {
             cursor = Cursors.intersects(cursor, bounds);
         }
 
-        Filter filter = q.getFilter();
-        if (!isFiltered() && !Filter.isFalseOrNull(filter)) {
+        Filter<Feature> filter = q.getFilter();
+        if (!isFiltered() && !Filters.isFalseOrNull(filter)) {
             cursor = Cursors.filter(cursor, filter);
         }
 

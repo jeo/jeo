@@ -9,6 +9,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 
 import org.jeo.data.mem.MemWorkspace;
+import org.jeo.filter.Filter;
 import org.jeo.util.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -69,7 +70,9 @@ public class DirectoryRepository implements DataRepository {
     }
 
     @Override
-    public Iterable<WorkspaceHandle> list() throws IOException {
+    public Iterable<Handle<Object>> query(Filter<? super Handle<Object>> filter) 
+        throws IOException {
+        
         // list all files, possibily filtering by extension
         String[] files = exts == null ? baseDir.list() : baseDir.list(new FilenameFilter() {
             @Override
@@ -79,14 +82,19 @@ public class DirectoryRepository implements DataRepository {
         });
 
         // process files to see what ones we have drivers for
-        LinkedHashSet<WorkspaceHandle> items = new LinkedHashSet<WorkspaceHandle>();
+        LinkedHashSet<Handle<Object>> items = new LinkedHashSet<Handle<Object>>();
         for (String fn : files) {
             Driver<?> drv = Drivers.find(new File(baseDir, fn).toURI(), drivers);
             if (drv != null) {
-                Class<?> t = drv.getType();
                 String name = Util.base(fn);
-                if (Workspace.class.isAssignableFrom(t) || Dataset.class.isAssignableFrom(t)) {
-                    items.add(new WorkspaceHandle(name, drv, this));
+                Handle<Object> h = new Handle<Object>(name, drv.getType(), drv) {
+                    @Override
+                    protected Object doResolve() throws IOException {
+                        return get(name);
+                    }
+                };
+                if (filter.apply(h)) {
+                    items.add(h);
                 }
             }
         }

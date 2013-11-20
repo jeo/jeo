@@ -7,6 +7,10 @@ package org.jeo.filter;
  */
 public class FilterVisitor {
 
+    public Object visit(Self self, Object obj) {
+        return obj;
+    }
+
     public Object visit(Literal literal, Object obj) {
         return obj;
     }
@@ -26,26 +30,30 @@ public class FilterVisitor {
         return obj;
     }
 
-    public Object visit(All all, Object obj) {
+    public Object visit(Expression expr, Object obj) {
         return obj;
     }
 
-    public Object visit(None none, Object obj) {
+    public Object visit(All<?> all, Object obj) {
         return obj;
     }
 
-    public Object visit(Id id, Object obj) {
+    public Object visit(None<?> none, Object obj) {
         return obj;
     }
 
-    public Object visit(Logic logic, Object obj) {
-        for (Filter f : logic.getParts()) {
+    public Object visit(Id<?> id, Object obj) {
+        return obj;
+    }
+
+    public Object visit(Logic<?> logic, Object obj) {
+        for (Filter<?> f : logic.getParts()) {
             f.accept(this, obj);
         }
         return obj;
     }
 
-    public Object visit(Comparison compare, Object obj) {
+    public Object visit(Comparison<?> compare, Object obj) {
         if (compare.getLeft() != null) {
             compare.getLeft().accept(this, obj);
         }
@@ -55,7 +63,7 @@ public class FilterVisitor {
         return obj;
     }
 
-    public Object visit(Spatial spatial, Object obj) {
+    public Object visit(Spatial<?> spatial, Object obj) {
         if (spatial.getLeft() != null) {
             spatial.getLeft().accept(this, obj);
         }
@@ -63,6 +71,15 @@ public class FilterVisitor {
             spatial.getRight().accept(this, obj);
         }
         
+        return obj;
+    }
+
+    public Object visit(TypeOf<?> inst, Object obj) {
+        inst.getExpression().accept(this, obj);
+        return obj;
+    }
+
+    public Object visit(Filter<?> filter, Object obj) {
         return obj;
     }
 }

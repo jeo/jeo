@@ -7,7 +7,8 @@ import java.io.IOException;
 import java.util.Set;
 
 import org.jeo.data.Cursor;
-import org.jeo.data.DatasetHandle;
+import org.jeo.data.Dataset;
+import org.jeo.data.Handle;
 import org.jeo.data.Query;
 import org.jeo.feature.Feature;
 import org.jeo.feature.Features;
@@ -47,9 +48,9 @@ public class MemoryTest {
 
     @Test
     public void testLayers() throws IOException {
-        assertTrue(Iterables.any(mem.list(), new Predicate<DatasetHandle>() {
+        assertTrue(Iterables.any(mem.list(), new Predicate<Handle<Dataset>>() {
             @Override
-            public boolean apply(DatasetHandle h) {
+            public boolean apply(Handle<Dataset> h) {
                 return "widgets".equals(h.getName());
             }
         }));

@@ -2,6 +2,7 @@ package org.jeo.filter.cql;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import org.jeo.filter.Comparison;
 import org.jeo.filter.Filter;
@@ -64,5 +65,17 @@ public class CQLTest {
         Filter f = CQL.parse("IN ('foo.1', 'foo.2')");
         assertTrue(f instanceof Id);
     }
-     
+
+    @Test
+    public void testInvalidCQL() throws ParseException {
+        try {
+            CQL.parse("STATE_NAME+EQ+'Virginia");
+        } catch (ParseException pe) {
+            assertEquals("Invalid CQL syntax: Lexical error at line 1, column 24."
+                    + "  Encountered: <EOF> after : \"\\'Virginia\"", pe.getMessage());
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            fail("expected to catch ParseException, got : " + ex.getClass());
+        }
+    }
 }

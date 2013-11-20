@@ -1,12 +1,17 @@
 package org.jeo.nano;
 
+import com.vividsolutions.jts.geom.Point;
+import java.util.regex.Pattern;
 import static org.easymock.classextension.EasyMock.createMock;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import org.jeo.data.Cursor;
+import org.jeo.feature.BasicFeature;
 import org.jeo.feature.Feature;
+import org.jeo.feature.Schema;
+import org.jeo.feature.SchemaBuilder;
 import org.jeo.geojson.GeoJSONReader;
 import org.jeo.nano.NanoHTTPD.Response;
 import org.junit.Before;
@@ -22,7 +27,13 @@ public class FeatureHandlerTest extends HandlerTestSupport {
 
     @Test
     public void testPattern() {
-        testWorkspaceDataPattern(FeatureHandler.FEATURES_URI_RE, "/features", false, true);
+        Pattern p = FeatureHandler.FEATURES_URI_RE;
+        assertFalse(p.matcher("/features").matches());
+        assertFalse(p.matcher("/features/").matches());
+        assertPattern(p, "/features/work-space/dataset", "work-space", "dataset");
+        assertPattern(p, "/features/work-space/dataset/", "work-space", "dataset");
+        assertPattern(p, "/features/work-space/dataset/fid", "work-space", "dataset", "fid");
+        assertPattern(p, "/features/work_space/data-set.html", "work_space", "data-set", null, "html");
     }
 
     @Test
@@ -39,6 +50,28 @@ public class FeatureHandlerTest extends HandlerTestSupport {
         );
         
         Cursor<Feature> features = (Cursor<Feature>) new GeoJSONReader().read(res.data);
+        assertFalse(features.hasNext());
+
+        mock.verify();
+    }
+
+    @Test
+    public void testGetWorkspaceDatasetFeatureJSON() throws Exception {
+        mock = MockServer.create()
+                .withVectorLayer()
+                    .withFeatureHavingId("baz")
+                .replay();
+
+        Response res = makeRequest(
+                new Request("/features/foo/bar/baz", "GET", null, q(), null),
+                NanoHTTPD.HTTP_OK,
+                NanoHTTPD.MIME_JSON
+        );
+
+        Cursor<Feature> features = (Cursor<Feature>) new GeoJSONReader().read(res.data);
+        assertTrue(features.hasNext());
+        Feature single = features.next();
+        assertEquals(single.get("id"), "baz");
         assertFalse(features.hasNext());
 
         mock.verify();
@@ -83,19 +116,58 @@ public class FeatureHandlerTest extends HandlerTestSupport {
     }
 
     @Test
-    public void testPostAddFeatures() throws Exception {
+    public void testPutEditFeature() throws Exception {
+        Feature feature = new BasicFeature("baz");
+        feature.put("name", "fourtytwo");
         mock = MockServer.create()
-                    .withVectorLayer()
-                        .withSingleFeature()
+                .withVectorLayer()
+                    .withFeatureHavingIdForEdit(feature, true)
                 .replay();
 
-        String json = dequote("{'type':'Feature','geometry':{'type':'Point','coordinates':[0.0,0.0]}," +
+        String json = dequote("{'type':'Feature'," +
+            "'properties':{'name':'zero'}}");
+        makeRequest(
+                new Request("/features/foo/bar/baz", "PUT", h("Content-type", "application/json"), null, body(json)),
+                NanoHTTPD.HTTP_OK,
+                NanoHTTPD.MIME_PLAINTEXT
+        );
+        assertEquals("baz", feature.getId());
+        assertEquals("zero", feature.get("name"));
+
+        mock.verify();
+
+        // make a bad request
+        mock = MockServer.create()
+                .withVectorLayer()
+                    .withFeatureHavingIdForEdit(feature, false)
+                .replay();
+        makeBadRequest(
+                new Request("/features/foo/bar/shaz", "PUT", h("Content-type", "application/json"), null, body(json)),
+                NanoHTTPD.HTTP_BADREQUEST,
+                "requested feature does not exist : /features/foo/bar/shaz"
+        );
+    }
+
+    @Test
+    public void testPostAddFeatures() throws Exception {
+        Schema schema = new SchemaBuilder("receiver").
+                field("geometry", Point.class).
+                field("name", String.class).
+                schema();
+        Feature receiver = new BasicFeature("receiver", schema);
+        mock = MockServer.create()
+                    .withWritableVectorLayer(receiver)
+                .replay();
+
+        String json = dequote("{'type':'Feature','geometry':{'type':'Point','coordinates':[1.2,3.4]}," +
             "'properties':{'name':'zero'}}");
         makeRequest(
                 new Request("/features/foo/bar", "POST", h("Content-type", "application/json"), null, body(json)),
                 NanoHTTPD.HTTP_CREATED,
                 NanoHTTPD.MIME_PLAINTEXT
         );
+
+        assertEquals("receiver{geometry=POINT (1.2 3.4), name=zero}", receiver.toString());
 
         mock.verify();
     }

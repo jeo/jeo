@@ -56,14 +56,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.vividsolutions.jts.geom.Envelope;
+import org.jeo.filter.Id;
+import org.jeo.filter.Literal;
 
 public class FeatureHandler extends Handler {
 
     static final Logger LOG = LoggerFactory.getLogger(NanoServer.class);
 
-    // /features/<workspace>[/<layer>]
+    // /features/<workspace>[/<layer>][/<id>]
     static final Pattern FEATURES_URI_RE =
-        Pattern.compile("/features(?:/([\\w-]+)(?:/([\\w-]+))?)(?:\\.([\\w]+))?/?", Pattern.CASE_INSENSITIVE);
+        Pattern.compile("/features(?:/([\\w-]+)(?:/([\\w-]+))?)(?:/([\\w-]+))?(?:\\.([\\w]+))?/?", Pattern.CASE_INSENSITIVE);
 
     MapRenderer renderer;
 
@@ -95,6 +97,9 @@ public class FeatureHandler extends Handler {
             }
             else if ("POST".equalsIgnoreCase(request.getMethod())) {
                 return handlePost(request, server);
+            }
+            else if ("PUT".equalsIgnoreCase(request.getMethod())) {
+                return handlePut(request, server);
             }
     
             return new Response(HTTP_METHOD_NOT_ALLOWED, MIME_PLAINTEXT, "");
@@ -133,6 +138,19 @@ public class FeatureHandler extends Handler {
     Response getAsJSON(VectorDataset layer, Request request, NanoServer server) 
         throws IOException {
 
+        Query q = buildQuery(layer, request);
+        
+        Cursor<Feature> c = layer.cursor(q);
+        String json;
+        try {
+            json = GeoJSONWriter.toString(c);
+        } finally {
+            c.close();
+        }
+        return new Response(HTTP_OK, MIME_JSON, json);
+    }
+
+    Query buildQuery(VectorDataset layer, Request request) throws IOException {
         Properties p = request.getParms();
 
         //parse the bbox
@@ -143,6 +161,13 @@ public class FeatureHandler extends Handler {
         }
 
         Query q = new Query();
+
+        String fid = parseFeatureId(request);
+
+        if (fid != null) {
+            // @todo if fid is provided, should other parameters be 'errors'?
+            q.filter(new Id(new Literal(fid)));
+        }
 
         if (p.containsKey("srs")) {
             CoordinateReferenceSystem to = parseCRS(p);
@@ -159,7 +184,7 @@ public class FeatureHandler extends Handler {
         if (bbox != null) {
             q.bounds(bbox);
         }
-        
+
         if (p.containsKey("limit")) {
             q.limit(Integer.parseInt(p.getProperty("limit")));
         }
@@ -167,9 +192,8 @@ public class FeatureHandler extends Handler {
         if (p.containsKey("filter")) {
             q.filter(parseFilter(p.getProperty("filter")));
         }
-        
-        Cursor<Feature> c = layer.cursor(q);
-        return new Response(HTTP_OK, MIME_JSON, GeoJSONWriter.toString(c));
+
+        return q;
     }
 
     Response getAsHTML(VectorDataset layer, Request request, NanoServer server) 
@@ -285,27 +309,31 @@ public class FeatureHandler extends Handler {
         Matcher m = (Matcher) request.getContext().get(Matcher.class);
         String dataSet = m.group(2);
 
-        String file = request.getFiles().getProperty("content");
-        BufferedInputStream in = new BufferedInputStream(new FileInputStream(file));
-        try {
-            if (dataSet == null) {
-                return handlePostCreateLayer(request, in, server);
-            }
-            else {
-                return handlePostAddFeatures(request, in, server);
-            }
-        }
-        finally {
-            in.close();
+        if (dataSet == null) {
+            return handlePostCreateLayer(request, server);
+        } else {
+            return handlePostAddFeatures(request, server);
         }
     }
 
-    Response handlePostCreateLayer(Request request, InputStream body, NanoServer server) throws IOException {
+    Response handlePut(Request request, NanoServer server) throws IOException {
+        String fid = parseFeatureId(request);
+        if (fid == null) {
+            throw new HttpException(HTTP_BADREQUEST, "must provide feature id for PUT");
+        }
+
+        Query query = new Query().update().filter(new Id(new Literal(fid)));
+        handleWrite(request, server, query, true);
+
+        return new Response(HTTP_OK, MIME_PLAINTEXT, "");
+    }
+
+    Response handlePostCreateLayer(Request request, NanoServer server) throws IOException {
         Matcher m = (Matcher) request.getContext().get(Matcher.class);
         Workspace ws = findWorkspace(m.group(1), server.getRegistry());
 
         try {
-            Schema schema = parseSchema(body);
+            Schema schema = parseSchema(getInput(request));
             ws.create(schema);
         } finally {
             ws.close();
@@ -315,14 +343,23 @@ public class FeatureHandler extends Handler {
         return new Response(HTTP_CREATED, MIME_PLAINTEXT, "");
     }
 
-    Response handlePostAddFeatures(Request request, InputStream body, NanoServer server) throws IOException {
+    Response handlePostAddFeatures(Request request, NanoServer server) throws IOException {
+        Query query = new Query().append();
+        handleWrite(request, server, query, false);
+        return new Response(HTTP_CREATED, MIME_PLAINTEXT, "");
+    }
+
+    void handleWrite(Request request, NanoServer server, Query query, boolean shouldExist) throws IOException {
         Pair<VectorDataset,Workspace> p = findVectorLayer(request, server);
 
-        Object obj = new GeoJSONReader().read(body);
+        Object obj = new GeoJSONReader().read(getInput(request));
 
         VectorDataset layer = p.first();
         try {
-            Cursor<Feature> c = layer.cursor(new Query().append());
+            Cursor<Feature> c = layer.cursor(query);
+            if (shouldExist && ! c.hasNext()) {
+                throw new HttpException(HTTP_BADREQUEST, "requested feature does not exist : " + request.getUri());
+            }
             try {
                 if (obj instanceof Feature) {
                     Features.copy((Feature)obj, c.next());
@@ -335,11 +372,8 @@ public class FeatureHandler extends Handler {
                     }
                 }
                 else {
-                    return new Response(HTTP_BADREQUEST, MIME_PLAINTEXT, "unable to add features from: " + obj);
+                    throw new HttpException(HTTP_BADREQUEST, "unable to add features from: " + obj);
                 }
-        
-                //TODO: set Location header
-                return new Response(HTTP_CREATED, MIME_PLAINTEXT, "");
             }
             finally {
                 c.close();
@@ -364,7 +398,18 @@ public class FeatureHandler extends Handler {
         return Pair.of((VectorDataset) p.first(), p.second());
     }
 
+    InputStream getInput(Request request) throws IOException {
+        String file = request.getFiles().getProperty("content");
+        return new BufferedInputStream(new FileInputStream(file));
+    }
+
     String parseFormat(Request request) throws IOException {
+        Matcher m = (Matcher) request.getContext().get(Matcher.class);
+
+        return m.group(4) != null ? m.group(4) : null;
+    }
+
+    String parseFeatureId(Request request) throws IOException {
         Matcher m = (Matcher) request.getContext().get(Matcher.class);
 
         return m.group(3) != null ? m.group(3) : null;

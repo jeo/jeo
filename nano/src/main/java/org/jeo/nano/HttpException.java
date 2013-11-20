@@ -15,6 +15,7 @@ public class HttpException extends RuntimeException {
         this(status, content, NanoHTTPD.MIME_PLAINTEXT);
     }
     public HttpException(String status, String content, String mimeType) {
+        super(content);
         this.status = status;
         this.content = content;
         this.mimeType = mimeType;

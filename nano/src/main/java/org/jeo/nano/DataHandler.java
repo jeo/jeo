@@ -1,7 +1,7 @@
 package org.jeo.nano;
 
 import static org.jeo.nano.NanoHTTPD.HTTP_OK;
-import static org.jeo.nano.NanoHTTPD.HTTP_BADREQUEST;
+import static org.jeo.nano.NanoHTTPD.HTTP_INTERNALERROR;
 import static org.jeo.nano.NanoHTTPD.HTTP_NOTFOUND;
 import static org.jeo.nano.NanoHTTPD.MIME_JSON;
 
@@ -35,7 +35,7 @@ import com.vividsolutions.jts.geom.Envelope;
 public class DataHandler extends Handler {
 
     static final Pattern DATA_URI_RE =
-        Pattern.compile("/data(?:/(\\w+)(?:/(\\w+))?)?/?", Pattern.CASE_INSENSITIVE);
+        Pattern.compile("/data(?:/([\\w-]+)(?:/([\\w-]+))?)?/?", Pattern.CASE_INSENSITIVE);
 
     @Override
     public boolean canHandle(Request request, NanoServer server) {
@@ -67,8 +67,11 @@ public class DataHandler extends Handler {
                 else if (obj instanceof Style) {
                     handleStyle((Style) obj, writer, request);
                 }
+                else if (obj == null) {
+                    throw new HttpException(HTTP_NOTFOUND, "not found : " + request.getUri());
+                }
                 else {
-                    throw new HttpException(HTTP_BADREQUEST, "unknown object: " + obj);
+                    throw new HttpException(HTTP_INTERNALERROR, "unknown object: " + obj);
                 }
             }
             finally {
@@ -182,7 +185,7 @@ public class DataHandler extends Handler {
         }
 
         w.endObject();
-        w.key("features").value("/features/" + path(req) + ".json");
+        w.key("features").value("/features/" + createPath(req) + ".json");
     }
 
     void handleTileDataset(TileDataset ds, GeoJSONWriter w, Request req) throws IOException {
@@ -202,55 +205,14 @@ public class DataHandler extends Handler {
         w.endArray();
 
         //TODO: link to first tile?
-        w.key("tiles").value("/tiles/" + path(req));
+        w.key("tiles").value("/tiles/" + createPath(req));
     }
 
     void handleStyle(Style s, GeoJSONWriter w, Request req) throws IOException {
         w.object()
           .key("type").value("style")
-          .key("style").value("/styles/" + path(req))
+          .key("style").value("/styles/" + createPath(req))
           .endObject();
-    }
-
-    Pair<Object,Object> findObject(Request request, DataRepository reg) throws IOException {
-        Matcher m = (Matcher) request.getContext().get(Matcher.class);
-        String first = m.group(1);
-        if (first != null) {
-            String second = m.group(2);
-            if (second != null) {
-                try {
-                    Workspace ws = (Workspace) reg.get(first);
-                    if (ws == null) {
-                        throw new HttpException(HTTP_NOTFOUND, "no such workspace: " + first);
-                    }
-
-                    Dataset ds = ws.get(second);
-                    if (ds == null) {
-                        throw new HttpException(HTTP_NOTFOUND, 
-                            "no such dataset: " + second + " in workspace: " + first);
-                    }
-
-                    return new Pair<Object,Object>(ds, ws);
-                } catch (ClassCastException e) {
-                    throw new HttpException(HTTP_BADREQUEST, first + " is not a workspace");
-                }
-            }
-            else {
-                return Pair.of((Object)reg.get(first), null);
-            }
-        }
-        else {
-            return null;
-        }
-    }
-
-    String path(Request req) {
-        Matcher m = (Matcher) req.getContext().get(Matcher.class);
-        String p = m.group(1);
-        if (m.group(2) != null) {
-            p += "/" + m.group(2);
-        }
-        return p;
     }
 
     void close(Object obj) {

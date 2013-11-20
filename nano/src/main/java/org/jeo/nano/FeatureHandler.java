@@ -62,9 +62,8 @@ public class FeatureHandler extends Handler {
     static final Logger LOG = LoggerFactory.getLogger(NanoServer.class);
 
     // /features/<workspace>[/<layer>]
-    static final Pattern FEATURES_URI_RE = 
-        //Pattern.compile("/features/((?:[^/]+/)?[^/]+)/?", Pattern.CASE_INSENSITIVE);
-        Pattern.compile("/features/((?:\\w+/)?\\w+)(?:\\.(\\w+))?/?", Pattern.CASE_INSENSITIVE);
+    static final Pattern FEATURES_URI_RE =
+        Pattern.compile("/features(?:/([\\w-]+)(?:/([\\w-]+))?)(?:\\.([\\w]+))?/?", Pattern.CASE_INSENSITIVE);
 
     MapRenderer renderer;
 
@@ -178,7 +177,7 @@ public class FeatureHandler extends Handler {
 
         Map<String,String> vars = new HashMap<String, String>();
         vars.put("name", layer.getName());
-        vars.put("path", parseLayerPath(request));
+        vars.put("path", createPath(request));
 
         Properties p = request.getParms();
 
@@ -285,12 +284,12 @@ public class FeatureHandler extends Handler {
 
     Response handlePost(Request request, NanoServer server) throws IOException {
         Matcher m = (Matcher) request.getContext().get(Matcher.class);
-        String key = m.group(1);
+        String dataSet = m.group(2);
 
         String file = request.getFiles().getProperty("content");
         BufferedInputStream in = new BufferedInputStream(new FileInputStream(file));
         try {
-            if (!key.contains("/")) {
+            if (dataSet == null) {
                 return handlePostCreateLayer(request, in, server);
             }
             else {
@@ -305,9 +304,13 @@ public class FeatureHandler extends Handler {
     Response handlePostCreateLayer(Request request, InputStream body, NanoServer server) throws IOException {
         Matcher m = (Matcher) request.getContext().get(Matcher.class);
         Workspace ws = findWorkspace(m.group(1), server.getRegistry());
-        
-        Schema schema = parseSchema(body);
-        ws.create(schema);
+
+        try {
+            Schema schema = parseSchema(body);
+            ws.create(schema);
+        } finally {
+            ws.close();
+        }
 
         //TODO: set Location header
         return new Response(HTTP_CREATED, MIME_PLAINTEXT, "");
@@ -353,29 +356,19 @@ public class FeatureHandler extends Handler {
     }
 
     Pair<VectorDataset,Workspace> findVectorLayer(Request request, NanoServer server) throws IOException {
-        String path = parseLayerPath(request);
-        Pair<Dataset,Workspace> p = findDataset(path, server.getRegistry());
+        Pair<Dataset,Workspace> p = findDataset(request, server.getRegistry());
         if (p == null || !(p.first() instanceof VectorDataset)) {
             //no such layer
-            throw new HttpException(HTTP_NOTFOUND, "No such feature layer: " + path);
+            throw new HttpException(HTTP_NOTFOUND, "No such feature layer at: " + request.getUri());
         }
 
         return Pair.of((VectorDataset) p.first(), p.second());
     }
 
-    String parseLayerPath(Request request) {
-            Matcher m = (Matcher) request.getContext().get(Matcher.class);
-            return m.group(1);
-    }
-
     String parseFormat(Request request) throws IOException {
         Matcher m = (Matcher) request.getContext().get(Matcher.class);
 
-        if (m.groupCount() > 1 && m.group(2) != null) {
-            return m.group(2);
-        }
-
-        return null;
+        return m.group(3) != null ? m.group(3) : null;
     }
 
     Envelope parseBBOX(String bbox) {

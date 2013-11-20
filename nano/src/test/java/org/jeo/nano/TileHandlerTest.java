@@ -1,48 +1,66 @@
 package org.jeo.nano;
 
-import static org.easymock.classextension.EasyMock.*;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
-import org.jeo.data.DataRepository;
+import java.io.IOException;
 import org.jeo.data.Tile;
 import org.jeo.data.TileDataset;
-import org.jeo.data.Workspace;
 import org.jeo.nano.NanoHTTPD.Response;
+import org.junit.Before;
 import org.junit.Test;
 
 public class TileHandlerTest extends HandlerTestSupport {
 
+    @Before
+    public void init() {
+        handler = new TileHandler();
+    }
+
+    @Test
+    public void testPattern() {
+        assertPattern(TileHandler.TILES_URI_RE, "/tiles/work-space/dataset", "work-space", "dataset");
+        assertPattern(TileHandler.TILES_URI_RE, "/tiles/workspace/data-set.html", "workspace", "data-set", null, null, null, "html");
+        assertPattern(TileHandler.TILES_URI_RE, "/tiles/work_space/data_set/1/2/3.jpg", "work_space", "data_set", "1", "2", "3", "jpg");
+    }
+
     @Test
     public void testGet() throws Exception {
-        TileDataset layer = createMock(TileDataset.class);
-        expect(layer.read(1, 2, 3)).andReturn(new Tile(1,2,3,new byte[]{},"image/png")).once();
-        layer.close();
-        expectLastCall().once();
-        replay(layer);
+        mock = MockServer.create().
+                withTileLayer(true).
+                replay();
 
-        Workspace ws = createMock(Workspace.class);
-        expect(ws.get("bar")).andReturn(layer).once();
-        ws.close();
-        expectLastCall().once();
-        replay(ws);
+        makeRequest(
+                new Request("/tiles/foo/bar/1/2/3.png", "GET", null, null, null),
+                NanoHTTPD.HTTP_OK,
+                "image/png"
+        );
 
-        DataRepository reg = createMock(DataRepository.class);
-        expect(reg.get("foo")).andReturn(ws).once();
-        replay(reg);
+        mock.verify();
+    }
 
-        NanoServer server = createMock(NanoServer.class);
-        expect(server.getRegistry()).andReturn(reg).anyTimes();
-        replay(server);
+    @Test
+    public void testGetHTML() throws Exception {
+        mock = MockServer.create().
+                withTileLayer(false).
+                withMoreDetails().
+                replay();
 
-        Request req = new Request("/tiles/foo/bar/1/2/3.png", "GET", null, null, null);
-        TileHandler h = new TileHandler();
-        assertTrue(h.canHandle(req, server));
+        handler = new TileHandler() {
 
-        Response res = h.handle(req, server);
-        assertEquals(NanoHTTPD.HTTP_OK, res.status);
-        assertEquals("image/png", res.mimeType);
+            @Override
+            Tile getFirstTile(TileDataset layer) throws IOException {
+                return new Tile(1, 2, 3);
+            }
 
-        verify(layer, ws, reg);
+        };
+
+        Response res = makeRequest(
+                new Request("/tiles/foo/bar.html", "GET", null, null, null),
+                NanoHTTPD.HTTP_OK,
+                NanoHTTPD.MIME_HTML
+        );
+
+        String body = read(res);
+        assertContains(body, "new OpenLayers.Bounds(-42.000000,-42.000000,42.000000,42.000000)");
+
+        mock.verify();
     }
 }

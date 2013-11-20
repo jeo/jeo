@@ -145,7 +145,7 @@ public class FeatureHandler extends Handler {
         Query q = new Query();
 
         if (p.containsKey("srs")) {
-            CoordinateReferenceSystem to = Proj.crs(p.getProperty("srs"));
+            CoordinateReferenceSystem to = parseCRS(p);
             CoordinateReferenceSystem from = layer.crs();
 
             // may have to back eproject bbox
@@ -182,8 +182,7 @@ public class FeatureHandler extends Handler {
         Properties p = request.getParms();
 
         Envelope bbox = p.containsKey("bbox") ? parseBBOX(p.getProperty("bbox")) : null;
-        CoordinateReferenceSystem crs = 
-            p.containsKey("srs") ? Proj.crs(p.getProperty("srs")) : null;
+        CoordinateReferenceSystem crs = parseCRS(p);
 
         if (bbox == null) {
             //use layer bounds

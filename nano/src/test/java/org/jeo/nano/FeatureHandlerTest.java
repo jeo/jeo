@@ -136,6 +136,22 @@ public class FeatureHandlerTest extends HandlerTestSupport {
                 NanoHTTPD.HTTP_NOTFOUND,
                 "no such dataset: baz in workspace: foo"
         );
+
+        assertInvalidSRSResponse("1234", "Cannot locate provided srs: 1234");
+        assertInvalidSRSResponse("xyz:1234", "Cannot locate provided srs: xyz:1234");
+        assertInvalidSRSResponse("epsg:9999", "Cannot locate provided authority: epsg:9999");
+        
+    }
+
+    private void assertInvalidSRSResponse(String srs, String message) throws Exception {
+        mock = MockServer.create()
+                    .withVectorLayer()
+                .replay();
+        makeBadRequest(
+                new Request("/features/foo/bar", "GET", null, q("srs", srs), null),
+                NanoHTTPD.HTTP_BADREQUEST,
+                message
+        );
     }
 
 }

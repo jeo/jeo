@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Map;
+import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -13,7 +14,11 @@ import org.jeo.data.Workspace;
 import static org.jeo.nano.NanoHTTPD.HTTP_BADREQUEST;
 import static org.jeo.nano.NanoHTTPD.HTTP_NOTFOUND;
 import org.jeo.nano.NanoHTTPD.Response;
+import org.jeo.proj.Proj;
 import org.jeo.util.Pair;
+import org.osgeo.proj4j.CoordinateReferenceSystem;
+import org.osgeo.proj4j.UnknownAuthorityCodeException;
+import org.osgeo.proj4j.UnsupportedParameterException;
 
 public abstract class Handler {
 
@@ -32,6 +37,19 @@ public abstract class Handler {
             return true;
         }
         return false;
+    }
+
+    protected CoordinateReferenceSystem parseCRS(Properties props) {
+        String srs = props.getProperty("srs");
+        try {
+            return srs == null ? null : Proj.crs(srs);
+        } catch (UnsupportedParameterException upe) {
+            throw new HttpException(HTTP_BADREQUEST, "Cannot locate provided srs: " + srs);
+        } catch (UnknownAuthorityCodeException uace) {
+            throw new HttpException(HTTP_BADREQUEST, "Cannot locate provided authority: " + srs);
+        } catch (IllegalStateException iae) {
+            throw new HttpException(HTTP_BADREQUEST, "Cannot locate provided srs: " + srs);
+        }
     }
 
     protected String createPath(Request request) {

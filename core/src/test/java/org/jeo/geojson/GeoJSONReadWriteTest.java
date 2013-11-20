@@ -192,7 +192,20 @@ public class GeoJSONReadWriteTest {
 
         assertFalse(c.hasNext());
     }
-    
+
+    @Test
+    public void testParseNoFeatureIds() throws Exception {
+        Cursor<Feature> c = reader.features(featureCollectionText(true, true, true, false));
+        assertTrue(c.hasNext());
+        assertEquals("0", c.next().getId());
+        assertTrue(c.hasNext());
+        assertEquals("1", c.next().getId());
+        assertTrue(c.hasNext());
+        assertEquals("2", c.next().getId());
+
+        c.close();
+    }
+
     String pointText() {
         return strip("{'type': 'Point','coordinates':[100.1,0.1]}");
     }
@@ -386,6 +399,10 @@ public class GeoJSONReadWriteTest {
     }
 
     String featureText(int val) {
+        return featureText(val, true);
+    }
+
+    String featureText(int val, boolean withId) {
         String text = 
         "{" +
         "  'type': 'Feature'," +
@@ -402,10 +419,13 @@ public class GeoJSONReadWriteTest {
         "    'properties': {" +
         "      'name': 'EPSG:4326'" + 
         "     }," +
-        "   }, " + 
-        "   'id':'feature." + val + "'" +
-        "}";
-        
+        "   }";
+
+        if (withId) {
+            text += "," + "'id':'feature." + val + "'";
+        }
+
+        text += "}";
         return strip(text);
     }
 
@@ -426,6 +446,10 @@ public class GeoJSONReadWriteTest {
     }
     
     String featureCollectionText(boolean withBounds, boolean withCRS, boolean crsAfter) {
+        return featureCollectionText(withBounds, withCRS, false, true);
+    }
+
+    String featureCollectionText(boolean withBounds, boolean withCRS, boolean crsAfter, boolean withId) {
         StringBuffer sb = new StringBuffer();
         sb.append("{'type':'FeatureCollection',");
         if (withBounds) {
@@ -451,7 +475,7 @@ public class GeoJSONReadWriteTest {
         }
         sb.append("'features':[");
         for (int i = 0; i < 3; i++) {
-            sb.append(featureText(i)).append(",");
+            sb.append(featureText(i, withId)).append(",");
         }
         sb.setLength(sb.length()-1);
         sb.append("]");

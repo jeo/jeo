@@ -13,6 +13,16 @@ import com.vividsolutions.jts.geom.Geometry;
 
 public class FeatureHandler extends BaseHandler {
 
+    Integer id;
+
+    public FeatureHandler() {
+        this(null);
+    }
+
+    public FeatureHandler(Integer id) {
+        this.id = id;
+    }
+
     @Override
     public boolean startObject() throws ParseException, IOException {
         return true;
@@ -54,9 +64,9 @@ public class FeatureHandler extends BaseHandler {
 
         props.put("geometry", geom);
 
-        String id = node.consume("id", String.class).or(null);
+        String fid = node.consume("id", String.class).or(id!=null?String.valueOf(id):null);
 
-        Feature f = new BasicFeature(id, props);
+        Feature f = new BasicFeature(fid, props);
         f.setCRS(node.consume("crs", CoordinateReferenceSystem.class).or(null));
 
         node.setValue(f);

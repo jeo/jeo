@@ -339,8 +339,9 @@ public class PostGISWorkspace implements Workspace {
                     }
 
                     int i = t.getSchema().indexOf(name);
+                    Field fld = t.getSchema().field(name);
 
-                    PrimaryKeyColumn col = new PrimaryKeyColumn(name);
+                    PrimaryKeyColumn col = new PrimaryKeyColumn(name, fld);
 
                     // auto increment key?
                     if (rs.getMetaData().isAutoIncrement(i+1)) {

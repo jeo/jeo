@@ -15,7 +15,7 @@ public class FilterSQLEncoderTest {
 
     @Before
     public void setUp() {
-        PrimaryKeyColumn col = new PrimaryKeyColumn("fid");
+        PrimaryKeyColumn col = new PrimaryKeyColumn("fid", null);
         PrimaryKey pkey = new PrimaryKey();
         pkey.getColumns().add(col);
 

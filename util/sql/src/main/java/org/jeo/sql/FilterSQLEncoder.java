@@ -115,8 +115,18 @@ public class FilterSQLEncoder extends FilterVisitor {
             else {
                 if (prepared) {
                     sql.add("?");
-                    args.add(new Pair<Object, Integer>(val, 
-                        val != null ? dbtypes.toSQL(val.getClass()) : Types.NULL));
+
+                    Integer sqlType = null;
+                    if (obj instanceof Field) {
+                        // if field passed in as context use it to determine the type
+                        Field fld = (Field) obj;
+                        sqlType = dbtypes.toSQL(fld.getType());
+                    }
+                    else {
+                        // use the value class
+                        sqlType = dbtypes.toSQL(val.getClass());
+                    }
+                    args.add(new Pair<Object, Integer>(val, sqlType));
                 }
                 else {
                     if (val instanceof Number) {
@@ -197,8 +207,10 @@ public class FilterSQLEncoder extends FilterVisitor {
 
         PrimaryKeyColumn pkeyCol = pkey.getColumns().get(0);
         sql.name(pkeyCol.getName()).add(" IN (");
+
+        // grab the field for the primary key so we can properly handle the type
         for (Expression e : id.getIds()) {
-            e.accept(this, obj);
+            e.accept(this, pkeyCol.getField());
             sql.add(",");
         }
         sql.trim(1).add(")");

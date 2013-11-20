@@ -1,5 +1,7 @@
 package org.jeo.sql;
 
+import org.jeo.feature.Field;
+
 /**
  * Represents a column of a primary key.
  * 
@@ -8,6 +10,7 @@ package org.jeo.sql;
 public class PrimaryKeyColumn {
 
     String name;
+    Field field;
     boolean autoIncrement;
     String sequence;
 
@@ -16,8 +19,9 @@ public class PrimaryKeyColumn {
      * 
      * @param name The column name.
      */
-    public PrimaryKeyColumn(String name) {
+    public PrimaryKeyColumn(String name, Field field) {
         this.name = name;
+        this.field = field;
     }
 
     /**
@@ -25,6 +29,13 @@ public class PrimaryKeyColumn {
      */
     public String getName() {
         return name;
+    }
+
+    /**
+     * Returns the schema field corresponding to the primary key column.
+     */
+    public Field getField() {
+        return field;
     }
 
     /**

@@ -65,6 +65,7 @@ public class FeatureCollectionHandler extends BaseHandler {
     class FeaturesHandler extends BaseHandler {
 
         List<Feature> features = !streaming ? new ArrayList<Feature>() : null;
+        int count = 0;
 
         @Override
         public boolean startArray() throws ParseException, IOException {
@@ -73,7 +74,7 @@ public class FeatureCollectionHandler extends BaseHandler {
 
         @Override
         public boolean startObject() throws ParseException, IOException {
-            push("feature", new FeatureHandler() {
+            push("feature", new FeatureHandler(count++) {
                @Override
                public boolean endObject() throws ParseException, IOException {
                    super.endObject();

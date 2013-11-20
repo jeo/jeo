@@ -91,6 +91,10 @@ public abstract class VectorApiTestBase {
         assertEquals(1, data.count(new Query().filter("P_MALE > P_FEMALE AND SAMP_POP > 200000")));
         assertEquals(5, data.count(new Query().filter("P_MALE > P_FEMALE OR SAMP_POP > 2000000")));
         assertEquals(1, data.count(new Query().filter("P_MALE > P_FEMALE AND NOT SAMP_POP > 200000")));
+
+        // count with id filters
+        String fid = fidFor(data, "STATE_NAME = 'Texas'");
+        assertEquals(1, data.count(new Query().filter(String.format("IN ('%s')", fid))));
     }
 
     @Test
@@ -124,6 +128,10 @@ public abstract class VectorApiTestBase {
             "TX", "NY", "PA", "NV", "CA");
         assertCovered(
             data.cursor(new Query().filter("P_MALE > P_FEMALE AND NOT SAMP_POP > 200000")), "NV");
+
+        // id filter
+        String fid = fidFor(data, "STATE_NAME = 'Texas'");
+        assertCovered(data.cursor(new Query().filter(String.format("IN ('%s')", fid))), "TX");
     }
 
     void assertNotCovered(Cursor<Feature> cursor, String... abbrs) throws IOException {
@@ -150,5 +158,16 @@ public abstract class VectorApiTestBase {
 
         assertTrue(set.isEmpty());
         assertEquals(abbrs.length, count);
+    }
+
+    String fidFor(VectorDataset dataset, String filter) throws IOException {
+        Cursor<Feature> c = dataset.cursor(new Query().filter(filter));
+        try {
+            assertTrue(c.hasNext());
+            return c.next().getId();
+        }
+        finally {
+            c.close();
+        }
     }
 }

@@ -10,6 +10,7 @@ import java.util.List;
 import static org.easymock.EasyMock.anyObject;
 import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.expectLastCall;
+import org.easymock.IExpectationSetters;
 import org.easymock.classextension.EasyMock;
 import static org.easymock.classextension.EasyMock.createMock;
 import org.jeo.data.Cursor;
@@ -24,9 +25,13 @@ import org.jeo.data.TileDataset;
 import org.jeo.data.TilePyramid;
 import org.jeo.data.VectorDataset;
 import org.jeo.data.Workspace;
+import org.jeo.feature.BasicFeature;
 import org.jeo.feature.Feature;
 import org.jeo.feature.Field;
 import org.jeo.feature.Schema;
+import org.jeo.filter.Filter;
+import org.jeo.filter.Id;
+import org.jeo.filter.Literal;
 import org.jeo.proj.Proj;
 
 public class MockServer {
@@ -85,6 +90,45 @@ public class MockServer {
     MockServer withNoFeatures() throws Exception {
         expect(vectorLayer.cursor(new Query().bounds(new Envelope(-180, 180, -90, 90))))
                 .andReturn(Cursors.empty(Feature.class)).once();
+
+        return this;
+    }
+
+    MockServer withFeatureHavingId(String id) throws Exception {
+        Feature f = new BasicFeature(id);
+        f.put("id", id);
+
+        Cursor<Feature> c = createMock(Cursor.class);
+        expect(c.iterator()).andReturn(Iterators.forArray(f));
+        
+        expect(vectorLayer.cursor(new Query().filter(new Id(new Literal(id))))).andReturn(c);
+        expect(vectorLayer.cursor((Query) anyObject())).andReturn(Cursors.empty(Feature.class)).anyTimes();
+        c.close();
+        expectLastCall().once();
+
+        expect(vectorLayer.cursor(new Query().filter((Filter) anyObject())))
+                .andReturn(Cursors.empty(Feature.class)).anyTimes();
+
+        return this;
+    }
+
+    MockServer withFeatureHavingIdForEdit(Feature feature, boolean expectSuccess) throws Exception {
+        Cursor<Feature> c = createMock(Cursor.class);
+        expect(c.hasNext()).andReturn(Boolean.TRUE);
+        expect(c.next()).andReturn(feature);
+        expect(c.write()).andReturn(c);
+
+        IExpectationSetters<Cursor<Feature>> cursor = 
+                expect(vectorLayer.cursor(new Query().update().filter(new Id(new Literal(feature.getId()))))).andReturn(c);
+        if (!expectSuccess) {
+            cursor.anyTimes();
+        }
+        expect(vectorLayer.cursor((Query) anyObject())).andReturn(Cursors.empty(Feature.class)).anyTimes();
+        c.close();
+        expectLastCall().once();
+
+        expect(vectorLayer.cursor(new Query().filter((Filter) anyObject())))
+                .andReturn(Cursors.empty(Feature.class)).anyTimes();
 
         return this;
     }
@@ -182,6 +226,20 @@ public class MockServer {
         expect(tileLayer.pyramid()).andReturn(tilePyramid).anyTimes();
 
         expect(workspace.get("bar")).andReturn(tileLayer).once();
+
+        return this;
+    }
+
+    MockServer withWritableVectorLayer(Feature receiver) throws Exception {
+        withVectorLayer();
+
+        Cursor<Feature> c = createMock(Cursor.class);
+        expect(c.next()).andReturn(receiver);
+        expect(c.write()).andReturn(c);
+
+        expect(vectorLayer.cursor(new Query().append())).andReturn(c);
+        c.close();
+        expectLastCall().once();
 
         return this;
     }

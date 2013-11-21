@@ -2,13 +2,17 @@ package org.jeo.geopkg;
 
 import static java.lang.String.format;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -100,12 +104,82 @@ public class GeoPkgWorkspace implements Workspace, FileData {
 
         dbtypes = new GeoPkgTypes();
         geomWriter = new GeoPkgGeomWriter();
+
+        init();
     }
 
     DataSource createDataSource(GeoPkgOpts opts) {
         SQLiteDataSource dataSource = new SQLiteDataSource();
         dataSource.setUrl("jdbc:sqlite:" + opts.getFile().getPath());
         return dataSource;
+    }
+
+    void init() throws IOException {
+        run(new DbOP<Void>() {
+            @Override
+            protected Void doRun(Connection cx) throws Exception {
+              // create the necessary metadata tables
+              runScript(SPATIAL_REF_SYS + ".sql", cx);
+              runScript(GEOMETRY_COLUMNS + ".sql", cx);
+              runScript(GEOPACKAGE_CONTENTS + ".sql", cx);
+              runScript(TILE_TABLE_METADATA +".sql", cx);
+              runScript(TILE_MATRIX_METADATA + ".sql", cx);
+              return null;
+            }
+        });
+    }
+
+    void runScript(String file, Connection cx) throws IOException, SQLException {
+        List<String> lines = readScript(file);
+
+        Statement st = cx.createStatement();
+
+        try {
+            StringBuilder buf = new StringBuilder();
+            for (String sql : lines) {
+                sql = sql.trim();
+                if (sql.isEmpty()) {
+                    continue;
+                }
+                if (sql.startsWith("--")) {
+                    continue;
+                }
+                buf.append(sql).append(" ");
+
+                if (sql.endsWith(";")) {
+                    String stmt = buf.toString();
+                    boolean skipError = stmt.startsWith("?");
+                    if (skipError) {
+                        stmt = stmt.replaceAll("^\\? *" ,"");
+                    }
+
+                    LOG.debug(stmt);
+                    st.addBatch(stmt);
+
+                    buf.setLength(0);
+                }
+            }
+            st.executeBatch();
+        }
+        finally {
+            st.close();
+        }
+    }
+
+    List<String> readScript(String file) throws IOException {
+        InputStream in = getClass().getResourceAsStream(file);
+        BufferedReader r = new BufferedReader(new InputStreamReader(in));
+        try {
+            List<String> lines = new ArrayList<String>();
+            String line = null;
+            while((line = r.readLine()) != null) {
+                lines.add(line);
+            }
+            return lines;
+        }
+        finally {
+            r.close();
+        }
     }
 
     @Override

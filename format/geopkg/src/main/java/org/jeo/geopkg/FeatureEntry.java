@@ -2,6 +2,7 @@ package org.jeo.geopkg;
 
 import org.jeo.feature.Schema;
 import org.jeo.geom.Geom;
+import org.jeo.sql.PrimaryKey;
 
 /**
  * Feature entry in a geopackage.
@@ -17,6 +18,7 @@ public class FeatureEntry extends Entry {
     String geometryColumn;
 
     Schema schema;
+    PrimaryKey primaryKey;
 
     public FeatureEntry() {
         setDataType(DataType.Feature);
@@ -52,6 +54,14 @@ public class FeatureEntry extends Entry {
 
     void setSchema(Schema schema) {
         this.schema = schema;
+    }
+
+    PrimaryKey getPrimaryKey() {
+        return primaryKey;
+    }
+
+    void setPrimaryKey(PrimaryKey primaryKey) {
+        this.primaryKey = primaryKey;
     }
 
     void init(FeatureEntry e) {

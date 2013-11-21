@@ -14,6 +14,8 @@ import org.jeo.feature.Feature;
 import org.jeo.feature.Field;
 import org.jeo.feature.Schema;
 import org.jeo.geopkg.geom.GeoPkgGeomReader;
+import org.jeo.sql.PrimaryKey;
+import org.jeo.sql.PrimaryKeyColumn;
 
 import com.vividsolutions.jts.geom.Geometry;
 
@@ -23,14 +25,19 @@ public class FeatureCursor extends Cursor<Feature> {
     Connection cx;
 
     Schema schema;
+    PrimaryKey primaryKey;
 
     Boolean next;
     GeoPkgGeomReader geomReader;
 
-    FeatureCursor(ResultSet stmt, Connection cx ,Schema schema) {
+    FeatureCursor(ResultSet stmt, Connection cx, FeatureEntry entry, GeoPkgWorkspace workspace) 
+        throws IOException {
         this.results = stmt;
         this.cx = cx;
-        this.schema = schema;
+
+        this.schema = workspace.schema(entry);
+        this.primaryKey = workspace.primaryKey(entry);
+
         this.geomReader = new GeoPkgGeomReader();
     }
 
@@ -52,6 +59,7 @@ public class FeatureCursor extends Cursor<Feature> {
         try {
             if (next != null && next) {
                 try {
+
                     List<Field> fields = schema.getFields();
                     List<Object> values = new ArrayList<Object>();
 
@@ -64,8 +72,23 @@ public class FeatureCursor extends Cursor<Feature> {
                         }
                     }
     
+                    String fid = null;
+                    if (primaryKey != null) {
+                        StringBuilder buf = new StringBuilder();
+                        for (PrimaryKeyColumn pkcol : primaryKey.getColumns()) {
+                            Object obj = results.getObject(pkcol.getName());
+                            if (obj != null) {
+                                buf.append(obj);
+                            }
+                            buf.append(".");
+                        }
+
+                        buf.setLength(buf.length()-1);
+                        fid = buf.toString();
+                    }
+
                     //TODO: feature id
-                    return new BasicFeature(null, values, schema);
+                    return new BasicFeature(fid, values, schema);
                 }
                 finally {
                     next = null;

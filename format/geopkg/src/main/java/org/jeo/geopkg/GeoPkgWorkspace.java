@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.sql.Connection;
+import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -45,6 +46,8 @@ import org.jeo.geopkg.Entry.DataType;
 import org.jeo.geopkg.geom.GeoPkgGeomWriter;
 import org.jeo.proj.Proj;
 import org.jeo.sql.DbOP;
+import org.jeo.sql.PrimaryKey;
+import org.jeo.sql.PrimaryKeyColumn;
 import org.jeo.sql.SQL;
 import org.jeo.util.Key;
 import org.jeo.util.Pair;
@@ -333,8 +336,6 @@ public class GeoPkgWorkspace implements Workspace, FileData {
                 return new FeatureAppendCursor(cx, entry, this);
             }
 
-            Schema schema = schema(entry);
-
             QueryPlan qp = new QueryPlan(q);
 
             //TODO: handle selective fields
@@ -346,7 +347,7 @@ public class GeoPkgWorkspace implements Workspace, FileData {
 
             ResultSet rs = ps.executeQuery();
 
-            Cursor<Feature> c = new FeatureCursor(rs, cx, schema);
+            Cursor<Feature> c = new FeatureCursor(rs, cx, entry, this);
 
             if (!Envelopes.isNull(q.getBounds())) {
                 c = Cursors.intersects(c, q.getBounds());
@@ -365,7 +366,8 @@ public class GeoPkgWorkspace implements Workspace, FileData {
 
         if (!Filter.isTrueOrNull(q.getFilter())) {
             try {
-                sql.add(" WHERE ").add(sqlfe.encode(q.getFilter(), null));
+                String where = sqlfe.encode(q.getFilter(), null);
+                sql.add(" WHERE ").add(where);
                 qp.filtered();
             }
             catch(Exception e) {
@@ -375,11 +377,15 @@ public class GeoPkgWorkspace implements Workspace, FileData {
 
         if (q.getLimit() != null) {
             sql.add(" LIMIT ").add(q.getLimit());
-            qp.offsetted();
+            qp.limited();
         }
         if (q.getOffset() != null) {
+            //sqlite doesn't understand offset without limit
+            if (q.getLimit() == null) {
+                sql.add(" LIMIT -1");
+            }
             sql.add(" OFFSET ").add(q.getOffset());
-            qp.limited();
+            qp.offsetted();
         }
 
         List<Object> args = new ArrayList<Object>();
@@ -657,11 +663,25 @@ public class GeoPkgWorkspace implements Workspace, FileData {
         return entry.getSchema();
     }
 
+    public PrimaryKey primaryKey(FeatureEntry entry) throws IOException {
+        if (entry.getPrimaryKey() == null) {
+            try {
+                entry.setPrimaryKey(createPrimaryKey(entry));
+            }
+            catch(Exception e) {
+                throw new IOException(e);
+            }
+        }
+        return entry.getPrimaryKey();
+    }
+ 
     Schema createSchema(final FeatureEntry entry) throws Exception {
         return run(new DbOP<Schema>() {
             @Override
             protected Schema doRun(Connection cx) throws Exception {
-                String sql = format("SELECT * FROM %s LIMIT 1", entry.getTableName());
+                String tableName = entry.getTableName();
+
+                String sql = format("SELECT * FROM %s LIMIT 1", tableName);
                 log(sql);
 
                 ResultSet rs = open(open(cx.createStatement()).executeQuery(sql));
@@ -680,6 +700,40 @@ public class GeoPkgWorkspace implements Workspace, FileData {
                     }
                 }
                 return sb.schema();
+            }
+        });
+    }
+
+    PrimaryKey createPrimaryKey(final FeatureEntry entry) throws Exception {
+        final Schema schema = schema(entry);
+
+        return run(new DbOP<PrimaryKey>() {
+            @Override
+            protected PrimaryKey doRun(Connection cx) throws Exception {
+                DatabaseMetaData md = cx.getMetaData();
+                ResultSet pk = open(md.getPrimaryKeys(null, "", entry.getTableName()));
+
+                List<PrimaryKeyColumn> cols = new ArrayList<PrimaryKeyColumn>();
+                while(pk.next()) {
+                    final String name = pk.getString("COLUMN_NAME");
+                    if (name == null) {
+                        continue;
+                    }
+
+                    Field fld = schema.field(name);
+
+                    PrimaryKeyColumn col = new PrimaryKeyColumn(name, fld);
+                    col.setAutoIncrement(true);  // sqlite primary keys always auto increment
+                    cols.add(col);
+                }
+
+                if (cols.isEmpty()) {
+                    return null;
+                }
+
+                PrimaryKey pkey = new PrimaryKey();
+                pkey.getColumns().addAll(cols);
+                return pkey;
             }
         });
     }

@@ -38,8 +38,8 @@ public class GeoPkgFeatureTest extends GeoPkgTestSupport {
 
     @Before
     public void setUp() throws Exception {
-        File dir = unzip(getClass().getResourceAsStream("states.geopackage.zip"), newTmpDir());
-        geopkg = GeoPackage.open(new File(dir, "states.geopackage"));
+        File dir = unzip(getClass().getResourceAsStream("usa.gpkg.zip"), newTmpDir());
+        geopkg = GeoPackage.open(new File(dir, "usa.gpkg"));
     }
 
     @After

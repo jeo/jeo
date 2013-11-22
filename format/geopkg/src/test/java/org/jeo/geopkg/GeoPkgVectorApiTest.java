@@ -11,9 +11,9 @@ public class GeoPkgVectorApiTest extends VectorApiTestBase {
     @Override
     protected VectorDataset createVectorData() throws Exception {
         File dir = Tests.newTmpDir("gpkg", "states");
-        Tests.unzip(getClass().getResourceAsStream("states.geopackage.zip"), dir);
+        Tests.unzip(getClass().getResourceAsStream("usa.gpkg.zip"), dir);
 
-        GeoPkgWorkspace gpkg = GeoPackage.open(new File(dir, "states.geopackage"));
+        GeoPkgWorkspace gpkg = GeoPackage.open(new File(dir, "usa.gpkg"));
         return (VectorDataset) gpkg.get("states");
     }
 

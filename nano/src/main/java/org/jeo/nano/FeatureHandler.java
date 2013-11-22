@@ -189,6 +189,10 @@ public class FeatureHandler extends Handler {
             q.limit(Integer.parseInt(p.getProperty("limit")));
         }
 
+        if (p.containsKey("offset")) {
+            q.offset(Integer.parseInt(p.getProperty("offset")));
+        }
+
         if (p.containsKey("filter")) {
             q.filter(parseFilter(p.getProperty("filter")));
         }

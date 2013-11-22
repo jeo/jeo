@@ -8,6 +8,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import org.jeo.data.Cursor;
+import org.jeo.data.Query;
 import org.jeo.feature.BasicFeature;
 import org.jeo.feature.Feature;
 import org.jeo.feature.Schema;
@@ -143,9 +144,35 @@ public class FeatureHandlerTest extends HandlerTestSupport {
                 .replay();
         makeBadRequest(
                 new Request("/features/foo/bar/shaz", "PUT", h("Content-type", "application/json"), null, body(json)),
-                NanoHTTPD.HTTP_BADREQUEST,
+                NanoHTTPD.HTTP_NOTFOUND,
                 "requested feature does not exist : /features/foo/bar/shaz"
         );
+    }
+
+    @Test
+    public void testDeleteFeature() throws Exception {
+        mock = MockServer.create()
+                .withMemoryVectorLayer()
+                .replay();
+
+        makeRequest(
+                new Request("/features/foo/bar/42", "DELETE", h("Content-type", "application/json"), null, null),
+                NanoHTTPD.HTTP_OK,
+                NanoHTTPD.MIME_PLAINTEXT
+        );
+
+        mock.verify();
+        assertTrue(mock.memoryLayer.count(new Query()) == 0);
+
+        mock = MockServer.create()
+                .withMemoryVectorLayer()
+                .replay();
+        makeBadRequest(
+                new Request("/features/foo/bar/66", "DELETE", h("Content-type", "application/json"), null, null),
+                NanoHTTPD.HTTP_NOTFOUND,
+                "requested feature does not exist : /features/foo/bar/66"
+        );
+        mock.verify();
     }
 
     @Test

@@ -11,7 +11,7 @@ import java.util.Map;
 
 import org.jeo.json.JSONObject;
 import org.jeo.json.JSONValue;
-import org.jeo.data.mem.MemWorkspace;
+import org.jeo.filter.Filter;
 import org.jeo.util.Convert;
 import org.jeo.util.Optional;
 import org.slf4j.Logger;
@@ -68,10 +68,12 @@ public class JSONRepository implements DataRepository {
     }
 
     @Override
-    public Iterable<WorkspaceHandle> list() throws IOException {
+    public Iterable<Handle<Object>> query(Filter<? super Handle<Object>> filter)
+            throws IOException {
+
         JSONObject reg = obj();
 
-        List<WorkspaceHandle> list = new ArrayList<WorkspaceHandle>();
+        List<Handle<Object>> list = new ArrayList<Handle<Object>>();
         
         for (Object k : reg.keySet()) {
             String key = k.toString();
@@ -95,13 +97,21 @@ public class JSONRepository implements DataRepository {
                 return null;
             }
 
-            list.add(new WorkspaceHandle(key, drv, this));
+            Handle<Object> h = new Handle<Object>(key, drv) {
+                @Override
+                protected Object doResolve() throws IOException {
+                    return get(name);
+                }
+            };
+            if (filter.apply(h)) {
+                list.add(h);
+            }
         }
         return list;
     }
 
     @Override
-    public Workspace get(String name) throws IOException {
+    public Object get(String name) throws IOException {
         JSONObject reg = obj();
 
         JSONObject wsObj = (JSONObject) reg.get(name);

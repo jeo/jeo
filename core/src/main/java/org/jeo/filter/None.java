@@ -3,10 +3,10 @@ package org.jeo.filter;
 /**
  * Identity filter that always returns false.
  */
-public class None extends Filter {
+public class None<T> extends Filter<T> {
 
     @Override
-    public boolean apply(Object obj) {
+    public boolean apply(T obj) {
         return false;
     }
 

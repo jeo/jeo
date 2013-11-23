@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.jeo.filter.Filter;
+import org.jeo.filter.Filters;
 
 public class Selector {
 
@@ -12,7 +13,7 @@ public class Selector {
     String attachment;
     boolean wildcard = false;
     List<String> classes = new ArrayList<String>();
-    Filter filter;
+    Filter<Object> filter;
     
     public String getId() {
         return id;
@@ -50,11 +51,11 @@ public class Selector {
         return classes;
     }
     
-    public Filter getFilter() {
+    public Filter<Object> getFilter() {
         return filter;
     }
     
-    public void setFilter(Filter filter) {
+    public void setFilter(Filter<Object> filter) {
         this.filter = filter;
     }
     
@@ -90,7 +91,7 @@ public class Selector {
         merged.getClasses().addAll(getClasses());
         merged.getClasses().addAll(other.getClasses());
     
-        Filter filter = getFilter() != null ? getFilter() : Filter.TRUE;
+        Filter<Object> filter = getFilter() != null ? getFilter() : Filters.all();
         if (other.getFilter() != null) {
             filter = filter.and(other.getFilter());
         }
@@ -132,7 +133,7 @@ public class Selector {
         for (String c : classes) {
             sb.append(".").append(c);
         }
-        if (filter != null && filter != Filter.TRUE) {
+        if (!Filters.isTrueOrNull(filter)) {
             sb.append("[").append(filter).append("]");
         }
         if (attachment != null) {

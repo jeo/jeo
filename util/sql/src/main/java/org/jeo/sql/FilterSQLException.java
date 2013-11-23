@@ -1,7 +1,5 @@
 package org.jeo.sql;
 
-import org.jeo.filter.Filter;
-
 /**
  * Exception thrown when {@link FilterSQLEncoder} is unable to encode a {@link Filter} as SQL. 
  * 

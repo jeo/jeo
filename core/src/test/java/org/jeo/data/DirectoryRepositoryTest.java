@@ -6,12 +6,15 @@ import static org.junit.Assert.assertNull;
 import static org.easymock.classextension.EasyMock.*;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.util.Iterator;
 
 import org.apache.commons.io.FileUtils;
 import org.easymock.IAnswer;
 import org.jeo.Tests;
 import org.jeo.geojson.GeoJSON;
+import org.jeo.json.JSONObject;
+import org.jeo.json.JSONValue;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -80,5 +83,35 @@ public class DirectoryRepositoryTest {
         repo.get("foo");
 
         verify(drvreg);
+    }
+
+    @Test
+    public void testMetaFile() throws Exception {
+        FileUtils.touch(new File(repo.getDirectory(), "baz.foo"));
+
+        createBazMetaFile();
+        assertEquals(3, Iterables.size(repo.list()));
+        assertNotNull(repo.get("baz"));
+    }
+
+    @Test
+    public void testMetaFileSolo() throws Exception {
+        createBazMetaFile();
+        assertEquals(3, Iterables.size(repo.list()));
+        assertNotNull(repo.get("baz"));
+    }
+
+    void createBazMetaFile() throws Exception {
+        JSONObject meta = new JSONObject();
+        meta.put("driver", "mem");
+
+        JSONObject opts = new JSONObject();
+        opts.put("name", "baz");
+        meta.put("options", opts);
+
+        FileWriter fw = new FileWriter(new File(repo.getDirectory(), "baz.jeo"));
+        JSONValue.writeJSONString(meta, fw);
+        fw.flush();
+        fw.close();
     }
 }

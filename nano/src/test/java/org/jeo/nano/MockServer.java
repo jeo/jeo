@@ -25,10 +25,13 @@ import org.jeo.data.TileDataset;
 import org.jeo.data.TilePyramid;
 import org.jeo.data.VectorDataset;
 import org.jeo.data.Workspace;
+import org.jeo.data.mem.MemVector;
 import org.jeo.feature.BasicFeature;
 import org.jeo.feature.Feature;
+import org.jeo.feature.Features;
 import org.jeo.feature.Field;
 import org.jeo.feature.Schema;
+import org.jeo.feature.SchemaBuilder;
 import org.jeo.filter.Filter;
 import org.jeo.filter.Id;
 import org.jeo.filter.Literal;
@@ -38,6 +41,7 @@ public class MockServer {
 
     private final List<Object> mocks = new ArrayList<Object>();
     final NanoServer server;
+    MemVector memoryLayer;
     private VectorDataset vectorLayer;
     private TileDataset tileLayer;
     private Workspace workspace;
@@ -100,6 +104,7 @@ public class MockServer {
 
         Cursor<Feature> c = createMock(Cursor.class);
         expect(c.iterator()).andReturn(Iterators.forArray(f));
+        expect(c.hasNext()).andReturn(true);
         
         expect(vectorLayer.cursor(new Query().filter(new Id(new Literal(id))))).andReturn(c);
         expect(vectorLayer.cursor((Query) anyObject())).andReturn(Cursors.empty(Feature.class)).anyTimes();
@@ -240,6 +245,20 @@ public class MockServer {
         expect(vectorLayer.cursor(new Query().append())).andReturn(c);
         c.close();
         expectLastCall().once();
+
+        return this;
+    }
+
+    MockServer withMemoryVectorLayer() throws Exception {
+        withWorkspace();
+
+        Schema schema = new SchemaBuilder("memory")
+                .field("name", String.class)
+                .schema();
+        memoryLayer = new MemVector(schema);
+        memoryLayer.add(Features.create("42", schema, "foo"));
+        expect(workspace.get("bar")).andReturn(memoryLayer).once();
+        expect(workspace.get((String) anyObject())).andReturn(null).anyTimes();
 
         return this;
     }

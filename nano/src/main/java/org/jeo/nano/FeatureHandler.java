@@ -101,6 +101,9 @@ public class FeatureHandler extends Handler {
             else if ("PUT".equalsIgnoreCase(request.getMethod())) {
                 return handlePut(request, server);
             }
+            else if ("DELETE".equalsIgnoreCase(request.getMethod())) {
+                return handleDelete(request, server);
+            }
     
             return new Response(HTTP_METHOD_NOT_ALLOWED, MIME_PLAINTEXT, "");
         }
@@ -141,6 +144,15 @@ public class FeatureHandler extends Handler {
         Query q = buildQuery(layer, request);
         
         Cursor<Feature> c = layer.cursor(q);
+        
+        // if requesting a specific feature, fail if not found
+        String fid = parseFeatureId(request);
+        if (fid != null) {
+            if (! c.hasNext()) {
+                throw new HttpException(HTTP_NOTFOUND, "Unable to locate feature at " + request.uri);
+            }
+        }
+
         String json;
         try {
             json = GeoJSONWriter.toString(c);
@@ -362,7 +374,7 @@ public class FeatureHandler extends Handler {
         try {
             Cursor<Feature> c = layer.cursor(query);
             if (shouldExist && ! c.hasNext()) {
-                throw new HttpException(HTTP_BADREQUEST, "requested feature does not exist : " + request.getUri());
+                throw new HttpException(HTTP_NOTFOUND, "requested feature does not exist : " + request.getUri());
             }
             try {
                 if (obj instanceof Feature) {
@@ -390,6 +402,31 @@ public class FeatureHandler extends Handler {
                 ws.close();
             }
         }
+    }
+
+    Response handleDelete(Request request, NanoServer server) throws IOException {
+        String fid = parseFeatureId(request);
+        if (fid == null) {
+            throw new HttpException(HTTP_BADREQUEST, "must provide feature id for PUT");
+        }
+
+        Query query = new Query().update().filter(new Id(new Literal(fid)));
+        Pair<VectorDataset,Workspace> p = findVectorLayer(request, server);
+
+        VectorDataset layer = p.first();
+        Cursor<Feature> c = layer.cursor(query);
+        try {
+            if (! c.hasNext()) {
+                throw new HttpException(HTTP_NOTFOUND, "requested feature does not exist : " + request.getUri());
+            }
+            c.next();
+            c.remove();
+        } finally {
+            c.close();
+            layer.close();
+            p.second().close();
+        }
+        return new Response(HTTP_OK, MIME_PLAINTEXT, "");
     }
 
     Pair<VectorDataset,Workspace> findVectorLayer(Request request, NanoServer server) throws IOException {

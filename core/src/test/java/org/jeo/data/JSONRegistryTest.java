@@ -30,9 +30,9 @@ public class JSONRegistryTest {
 
     @Test
     public void testList() throws Exception {
-        Iterables.find(repo.list(), new Predicate<WorkspaceHandle>() {
+        Iterables.find(repo.list(), new Predicate<Handle<?>>() {
             @Override
-            public boolean apply(WorkspaceHandle h) {
+            public boolean apply(Handle<?> h) {
                 return "foo".equals(h.getName()) 
                     && Memory.class.isAssignableFrom(h.getDriver().getClass());
             }

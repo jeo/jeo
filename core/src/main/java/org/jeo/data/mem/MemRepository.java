@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.jeo.data.DataRepository;
+import org.jeo.data.Handle;
 import org.jeo.data.Workspace;
 import org.jeo.data.WorkspaceHandle;
 import org.slf4j.Logger;
@@ -46,8 +47,8 @@ public class MemRepository implements DataRepository {
     }
 
     @Override
-    public Iterable<WorkspaceHandle> list() {
-        List<WorkspaceHandle> items = new ArrayList<WorkspaceHandle>();
+    public Iterable<Handle<?>> list() {
+        List<Handle<?>> items = new ArrayList<Handle<?>>();
         for (Map.Entry<String, Workspace> kv : map.entrySet()) {
             Workspace ws = kv.getValue();
             items.add(new WorkspaceHandle(kv.getKey(), ws.getDriver(), this));

@@ -8,7 +8,7 @@ import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.List;
 
-import org.jeo.data.mem.MemWorkspace;
+import org.jeo.map.Style;
 import org.jeo.util.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -69,7 +69,7 @@ public class DirectoryRepository implements DataRepository {
     }
 
     @Override
-    public Iterable<WorkspaceHandle> list() throws IOException {
+    public Iterable<Handle<?>> list() throws IOException {
         // list all files, possibily filtering by extension
         String[] files = exts == null ? baseDir.list() : baseDir.list(new FilenameFilter() {
             @Override
@@ -79,7 +79,7 @@ public class DirectoryRepository implements DataRepository {
         });
 
         // process files to see what ones we have drivers for
-        LinkedHashSet<WorkspaceHandle> items = new LinkedHashSet<WorkspaceHandle>();
+        LinkedHashSet<Handle<?>> items = new LinkedHashSet<Handle<?>>();
         for (String fn : files) {
             Driver<?> drv = Drivers.find(new File(baseDir, fn).toURI(), drivers);
             if (drv != null) {
@@ -88,6 +88,14 @@ public class DirectoryRepository implements DataRepository {
                 if (Workspace.class.isAssignableFrom(t) || Dataset.class.isAssignableFrom(t)) {
                     items.add(new WorkspaceHandle(name, drv, this));
                 }
+                if (Style.class.isAssignableFrom(t)) {
+                    items.add(new Handle<Style>(name, Style.class, drv) {
+                        @Override
+                        protected Style doResolve() throws IOException {
+                            return (Style) get(name);
+                        }
+                    });
+                }
             }
         }
 
@@ -95,7 +103,7 @@ public class DirectoryRepository implements DataRepository {
     }
 
     @Override
-    public Workspace get(final String key) throws IOException {
+    public Object get(final String key) throws IOException {
         if (exts == null) {
             //search for any file with this base name
             String[] files = baseDir.list(new FilenameFilter() {
@@ -105,7 +113,7 @@ public class DirectoryRepository implements DataRepository {
                 }
             });
             for (String file : files) {
-                return newWorkspaceOrNull(new File(baseDir, file));
+                return objOrNull(new File(baseDir, file));
             }
         }
         else {
@@ -113,7 +121,7 @@ public class DirectoryRepository implements DataRepository {
             for (String ext : exts) {
                 File f = new File(baseDir, key + "." + ext);
                 if (f.exists()) {
-                    return newWorkspaceOrNull(f);
+                    return objOrNull(f);
                 }
             }
         }
@@ -121,7 +129,7 @@ public class DirectoryRepository implements DataRepository {
         return null;
     }
 
-    Workspace newWorkspaceOrNull(File file) throws IOException {
+    Object objOrNull(File file) throws IOException {
         Object obj = Drivers.open(file, drivers);
         if (obj != null) {
             if (obj instanceof Workspace) {
@@ -130,10 +138,13 @@ public class DirectoryRepository implements DataRepository {
             else if (obj instanceof Dataset) {
                 return new SingleWorkspace((Dataset)obj);
             }
+            else if (obj instanceof Style) {
+                return obj;
+            }
             else {
                 if (LOG.isDebugEnabled()) {
-                    LOG.debug(
-                        "object: " + obj + " not a workspace or dataset, file: " + file.getPath());
+                    LOG.debug("object: " + obj + " not a workspace, dataset or style, file: " + 
+                        file.getPath());
                 }
             }
         }

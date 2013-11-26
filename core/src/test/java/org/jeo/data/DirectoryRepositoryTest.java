@@ -12,6 +12,7 @@ import org.apache.commons.io.FileUtils;
 import org.easymock.IAnswer;
 import org.jeo.Tests;
 import org.jeo.geojson.GeoJSON;
+import org.jeo.map.Style;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -41,16 +42,16 @@ public class DirectoryRepositoryTest {
     @Test
     public void testList() throws Exception {
         assertEquals(2, Iterables.size(repo.list()));
-        Iterables.find(repo.list(), new Predicate<WorkspaceHandle>() {
+        Iterables.find(repo.list(), new Predicate<Handle<?>>() {
             @Override
-            public boolean apply(WorkspaceHandle input) {
+            public boolean apply(Handle<?> input) {
                 return "foo".equals(input.getName()) 
                     && Workspace.class.isAssignableFrom(input.getType());
             }
         });
-        Iterables.find(repo.list(), new Predicate<WorkspaceHandle>() {
+        Iterables.find(repo.list(), new Predicate<Handle<?>>() {
             @Override
-            public boolean apply(WorkspaceHandle input) {
+            public boolean apply(Handle<?> input) {
                 return "bar".equals(input.getName())
                     && Workspace.class.isAssignableFrom(input.getType());
             }
@@ -80,5 +81,33 @@ public class DirectoryRepositoryTest {
         repo.get("foo");
 
         verify(drvreg);
+    }
+
+    @Test
+    public void testStyles() throws Exception {
+        final Driver<?> d = createNiceMock(Driver.class);
+        expect(d.getName()).andReturn("css").anyTimes();
+        expect(d.getType()).andReturn((Class)Style.class).anyTimes();
+        replay(d);
+
+        DirectoryRepository repo2 = new DirectoryRepository(repo.getDirectory(), 
+            new DriverRegistry() {
+                @Override
+                public Iterator<Driver<?>> list() {
+                    return (Iterator) Iterators.singletonIterator(d);
+                }
+            }, "css"
+        );
+        FileUtils.touch(new File(repo2.getDirectory(), "baz.css"));
+
+        assertEquals(1, Iterables.size(repo2.list()));
+        Iterables.find(repo2.list(), new Predicate<Handle<?>>() {
+            @Override
+            public boolean apply(Handle<?> input) {
+                return "baz".equals(input.getName()) 
+                    && Style.class.isAssignableFrom(input.getType());
+            }
+        });
+        repo2.close();  
     }
 }

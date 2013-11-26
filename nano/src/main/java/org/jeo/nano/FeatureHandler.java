@@ -290,9 +290,15 @@ public class FeatureHandler extends Handler {
         Style style = null;
         if (p.containsKey("style") && !p.getProperty("style").isEmpty()) {
             String s = p.getProperty("style");
-            style = (Style) server.getRegistry().get(s);
-            if (style == null) {
-                throw new HttpException(HTTP_NOTFOUND, "No such style: " + s);
+            try {
+                style = (Style) server.getRegistry().get(s);
+                if (style == null) {
+                    throw new HttpException(HTTP_NOTFOUND, "No such style: " + s);
+                }
+            }
+            catch(ClassCastException e) {
+                throw new HttpException(HTTP_BADREQUEST, String.format(
+                    "Object %s is not a style", s));
             }
         }
         else {

@@ -11,6 +11,7 @@ import java.util.Map;
 
 import org.jeo.json.JSONObject;
 import org.jeo.json.JSONValue;
+import org.jeo.map.Style;
 import org.jeo.data.mem.MemWorkspace;
 import org.jeo.util.Convert;
 import org.jeo.util.Optional;
@@ -68,11 +69,11 @@ public class JSONRepository implements DataRepository {
     }
 
     @Override
-    public Iterable<WorkspaceHandle> list() throws IOException {
+    public Iterable<Handle<?>> list() throws IOException {
         JSONObject reg = obj();
 
-        List<WorkspaceHandle> list = new ArrayList<WorkspaceHandle>();
-        
+        List<Handle<?>> list = new ArrayList<Handle<?>>();
+
         for (Object k : reg.keySet()) {
             String key = k.toString();
 
@@ -95,13 +96,27 @@ public class JSONRepository implements DataRepository {
                 return null;
             }
 
-            list.add(new WorkspaceHandle(key, drv, this));
+            Class<?> t = drv.getType();
+            if (Workspace.class.isAssignableFrom(t) || Dataset.class.isAssignableFrom(t)) {
+                list.add(new WorkspaceHandle(key, drv, this));
+            }
+            else if (Style.class.isAssignableFrom(t)) {
+                list.add(new Handle<Style>(key, Style.class, drv) {
+                    @Override
+                    protected Style doResolve() throws IOException {
+                        return (Style) get(name);
+                    }
+                });
+            }
+            else {
+                LOG.debug("object "+key+" not a workspace, dataset, or style: " + t.getName());
+            }
         }
         return list;
     }
 
     @Override
-    public Workspace get(String name) throws IOException {
+    public Object get(String name) throws IOException {
         JSONObject reg = obj();
 
         JSONObject wsObj = (JSONObject) reg.get(name);
@@ -149,6 +164,9 @@ public class JSONRepository implements DataRepository {
             }
             else if (data instanceof Dataset) {
                 return new SingleWorkspace((Dataset)data);
+            }
+            else if (data instanceof Style) {
+                return ((Style)data);
             }
             else {
                 LOG.debug(

@@ -18,7 +18,7 @@ public class WorkspaceHandle extends Handle<Workspace> {
 
     @Override
     protected Workspace doResolve() throws IOException {
-        return repo.get(name);
+        return (Workspace) repo.get(name);
     }
 
 }

@@ -10,6 +10,7 @@ import org.jeo.data.Dataset;
 import org.jeo.data.DatasetHandle;
 import org.jeo.data.DirectoryRepository;
 import org.jeo.data.Drivers;
+import org.jeo.data.Handle;
 import org.jeo.data.Query;
 import org.jeo.data.TileDataset;
 import org.jeo.data.TileGrid;
@@ -59,7 +60,7 @@ public class InfoCmd extends JeoCmd {
                 if (f != null && f.exists() && f.isDirectory()) {
                     DirectoryRepository reg = new DirectoryRepository(f);
                     try {
-                        for (WorkspaceHandle h : reg.list()) {
+                        for (Handle<?> h : reg.list()) {
                             print(reg.get(h.getName()), w, cli);
                         }
                     }

@@ -186,7 +186,7 @@ public class MockServer {
     MockServer withWorkspace() throws Exception {
         workspace = createMock(Workspace.class);
         workspace.close();
-        expectLastCall().once();
+        expectLastCall().atLeastOnce();
 
         expect(reg.get("foo")).andReturn(workspace).once();
         expect(reg.get((String) anyObject())).andReturn(null).anyTimes();
@@ -197,6 +197,7 @@ public class MockServer {
 
     MockServer expectSchemaCreated() throws Exception {
         VectorDataset layer = createMock(VectorDataset.class);
+        expect(workspace.get((String) anyObject())).andReturn(null).anyTimes();
         expect(workspace.create((Schema) anyObject())).andReturn(layer).once();
         return this;
     }

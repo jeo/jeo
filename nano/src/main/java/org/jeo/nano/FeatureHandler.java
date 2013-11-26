@@ -326,7 +326,7 @@ public class FeatureHandler extends Handler {
         String dataSet = m.group(2);
 
         if (dataSet == null) {
-            return handlePostCreateLayer(request, server);
+            return handleCreateLayer(request, server);
         } else {
             return handlePostAddFeatures(request, server);
         }
@@ -335,21 +335,32 @@ public class FeatureHandler extends Handler {
     Response handlePut(Request request, NanoServer server) throws IOException {
         String fid = parseFeatureId(request);
         if (fid == null) {
-            throw new HttpException(HTTP_BADREQUEST, "must provide feature id for PUT");
+            return handleCreateLayer(request, server);
+        } else {
+            return handlePutEditFeature(fid, request, server);
         }
+    }
 
+    Response handlePutEditFeature(String fid, Request request, NanoServer server) throws IOException {
         Query query = new Query().update().filter(new Id(new Literal(fid)));
         handleWrite(request, server, query, true);
 
         return new Response(HTTP_OK, MIME_PLAINTEXT, "");
     }
 
-    Response handlePostCreateLayer(Request request, NanoServer server) throws IOException {
+    Response handleCreateLayer(Request request, NanoServer server) throws IOException {
         Matcher m = (Matcher) request.getContext().get(Matcher.class);
+        String dataSetName = m.group(2);
+
+        Schema schema = parseSchema(dataSetName, getInput(request));
         Workspace ws = findWorkspace(m.group(1), server.getRegistry());
 
         try {
-            Schema schema = parseSchema(getInput(request));
+            if (ws.get(schema.getName()) != null) {
+                String msg = String.format("dataset '%s' already exists in workspace %s",
+                        schema.getName(), m.group(1));
+                throw new HttpException(HTTP_BADREQUEST, msg);
+            }
             ws.create(schema);
         } finally {
             ws.close();
@@ -362,6 +373,7 @@ public class FeatureHandler extends Handler {
     Response handlePostAddFeatures(Request request, NanoServer server) throws IOException {
         Query query = new Query().append();
         handleWrite(request, server, query, false);
+        //TODO: set Location header
         return new Response(HTTP_CREATED, MIME_PLAINTEXT, "");
     }
 
@@ -479,15 +491,18 @@ public class FeatureHandler extends Handler {
         return (JSONObject) JSONValue.parse(new InputStreamReader(body));
     }
 
-    Schema parseSchema(InputStream body) {
+    Schema parseSchema(String name, InputStream body) {
 
         JSONObject obj = (JSONObject) JSONValue.parse(new InputStreamReader(body));
 
         //not part of GeoJSON
-         String name = (String) obj.get("name");
-         if (name == null) {
-             throw new IllegalArgumentException("Object must specify name property");
-         }
+        if (name == null) {
+            name = (String) obj.get("name");
+
+            if (name == null) {
+                throw new IllegalArgumentException("Object must specify name property");
+            }
+        }
  
          JSONObject properties = (JSONObject) obj.get("properties");
          List<Field> fields = new ArrayList<Field>();
@@ -515,7 +530,7 @@ public class FeatureHandler extends Handler {
  
              CoordinateReferenceSystem crs = null;
              if (prop.containsKey("crs")) {
-                 //crs = readCRS(prop.get("crs"));
+                 crs = parseCRS(prop.get("crs").toString());
              }
  
              fields.add(new Field(key, clazz, crs));

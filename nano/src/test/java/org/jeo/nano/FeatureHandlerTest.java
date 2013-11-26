@@ -200,13 +200,41 @@ public class FeatureHandlerTest extends HandlerTestSupport {
     }
 
     @Test
+    public void testPutCreateLayer() throws Exception {
+        mock = MockServer.create()
+                    .withWorkspace()
+                    .expectSchemaCreated()
+                .replay();
+
+        String json = dequote("{ 'type': 'schema', 'properties': { 'geometry': { 'type': 'Point' }, " +
+            "'name': { 'type': 'string' } } }");
+
+        makeRequest(
+                new Request("/features/foo/widgets", "PUT", h("Content-type", "application/json"), null, body(json)),
+                NanoHTTPD.HTTP_CREATED,
+                NanoHTTPD.MIME_PLAINTEXT
+        );
+
+        mock.verify();
+
+        mock = MockServer.create()
+                    .withVectorLayer()
+                .replay();
+        makeBadRequest(
+                new Request("/features/foo/bar", "PUT", h("Content-type", "application/json"), null, body(json)),
+                NanoHTTPD.HTTP_BADREQUEST,
+                "dataset 'bar' already exists in workspace foo"
+        );
+    }
+
+    @Test
     public void testPostCreateLayer() throws Exception {
         mock = MockServer.create()
                     .withWorkspace()
                     .expectSchemaCreated()
                 .replay();
 
-        String json = dequote("{ 'type': 'schema','name': 'widgets', 'properties': { 'geometry': { 'type': 'Point' }, " +
+        String json = dequote("{ 'type': 'schema','name': 'bar', 'properties': { 'geometry': { 'type': 'Point' }, " +
             "'name': { 'type': 'string' } } }");
 
         makeRequest(
@@ -216,6 +244,15 @@ public class FeatureHandlerTest extends HandlerTestSupport {
         );
 
         mock.verify();
+
+        mock = MockServer.create()
+                    .withVectorLayer()
+                .replay();
+        makeBadRequest(
+                new Request("/features/foo", "POST", h("Content-type", "application/json"), null, body(json)),
+                NanoHTTPD.HTTP_BADREQUEST,
+                "dataset 'bar' already exists in workspace foo"
+        );
     }
 
     @Test

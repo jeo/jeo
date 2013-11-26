@@ -40,7 +40,10 @@ public abstract class Handler {
     }
 
     protected CoordinateReferenceSystem parseCRS(Properties props) {
-        String srs = props.getProperty("srs");
+        return parseCRS(props.getProperty("srs"));
+    }
+
+    protected CoordinateReferenceSystem parseCRS(String srs) {
         try {
             return srs == null ? null : Proj.crs(srs);
         } catch (UnsupportedParameterException upe) {

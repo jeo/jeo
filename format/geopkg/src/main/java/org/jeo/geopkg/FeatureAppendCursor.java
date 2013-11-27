@@ -32,12 +32,12 @@ public class FeatureAppendCursor extends Cursor<Feature> {
 
     @Override
     public Feature next() throws IOException {
-        return next = new BasicFeature(null, ws.schema(entry));
+        return next = new BasicFeature(null, ws.schema(entry, cx));
     }
 
     @Override
     protected void doWrite() throws IOException {
-        ws.add(entry, next);
+        ws.insert(entry, next, cx);
     }
 
     @Override

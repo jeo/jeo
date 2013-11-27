@@ -51,7 +51,7 @@ public class GeoPkgVector implements VectorDataset {
 
     @Override
     public Schema schema() throws IOException {
-        return geopkg.schema(entry);
+        return geopkg.schema(entry, null);
     }
 
     @Override
@@ -73,10 +73,6 @@ public class GeoPkgVector implements VectorDataset {
     @Override
     public Cursor<Feature> cursor(Query q) throws IOException {
         return geopkg.cursor(entry, q);
-    }
-
-    public void add(Feature f) throws IOException {
-        geopkg.add(entry, f);
     }
 
     @Override

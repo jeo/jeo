@@ -24,19 +24,26 @@ public class FeatureCursor extends Cursor<Feature> {
     ResultSet results;
     Connection cx;
 
+    FeatureEntry entry;
+    GeoPkgWorkspace workspace;
     Schema schema;
     PrimaryKey primaryKey;
-
-    Boolean next;
     GeoPkgGeomReader geomReader;
 
-    FeatureCursor(ResultSet stmt, Connection cx, FeatureEntry entry, GeoPkgWorkspace workspace) 
+    Boolean next;
+    Feature feature;
+
+    FeatureCursor(Mode mode, ResultSet stmt, Connection cx, FeatureEntry entry, GeoPkgWorkspace workspace) 
         throws IOException {
+        super(mode);
+
         this.results = stmt;
         this.cx = cx;
+        this.entry = entry;
+        this.workspace = workspace;
 
-        this.schema = workspace.schema(entry);
-        this.primaryKey = workspace.primaryKey(entry);
+        this.schema = workspace.schema(entry, cx);
+        this.primaryKey = workspace.primaryKey(entry, cx);
 
         this.geomReader = new GeoPkgGeomReader();
     }
@@ -87,8 +94,7 @@ public class FeatureCursor extends Cursor<Feature> {
                         fid = buf.toString();
                     }
 
-                    //TODO: feature id
-                    return new BasicFeature(fid, values, schema);
+                    return feature = new BasicFeature(fid, values, schema);
                 }
                 finally {
                     next = null;
@@ -99,6 +105,16 @@ public class FeatureCursor extends Cursor<Feature> {
         catch(Exception e) {
             throw new IOException(e);
         }
+    }
+
+    @Override
+    protected void doWrite() throws IOException {
+        workspace.update(entry, feature, cx);
+    }
+
+    @Override
+    protected void doRemove() throws IOException {
+        workspace.delete(entry, feature, cx);
     }
 
     @Override

@@ -15,6 +15,7 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -347,7 +348,7 @@ public class GeoPkgWorkspace implements Workspace, FileData {
 
             ResultSet rs = ps.executeQuery();
 
-            Cursor<Feature> c = new FeatureCursor(rs, cx, entry, this);
+            Cursor<Feature> c = new FeatureCursor(q.getMode(), rs, cx, entry, this);
 
             if (!Envelopes.isNull(q.getBounds())) {
                 c = Cursors.intersects(c, q.getBounds());
@@ -395,11 +396,11 @@ public class GeoPkgWorkspace implements Workspace, FileData {
         return args;
     }
 
-    public void add(final FeatureEntry entry, final Feature feature) throws IOException {
+    void insert(final FeatureEntry entry, final Feature feature, Connection cx) throws IOException {
         run(new DbOP<Boolean>() {
             @Override
             protected Boolean doRun(Connection cx) throws Exception {
-                Feature f = Features.retype(feature, schema(entry));
+                Feature f = Features.retype(feature, schema(entry, cx));
 
                 SQL sqlb = new SQL("INSERT INTO ").name(entry.getTableName()).add(" (");
                 List<Object> objs = new ArrayList<Object>();
@@ -423,8 +424,52 @@ public class GeoPkgWorkspace implements Workspace, FileData {
 
                 return open(prepareStatement(sql, objs, cx)).execute();
             }
-        });
-        
+        }, cx);
+    }
+
+    void update(final FeatureEntry entry, final Feature feature, Connection cx) throws IOException {
+        run(new DbOP<Boolean>() {
+            @Override
+            protected Boolean doRun(Connection cx) throws Exception {
+                Map<String,Object> vals = feature.map();
+                if (vals.isEmpty()) {
+                    // do nothing
+                    return false;
+                }
+
+                SQL sqlb = new SQL("UPDATE ").name(entry.getTableName()).add(" SET ");
+                List<Object> objs = new ArrayList<Object>();
+
+                for (Map.Entry<String, Object> kv : feature.map().entrySet()) {
+                    sqlb.name(kv.getKey()).add(" = ?, ");
+                    objs.add(kv.getValue());
+                }
+                sqlb.trim(2);
+
+                PrimaryKeyColumn pk = primaryKey(entry, cx).getColumns().get(0);
+                sqlb.add(" WHERE ").name(pk.getName()).add(" = ?");
+                objs.add(feature.getId());
+
+                String sql = sqlb.toString();
+                log(sql, objs);
+
+                return open(prepareStatement(sql, objs, cx)).execute();
+            }
+        }, cx);
+    }
+
+    void delete(final FeatureEntry entry, final Feature feature, Connection cx) throws IOException {
+        run(new DbOP<Boolean>() {
+            @Override
+            protected Boolean doRun(Connection cx) throws Exception {
+                String sql = new SQL("DELETE FROM ").name(entry.getTableName()).add(" WHERE ")
+                    .name(primaryKeyCol(entry, cx).getName()).add(" = ?").toString();
+                List objs = Arrays.asList(feature.getId());
+                log(sql, objs);
+
+                return open(prepareStatement(sql, objs, cx)).execute();
+            }
+        }, cx);
     }
 
     public GeoPkgVector create(Schema schema) throws IOException {
@@ -652,10 +697,10 @@ public class GeoPkgWorkspace implements Workspace, FileData {
         return e;
     }
 
-    public Schema schema(FeatureEntry entry) throws IOException {
+    public Schema schema(FeatureEntry entry, Connection cx) throws IOException {
         if (entry.getSchema() == null) {
             try {
-                entry.setSchema(createSchema(entry));
+                entry.setSchema(createSchema(entry, cx));
             } catch (Exception e) {
                 throw new IOException(e);
             }
@@ -663,10 +708,10 @@ public class GeoPkgWorkspace implements Workspace, FileData {
         return entry.getSchema();
     }
 
-    public PrimaryKey primaryKey(FeatureEntry entry) throws IOException {
+    public PrimaryKey primaryKey(FeatureEntry entry, Connection cx) throws IOException {
         if (entry.getPrimaryKey() == null) {
             try {
-                entry.setPrimaryKey(createPrimaryKey(entry));
+                entry.setPrimaryKey(createPrimaryKey(entry, cx));
             }
             catch(Exception e) {
                 throw new IOException(e);
@@ -675,7 +720,13 @@ public class GeoPkgWorkspace implements Workspace, FileData {
         return entry.getPrimaryKey();
     }
  
-    Schema createSchema(final FeatureEntry entry) throws Exception {
+    public PrimaryKeyColumn primaryKeyCol(FeatureEntry entry, Connection cx) throws IOException {
+        // geopackage spec mandates a single primary key column in all cases, but we could be safe
+        // and do a check anyways
+        return primaryKey(entry, cx).getColumns().get(0);
+    }
+
+    Schema createSchema(final FeatureEntry entry, Connection cx) throws Exception {
         return run(new DbOP<Schema>() {
             @Override
             protected Schema doRun(Connection cx) throws Exception {
@@ -701,11 +752,11 @@ public class GeoPkgWorkspace implements Workspace, FileData {
                 }
                 return sb.schema();
             }
-        });
+        }, cx);
     }
 
-    PrimaryKey createPrimaryKey(final FeatureEntry entry) throws Exception {
-        final Schema schema = schema(entry);
+    PrimaryKey createPrimaryKey(final FeatureEntry entry, Connection cx) throws Exception {
+        final Schema schema = schema(entry, cx);
 
         return run(new DbOP<PrimaryKey>() {
             @Override
@@ -735,7 +786,7 @@ public class GeoPkgWorkspace implements Workspace, FileData {
                 pkey.getColumns().addAll(cols);
                 return pkey;
             }
-        });
+        }, cx);
     }
 
     /**
@@ -927,7 +978,7 @@ public class GeoPkgWorkspace implements Workspace, FileData {
     }
 
     <T> T run(DbOP<T> op, Connection cx) throws IOException {
-        return op.run(cx);
+        return cx != null ? op.run(cx) : run(op);
     }
 
     String log(String sql, Object... params) {

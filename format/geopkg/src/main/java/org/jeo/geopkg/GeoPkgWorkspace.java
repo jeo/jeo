@@ -14,6 +14,7 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -431,19 +432,24 @@ public class GeoPkgWorkspace implements Workspace, FileData {
         run(new DbOP<Boolean>() {
             @Override
             protected Boolean doRun(Connection cx) throws Exception {
-                Map<String,Object> vals = feature.map();
-                if (vals.isEmpty()) {
-                    // do nothing
-                    return false;
-                }
-
                 SQL sqlb = new SQL("UPDATE ").name(entry.getTableName()).add(" SET ");
                 List<Object> objs = new ArrayList<Object>();
 
                 for (Map.Entry<String, Object> kv : feature.map().entrySet()) {
+                    Object obj = kv.getValue();
+                    if (obj == null) {
+                        //TODO: revisit this, this doesn't allow us to null a property
+                        continue;
+                    }
+
                     sqlb.name(kv.getKey()).add(" = ?, ");
                     objs.add(kv.getValue());
                 }
+               
+                if (objs.isEmpty()) {
+                    return false;
+                }
+
                 sqlb.trim(2);
 
                 PrimaryKeyColumn pk = primaryKey(entry, cx).getColumns().get(0);
@@ -951,21 +957,27 @@ public class GeoPkgWorkspace implements Workspace, FileData {
 
         for (int i = 0; i < args.size(); i++) {
             Object obj = args.get(i);
-            if (obj instanceof Geometry) {
-                ps.setBytes(i+1, geomWriter.write((Geometry)obj));
+            int j = i+1;
+            if (obj == null) {
+                ps.setNull(j, Types.VARCHAR); 
             }
             else {
-                if (obj instanceof Byte || obj instanceof Short || obj instanceof Integer) {
-                    ps.setInt(i+1, ((Number)obj).intValue());
-                }
-                if (obj instanceof Long) {
-                    ps.setLong(i+1, ((Number)obj).longValue());
-                }
-                if (obj instanceof Float || obj instanceof Double) {
-                    ps.setDouble(i+1, ((Number)obj).doubleValue());
+                if (obj instanceof Geometry) {
+                    ps.setBytes(j, geomWriter.write((Geometry)obj));
                 }
                 else {
-                    ps.setString(i+1, obj.toString());
+                    if (obj instanceof Byte || obj instanceof Short || obj instanceof Integer) {
+                        ps.setInt(j, ((Number)obj).intValue());
+                    }
+                    else if (obj instanceof Long) {
+                        ps.setLong(j, ((Number)obj).longValue());
+                    }
+                    else if (obj instanceof Float || obj instanceof Double) {
+                        ps.setDouble(j, ((Number)obj).doubleValue());
+                    }
+                    else {
+                        ps.setString(j, obj.toString());
+                    }
                 }
             }
         }

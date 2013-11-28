@@ -72,7 +72,8 @@ public class FeatureCursor extends Cursor<Feature> {
 
                     for (int i = 0; i < fields.size(); i++) {
                         if (Geometry.class.isAssignableFrom(fields.get(i).getType())) {
-                            values.add(geomReader.read(results.getBytes(i+1)));
+                            byte[] bytes = results.getBytes(i+1);
+                            values.add(bytes != null ? geomReader.read(bytes) : null);
                         }
                         else {
                             values.add(results.getObject(i+1));

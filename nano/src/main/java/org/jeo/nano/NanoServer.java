@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Properties;
 
 import org.jeo.data.DataRepository;
+import org.jeo.data.DirectoryRepository;
 import org.jeo.data.mem.MemRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,7 +62,7 @@ public class NanoServer extends NanoHTTPD {
             }
         }
 
-        for (Handler h : handlers) {
+        for (Handler h : this.handlers) {
             h.init(this);
         }
     }
@@ -140,23 +141,12 @@ public class NanoServer extends NanoHTTPD {
             usage();
         }
 
-        Integer port = Integer.parseInt(args[0]);
-        File wwwRoot = null;
-        if (args.length > 1) {
-            wwwRoot = new File(args[1]);
-        }
-
+        Opts opts = parseOpts(args);
+        
         // make number of threads configurable
         try {
-            new NanoServer(port, wwwRoot, DEFAULT_NUM_THREADS, loadRegistry(),
+            new NanoServer(opts.port, opts.root, DEFAULT_NUM_THREADS, loadRegistry(opts), 
                 null, null);
-                /*(List)Arrays.asList(new AppsHandler(new File("/Users/jdeolive/Projects/jeo/apps")))
-                new MapRenderer() {
-                    @Override
-                    public void render(Map map, OutputStream output) throws IOException {
-                        Java2D.render(map, output);
-                    }
-                });*/
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -164,13 +154,45 @@ public class NanoServer extends NanoHTTPD {
         try { System.in.read(); } catch( Throwable t ) {}
     }
 
-    static DataRepository loadRegistry() {
-        return new org.jeo.data.DirectoryRepository(new File("/Users/jdeolive/Documents/Geodata"));
-        //return new MemRepository();
+    static Opts parseOpts(String[] args) {
+        if (args.length % 2 != 0) {
+            usage();
+        }
+
+        Opts opts = new Opts();
+        for (int i = 0; i < args.length; i += 2) {
+            String arg = args[i];
+            if ("-p".equalsIgnoreCase(arg)) {
+                opts.port = Integer.parseInt(args[i+1]);
+            }
+            else if ("-r".equalsIgnoreCase(arg)) {
+                opts.root = new File(args[i+1]);
+            }
+            else if ("-d".equalsIgnoreCase(arg)) {
+                opts.data = new File(args[i+1]);
+            }
+            else {
+                usage();
+            }
+        }
+        return opts;
+    }
+
+    static DataRepository loadRegistry(Opts opts) {
+        if (opts.data != null) {
+            return new DirectoryRepository(opts.data);
+        }
+        return new MemRepository();
     }
 
     static void usage() {
-        System.out.println(NanoServer.class.getCanonicalName() + " <port> [<wwwRoot>]");
+        System.out.println(NanoServer.class.getCanonicalName() + "[-p <port>] [-r <root>] [-d <dataRoot>]");
         System.exit(1);
+    }
+
+    static class Opts {
+        Integer port = 8000;
+        File root = null;
+        File data = null;
     }
 }

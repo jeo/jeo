@@ -28,7 +28,7 @@ public interface Workspace extends Disposable {
      * 
      * @return Iterable over datasets. 
      */
-    Iterable<DatasetHandle> list() throws IOException;
+    Iterable<Handle<Dataset>> list() throws IOException;
 
     /**
      * Returns a layer object by name.

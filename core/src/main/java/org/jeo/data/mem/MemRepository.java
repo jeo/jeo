@@ -1,15 +1,17 @@
 package org.jeo.data.mem;
 
+import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.jeo.data.DataRepository;
+import org.jeo.data.Disposable;
 import org.jeo.data.Handle;
 import org.jeo.data.Workspace;
-import org.jeo.data.WorkspaceHandle;
+import org.jeo.filter.Filter;
+import org.jeo.filter.Filters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,54 +28,60 @@ public class MemRepository implements DataRepository {
     static Logger LOG = LoggerFactory.getLogger(MemRepository.class);
 
     /** registry map */
-    Map<String, Workspace> map;
+    Map<String, Object> map;
 
     /**
      * Constructs a new empty repo.
      */
     public MemRepository() {
-        map = new LinkedHashMap<String, Workspace>();
+        map = new LinkedHashMap<String, Object>();
     }
 
-    /**
-     * Constructs a new repo from an existing map.
-     */
-    public MemRepository(Map<String,Workspace> map) {
-        map = new LinkedHashMap<String, Workspace>(map);
-    }
+    @Override
+    public Iterable<Handle<?>> query(Filter<? super Handle<?>> filter) {
+        List<Handle<?>> list = new ArrayList<Handle<?>>();
+        for (Map.Entry<String, Object> kv : map.entrySet()) {
+            final Object obj = kv.getValue();
 
-    public MemRepository(String name, Workspace workspace) {
-        this(Collections.singletonMap(name, workspace));
+            //TODO: driver
+            Handle<Object> h = new Handle<Object>(kv.getKey(), obj.getClass(), null) {
+                @Override
+                protected Object doResolve() throws IOException {
+                    return obj;
+                }
+            };
+            if (filter.apply(h)) {
+                list.add(h);
+            }
+        }
+        return list;
     }
 
     @Override
     public Iterable<Handle<?>> list() {
-        List<Handle<?>> items = new ArrayList<Handle<?>>();
-        for (Map.Entry<String, Workspace> kv : map.entrySet()) {
-            Workspace ws = kv.getValue();
-            items.add(new WorkspaceHandle(kv.getKey(), ws.getDriver(), this));
-        }
-        return items;
-    }
-
-    /**
-     * Adds a new workspace to the repository.
-     * 
-     * @param key The name/key of the workspace.
-     * @param workspace The workspace.
-     */
-    public void put(String key, Workspace ws) {
-        map.put(key, ws);
+        return query(Filters.all());
     }
 
     @Override
-    public Workspace get(String key) {
-        return map.get(key);
+    public Object get(String name) throws IOException {
+        return map.get(name);
+    }
+
+    /**
+     * Adds a object to the repository.
+     * 
+     * @param key The name/key of the workspace.
+     * @param obj The object.
+     */
+    public void put(String key, Object obj) {
+        map.put(key, obj);
     }
 
     public void close() {
-        for (Workspace ws : map.values()) {
-            ws.close();
+        for (Object obj : map.values()) {
+            if (obj instanceof Disposable) {
+                ((Disposable) obj).close();
+            }
         }
         map.clear();
     }

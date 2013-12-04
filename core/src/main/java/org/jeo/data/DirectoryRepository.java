@@ -17,6 +17,8 @@ import org.jeo.json.JSONObject;
 import org.jeo.json.JSONValue;
 import org.jeo.util.Pair;
 import org.jeo.map.Style;
+import org.jeo.filter.Filter;
+import org.jeo.filter.Filters;
 import org.jeo.util.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -78,6 +80,13 @@ public class DirectoryRepository implements DataRepository {
 
     @Override
     public Iterable<Handle<?>> list() throws IOException {
+        return query(Filters.all());
+    }
+
+    @Override
+    public Iterable<Handle<?>> query(Filter<? super Handle<?>> filter)
+        throws IOException {
+
         // list all files, possibly filtering by extension
         final Map<String,String> metaFiles = new HashMap<String, String>();
 
@@ -123,7 +132,7 @@ public class DirectoryRepository implements DataRepository {
 
             if (drv != null) {
                 Handle<?> h = newHandle(name, drv, file);
-                if (h != null) {
+                if (h != null && filter.apply(h)) {
                     items.add(h);
                 }
             }
@@ -152,7 +161,12 @@ public class DirectoryRepository implements DataRepository {
         Class<?> t = drv.getType();
 
         if (Workspace.class.isAssignableFrom(t) || Dataset.class.isAssignableFrom(t)) {
-            return new WorkspaceHandle(name, drv, this);
+            return new Handle<Object>(name, t, drv) {
+                @Override
+                protected Object doResolve() throws IOException {
+                    return get(name);
+                }
+            };
         }
         else if (Style.class.isAssignableFrom(t)) {
             return new Handle<Style>(name, Style.class, drv) {

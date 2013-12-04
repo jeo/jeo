@@ -6,8 +6,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.jeo.data.Dataset;
-import org.jeo.data.DatasetHandle;
 import org.jeo.data.Driver;
+import org.jeo.data.Handle;
 import org.jeo.data.Workspace;
 import org.jeo.feature.Schema;
 import org.jeo.util.Key;
@@ -51,11 +51,16 @@ public class MongoWorkspace implements Workspace {
     }
 
     @Override
-    public Iterable<DatasetHandle> list() throws IOException {
-        List<DatasetHandle> refs = new ArrayList<DatasetHandle>(); 
+    public Iterable<Handle<Dataset>> list() throws IOException {
+        List<Handle<Dataset>> refs = new ArrayList<Handle<Dataset>>(); 
         for (String name : db.getCollectionNames()) {
             if (!name.startsWith("system.")) {
-                refs.add(new DatasetHandle(name, Dataset.class, getDriver(), this));
+                refs.add(new Handle<Dataset>(name, Dataset.class, getDriver()) {
+                    @Override
+                    protected Dataset doResolve() throws IOException {
+                        return get(name);
+                    }
+                });
             }
         }
         return refs;

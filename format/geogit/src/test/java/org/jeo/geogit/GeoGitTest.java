@@ -27,7 +27,8 @@ import org.geotools.util.NullProgressListener;
 import org.jeo.TestData;
 import org.jeo.Tests;
 import org.jeo.data.Cursor;
-import org.jeo.data.DatasetHandle;
+import org.jeo.data.Dataset;
+import org.jeo.data.Handle;
 import org.jeo.data.Query;
 import org.jeo.data.Transaction;
 import org.jeo.data.VectorDataset;
@@ -115,15 +116,15 @@ public class GeoGitTest {
     @Test
     public void testLayers() throws IOException {
         assertEquals(4, Iterables.size(ws.list()));
-        Iterables.find(ws.list(), new Predicate<DatasetHandle>() {
+        Iterables.find(ws.list(), new Predicate<Handle<Dataset>>() {
             @Override
-            public boolean apply(DatasetHandle input) {
+            public boolean apply(Handle<Dataset> input) {
                 return input.getName().equals("states");
             }
         });
-        Iterables.find(ws.list(), new Predicate<DatasetHandle>() {
+        Iterables.find(ws.list(), new Predicate<Handle<Dataset>>() {
             @Override
-            public boolean apply(DatasetHandle input) {
+            public boolean apply(Handle<Dataset> input) {
                 return input.getName().equals("point");
             }
         });

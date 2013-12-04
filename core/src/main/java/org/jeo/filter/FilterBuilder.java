@@ -6,8 +6,6 @@ import java.util.Deque;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.jeo.filter.Logic.Type;
-
 /**
  * Builder for filters that can compose complex filter / expression trees. 
  * <p>
@@ -68,8 +66,8 @@ public class FilterBuilder {
         Expression low = (Expression) stack.pop();
         Expression e = (Expression) stack.pop();
 
-        stack.push(new Comparison(Comparison.Type.GREATER_OR_EQUAL, e, low).
-            and(new Comparison(Comparison.Type.LESS_OR_EQUAL, e, high)));
+        stack.push(new Comparison<Object>(Comparison.Type.GREATER_OR_EQUAL, e, low).
+            and(new Comparison<Object>(Comparison.Type.LESS_OR_EQUAL, e, high)));
         return this;
     }
 
@@ -78,7 +76,7 @@ public class FilterBuilder {
         while(!stack.isEmpty() && stack.peek() instanceof Expression) {
             ids.add((Expression) stack.pop());
         }
-        stack.push(new Id(ids));
+        stack.push(new Id<Object>(ids));
         return this;
     }
 
@@ -98,35 +96,46 @@ public class FilterBuilder {
         return spatial(Spatial.Type.INTERSECT);
     }
 
-    public Filter filter() {
-        return (Filter) stack.pop();
+    public FilterBuilder type(Class<?> type) {
+        if (stack.peek() instanceof Expression) {
+            stack.push(new TypeOf<Object>((Expression)stack.pop(), type));
+        }
+        else {
+            stack.push(new TypeOf<Object>(new Self(), type));
+        }
+        return this;
     }
 
+    public <T> Filter<T> filter() {
+        return (Filter<T>) stack.pop();
+    }
+
+    public <T> 
     FilterBuilder cmp(Comparison.Type type) {
         Expression e2 = (Expression) stack.pop();
         Expression e1 = (Expression) stack.pop();
-        stack.push(new Comparison(type, e1, e2));
+        stack.push(new Comparison<Object>(type, e1, e2));
         return this;
     }
 
     FilterBuilder log(Logic.Type type) {
-        LinkedList<Filter> parts = new LinkedList<Filter>();
+        LinkedList<Filter<Object>> parts = new LinkedList<Filter<Object>>();
 
         while(stack.peek() instanceof Filter) {
-            parts.addFirst((Filter)stack.pop());
-            if (type == Type.NOT) {
+            parts.addFirst((Filter<Object>)stack.pop());
+            if (type == Logic.Type.NOT) {
                 break;
             }
         }
 
-        stack.push(new Logic(type, parts));
+        stack.push(new Logic<Object>(type, parts));
         return this;
     }
 
     FilterBuilder spatial(Spatial.Type type) {
         Expression e2 = (Expression) stack.pop();
         Expression e1 = (Expression) stack.pop();
-        stack.push(new Spatial(type, e1, e2));
+        stack.push(new Spatial<Object>(type, e1, e2));
         return this;
     }
 }

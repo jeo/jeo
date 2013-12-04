@@ -7,7 +7,6 @@ import java.util.List;
 
 import org.jeo.cli.JeoCLI;
 import org.jeo.data.Dataset;
-import org.jeo.data.DatasetHandle;
 import org.jeo.data.DirectoryRepository;
 import org.jeo.data.Drivers;
 import org.jeo.data.Handle;
@@ -17,8 +16,8 @@ import org.jeo.data.TileGrid;
 import org.jeo.data.TilePyramid;
 import org.jeo.data.VectorDataset;
 import org.jeo.data.Workspace;
-import org.jeo.data.WorkspaceHandle;
 import org.jeo.feature.Field;
+import org.jeo.filter.Filters;
 import org.jeo.geojson.GeoJSONWriter;
 import org.jeo.geom.Envelopes;
 import org.jeo.map.Style;
@@ -171,7 +170,7 @@ public class InfoCmd extends JeoCmd {
             w.key("driver").value(workspace.getDriver().getName());
             w.key("datasets").array();
     
-            for (DatasetHandle h : workspace.list()) {
+            for (Handle<Dataset> h : workspace.list()) {
                 w.value(h.getName());
             }
     

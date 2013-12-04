@@ -8,7 +8,7 @@ import org.jeo.util.Optional;
  * 
  * @author Justin Deoliveira, OpenGeo
  */
-public class Comparison extends Filter {
+public class Comparison<T> extends Filter<T> {
 
     /**
      * Comparison operator type.  
@@ -55,7 +55,7 @@ public class Comparison extends Filter {
     }
 
     @Override
-    public boolean apply(Object obj) {
+    public boolean apply(T obj) {
         Object o1 = left.evaluate(obj);
         Object o2 = right.evaluate(obj);
 
@@ -131,7 +131,7 @@ public class Comparison extends Filter {
             return false;
         if (getClass() != obj.getClass())
             return false;
-        Comparison other = (Comparison) obj;
+        Comparison<?> other = (Comparison<?>) obj;
         if (left == null) {
             if (other.left != null)
                 return false;

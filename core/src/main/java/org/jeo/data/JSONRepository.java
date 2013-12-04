@@ -12,7 +12,8 @@ import java.util.Map;
 import org.jeo.json.JSONObject;
 import org.jeo.json.JSONValue;
 import org.jeo.map.Style;
-import org.jeo.data.mem.MemWorkspace;
+import org.jeo.filter.Filter;
+import org.jeo.filter.Filters;
 import org.jeo.util.Convert;
 import org.jeo.util.Optional;
 import org.slf4j.Logger;
@@ -70,10 +71,17 @@ public class JSONRepository implements DataRepository {
 
     @Override
     public Iterable<Handle<?>> list() throws IOException {
+        return query(Filters.all());
+    }
+
+    @Override
+    public Iterable<Handle<?>> query(Filter<? super Handle<?>> filter)
+            throws IOException {
+
         JSONObject reg = obj();
 
         List<Handle<?>> list = new ArrayList<Handle<?>>();
-
+        
         for (Object k : reg.keySet()) {
             String key = k.toString();
 
@@ -97,8 +105,14 @@ public class JSONRepository implements DataRepository {
             }
 
             Class<?> t = drv.getType();
+            Handle<?> h = null;
             if (Workspace.class.isAssignableFrom(t) || Dataset.class.isAssignableFrom(t)) {
-                list.add(new WorkspaceHandle(key, drv, this));
+                list.add(new Handle<Object>(key, t, drv) {
+                    @Override
+                    protected Object doResolve() throws IOException {
+                        return get(name);
+                    }
+                });
             }
             else if (Style.class.isAssignableFrom(t)) {
                 list.add(new Handle<Style>(key, Style.class, drv) {
@@ -110,6 +124,9 @@ public class JSONRepository implements DataRepository {
             }
             else {
                 LOG.debug("object "+key+" not a workspace, dataset, or style: " + t.getName());
+            }
+            if (h != null && filter.apply(h)) {
+                list.add(h);
             }
         }
         return list;

@@ -2,6 +2,10 @@ package org.jeo.data;
 
 import java.io.IOException;
 
+import org.osgeo.proj4j.CoordinateReferenceSystem;
+
+import com.vividsolutions.jts.geom.Envelope;
+
 /**
  * Reference to a data object.
  * <p> 
@@ -27,9 +31,19 @@ public abstract class Handle<T> implements Disposable {
     protected String title;
 
     /**
-     * object title
+     * object description
      */
     protected String description;
+
+    /**
+     * object coordinate reference system
+     */
+    protected CoordinateReferenceSystem crs;
+
+    /**
+     * object bounding box
+     */
+    protected Envelope bounds;
 
     /**
      * object type
@@ -53,10 +67,15 @@ public abstract class Handle<T> implements Disposable {
      * @param type The type of the data object.
      * @param driver The format driver for the data type.
      */
-    protected Handle(String name, Class<T> type, Driver<?> driver) {
+    @SuppressWarnings("unchecked")
+    protected Handle(String name, @SuppressWarnings("rawtypes") Class type, Driver<?> driver) {
         this.name = name;
         this.type = type;
         this.driver = driver;
+    }
+
+    protected Handle(String name, Driver<?> driver) {
+        this(name, driver.getType(), driver);
     }
 
     /**
@@ -103,9 +122,15 @@ public abstract class Handle<T> implements Disposable {
      *
      * @return The title, or <code>null</code>.
      * 
-     * @throws IOException I/O errors that occur interacting with the underlyign data object.
+     * @throws IOException I/O errors that occur interacting with the underlying data object.
      */
     public String title() throws IOException {
+        if (title == null) {
+            if (Dataset.class.isAssignableFrom(type)) {
+                Dataset data = (Dataset) resolve();
+                title = data.getTitle();
+            }
+        }
         return title;
     }
 
@@ -132,10 +157,47 @@ public abstract class Handle<T> implements Disposable {
      *
      * @return The description, or <code>null</code>.
      * 
-     * @throws IOException I/O errors that occur interacting with the underlyign data object. 
+     * @throws IOException I/O errors that occur interacting with the underlying data object. 
      */
     public String description() throws IOException {
+        if (description == null) {
+            if (Dataset.class.isAssignableFrom(type)) {
+                description = ((Dataset) resolve()).getDescription();
+            }
+        }
         return description;
+    }
+
+    public CoordinateReferenceSystem getCRS() {
+        return crs;
+    }
+
+    public void setCRS(CoordinateReferenceSystem crs) {
+        this.crs = crs;
+    }
+
+    public CoordinateReferenceSystem crs() throws IOException {
+        if (crs == null ) {
+            if (Dataset.class.isAssignableFrom(type)) {
+                crs = ((Dataset) resolve()).crs();
+            }
+        }
+        return crs;
+    }
+
+    public Envelope getBounds() {
+        return bounds;
+    }
+
+    public void setBounds(Envelope bounds) {
+        this.bounds = bounds;
+    }
+
+    public Envelope bounds() throws IOException {
+        if (bounds == null) {
+            bounds = ((Dataset)resolve()).bounds();
+        }
+        return bounds;
     }
 
     /**
@@ -147,7 +209,12 @@ public abstract class Handle<T> implements Disposable {
      */
     public T resolve() throws IOException {
         if (obj == null) {
-            obj = doResolve();
+            try {
+                obj = doResolve();
+            }
+            catch(ClassCastException e) {
+                throw new IOException("handle wrong type, expected: " + type.getName(), e);
+            }
         }
         return obj;
     }
@@ -155,8 +222,7 @@ public abstract class Handle<T> implements Disposable {
     /**
      * Subclass hook to perform the resolving of the data object.
      * 
-     * @return
-     * @throws IOException
+     * @return The resolved object.
      */
     protected abstract T doResolve() throws IOException;
 

@@ -3,10 +3,10 @@ package org.jeo.filter;
 /**
  * Identity filter that always returns true.
  */
-public class All extends Filter {
+public class All<T> extends Filter<T> {
 
     @Override
-    public boolean apply(Object obj) {
+    public boolean apply(T obj) {
         return true;
     }
 

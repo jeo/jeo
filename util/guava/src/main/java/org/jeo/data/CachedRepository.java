@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 import org.jeo.feature.Schema;
+import org.jeo.filter.Filter;
 import org.jeo.util.Key;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,6 +56,12 @@ public class CachedRepository implements DataRepository {
         return reg.list();
     }
 
+    public Iterable<Handle<?>> query(Filter<? super Handle<?>> filter)
+            throws IOException {
+        //TODO: check for FIlter.all and cache it
+        return reg.query(filter);
+    }
+
     @Override
     public Object get(String key) throws IOException {
         try {
@@ -103,7 +110,7 @@ public class CachedRepository implements DataRepository {
         }
 
         @Override
-        public Iterable<DatasetHandle> list() throws IOException {
+        public Iterable<Handle<Dataset>> list() throws IOException {
             return ws.list();
         }
 

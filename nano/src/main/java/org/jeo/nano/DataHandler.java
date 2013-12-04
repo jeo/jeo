@@ -11,7 +11,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.jeo.data.Dataset;
-import org.jeo.data.DatasetHandle;
 import org.jeo.data.Disposable;
 import org.jeo.data.Driver;
 import org.jeo.data.Handle;
@@ -23,6 +22,7 @@ import org.jeo.data.TilePyramid;
 import org.jeo.data.VectorDataset;
 import org.jeo.data.Workspace;
 import org.jeo.feature.Field;
+import org.jeo.filter.Filters;
 import org.jeo.geojson.GeoJSONWriter;
 import org.jeo.geom.Envelopes;
 import org.jeo.map.Style;
@@ -121,7 +121,7 @@ public class DataHandler extends Handler {
         w.key("driver").value(ws.getDriver().getName());
         w.key("datasets").array();
 
-        for (DatasetHandle ref : ws.list()) {
+        for (Handle<Dataset> ref : ws.list()) {
             w.value(ref.getName());
         }
 

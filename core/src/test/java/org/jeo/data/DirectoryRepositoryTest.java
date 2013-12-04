@@ -12,6 +12,7 @@ import java.util.Iterator;
 import org.apache.commons.io.FileUtils;
 import org.easymock.IAnswer;
 import org.jeo.Tests;
+import org.jeo.filter.Filters;
 import org.jeo.geojson.GeoJSON;
 import org.jeo.json.JSONObject;
 import org.jeo.json.JSONValue;
@@ -49,14 +50,14 @@ public class DirectoryRepositoryTest {
             @Override
             public boolean apply(Handle<?> input) {
                 return "foo".equals(input.getName()) 
-                    && Workspace.class.isAssignableFrom(input.getType());
+                    && Dataset.class.isAssignableFrom(input.getType());
             }
         });
         Iterables.find(repo.list(), new Predicate<Handle<?>>() {
             @Override
             public boolean apply(Handle<?> input) {
                 return "bar".equals(input.getName())
-                    && Workspace.class.isAssignableFrom(input.getType());
+                    && Dataset.class.isAssignableFrom(input.getType());
             }
         });
     }
@@ -80,7 +81,7 @@ public class DirectoryRepositoryTest {
         replay(drvreg);
 
         repo = new DirectoryRepository(repo.getDirectory(), drvreg);
-        repo.list();
+        repo.query(Filters.all());
         repo.get("foo");
 
         verify(drvreg);

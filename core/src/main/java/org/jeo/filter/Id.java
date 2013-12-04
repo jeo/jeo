@@ -11,7 +11,7 @@ import org.jeo.feature.Feature;
  * 
  * @author Justin Deoliveira, OpenGeo
  */
-public class Id extends Filter {
+public class Id<T> extends Filter<T> {
 
     List<Expression> ids;
 
@@ -31,7 +31,7 @@ public class Id extends Filter {
     }
 
     @Override
-    public boolean apply(Object obj) {
+    public boolean apply(T obj) {
         if (obj instanceof Feature) {
             for (Expression e : ids) {
                 Object val = e.evaluate(obj);
@@ -69,7 +69,7 @@ public class Id extends Filter {
             return false;
         if (getClass() != obj.getClass())
             return false;
-        Id other = (Id) obj;
+        Id<?> other = (Id<?>) obj;
         if (ids == null) {
             if (other.ids != null)
                 return false;

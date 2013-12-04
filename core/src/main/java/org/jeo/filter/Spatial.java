@@ -12,7 +12,7 @@ import com.vividsolutions.jts.geom.Geometry;
  * 
  * TODO: use prepared geometries
  */
-public class Spatial extends Filter {
+public class Spatial<T> extends Filter<T> {
 
     /**
      * Spatial operator type.  
@@ -43,7 +43,7 @@ public class Spatial extends Filter {
     }
 
     @Override
-    public boolean apply(Object obj) {
+    public boolean apply(T obj) {
         Object o1 = left.evaluate(obj);
         Object o2 = right.evaluate(obj);
 
@@ -112,7 +112,7 @@ public class Spatial extends Filter {
             return false;
         if (getClass() != obj.getClass())
             return false;
-        Spatial other = (Spatial) obj;
+        Spatial<?> other = (Spatial<?>) obj;
         if (left == null) {
             if (other.left != null)
                 return false;

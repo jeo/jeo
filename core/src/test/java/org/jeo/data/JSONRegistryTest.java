@@ -5,6 +5,7 @@ import static org.junit.Assert.assertTrue;
 
 import org.jeo.data.mem.MemWorkspace;
 import org.jeo.data.mem.Memory;
+import org.jeo.filter.Filters;
 import org.jeo.json.JSONObject;
 import org.jeo.json.JSONValue;
 import org.junit.Before;

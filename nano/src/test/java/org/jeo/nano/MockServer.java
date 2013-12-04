@@ -17,8 +17,8 @@ import org.jeo.data.Cursor;
 import org.jeo.data.Cursors;
 import org.jeo.data.DataRepository;
 import org.jeo.data.Dataset;
-import org.jeo.data.DatasetHandle;
 import org.jeo.data.Driver;
+import org.jeo.data.Handle;
 import org.jeo.data.Query;
 import org.jeo.data.Tile;
 import org.jeo.data.TileDataset;
@@ -208,7 +208,7 @@ public class MockServer {
         Driver driver = createMock(Driver.class);
         expect(driver.getName()).andReturn("mockDriver");
         
-        DatasetHandle dataSet = createMock(DatasetHandle.class);
+        Handle<Dataset> dataSet = createMock(Handle.class);
         expect(dataSet.getName()).andReturn("mockDataSet");
 
         expect(workspace.getDriver()).andReturn(driver);

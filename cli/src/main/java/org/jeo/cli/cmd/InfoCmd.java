@@ -59,8 +59,8 @@ public class InfoCmd extends JeoCmd {
                 if (f != null && f.exists() && f.isDirectory()) {
                     DirectoryRepository reg = new DirectoryRepository(f);
                     try {
-                        for (Handle<?> h : reg.list()) {
-                            print(reg.get(h.getName()), w, cli);
+                        for (Handle<?> h : reg.query(Filters.all())) {
+                            print(h.resolve(), w, cli);
                         }
                     }
                     finally {

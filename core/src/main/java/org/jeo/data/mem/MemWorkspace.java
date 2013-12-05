@@ -49,12 +49,7 @@ public class MemWorkspace implements Workspace {
     public Iterable<Handle<Dataset>> list() throws IOException {
         List<Handle<Dataset>> list = new ArrayList<Handle<Dataset>>();
         for (String key : map.keySet()) {
-            list.add(new Handle<Dataset>(key, Dataset.class, getDriver()) {
-                @Override
-                protected Dataset doResolve() throws IOException {
-                    return get(name);
-                }
-            });
+            list.add(Handle.to(key, this));
         }
         return list;
     }

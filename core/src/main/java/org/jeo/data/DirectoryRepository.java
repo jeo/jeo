@@ -16,9 +16,7 @@ import java.util.Map;
 import org.jeo.json.JSONObject;
 import org.jeo.json.JSONValue;
 import org.jeo.util.Pair;
-import org.jeo.map.Style;
 import org.jeo.filter.Filter;
-import org.jeo.filter.Filters;
 import org.jeo.util.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -79,11 +77,6 @@ public class DirectoryRepository implements DataRepository {
     }
 
     @Override
-    public Iterable<Handle<?>> list() throws IOException {
-        return query(Filters.all());
-    }
-
-    @Override
     public Iterable<Handle<?>> query(Filter<? super Handle<?>> filter)
         throws IOException {
 
@@ -131,8 +124,8 @@ public class DirectoryRepository implements DataRepository {
             }
 
             if (drv != null) {
-                Handle<?> h = newHandle(name, drv, file);
-                if (h != null && filter.apply(h)) {
+                Handle<?> h = Handle.to(name, drv, this);
+                if (filter.apply(h)) {
                     items.add(h);
                 }
             }
@@ -148,8 +141,8 @@ public class DirectoryRepository implements DataRepository {
 
             Pair<Driver<?>,Map<String,Object>> meta = readMetaFile(file);
             if (meta != null) {
-                Handle<?> h = newHandle(name, meta.first(), file);
-                if (h != null) {
+                Handle<?> h = Handle.to(name, meta.first(), this);
+                if (filter.apply(h)) {
                     items.add(h);
                 }
             }
@@ -157,33 +150,8 @@ public class DirectoryRepository implements DataRepository {
         return items;
     }
 
-    Handle<?> newHandle(String name, Driver<?> drv, File file) {
-        Class<?> t = drv.getType();
-
-        if (Workspace.class.isAssignableFrom(t) || Dataset.class.isAssignableFrom(t)) {
-            return new Handle<Object>(name, t, drv) {
-                @Override
-                protected Object doResolve() throws IOException {
-                    return get(name);
-                }
-            };
-        }
-        else if (Style.class.isAssignableFrom(t)) {
-            return new Handle<Style>(name, Style.class, drv) {
-                @Override
-                protected Style doResolve() throws IOException {
-                    return (Style) get(name);
-                }
-            };
-        }
-        else {
-            LOG.debug("ignoring file " + file.getPath());
-        }
-        return null;
-    }
-
     @Override
-    public Object get(final String key) throws IOException {
+    public <T> T get(final String key, Class<T> type) throws IOException {
         if (exts == null) {
             //search for any file with this base name
             String[] files = baseDir.list(new FilenameFilter() {
@@ -193,7 +161,7 @@ public class DirectoryRepository implements DataRepository {
                 }
             });
             for (String file : files) {
-                return objOrNull(new File(baseDir, file));
+                return objOrNull(new File(baseDir, file), type);
             }
         }
         else {
@@ -201,12 +169,16 @@ public class DirectoryRepository implements DataRepository {
             for (String ext : exts) {
                 File f = new File(baseDir, key + "." + ext);
                 if (f.exists()) {
-                    return objOrNull(f);
+                    return objOrNull(f, type);
                 }
             }
         }
 
         return null;
+    }
+
+    @Override
+    public void close() {
     }
 
     Pair<Driver<?>,Map<String,Object>> readMetaFile(File f) {
@@ -248,7 +220,7 @@ public class DirectoryRepository implements DataRepository {
         } 
     }
 
-    Object objOrNull(File file) throws IOException {
+    <T> T objOrNull(File file, Class<T> type) throws IOException {
         // handle a meta file
         String base = Util.base(file.getName());
         String ext = Util.extension(file.getName());
@@ -257,7 +229,7 @@ public class DirectoryRepository implements DataRepository {
             Pair<Driver<?>,Map<String,Object>> meta = readMetaFile(file);
             if (meta != null) {
                 Object data = meta.first().open(meta.second());
-                return objOrNull(data, file);
+                return objOrNull(data, file, type);
             }
         }
         else {
@@ -269,43 +241,29 @@ public class DirectoryRepository implements DataRepository {
                     Map<String,Object> opts = meta.second();
                     opts.put(FileDriver.FILE.getName(), file);
 
-                    return objOrNull(meta.first().open(opts), file);
+                    return objOrNull(meta.first().open(opts), file, type);
                 }
             }
             else {
                 // regular direct file base
-                Object obj = Drivers.open(file, drivers);
-                return objOrNull(obj, file);
+                Object obj = Drivers.open(file, type, drivers);
+                return objOrNull(obj, file, type);
             }
         }
         return null;
     }
 
-    Object objOrNull(Object obj, File file) throws IOException {
+    <T> T objOrNull(Object obj, File file, Class<T> type) throws IOException {
         if (obj != null) {
-            if (obj instanceof Workspace) {
-                return (Workspace) obj;
-            }
-            else if (obj instanceof Dataset) {
-                return new SingleWorkspace((Dataset)obj);
-            }
-            else if (obj instanceof Style) {
-                return obj;
-            }
-            else {
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("object: " + obj + " not a workspace, dataset or style, file: " + 
-                        file.getPath());
-                }
+            if (obj instanceof Dataset) {
+                obj = new SingleWorkspace((Dataset) obj);
             }
         }
         else {
             LOG.debug("Unable to open file: " + file.getPath());
         }
         
-        return null;
+        return type.cast(obj);
     }
 
-    public void close() {
-    }
 }

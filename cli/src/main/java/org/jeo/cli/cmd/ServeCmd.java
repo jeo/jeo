@@ -9,6 +9,7 @@ import jline.console.ConsoleReader;
 import org.jeo.cli.JeoCLI;
 import org.jeo.data.DirectoryRepository;
 import org.jeo.data.DataRepository;
+import org.jeo.data.DataRepositoryView;
 import org.jeo.data.JSONRepository;
 import org.jeo.nano.NanoServer;
 
@@ -35,18 +36,20 @@ public class ServeCmd extends JeoCmd {
         console.flush();
 
         File f = new File(reg.get(0));
-        DataRepository registry = registry(f, cli);
+        DataRepositoryView registry = registry(f, cli);
         
         NanoServer server = new NanoServer(port, null, nThreads, registry, null);
         server.join();
 
     }
 
-    DataRepository registry(File f, JeoCLI cli) throws IOException {
+    DataRepositoryView registry(File f, JeoCLI cli) throws IOException {
+        DataRepository repo;
         if (f.isDirectory()) {
-            return new DirectoryRepository(f);
+            repo = new DirectoryRepository(f);
+        } else {
+            repo = new JSONRepository(f);
         }
-
-        return new JSONRepository(f);
+        return new DataRepositoryView(repo);
     }
 }

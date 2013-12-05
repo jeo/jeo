@@ -45,28 +45,32 @@ public class DirectoryRepositoryTest {
 
     @Test
     public void testList() throws Exception {
-        assertEquals(2, Iterables.size(repo.list()));
-        Iterables.find(repo.list(), new Predicate<Handle<?>>() {
+        assertEquals(2, Iterables.size(repo.query(Filters.all())));
+        
+        Handle<?> found = Iterables.find(repo.query(Filters.all()), new Predicate<Handle<?>>() {
             @Override
             public boolean apply(Handle<?> input) {
-                return "foo".equals(input.getName()) 
-                    && Dataset.class.isAssignableFrom(input.getType());
+                return "foo".equals(input.getName())
+                        && Dataset.class.isAssignableFrom(input.getType());
             }
         });
-        Iterables.find(repo.list(), new Predicate<Handle<?>>() {
+        assertNotNull(found);
+
+        found = Iterables.find(repo.query(Filters.all()), new Predicate<Handle<?>>() {
             @Override
             public boolean apply(Handle<?> input) {
                 return "bar".equals(input.getName())
                     && Dataset.class.isAssignableFrom(input.getType());
             }
         });
+        assertNotNull(found);
     }
 
     @Test
     public void testGet() throws Exception {
-        assertNotNull(repo.get("foo"));
-        assertNotNull(repo.get("bar"));
-        assertNull(repo.get("baz"));
+        assertNotNull(repo.get("foo", Workspace.class));
+        assertNotNull(repo.get("bar", Workspace.class));
+        assertNull(repo.get("baz", Workspace.class));
     }
 
     @Test
@@ -82,7 +86,7 @@ public class DirectoryRepositoryTest {
 
         repo = new DirectoryRepository(repo.getDirectory(), drvreg);
         repo.query(Filters.all());
-        repo.get("foo");
+        repo.get("foo", Workspace.class);
 
         verify(drvreg);
     }
@@ -92,15 +96,15 @@ public class DirectoryRepositoryTest {
         FileUtils.touch(new File(repo.getDirectory(), "baz.foo"));
 
         createBazMetaFile();
-        assertEquals(3, Iterables.size(repo.list()));
-        assertNotNull(repo.get("baz"));
+        assertEquals(3, Iterables.size(repo.query(Filters.all())));
+        assertNotNull(repo.get("baz", Workspace.class));
     }
 
     @Test
     public void testMetaFileSolo() throws Exception {
         createBazMetaFile();
-        assertEquals(3, Iterables.size(repo.list()));
-        assertNotNull(repo.get("baz"));
+        assertEquals(3, Iterables.size(repo.query(Filters.all())));
+        assertNotNull(repo.get("baz", Workspace.class));
     }
 
     void createBazMetaFile() throws Exception {
@@ -134,8 +138,8 @@ public class DirectoryRepositoryTest {
         );
         FileUtils.touch(new File(repo2.getDirectory(), "baz.css"));
 
-        assertEquals(1, Iterables.size(repo2.list()));
-        Iterables.find(repo2.list(), new Predicate<Handle<?>>() {
+        assertEquals(1, Iterables.size(repo2.query(Filters.all())));
+        Iterables.find(repo2.query(Filters.all()), new Predicate<Handle<?>>() {
             @Override
             public boolean apply(Handle<?> input) {
                 return "baz".equals(input.getName()) 

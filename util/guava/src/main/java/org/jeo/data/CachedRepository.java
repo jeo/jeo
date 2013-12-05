@@ -15,13 +15,14 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.cache.RemovalListener;
 import com.google.common.cache.RemovalNotification;
+import org.jeo.util.Pair;
 
 public class CachedRepository implements DataRepository {
 
     static Logger LOG = LoggerFactory.getLogger(CachedRepository.class);
 
     DataRepository reg;
-    LoadingCache<String, Object> objCache;
+    LoadingCache<Pair<String, Class>, Object> objCache;
 
     public CachedRepository(DataRepository reg) {
         this(reg, 20);
@@ -30,30 +31,24 @@ public class CachedRepository implements DataRepository {
     public CachedRepository(DataRepository reg, final int cacheSize) {
         this.reg = reg;
         objCache = CacheBuilder.newBuilder().maximumSize(cacheSize)
-            .removalListener(new RemovalListener<String, Object>() {
+            .removalListener(new RemovalListener<Pair<String, Class>, Object>() {
                 @Override
-                public void onRemoval(RemovalNotification<String, Object> n) {
+                public void onRemoval(RemovalNotification<Pair<String, Class>, Object> n) {
                     Object obj = n.getValue();
                     if (obj instanceof Disposable) {
                         ((Disposable) obj).close();
                     }
                 }
-            }).build(new CacheLoader<String, Object>() {
+            }).build(new CacheLoader<Pair<String, Class>, Object>() {
                 @Override
-                public Object load(String key) throws Exception {
-                    Object obj = CachedRepository.this.reg.get(key);
+                public Object load(Pair<String, Class> key) throws Exception {
+                    Object obj = CachedRepository.this.reg.get(key.first(), key.second());
                     if (obj instanceof Workspace) {
                         return new CachedWorkspace((Workspace)obj, cacheSize);
                     }
                     return obj;
                 }
             });
-    }
-
-    @Override
-    public Iterable<Handle<?>> list() throws IOException {
-        //TODO: might want to cache this
-        return reg.list();
     }
 
     public Iterable<Handle<?>> query(Filter<? super Handle<?>> filter)
@@ -63,12 +58,12 @@ public class CachedRepository implements DataRepository {
     }
 
     @Override
-    public Object get(String key) throws IOException {
+    public <T> T get(String key, Class<T> type) throws IOException {
         try {
-            return objCache.get(key);
+            return type.cast(objCache.get(new Pair(key, type)));
         } catch (ExecutionException e) {
             LOG.warn("Error loading object from cache", e);
-            return reg.get(key);
+            return reg.get(key, type);
         }
     }
 

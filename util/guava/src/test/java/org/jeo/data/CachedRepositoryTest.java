@@ -14,14 +14,14 @@ public class CachedRepositoryTest {
         Workspace ws = createMock(Workspace.class);
 
         DataRepository reg = createMock(DataRepository.class);
-        expect(reg.get("foo")).andReturn(ws).once();
+        expect(reg.get("foo", Workspace.class)).andReturn(ws).once();
 
         replay(ws, reg);
 
         CachedRepository cached = new CachedRepository(reg);
-        assertNotNull(cached.get("foo"));
-        assertNotNull(cached.get("foo"));
-        assertNotNull(cached.get("foo"));
+        assertNotNull(cached.get("foo", Workspace.class));
+        assertNotNull(cached.get("foo", Workspace.class));
+        assertNotNull(cached.get("foo", Workspace.class));
 
         verify(ws, reg);
     }
@@ -34,14 +34,14 @@ public class CachedRepositoryTest {
         expect(ws.get("bar")).andReturn(l).once();
 
         DataRepository reg = createMock(DataRepository.class);
-        expect(reg.get("foo")).andReturn(ws).once();
+        expect(reg.get("foo", Workspace.class)).andReturn(ws).once();
 
         replay(l, ws, reg);
 
         CachedRepository cached = new CachedRepository(reg);
-        assertNotNull(((Workspace)cached.get("foo")).get("bar"));
-        assertNotNull(((Workspace)cached.get("foo")).get("bar"));
-        assertNotNull(((Workspace)cached.get("foo")).get("bar"));
+        assertNotNull(((Workspace)cached.get("foo", Workspace.class)).get("bar"));
+        assertNotNull(((Workspace)cached.get("foo", Workspace.class)).get("bar"));
+        assertNotNull(((Workspace)cached.get("foo", Workspace.class)).get("bar"));
 
         verify(l, ws, reg);
     }

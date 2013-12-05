@@ -11,7 +11,7 @@ import org.jeo.data.Disposable;
 import org.jeo.data.Handle;
 import org.jeo.data.Workspace;
 import org.jeo.filter.Filter;
-import org.jeo.filter.Filters;
+import org.jeo.util.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,23 +28,23 @@ public class MemRepository implements DataRepository {
     static Logger LOG = LoggerFactory.getLogger(MemRepository.class);
 
     /** registry map */
-    Map<String, Object> map;
+    Map<Pair<String, Class>, Object> map;
 
     /**
      * Constructs a new empty repo.
      */
     public MemRepository() {
-        map = new LinkedHashMap<String, Object>();
+        map = new LinkedHashMap<Pair<String, Class>, Object>();
     }
 
     @Override
     public Iterable<Handle<?>> query(Filter<? super Handle<?>> filter) {
         List<Handle<?>> list = new ArrayList<Handle<?>>();
-        for (Map.Entry<String, Object> kv : map.entrySet()) {
+        for (Map.Entry<Pair<String, Class>, Object> kv : map.entrySet()) {
             final Object obj = kv.getValue();
 
             //TODO: driver
-            Handle<Object> h = new Handle<Object>(kv.getKey(), obj.getClass(), null) {
+            Handle<Object> h = new Handle<Object>(kv.getKey().first(), obj.getClass(), null) {
                 @Override
                 protected Object doResolve() throws IOException {
                     return obj;
@@ -58,13 +58,8 @@ public class MemRepository implements DataRepository {
     }
 
     @Override
-    public Iterable<Handle<?>> list() {
-        return query(Filters.all());
-    }
-
-    @Override
-    public Object get(String name) throws IOException {
-        return map.get(name);
+    public Object get(String name, Class type) throws IOException {
+        return map.get(new Pair(name, type));
     }
 
     /**
@@ -74,9 +69,10 @@ public class MemRepository implements DataRepository {
      * @param obj The object.
      */
     public void put(String key, Object obj) {
-        map.put(key, obj);
+        map.put(new Pair(key, obj.getClass()), obj);
     }
 
+    @Override
     public void close() {
         for (Object obj : map.values()) {
             if (obj instanceof Disposable) {

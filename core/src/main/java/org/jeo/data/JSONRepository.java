@@ -11,9 +11,7 @@ import java.util.Map;
 
 import org.jeo.json.JSONObject;
 import org.jeo.json.JSONValue;
-import org.jeo.map.Style;
 import org.jeo.filter.Filter;
-import org.jeo.filter.Filters;
 import org.jeo.util.Convert;
 import org.jeo.util.Optional;
 import org.slf4j.Logger;
@@ -70,11 +68,6 @@ public class JSONRepository implements DataRepository {
     }
 
     @Override
-    public Iterable<Handle<?>> list() throws IOException {
-        return query(Filters.all());
-    }
-
-    @Override
     public Iterable<Handle<?>> query(Filter<? super Handle<?>> filter)
             throws IOException {
 
@@ -104,28 +97,8 @@ public class JSONRepository implements DataRepository {
                 return null;
             }
 
-            Class<?> t = drv.getType();
-            Handle<?> h = null;
-            if (Workspace.class.isAssignableFrom(t) || Dataset.class.isAssignableFrom(t)) {
-                list.add(new Handle<Object>(key, t, drv) {
-                    @Override
-                    protected Object doResolve() throws IOException {
-                        return get(name);
-                    }
-                });
-            }
-            else if (Style.class.isAssignableFrom(t)) {
-                list.add(new Handle<Style>(key, Style.class, drv) {
-                    @Override
-                    protected Style doResolve() throws IOException {
-                        return (Style) get(name);
-                    }
-                });
-            }
-            else {
-                LOG.debug("object "+key+" not a workspace, dataset, or style: " + t.getName());
-            }
-            if (h != null && filter.apply(h)) {
+            Handle<?> h = Handle.to(key, drv, this);
+            if (filter.apply(h)) {
                 list.add(h);
             }
         }
@@ -133,7 +106,7 @@ public class JSONRepository implements DataRepository {
     }
 
     @Override
-    public Object get(String name) throws IOException {
+    public <T> T get(String name, Class<T> type) throws IOException {
         JSONObject reg = obj();
 
         JSONObject wsObj = (JSONObject) reg.get(name);
@@ -176,27 +149,17 @@ public class JSONRepository implements DataRepository {
         
         Object data = drv.open(opts);
         if (data != null) {
-            if (data instanceof Workspace) {
-                return (Workspace) data;
-            }
-            else if (data instanceof Dataset) {
-                return new SingleWorkspace((Dataset)data);
-            }
-            else if (data instanceof Style) {
-                return ((Style)data);
-            }
-            else {
-                LOG.debug(
-                    "object: " + obj + " not a workspace or dataset, opts: " + opts);
+            if (data instanceof Dataset) {
+                data = new SingleWorkspace((Dataset)data);
             }
         }
         else {
             LOG.debug("Unable to open from options: " + opts);
         }
 
-        return null;
+        return type.cast(data);
     }
-    
+
     @Override
     public void close() {
     }

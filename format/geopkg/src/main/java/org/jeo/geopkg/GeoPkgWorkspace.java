@@ -217,12 +217,7 @@ public class GeoPkgWorkspace implements Workspace, FileData {
                 ResultSet rs = open(open(cx.createStatement()).executeQuery(sql));
                 List<Handle<Dataset>> refs = new ArrayList<Handle<Dataset>>();
                 while(rs.next()) {
-                    refs.add(new Handle<Dataset>(rs.getString(1), Dataset.class, getDriver()) {
-                        @Override
-                        protected Dataset doResolve() throws IOException {
-                            return get(name);
-                        }
-                    });
+                    refs.add(Handle.to(rs.getString(1), GeoPkgWorkspace.this));
                 }
                 return refs;
             }

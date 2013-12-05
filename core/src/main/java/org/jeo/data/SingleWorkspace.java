@@ -32,14 +32,7 @@ public class SingleWorkspace implements Workspace {
     
     @Override
     public Iterable<Handle<Dataset>> list() throws IOException {
-        Dataset d = dataset;
-        Handle<Dataset> h = new Handle<Dataset>(d.getName(), d.getClass(), d.getDriver()) {
-            @Override
-            protected Dataset doResolve() throws IOException {
-                return dataset;
-            }
-        };
-        return Arrays.asList(h);
+        return Arrays.asList(Handle.to(dataset));
     }
 
     @Override

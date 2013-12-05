@@ -220,6 +220,42 @@ public abstract class Handle<T> implements Disposable {
     }
 
     /**
+     * Create a Handle that implements Handle.doResolve by calling
+     * DataRepository.get
+     */
+    public static <T> Handle<T> to(String name, Driver<?> driver,
+            final DataRepository repo) {
+        return new Handle<T>(name, driver) {
+            @Override
+            protected T doResolve() throws IOException {
+                return repo.get(name, type);
+            }
+        };
+    }
+
+    /**
+     * Create a Handle that implements Handle.doResolve by calling
+     * Workspace.get
+     */
+    public static Handle<Dataset> to(String name, final Workspace workspace) {
+        return new Handle<Dataset>(name, Dataset.class, workspace.getDriver()) {
+            @Override
+            protected Dataset doResolve() throws IOException {
+                return workspace.get(name);
+            }
+        };
+    }
+
+    public static Handle<Dataset> to(final Dataset d) {
+        return new Handle<Dataset>(d.getName(), d.getClass(), d.getDriver()) {
+            @Override
+            protected Dataset doResolve() throws IOException {
+                return d;
+            }
+        };
+    }
+
+    /**
      * Subclass hook to perform the resolving of the data object.
      * 
      * @return The resolved object.

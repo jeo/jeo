@@ -19,6 +19,9 @@ public class Schema implements Iterable<Field> {
     /** schema name */
     String name;
 
+    /** schema namespace */
+    String uri;
+
     /** list of fields */
     List<Field> fields;
 
@@ -38,7 +41,19 @@ public class Schema implements Iterable<Field> {
      * @param fields List of fields 
      */
     public Schema(String name, List<Field> fields) {
+        this(name, null, fields);
+    }
+
+    /**
+     * Constructs a new Schema.
+     * 
+     * @param name Name of the schema.
+     * @param uri Namespace of the schema.
+     * @param fields List of fields 
+     */
+    public Schema(String name, String uri, List<Field> fields) {
         this.name = name;
+        this.uri = uri;
         this.fields = Collections.unmodifiableList(fields);
     }
 
@@ -47,6 +62,16 @@ public class Schema implements Iterable<Field> {
      */
     public String getName() {
         return name;
+    }
+
+    /**
+     * Namespace uri of the schema.
+     * <p>
+     * May be <code>null</code>
+     * </p>
+     */
+    public String getURI() {
+        return uri;
     }
 
     /**

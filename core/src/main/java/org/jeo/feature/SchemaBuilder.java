@@ -25,6 +25,7 @@ import com.vividsolutions.jts.geom.Geometry;
 public class SchemaBuilder {
 
     String name;
+    String uri;
     List<Field> fields = new ArrayList<Field>();
     Map<String,Object> props;
 
@@ -35,6 +36,18 @@ public class SchemaBuilder {
      */
     public SchemaBuilder(String name) {
         this.name = name;
+    }
+
+    /**
+     * Sets the namespace of the schema.
+     * 
+     * @param uri A namespace uri.
+     * 
+     * @return This builder.
+     */
+    public SchemaBuilder uri(String uri) {
+        this.uri = uri;
+        return this;
     }
 
     /**
@@ -124,6 +137,6 @@ public class SchemaBuilder {
      * Returns the built schema.
      */
     public Schema schema() {
-        return new Schema(name, fields);
+        return new Schema(name, uri, fields);
     }
 }

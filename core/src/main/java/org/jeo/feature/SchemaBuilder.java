@@ -5,6 +5,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.jeo.geom.Geom;
 import org.jeo.proj.Proj;
 import org.osgeo.proj4j.CoordinateReferenceSystem;
 
@@ -113,6 +114,55 @@ public class SchemaBuilder {
             fields.add(fld);
         }
         return this;
+    }
+
+    /**
+     * Adds fields to the schema being built described by a GeoTools style schema specification
+     * of the form: <pre>&lt;name>:&lt;type>[:srid=&lt;srid>][,...]</pre>
+     * 
+     * @param spec
+     * @return
+     */
+    public SchemaBuilder fields(String spec) {
+        for (String field : spec.split(" *, *")) {
+            String[] split = field.split(" *: *");
+            if (split.length < 1) {
+                throw new IllegalArgumentException("field spec must have at least a name");
+            }
+
+            String name = split[0];
+            Class<?> type;
+            try {
+                type = split.length > 1 ? classForName(split[1]) : Object.class;
+            } catch (ClassNotFoundException e) {
+                throw new IllegalArgumentException("illegal type", e);
+            }
+            CoordinateReferenceSystem crs = null;
+            if (split.length > 2) {
+                String[] srid = split[2].split("=");
+                Integer srs = Integer.parseInt(srid.length > 1 ? srid[1] : srid[0]);
+                crs = Proj.crs(srs);
+            }
+
+            fields.add(new Field(name, type, crs));
+        }
+        return this;
+    }
+
+    Class<?> classForName(String name) throws ClassNotFoundException {
+        if (name.contains(".")) {
+            // already qualified
+            return Class.forName(name);
+        }
+
+        // check for geometry type
+        Geom.Type t = Geom.Type.from(name);
+        if (t != null) {
+            return t.getType();
+        }
+
+        // try in java.lang
+        return Class.forName("java.lang." + name);
     }
 
     /**

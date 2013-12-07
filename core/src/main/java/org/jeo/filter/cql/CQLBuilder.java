@@ -234,20 +234,42 @@ public class CQLBuilder extends CQLParser {
         case JJTROUTINEINVOCATION_GEOOP_EQUAL_NODE:
             return;
         case JJTROUTINEINVOCATION_GEOOP_DISJOINT_NODE:
+            h.disjoint();
             return;
         case JJTROUTINEINVOCATION_GEOOP_INTERSECT_NODE:
             h.intersect();
             return;
-            
+
         case JJTROUTINEINVOCATION_GEOOP_TOUCH_NODE:
+            h.touch();
+            return;
+
         case JJTROUTINEINVOCATION_GEOOP_CROSS_NODE:
+            h.cross();
+            return;
+
         case JJTROUTINEINVOCATION_GEOOP_WITHIN_NODE:
+            h.within();
+            return;
+
         case JJTROUTINEINVOCATION_GEOOP_CONTAIN_NODE:
+            h.contain();
+            return;
+
         case JJTROUTINEINVOCATION_GEOOP_OVERLAP_NODE:
+            h.overlap();
+            return;
+
             //return buildBinarySpatialOperator(cqlNode.getType());
 
         case JJTROUTINEINVOCATION_GEOOP_BBOX_NODE:
+            h.bbox();
+            return;
+            
         case JJTROUTINEINVOCATION_GEOOP_BBOX_SRS_NODE:
+            // ignore
+            h.bboxWithSRS();
+            return;
             //return buildBBox(cqlNode.getType());
 
         case JJTROUTINEINVOCATION_GEOOP_RELATE_NODE:
@@ -267,6 +289,7 @@ public class CQLBuilder extends CQLParser {
 
         case JJTROUTINEINVOCATION_RELOP_BEYOND_NODE:
         case JJTROUTINEINVOCATION_RELOP_DWITHIN_NODE:
+            return;
             //return buildDistanceBufferOperator(cqlNode.getType());
 
             // ----------------------------------------

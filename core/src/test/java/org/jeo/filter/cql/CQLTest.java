@@ -78,4 +78,13 @@ public class CQLTest {
             fail("expected to catch ParseException, got : " + ex.getClass());
         }
     }
+
+    @Test
+    public void testBBOX() throws ParseException {
+        //Filter f = CQL.parse("BBOX(pp,30, -125, 40, -110)");
+        //assertTrue(f instanceof Spatial);
+
+        Filter f = CQL.parse("BBOX(pp,30, -125, 40, -110,'EPSG:4326')");
+        assertTrue(f instanceof Spatial);
+    }
 }

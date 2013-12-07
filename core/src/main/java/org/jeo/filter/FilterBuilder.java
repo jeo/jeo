@@ -98,6 +98,42 @@ public class FilterBuilder {
         return spatial(Spatial.Type.INTERSECT);
     }
 
+    public FilterBuilder touch() {
+        return spatial(Spatial.Type.TOUCH);
+    }
+
+    public FilterBuilder disjoint() {
+        return spatial(Spatial.Type.DISJOINT);
+    }
+
+    public FilterBuilder overlap() {
+        return spatial(Spatial.Type.OVERLAP);
+    }
+
+    public FilterBuilder cross() {
+        return spatial(Spatial.Type.CROSS);
+    }
+
+    public FilterBuilder cover() {
+        return spatial(Spatial.Type.COVER);
+    }
+
+    public FilterBuilder within() {
+        return spatial(Spatial.Type.WITHIN);
+    }
+
+    public FilterBuilder contain() {
+        return spatial(Spatial.Type.CONTAIN);
+    }
+
+    public FilterBuilder bbox() {
+        return spatial(Spatial.Type.BBOX);
+    }
+
+    public Object pop() {
+        return stack.pop();
+    }
+
     public Filter filter() {
         return (Filter) stack.pop();
     }

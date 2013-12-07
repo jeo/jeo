@@ -5,7 +5,10 @@ import java.util.Deque;
 
 import org.jeo.filter.Filter;
 import org.jeo.filter.FilterBuilder;
+import org.jeo.filter.Literal;
+import org.jeo.util.Convert;
 
+import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.io.ParseException;
 import com.vividsolutions.jts.io.WKTReader;
 
@@ -118,8 +121,59 @@ class CQLHelper {
         builder.intersect();
     }
 
+    public void touch() {
+        builder.touch();
+    }
+
+    public void disjoint() {
+        builder.disjoint();
+    }
+
+    public void overlap() {
+        builder.overlap();
+    }
+
+    public void cross() {
+        builder.cross();
+    }
+
+    public void cover() {
+        builder.cover();
+    }
+
+    public void within() {
+        builder.within();
+    }
+
+    public void contain() {
+        builder.contain();
+    }
+
+    public void bbox() {
+        Literal e1 = (Literal) builder.pop();
+        Literal e2 = (Literal) builder.pop();
+        Literal e3 = (Literal) builder.pop();
+        Literal e4 = (Literal) builder.pop();
+
+        double x1 = Convert.toNumber(e4.evaluate(null)).get().doubleValue();
+        double y1 = Convert.toNumber(e3.evaluate(null)).get().doubleValue();
+        double x2 = Convert.toNumber(e2.evaluate(null)).get().doubleValue();
+        double y2 = Convert.toNumber(e1.evaluate(null)).get().doubleValue();
+
+        builder.literal(new Envelope(x1, x2, y1, y2));
+        builder.bbox();
+    }
+
+    public void bboxWithSRS() {
+        builder.pop();
+        bbox();
+    }
+
     public void id() {
         builder.id();
     }
 
+    public void pop() {
+        builder.pop();
+    }
 }

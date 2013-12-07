@@ -245,17 +245,29 @@ public class ECQLBuilder extends ECQLParser {
         case JJTROUTINEINVOCATION_GEOOP_INTERSECT_NODE:
             h.intersect();
             return;
-            
         case JJTROUTINEINVOCATION_GEOOP_TOUCH_NODE:
+            h.touch();
+            return;
         case JJTROUTINEINVOCATION_GEOOP_CROSS_NODE:
+            h.cross();
+            return;
         case JJTROUTINEINVOCATION_GEOOP_WITHIN_NODE:
+            h.within();
+            return;
         case JJTROUTINEINVOCATION_GEOOP_CONTAIN_NODE:
+            h.contain();
+            return;
         case JJTROUTINEINVOCATION_GEOOP_OVERLAP_NODE:
+            h.overlap();
+            return;
             //return buildBinarySpatialOperator(cqlNode.getType());
 
         case JJTROUTINEINVOCATION_GEOOP_BBOX_NODE:
+            h.bbox();
+            return;
         case JJTROUTINEINVOCATION_GEOOP_BBOX_SRS_NODE:
-            //return buildBBox(cqlNode.getType());
+            h.bboxWithSRS();
+            return;
 
         case JJTROUTINEINVOCATION_GEOOP_RELATE_NODE:
             //    return this.builder.buildSpatialRelateFilter();

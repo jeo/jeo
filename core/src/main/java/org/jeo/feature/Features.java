@@ -6,7 +6,10 @@ import java.util.List;
 import java.util.Map;
 
 import org.jeo.geom.Geom;
+import org.jeo.proj.Proj;
+import org.osgeo.proj4j.CoordinateReferenceSystem;
 
+import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.LineString;
@@ -25,6 +28,85 @@ public class Features {
 
     /** geometry factory */
     static GeometryFactory gfac = new GeometryFactory();
+
+    /**
+     * Returns the bounds of the feature object.
+     * <p>
+     * The bounds is computed by computing the aggregated bounds of all geometries of the feature 
+     * object. Projections are not taken into account. To handle geometries in different projections
+     * use the {@link #boundsReprojected(Feature)} method.
+     * </p>
+     * @param f The feature.
+     * 
+     * @return The bounds, or a bounds object in which {@link Envelope#isNull()} returns true.
+     */
+    public static Envelope bounds(Feature f) {
+        Envelope e = new Envelope();
+        for (Object obj : f.list()) {
+            if (obj instanceof Geometry) {
+                e.expandToInclude(((Geometry) obj).getEnvelopeInternal());
+            }
+        }
+        return e;
+    }
+
+    /**
+     * Returns the bounds of the feature object, reprojecting geometries of the feature if required.
+     * <p>
+     * The bounds is computed by computing the aggregated bounds of all geometries of the feature 
+     * object. All geometries are reprojected to the crs returned from 
+     * <tt>f.schema().geometry().getCRS()</tt>. Therefore this method requires that the features 
+     * schema accurately represent the feature.
+     * </p>
+     * @param f The feature.
+     * 
+     * @return The bounds, or a bounds object in which {@link Envelope#isNull()} returns true.
+     */
+    public static Envelope boundsReprojected(Feature f) {
+        Schema schema = f.schema();
+        Field geo = schema.geometry();
+        if (geo == null) {
+            return null;
+        }
+
+        return boundsReprojected(f, geo.getCRS());
+    }
+
+    /**
+     * Returns the bounds of the feature object, reprojecting geometries of the feature if required.
+     * <p>
+     * The bounds is computed by computing the aggregated bounds of all geometries of the feature 
+     * object in the specified crs.
+     * </p>
+     * @param f The feature.
+     * @param crs The target projection.
+     * 
+     * @return The bounds, or a bounds object in which {@link Envelope#isNull()} returns true.
+     */
+    public static Envelope boundsReprojected(Feature f, CoordinateReferenceSystem crs) {
+        Envelope e = new Envelope();
+        for (Field fld : f.schema()) {
+            if (fld.isGeometry()) {
+                CoordinateReferenceSystem c = fld.getCRS();
+                Geometry g = (Geometry) f.get(fld.getName());
+                if (g == null) {
+                    //ignore
+                    continue;
+                }
+
+                if (c != null) {
+                    g = Proj.reproject(g, c, crs);
+                }
+                else {
+                    // no crs, just assume it is the same reference system
+                }
+
+                e.expandToInclude(g.getEnvelopeInternal());
+            }
+        }
+
+        return e;
+    }
 
     /**
      * Retypes a feature object to a new schema.

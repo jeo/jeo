@@ -18,7 +18,7 @@ public class Spatial extends Filter {
      * Spatial operator type.  
      */
     public static enum Type {
-        INTERSECT, TOUCH, DISJOINT, OVERLAP, CROSS, COVER, WITHIN;
+        INTERSECT, TOUCH, DISJOINT, OVERLAP, CROSS, COVER, WITHIN, CONTAIN, BBOX;
     }
 
     Type type;
@@ -55,6 +55,14 @@ public class Spatial extends Filter {
             throw new IllegalArgumentException("Unable to perform comparison on null operand(s)");
         }
 
+        if (type == Type.BBOX) {
+            // only need to compare envelopes
+            Envelope e1 = toEnvelope(o1);
+            Envelope e2 = toEnvelope(o2);
+
+            return e1.intersects(e2);
+        }
+
         Geometry g1 = toGeometry(o1);
         Geometry g2 = toGeometry(o2);
 
@@ -73,9 +81,24 @@ public class Spatial extends Filter {
             return g1.covers(g2);
         case WITHIN:
             return g1.within(g2);
+        case CONTAIN:
+            return g1.contains(g2);
         default:
             throw new IllegalStateException();
         }
+    }
+
+    protected Envelope toEnvelope(Object o) {
+        if (o instanceof Envelope) {
+            return (Envelope) o;
+        }
+
+        Geometry g = toGeometry(o);
+        if (g == null) {
+            throw new IllegalArgumentException("Unable to convert " + o + " to envelope");
+        }
+
+        return g.getEnvelopeInternal();
     }
 
     protected Geometry toGeometry(Object o) {

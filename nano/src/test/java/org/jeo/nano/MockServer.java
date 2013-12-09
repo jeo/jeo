@@ -15,10 +15,10 @@ import org.easymock.classextension.EasyMock;
 import static org.easymock.classextension.EasyMock.createMock;
 import org.jeo.data.Cursor;
 import org.jeo.data.Cursors;
-import org.jeo.data.DataRepository;
+import org.jeo.data.DataRepositoryView;
 import org.jeo.data.Dataset;
-import org.jeo.data.DatasetHandle;
 import org.jeo.data.Driver;
+import org.jeo.data.Handle;
 import org.jeo.data.Query;
 import org.jeo.data.Tile;
 import org.jeo.data.TileDataset;
@@ -45,11 +45,11 @@ public class MockServer {
     private VectorDataset vectorLayer;
     private TileDataset tileLayer;
     private Workspace workspace;
-    private final DataRepository reg;
+    private final DataRepositoryView reg;
 
     private MockServer() {
         server = createMock(NanoServer.class);
-        reg = createMock(DataRepository.class);
+        reg = createMock(DataRepositoryView.class);
     }
 
     public static MockServer create() {
@@ -188,8 +188,8 @@ public class MockServer {
         workspace.close();
         expectLastCall().atLeastOnce();
 
-        expect(reg.get("foo")).andReturn(workspace).once();
-        expect(reg.get((String) anyObject())).andReturn(null).anyTimes();
+        expect(reg.get("foo", Workspace.class)).andReturn(workspace).once();
+        expect(reg.get((String) anyObject(), (Class) anyObject())).andReturn(null).anyTimes();
         expect(server.getRegistry()).andReturn(reg).atLeastOnce();
 
         return this;
@@ -208,7 +208,7 @@ public class MockServer {
         Driver driver = createMock(Driver.class);
         expect(driver.getName()).andReturn("mockDriver");
         
-        DatasetHandle dataSet = createMock(DatasetHandle.class);
+        Handle<Dataset> dataSet = createMock(Handle.class);
         expect(dataSet.getName()).andReturn("mockDataSet");
 
         expect(workspace.getDriver()).andReturn(driver);

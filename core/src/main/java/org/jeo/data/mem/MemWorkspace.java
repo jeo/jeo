@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.jeo.data.Dataset;
-import org.jeo.data.DatasetHandle;
+import org.jeo.data.Handle;
 import org.jeo.data.Workspace;
 import org.jeo.feature.Schema;
 import org.jeo.util.Key;
@@ -46,10 +46,10 @@ public class MemWorkspace implements Workspace {
     }
 
     @Override
-    public Iterable<DatasetHandle> list() throws IOException {
-        List<DatasetHandle> list = new ArrayList<DatasetHandle>();
+    public Iterable<Handle<Dataset>> list() throws IOException {
+        List<Handle<Dataset>> list = new ArrayList<Handle<Dataset>>();
         for (String key : map.keySet()) {
-            list.add(new DatasetHandle(key, Dataset.class, getDriver(), this));
+            list.add(Handle.to(key, this));
         }
         return list;
     }

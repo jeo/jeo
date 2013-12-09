@@ -113,10 +113,10 @@ public class FeatureHandler extends Handler {
     }
 
     Response handleGet(Request request, NanoServer server) throws IOException {
-        Pair<VectorDataset,Workspace> p = findVectorLayer(request, server);
+        Pair<Workspace,VectorDataset> p = findVectorLayer(request, server);
         String format = parseFormat(request);
 
-        VectorDataset layer = p.first();
+        VectorDataset layer = p.second();
         try {
             if ("html".equalsIgnoreCase(format)) {
                 return getAsHTML(layer, request, server);
@@ -131,7 +131,7 @@ public class FeatureHandler extends Handler {
         finally {
             layer.close();
 
-            Workspace ws = p.second();
+            Workspace ws = p.first();
             if (ws != null) {
                 ws.close();
             }
@@ -291,7 +291,7 @@ public class FeatureHandler extends Handler {
         if (p.containsKey("style") && !p.getProperty("style").isEmpty()) {
             String s = p.getProperty("style");
             try {
-                style = (Style) server.getRegistry().get(s);
+                style = server.getRegistry().get(s, Style.class);
                 if (style == null) {
                     throw new HttpException(HTTP_NOTFOUND, "No such style: " + s);
                 }
@@ -384,11 +384,11 @@ public class FeatureHandler extends Handler {
     }
 
     void handleWrite(Request request, NanoServer server, Query query, boolean shouldExist) throws IOException {
-        Pair<VectorDataset,Workspace> p = findVectorLayer(request, server);
+        Pair<Workspace, VectorDataset> p = findVectorLayer(request, server);
 
         Object obj = new GeoJSONReader().read(getInput(request));
 
-        VectorDataset layer = p.first();
+        VectorDataset layer = p.second();
         try {
             Cursor<Feature> c = layer.cursor(query);
             if (shouldExist && ! c.hasNext()) {
@@ -415,7 +415,7 @@ public class FeatureHandler extends Handler {
         }
         finally {
             layer.close();
-            Workspace ws = p.second();
+            Workspace ws = p.first();
             if (ws != null ) {
                 ws.close();
             }
@@ -429,9 +429,9 @@ public class FeatureHandler extends Handler {
         }
 
         Query query = new Query().update().filter(new Id(new Literal(fid)));
-        Pair<VectorDataset,Workspace> p = findVectorLayer(request, server);
+        Pair<Workspace, VectorDataset> p = findVectorLayer(request, server);
 
-        VectorDataset layer = p.first();
+        VectorDataset layer = p.second();
         Cursor<Feature> c = layer.cursor(query);
         try {
             if (! c.hasNext()) {
@@ -442,19 +442,17 @@ public class FeatureHandler extends Handler {
         } finally {
             c.close();
             layer.close();
-            p.second().close();
+            p.first().close();
         }
         return new Response(HTTP_OK, MIME_PLAINTEXT, "");
     }
 
-    Pair<VectorDataset,Workspace> findVectorLayer(Request request, NanoServer server) throws IOException {
-        Pair<Dataset,Workspace> p = findDataset(request, server.getRegistry());
-        if (p == null || !(p.first() instanceof VectorDataset)) {
-            //no such layer
-            throw new HttpException(HTTP_NOTFOUND, "No such feature layer at: " + request.getUri());
+    Pair<Workspace, VectorDataset> findVectorLayer(Request request, NanoServer server) throws IOException {
+        Pair<Workspace, ? extends Dataset> p = findWorkspaceOrDataset(request, server.getRegistry());
+        if (!(p.second() instanceof VectorDataset)) {
+            throw new HttpException(HTTP_BADREQUEST, request.getUri() + " is not a feature layer");
         }
-
-        return Pair.of((VectorDataset) p.first(), p.second());
+        return (Pair<Workspace, VectorDataset>) p;
     }
 
     InputStream getInput(Request request) throws IOException {

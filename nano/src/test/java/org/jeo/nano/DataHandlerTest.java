@@ -65,7 +65,7 @@ public class DataHandlerTest extends HandlerTestSupport {
         makeBadRequest(
                 new Request("/data/baz", "GET", null, q(), null),
                 NanoHTTPD.HTTP_NOTFOUND,
-                "not found : /data/baz"
+                "No such workspace: baz"
         );
 
         makeBadRequest(

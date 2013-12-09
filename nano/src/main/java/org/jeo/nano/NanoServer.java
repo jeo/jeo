@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Properties;
 
 import org.jeo.data.DataRepository;
+import org.jeo.data.DataRepositoryView;
 import org.jeo.data.DirectoryRepository;
 import org.jeo.data.mem.MemRepository;
 import org.slf4j.Logger;
@@ -23,17 +24,17 @@ public class NanoServer extends NanoHTTPD {
 
     static final Logger LOG = LoggerFactory.getLogger(NanoServer.class);
 
-    DataRepository reg;
+    DataRepositoryView reg;
     List<Handler> handlers;
 
     MapRenderer renderer;
 
-    public NanoServer(int port, File wwwRoot, int nThreads, DataRepository reg, List<Handler> handlers) 
+    public NanoServer(int port, File wwwRoot, int nThreads, DataRepositoryView reg, List<Handler> handlers)
         throws IOException {
         this(port, wwwRoot, nThreads, reg, handlers, null);
     }
     
-    public NanoServer(int port, File wwwRoot, int nThreads, DataRepository reg, List<Handler> handlers, 
+    public NanoServer(int port, File wwwRoot, int nThreads, DataRepositoryView reg, List<Handler> handlers,
         MapRenderer renderer) throws IOException {
         super(port, wwwRoot, nThreads);
 
@@ -67,7 +68,7 @@ public class NanoServer extends NanoHTTPD {
         }
     }
 
-    public DataRepository getRegistry() {
+    public DataRepositoryView getRegistry() {
         return reg;
     }
 
@@ -178,11 +179,14 @@ public class NanoServer extends NanoHTTPD {
         return opts;
     }
 
-    static DataRepository loadRegistry(Opts opts) {
+    static DataRepositoryView loadRegistry(Opts opts) {
+        DataRepository repo;
         if (opts.data != null) {
-            return new DirectoryRepository(opts.data);
+            repo = new DirectoryRepository(opts.data);
+        } else {
+            repo = new MemRepository();
         }
-        return new MemRepository();
+        return new DataRepositoryView(repo);
     }
 
     static void usage() {

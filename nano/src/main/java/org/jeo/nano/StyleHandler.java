@@ -34,7 +34,7 @@ public class StyleHandler extends Handler {
         Matcher m = (Matcher) request.getContext().get(Matcher.class);
         String s = m.group(1);
         try {
-            return (Style) data.get(s);
+            return data.get(s, Style.class);
         }
         catch(ClassCastException e) {
             throw new HttpException(HTTP_BADREQUEST, s + " is not a style");

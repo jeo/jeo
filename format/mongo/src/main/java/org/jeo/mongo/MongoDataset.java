@@ -14,6 +14,7 @@ import org.jeo.feature.Feature;
 import org.jeo.feature.Schema;
 import org.jeo.feature.SchemaBuilder;
 import org.jeo.filter.Filter;
+import org.jeo.filter.Filters;
 import org.jeo.geom.Envelopes;
 import org.jeo.proj.Proj;
 import org.jeo.util.Key;
@@ -102,7 +103,7 @@ public class MongoDataset implements VectorDataset {
 
         QueryPlan qp = new QueryPlan(q);
 
-        if (!Filter.isTrueOrNull(q.getFilter())) {
+        if (!Filters.isTrueOrNull(q.getFilter())) {
             // TODO: transform natively to filter 
             // we can't optimize
             return Cursors.size(qp.apply(cursor(q)));

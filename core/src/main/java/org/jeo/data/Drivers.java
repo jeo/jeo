@@ -290,6 +290,7 @@ public class Drivers {
      * </p>
      * @param uri uri specifying connection options.
      * @param clazz Class used to filter registered drivers, may be <code>null</code>.
+     * @param registry the non-null registry to search for drivers
      * 
      * @return The data object, or <code>null</code> if no suitable driver could be found for the 
      *   specified options.
@@ -307,13 +308,12 @@ public class Drivers {
 
         Map<String,Object> opts = parseURI(uri, d);
 
-        if (!d.canOpen(opts, null)) {
-            throw new IllegalArgumentException(d.getName() + " driver can't open " + opts);
-        }
-
         Object data = d.open(opts);
         if (data instanceof Workspace && uri.getFragment() != null) {
             data = ((Workspace)data).get(uri.getFragment()); 
+        }
+        if (clazz == Workspace.class && data instanceof Dataset) {
+            data = new SingleWorkspace((Dataset) data);
         }
 
         return clazz.cast(data);

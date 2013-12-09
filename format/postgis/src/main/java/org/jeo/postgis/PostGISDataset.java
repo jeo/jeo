@@ -25,6 +25,7 @@ import org.jeo.feature.Feature;
 import org.jeo.feature.Field;
 import org.jeo.feature.Schema;
 import org.jeo.filter.Filter;
+import org.jeo.filter.Filters;
 import org.jeo.geom.Envelopes;
 import org.jeo.sql.DbOP;
 import org.jeo.sql.FilterSQLEncoder;
@@ -126,7 +127,7 @@ public class PostGISDataset implements VectorDataset {
         final List<Pair<Object,Integer>> args = new ArrayList<Pair<Object,Integer>>();
 
         encodeQuery(sql, q, qp, args);
-        if (!Filter.isTrueOrNull(q.getFilter()) && qp.isFiltered()) {
+        if (!Filters.isTrueOrNull(q.getFilter()) && qp.isFiltered()) {
             return pg.run(new DbOP<Long>() {
                 @Override
                 protected Long doRun(Connection cx) throws Exception {
@@ -248,8 +249,8 @@ public class PostGISDataset implements VectorDataset {
             //values.add(new Pair(srid ,Types.INTEGER));
         }
 
-        Filter filter = q.getFilter();
-        if (!Filter.isTrueOrNull(filter)) {
+        Filter<Feature> filter = q.getFilter();
+        if (!Filters.isTrueOrNull(filter)) {
             FilterSQLEncoder sqle = new PostGISFilterEncoder(this);
             try {
                 String where = sqle.encode(filter, null);

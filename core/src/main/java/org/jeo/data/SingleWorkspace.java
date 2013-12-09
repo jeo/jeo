@@ -31,11 +31,10 @@ public class SingleWorkspace implements Workspace {
     }
     
     @Override
-    public Iterable<DatasetHandle> list() throws IOException {
-        return Arrays.asList(new DatasetHandle(dataset.getName(), dataset.getClass(), 
-            dataset.getDriver(), this));
+    public Iterable<Handle<Dataset>> list() throws IOException {
+        return Arrays.asList(Handle.to(dataset));
     }
-    
+
     @Override
     public Dataset get(String layer) throws IOException {
         if (dataset.getName().equals(layer)) {

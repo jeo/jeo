@@ -264,7 +264,7 @@ public class FeatureHandlerTest extends HandlerTestSupport {
         makeBadRequest(
                 new Request("/features/baz", "GET", null, q(), null),
                 NanoHTTPD.HTTP_NOTFOUND,
-                "No such dataset at: /features/baz"
+                "No such workspace: baz"
         );
 
         makeBadRequest(

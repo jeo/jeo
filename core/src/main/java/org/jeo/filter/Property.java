@@ -1,6 +1,12 @@
 package org.jeo.filter;
 
+import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.Iterator;
+
 import org.jeo.feature.Feature;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Evaluates a field/property of a {@link Feature} object.
@@ -8,6 +14,8 @@ import org.jeo.feature.Feature;
  * @author Justin Deoliveira, OpenGeo
  */
 public class Property implements Expression {
+
+    static Logger LOG = LoggerFactory.getLogger(Property.class);
 
     String property;
 
@@ -21,8 +29,46 @@ public class Property implements Expression {
 
     @Override
     public Object evaluate(Object obj) {
+        return resolve(obj);
+    }
+
+    protected Object resolve(Object obj) {
+        if (obj == null) {
+            return null;
+        }
+
+        // first check for feature
         if (obj instanceof Feature) {
+            //TODO: nested properties for features?
             return ((Feature)obj).get(property);
+        }
+
+        // fall back onto reflection
+        Iterator<String> parts = Arrays.asList(property.split("\\.")).iterator();
+        Object target = obj;
+        
+        while(parts.hasNext() && target != null) {
+            target = get(target, parts.next());
+        }
+
+        return target;
+    }
+
+    protected Object get(Object target, String prop) {
+        Class<?> clazz = target.getClass();
+        for (String name : 
+            Arrays.asList(prop, "get"+Character.toUpperCase(prop.charAt(0))+prop.substring(1))) {
+
+            try {
+                Method m = clazz.getMethod(name);
+                if (m != null && m.getReturnType() != null) {
+                    return m.invoke(target);
+                }
+            } catch (Exception e) {
+                if (LOG.isTraceEnabled()) {
+                    LOG.trace("Error invoking method: "+name+" of class " + clazz.getName(), e);
+                }
+            } 
         }
         return null;
     }

@@ -226,6 +226,18 @@ public class DirectoryRepository implements DataRepository {
                 }
             }
 
+            // process the options, and turn any relative file urls to absolute ones relative to 
+            // the meta file
+            for (Map.Entry<String, Object> e : opts.entrySet()) {
+               if (FileDriver.FILE.getName().equals(e.getKey())) {
+                   File file = FileDriver.FILE.get(opts);
+                   if (file != null && !file.isAbsolute()) {
+                       file = new File(f.getParentFile(), file.getPath());
+                       e.setValue(file);
+                   }
+               }
+            }
+
             return new Pair(drv, opts);
         }
         catch(Exception e) {

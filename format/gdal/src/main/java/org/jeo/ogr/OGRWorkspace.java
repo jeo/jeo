@@ -10,9 +10,9 @@ import java.util.Map;
 import org.gdal.ogr.DataSource;
 import org.gdal.ogr.Layer;
 import org.jeo.data.Dataset;
-import org.jeo.data.DatasetHandle;
 import org.jeo.data.Driver;
 import org.jeo.data.FileData;
+import org.jeo.data.Handle;
 import org.jeo.data.VectorDataset;
 import org.jeo.data.Workspace;
 import org.jeo.feature.Schema;
@@ -47,13 +47,13 @@ public class OGRWorkspace implements Workspace, FileData {
     }
 
     @Override
-    public Iterable<DatasetHandle> list() throws IOException {
+    public Iterable<Handle<Dataset>> list() throws IOException {
         DataSource data = open();
         try {
-            List<DatasetHandle> list = new ArrayList<DatasetHandle>();
+            List<Handle<Dataset>> list = new ArrayList<Handle<Dataset>>();
             for (int i = 0; i < data.GetLayerCount(); i++) {
                 Layer l = data.GetLayer(i);
-                list.add(new DatasetHandle(l.GetName(), OGRDataset.class, driver, this));
+                list.add(Handle.to(l.GetName(), this));
                 l.delete();
             }
             return list;

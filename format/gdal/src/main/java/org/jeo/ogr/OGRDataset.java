@@ -278,7 +278,7 @@ public class OGRDataset implements VectorDataset, FileData {
             qp.bounded();
         }
 
-        return qp.apply(new OGRCursor(l, data.second(), schema()));
+        return qp.apply(new OGRCursor(l, data.second(), this));
     }
 
     Pair<Layer,DataSource> open() throws IOException {

@@ -59,6 +59,16 @@ public class CoordinatePathTest {
     }
 
     @Test
+    public void testLineStringReset() {
+        LineString l = gb.points(1,2,3,4,5,6).toLineString();
+        CoordinatePath li = CoordinatePath.create(l);
+
+        assertSequence(li, 1,2,MOVE_TO, 3,4,LINE_TO, 5,6,LINE_TO);
+        li.reset();
+        assertSequence(li, 1,2,MOVE_TO, 3,4,LINE_TO, 5,6,LINE_TO);
+    }
+
+    @Test
     public void testLineStringGeneralize() throws Exception {
         LineString l = gb.points(1,1,2,2,3,3,4,4,5,5,6,6).toLineString();
         CoordinatePath li = CoordinatePath.create(l).generalize(2, 2);
@@ -72,7 +82,16 @@ public class CoordinatePathTest {
         CoordinatePath pi = CoordinatePath.create(p);
 
         assertSequence(pi, 1,2,MOVE_TO, 3,4,LINE_TO, 5,6,LINE_TO, 1,2,CLOSE);
-        
+    }
+
+    @Test
+    public void testPolygonRest() {
+        Polygon p = gb.points(1,2,3,4,5,6,1,2).ring().toPolygon();
+        CoordinatePath pi = CoordinatePath.create(p);
+
+        assertSequence(pi, 1,2,MOVE_TO, 3,4,LINE_TO, 5,6,LINE_TO, 1,2,CLOSE);
+        pi.reset();
+        assertSequence(pi, 1,2,MOVE_TO, 3,4,LINE_TO, 5,6,LINE_TO, 1,2,CLOSE);
     }
 
     @Test

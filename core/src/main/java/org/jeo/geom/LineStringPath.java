@@ -15,16 +15,23 @@
 package org.jeo.geom;
 
 import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.CoordinateSequence;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.LineString;
 
 public class LineStringPath extends CoordinatePath {
 
     /** original line string */
-    LineString line;
+    final LineString line;
 
     /** coordinate index */
     int i;
+
+    /** line coordinates */
+    CoordinateSequence coords;
+
+    /** number of coordinates */
+    int numCoords;
 
     LineStringPath(LineString line) {
         this.line = line;
@@ -38,13 +45,11 @@ public class LineStringPath extends CoordinatePath {
 
     @Override
     protected PathStep doNext(Coordinate c) {
-        if (i == line.getNumPoints()) {
+        if (i == numCoords) {
             return PathStep.STOP;
         }
 
-        Coordinate d = line.getCoordinateN(i);
-        c.x = d.x;
-        c.y = d.y;
+        coords.getCoordinate(i, c);
 
         return i++ == 0 ? PathStep.MOVE_TO : PathStep.LINE_TO;
     }
@@ -52,5 +57,7 @@ public class LineStringPath extends CoordinatePath {
     @Override
     protected void doReset() {
         i = 0;
+        coords = line.getCoordinateSequence();
+        numCoords = coords.size();
     }
 }

@@ -25,6 +25,7 @@ import java.util.Map;
 
 import org.jeo.json.JSONObject;
 import org.jeo.json.JSONValue;
+import org.jeo.map.Style;
 import org.jeo.filter.Filter;
 import org.jeo.util.Convert;
 import org.jeo.util.Optional;
@@ -111,7 +112,7 @@ public class JSONRepository implements DataRepository {
                 return null;
             }
 
-            Handle<?> h = Handle.to(key, drv, this);
+            Handle<?> h = Handle.to(key, handleType(drv), drv, this);
             if (filter.apply(h)) {
                 list.add(h);
             }
@@ -195,5 +196,7 @@ public class JSONRepository implements DataRepository {
         }
     }
 
-
+    Class<?> handleType(Driver<?> drv) {
+        return Style.class.isAssignableFrom(drv.getType()) ? Style.class : Workspace.class;
+    }
 }

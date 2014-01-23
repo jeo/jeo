@@ -29,6 +29,7 @@ import java.util.Map;
 
 import org.jeo.json.JSONObject;
 import org.jeo.json.JSONValue;
+import org.jeo.map.Style;
 import org.jeo.util.Pair;
 import org.jeo.filter.Filter;
 import org.jeo.util.Util;
@@ -138,7 +139,7 @@ public class DirectoryRepository implements DataRepository {
             }
 
             if (drv != null) {
-                Handle<?> h = Handle.to(name, drv, this);
+                Handle<?> h = Handle.to(name, handleType(drv), drv, this);
                 if (filter.apply(h)) {
                     items.add(h);
                 }
@@ -155,7 +156,8 @@ public class DirectoryRepository implements DataRepository {
 
             Pair<Driver<?>,Map<String,Object>> meta = readMetaFile(file);
             if (meta != null) {
-                Handle<?> h = Handle.to(name, meta.first(), this);
+                Driver<?> drv = meta.first();
+                Handle<?> h = Handle.to(name, handleType(drv), drv, this);
                 if (filter.apply(h)) {
                     items.add(h);
                 }
@@ -175,7 +177,10 @@ public class DirectoryRepository implements DataRepository {
                 }
             });
             for (String file : files) {
-                return objOrNull(new File(baseDir, file), type);
+                T result = objOrNull(new File(baseDir, file), type); 
+                if (result != null) {
+                    return result;
+                }
             }
         }
         else {
@@ -183,7 +188,10 @@ public class DirectoryRepository implements DataRepository {
             for (String ext : exts) {
                 File f = new File(baseDir, key + "." + ext);
                 if (f.exists()) {
-                    return objOrNull(f, type);
+                    T result = objOrNull(f, type);
+                    if (result != null) {
+                        return result;
+                    }
                 }
             }
         }
@@ -292,4 +300,7 @@ public class DirectoryRepository implements DataRepository {
         return type.cast(obj);
     }
 
+    Class<?> handleType(Driver<?> drv) {
+        return Style.class.isAssignableFrom(drv.getType()) ? Style.class : Workspace.class;
+    }
 }

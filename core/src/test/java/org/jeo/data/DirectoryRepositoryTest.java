@@ -65,7 +65,7 @@ public class DirectoryRepositoryTest {
             @Override
             public boolean apply(Handle<?> input) {
                 return "foo".equals(input.getName())
-                        && Dataset.class.isAssignableFrom(input.getType());
+                        && Workspace.class.isAssignableFrom(input.getType());
             }
         });
         assertNotNull(found);
@@ -74,7 +74,7 @@ public class DirectoryRepositoryTest {
             @Override
             public boolean apply(Handle<?> input) {
                 return "bar".equals(input.getName())
-                    && Dataset.class.isAssignableFrom(input.getType());
+                    && Workspace.class.isAssignableFrom(input.getType());
             }
         });
         assertNotNull(found);

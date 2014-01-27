@@ -55,7 +55,6 @@ import org.jeo.feature.Features;
 import org.jeo.feature.Field;
 import org.jeo.feature.Schema;
 import org.jeo.feature.SchemaBuilder;
-import org.jeo.filter.Filter;
 import org.jeo.filter.Filters;
 import org.jeo.geom.Envelopes;
 import org.jeo.geom.Geom;
@@ -86,19 +85,19 @@ public class GeoPkgWorkspace implements Workspace, FileData {
     static Logger LOG = LoggerFactory.getLogger(GeoPackage.class);
 
     /** name of geopackage contents table */
-    static final String GEOPACKAGE_CONTENTS = "geopackage_contents";
+    static final String GEOPACKAGE_CONTENTS = "gpkg_contents";
 
     /** name of geoemtry columns table */
-    static final String GEOMETRY_COLUMNS = "geometry_columns";
+    static final String GEOMETRY_COLUMNS = "gpkg_geometry_columns";
 
     /** name of geoemtry columns table */
-    static final String SPATIAL_REF_SYS = "spatial_ref_sys";
+    static final String SPATIAL_REF_SYS = "gpkg_spatial_ref_sys";
 
-    /** name of tile metadata table */
-    static final String TILE_TABLE_METADATA = "tile_table_metadata";
+    /** name of tile matrix table */
+    static final String TILE_MATRIX = "gpkg_tile_matrix";
 
-    /** name of tile matrix metadata table */
-    static final String TILE_MATRIX_METADATA = "tile_matrix_metadata";
+    /** name of tile matrix set table */
+    static final String TILE_MATRIX_SET = "gpkg_tile_matrix_set";
 
     /** creation options */
     GeoPkgOpts opts;
@@ -142,8 +141,8 @@ public class GeoPkgWorkspace implements Workspace, FileData {
               runScript(SPATIAL_REF_SYS + ".sql", cx);
               runScript(GEOMETRY_COLUMNS + ".sql", cx);
               runScript(GEOPACKAGE_CONTENTS + ".sql", cx);
-              runScript(TILE_TABLE_METADATA +".sql", cx);
-              runScript(TILE_MATRIX_METADATA + ".sql", cx);
+              runScript(TILE_MATRIX +".sql", cx);
+              runScript(TILE_MATRIX_SET + ".sql", cx);
               return null;
             }
         });
@@ -271,11 +270,11 @@ public class GeoPkgWorkspace implements Workspace, FileData {
             @Override
             protected List<FeatureEntry> doRun(Connection cx) throws Exception {
                 String sql = format(
-                    "SELECT a.*, b.f_geometry_column, b.geometry_type, b.coord_dimension, " +
-                           "c.auth_name, c.auth_srid" +
+                    "SELECT a.*, b.column_name, b.geometry_type_name, b.z, b.m, " +
+                           "c.organization, c.organization_coordsys_id" +
                      " FROM %s a, %s b, %s c" + 
-                    " WHERE a.table_name = b.f_table_name" + 
-                      " AND a.srid = c.srid" + 
+                    " WHERE a.table_name = b.table_name" + 
+                      " AND a.srs_id = c.srs_id" + 
                       " AND a.data_type = '%s'", 
                       GEOPACKAGE_CONTENTS,GEOMETRY_COLUMNS,SPATIAL_REF_SYS, DataType.Feature.value());
                 log(sql);
@@ -297,9 +296,9 @@ public class GeoPkgWorkspace implements Workspace, FileData {
             @Override
             protected FeatureEntry doRun(Connection cx) throws Exception {
                 String sql = format(
-                    "SELECT a.*, b.f_geometry_column, b.geometry_type, b.coord_dimension" +
+                    "SELECT a.*, b.column_name, b.geometry_type_name, b.z, b.m" +
                      " FROM %s a, %s b" + 
-                    " WHERE a.table_name = b.f_table_name" +
+                    " WHERE a.table_name = b.table_name" +
                       " AND a.table_name = ?" + 
                       " AND a.data_type = ?", 
                   GEOPACKAGE_CONTENTS, GEOMETRY_COLUMNS);
@@ -538,10 +537,6 @@ public class GeoPkgWorkspace implements Workspace, FileData {
             throw new IllegalArgumentException("Entry must have bounds");
         }
 
-        if (e.getCoordDimension() == null) {
-            e.setCoordDimension(2);
-        }
-
         if (e.getGeometryType() == null) {
             e.setGeometryType(findGeometryType(schema));
         }
@@ -622,7 +617,7 @@ public class GeoPkgWorkspace implements Workspace, FileData {
                 }
                 
                 if (entry.getSrid() != null) {
-                    sqlb.add(", srid");
+                    sqlb.add(", srs_id");
                     vals.append(",?");
                 }
                 sqlb.add(") ").add(vals.append(")").toString());
@@ -664,17 +659,18 @@ public class GeoPkgWorkspace implements Workspace, FileData {
             @Override
             protected Object doRun(Connection cx) throws Exception {
                 String sql = format(
-                    "INSERT INTO %s VALUES (?, ?, ?, ?, ?);", GEOMETRY_COLUMNS);
+                    "INSERT INTO %s VALUES (?, ?, ?, ?, ?, ?);", GEOMETRY_COLUMNS);
                 
                 log(sql, entry.getTableName(), entry.getGeometryColumn(), 
-                    entry.getGeometryType(), entry.getCoordDimension(), entry.getSrid());
+                    entry.getGeometryType(), entry.getSrid(), entry.hasZ(), entry.hasM());
 
                 PreparedStatement ps = open(cx.prepareStatement(sql));
                 ps.setString(1, entry.getTableName());
                 ps.setString(2, entry.getGeometryColumn());
                 ps.setString(3, entry.getGeometryType().getSimpleName());
-                ps.setInt(4, entry.getCoordDimension());
-                ps.setInt(5, entry.getSrid());
+                ps.setInt(4, entry.getSrid());
+                ps.setBoolean(5, entry.hasZ());
+                ps.setBoolean(6, entry.hasM());
 
                 ps.executeUpdate();
                 return null;
@@ -713,7 +709,8 @@ public class GeoPkgWorkspace implements Workspace, FileData {
         initEntry(e, rs);
         e.setGeometryColumn(rs.getString(11));
         e.setGeometryType(Geom.Type.from(rs.getString(12)));
-        e.setCoordDimension((rs.getInt(13)));
+        e.setZ((rs.getBoolean(13)));
+        e.setM((rs.getBoolean(14)));
         return e;
     }
 
@@ -817,10 +814,10 @@ public class GeoPkgWorkspace implements Workspace, FileData {
             @Override
             protected List<TileEntry> doRun(Connection cx) throws Exception {
                 String sql = format(
-                    "SELECT a.*, b.is_times_two_zoom" +
+                    "SELECT a.*" +
                      " FROM %s a, %s b" + 
-                    " WHERE a.table_name = b.t_table_name" + 
-                      " AND a.data_type = ?", GEOPACKAGE_CONTENTS, TILE_TABLE_METADATA);
+                    " WHERE a.table_name = b.table_name" + 
+                      " AND a.data_type = ?", GEOPACKAGE_CONTENTS, TILE_MATRIX_SET);
                 log(sql, DataType.Tile);
 
                 PreparedStatement ps = open(cx.prepareStatement(sql));
@@ -842,10 +839,10 @@ public class GeoPkgWorkspace implements Workspace, FileData {
             @Override
             protected TileEntry doRun(Connection cx) throws Exception {
                 String sql = format(
-                    "SELECT a.*, b.is_times_two_zoom" +
+                    "SELECT a.*" +
                      " FROM %s a, %s b" + 
                     " WHERE a.table_name = ?" + 
-                      " AND a.data_type = ?", GEOPACKAGE_CONTENTS, TILE_TABLE_METADATA);
+                      " AND a.data_type = ?", GEOPACKAGE_CONTENTS, TILE_MATRIX_SET);
 
                 log(sql, name, DataType.Tile);
 
@@ -915,16 +912,14 @@ public class GeoPkgWorkspace implements Workspace, FileData {
         final TileEntry e = new TileEntry();
         initEntry(e, rs);
 
-        e.setTimesTwoZoom(1 == rs.getInt(10));
-
         run(new DbOP<Object>() {
             @Override
             protected Object doRun(Connection cx) throws Exception {
                 //load all the tile matrix entries
                 String sql = format(
                     "SELECT zoom_level,matrix_width,matrix_height,tile_width,tile_height," +
-                           "pixel_x_size, pixel_y_size FROM %s WHERE t_table_name = ? " +
-                    " ORDER BY zoom_level", TILE_MATRIX_METADATA);
+                           "pixel_x_size, pixel_y_size FROM %s WHERE table_name = ? " +
+                    " ORDER BY zoom_level", TILE_MATRIX);
                 log(sql, e.getTableName());
 
                 PreparedStatement ps = open(cx.prepareStatement(sql));

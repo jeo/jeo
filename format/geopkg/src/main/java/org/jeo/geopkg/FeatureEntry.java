@@ -28,9 +28,9 @@ import org.jeo.sql.PrimaryKey;
 public class FeatureEntry extends Entry {
 
     Geom.Type geometryType;
-    Integer coordDimension;
     String geometryColumn;
-
+    boolean z, m;
+    
     Schema schema;
     PrimaryKey primaryKey;
 
@@ -54,12 +54,20 @@ public class FeatureEntry extends Entry {
         this.geometryType = geometryType;
     }
 
-    public Integer getCoordDimension() {
-        return coordDimension;
+    public boolean hasZ() {
+        return z;
     }
 
-    public void setCoordDimension(Integer coordDimension) {
-        this.coordDimension = coordDimension;
+    public void setZ(boolean z) {
+        this.z = z;
+    }
+
+    public boolean hasM() {
+        return m;
+    }
+
+    public void setM(boolean m) {
+        this.m = m;
     }
 
     Schema getSchema() {
@@ -82,7 +90,8 @@ public class FeatureEntry extends Entry {
         super.init(e);
         setGeometryColumn(e.getGeometryColumn());
         setGeometryType(e.getGeometryType());
-        setCoordDimension(e.getCoordDimension());
+        setZ(e.hasZ());
+        setM(e.hasM());
     }
 
     @Override

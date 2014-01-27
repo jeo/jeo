@@ -213,7 +213,7 @@ public class GeoPkgFeatureTest extends GeoPkgTestSupport {
             @Override
             protected Object doRun(Connection cx) throws Exception {
                 ResultSet rs = open(open(cx.createStatement()).executeQuery(
-                    "SELECT data_type FROM geopackage_contents WHERE table_name = 'widgets'"));
+                    "SELECT data_type FROM gpkg_contents WHERE table_name = 'widgets'"));
                 
                 assertTrue(rs.next());
                 assertEquals(DataType.Feature.value(), rs.getString(1));

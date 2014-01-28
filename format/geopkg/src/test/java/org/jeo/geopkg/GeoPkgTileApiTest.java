@@ -1,4 +1,4 @@
-/* Copyright 2013 The jeo project. All rights reserved.
+/* Copyright 2014 The jeo project. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,24 +14,24 @@
  */
 package org.jeo.geopkg;
 
+import static org.jeo.Tests.unzip;
+
 import java.io.File;
 
 import org.jeo.Tests;
-import org.jeo.data.VectorApiTestBase;
-import org.jeo.data.VectorDataset;
+import org.jeo.data.TileApiTestBase;
+import org.jeo.data.TileDataset;
 import org.junit.After;
 
-public class GeoPkgVectorApiTest extends VectorApiTestBase {
+public class GeoPkgTileApiTest extends TileApiTestBase {
 
     GeoPkgWorkspace gpkg;
 
     @Override
-    protected VectorDataset createVectorData() throws Exception {
-        File dir = Tests.newTmpDir("gpkg", "states");
-        Tests.unzip(getClass().getResourceAsStream("usa.gpkg.zip"), dir);
-
-        gpkg = GeoPackage.open(new File(dir, "usa.gpkg"));
-        return (VectorDataset) gpkg.get("states");
+    protected TileDataset createTileData() throws Exception {
+        File dir = unzip(getClass().getResourceAsStream("ne.gpkg.zip"), Tests.newTmpDir());
+        gpkg = GeoPackage.open(new File(dir, "ne.gpkg"));
+        return (TileDataset) gpkg.get("tiles");
     }
 
     @After

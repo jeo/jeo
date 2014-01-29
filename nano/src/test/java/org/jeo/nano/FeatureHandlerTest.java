@@ -64,7 +64,7 @@ public class FeatureHandlerTest extends HandlerTestSupport {
                 NanoHTTPD.MIME_JSON
         );
         
-        Cursor<Feature> features = (Cursor<Feature>) new GeoJSONReader().read(res.data);
+        Cursor<Feature> features = (Cursor<Feature>) new GeoJSONReader().read(res.stream());
         assertFalse(features.hasNext());
 
         mock.verify();
@@ -83,7 +83,7 @@ public class FeatureHandlerTest extends HandlerTestSupport {
                 NanoHTTPD.MIME_JSON
         );
 
-        Cursor<Feature> features = (Cursor<Feature>) new GeoJSONReader().read(res.data);
+        Cursor<Feature> features = (Cursor<Feature>) new GeoJSONReader().read(res.stream());
         assertTrue(features.hasNext());
         Feature single = features.next();
         assertEquals(single.get("id"), "baz");

@@ -24,15 +24,19 @@ import org.junit.rules.TestName;
 
 import com.google.common.io.ByteStreams;
 import com.google.common.io.Files;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 import org.jeo.nano.NanoHTTPD.Response;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+
 import org.junit.Test;
 
 public class HandlerTestSupport {
@@ -68,7 +72,7 @@ public class HandlerTestSupport {
     }
 
     String read(Response resp) throws IOException {
-        return new String(ByteStreams.toByteArray(resp.data));
+        return new String(ByteStreams.toByteArray(resp.stream()));
     }
 
     String dequote(String json) {

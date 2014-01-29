@@ -32,6 +32,8 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -70,6 +72,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.vividsolutions.jts.geom.Envelope;
+
 import org.jeo.filter.Id;
 import org.jeo.filter.Literal;
 
@@ -157,8 +160,8 @@ public class FeatureHandler extends Handler {
 
         Query q = buildQuery(layer, request);
         
-        Cursor<Feature> c = layer.cursor(q);
-        
+        final Cursor<Feature> c = layer.cursor(q);
+
         // if requesting a specific feature, fail if not found
         String fid = parseFeatureId(request);
         if (fid != null) {
@@ -167,13 +170,22 @@ public class FeatureHandler extends Handler {
             }
         }
 
-        String json;
-        try {
-            json = GeoJSONWriter.toString(c);
-        } finally {
-            c.close();
-        }
-        return new Response(HTTP_OK, MIME_JSON, json);
+        return new Response(HTTP_OK, MIME_JSON, new Response.Content() {
+
+            GeoJSONWriter w;
+
+            @Override
+            public void write(OutputStream output) throws IOException {
+                w = new GeoJSONWriter(new OutputStreamWriter(output));
+                w.featureCollection(c);
+                w.flush();
+            }
+
+            @Override
+            public void close() throws IOException {
+                c.close();
+            }
+        });
     }
 
     Query buildQuery(VectorDataset layer, Request request) throws IOException {

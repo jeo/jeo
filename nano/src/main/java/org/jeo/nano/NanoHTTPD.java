@@ -43,6 +43,8 @@ import java.util.concurrent.Executors;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.jeo.nano.NanoHTTPD.Response.Content;
+
 /**
  * A simple, tiny, nicely embeddable HTTP 1.0 (partially 1.1) server in Java
  *
@@ -151,9 +153,7 @@ public class NanoHTTPD
 		 */
 		public Response( String status, String mimeType, InputStream data )
 		{
-			this.status = status;
-			this.mimeType = mimeType;
-			this.data = data;
+			this(status, mimeType, new StreamContent(data));
 		}
 
 		/**
@@ -162,17 +162,27 @@ public class NanoHTTPD
 		 */
 		public Response( String status, String mimeType, String txt )
 		{
-			this.status = status;
-			this.mimeType = mimeType;
-			try
-			{
-				this.data = new ByteArrayInputStream( txt.getBytes("UTF-8"));
-			}
-			catch ( java.io.UnsupportedEncodingException uee )
-			{
-				uee.printStackTrace();
-			}
+		        this(status, mimeType, newStreamContent(txt));
 		}
+
+		static StreamContent newStreamContent(String txt) {
+		    try {
+		        return new StreamContent(new ByteArrayInputStream( txt.getBytes("UTF-8")));
+                    }
+                    catch ( java.io.UnsupportedEncodingException uee ) {
+                           throw new RuntimeException(uee);
+                    }
+		}
+
+		/**
+                 * Constructor taking direct content.
+                 */
+                public Response( String status, String mimeType, Content content )
+                {
+                    this.status = status;
+                    this.mimeType = mimeType;
+                    this.data = content;
+                }
 
 		/**
 		 * Adds given line to the header.
@@ -195,13 +205,56 @@ public class NanoHTTPD
 		/**
 		 * Data of the response, may be null.
 		 */
-		public InputStream data;
+		public Content data;
 
 		/**
 		 * Headers for the HTTP response. Use addHeader()
 		 * to add lines.
 		 */
 		public Properties header = new Properties();
+
+		public InputStream stream() throws IOException {
+		    if (data instanceof StreamContent) {
+		        return ((StreamContent) data).data;
+		    }
+
+		    ByteArrayOutputStream bout = new ByteArrayOutputStream();
+		    data.write(bout);
+		    data.close();
+		    return new ByteArrayInputStream(bout.toByteArray());
+
+		}
+
+		interface Content {
+		    void write(OutputStream output) throws IOException;
+		    void close() throws IOException;
+		}
+
+		static class StreamContent implements Content {
+		    InputStream data;
+
+		    StreamContent(InputStream data) {
+		        this.data = data;
+		    }
+
+		    @Override
+		    public void write(OutputStream out) throws IOException {
+                        int pending = data.available(); // This is to support partial sends, see serveFile()
+                        byte[] buff = new byte[theBufferSize];
+                        while (pending>0)
+                        {
+                                int read = data.read( buff, 0, ( (pending>theBufferSize) ?  theBufferSize : pending ));
+                                if (read <= 0)  break;
+                                out.write( buff, 0, read );
+                                pending -= read;
+                        }
+		    }
+
+		    @Override
+		    public void close() throws IOException {
+		        this.data.close();
+		    }
+		}
 	}
 
 	/**
@@ -801,10 +854,14 @@ public class NanoHTTPD
 			throw new InterruptedException();
 		}
 
+		private void sendResponse( String status, String mime, Properties header, InputStream data ) {
+		    sendResponse(status, mime, header, new Response.StreamContent(data));
+		}
+
 		/**
 		 * Sends given response to the socket.
 		 */
-		private void sendResponse( String status, String mime, Properties header, InputStream data )
+		private void sendResponse( String status, String mime, Properties header, Content data )
 		{
 			try
 			{
@@ -835,22 +892,19 @@ public class NanoHTTPD
 				pw.print("\r\n");
 				pw.flush();
 
-				if ( data != null )
-				{
-					int pending = data.available();	// This is to support partial sends, see serveFile()
-					byte[] buff = new byte[theBufferSize];
-					while (pending>0)
-					{
-						int read = data.read( buff, 0, ( (pending>theBufferSize) ?  theBufferSize : pending ));
-						if (read <= 0)	break;
-						out.write( buff, 0, read );
-						pending -= read;
-					}
+				try {
+        				if ( data != null )
+        				{
+        				    data.write(out);
+        				}
+        				out.flush();
+        				out.close();
 				}
-				out.flush();
-				out.close();
-				if ( data != null )
-					data.close();
+				finally {
+				    if ( data != null )
+                                        data.close();
+				}
+				
 			}
 			catch( IOException ioe )
 			{

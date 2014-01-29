@@ -218,8 +218,39 @@ public class OGRDataset implements VectorDataset, FileData {
 
     @Override
     public CoordinateReferenceSystem crs() throws IOException {
-        // TODO Auto-generated method stub
-        return null;
+        Pair<Layer,DataSource> data = open();
+        try {
+            SpatialReference sref = data.first().GetSpatialRef();
+            if (sref == null) {
+                return null;
+            }
+
+            try {
+                // have ogr try to map random projection into a well known code
+                sref.AutoIdentifyEPSG();
+            }
+            catch(Exception e) {
+                LOG.debug("error auto identifying epsg code", e);
+            }
+
+            CoordinateReferenceSystem crs = null;
+
+            // first try by mapping directly epsg code
+            String code = sref.GetAuthorityCode(null);
+            if (code != null) {
+                crs = Proj.crs("epsg:" + code);
+            }
+
+            if (crs == null) {
+                // use proj string
+                crs = Proj.crs(sref.ExportToProj4());
+            }
+
+            return crs;
+        }
+        finally {
+            close(data);
+        }
     }
     
     @Override

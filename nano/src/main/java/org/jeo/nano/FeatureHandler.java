@@ -249,6 +249,10 @@ public class FeatureHandler extends Handler {
 
         Envelope bbox = p.containsKey("bbox") ? parseBBOX(p.getProperty("bbox")) : null;
         CoordinateReferenceSystem crs = parseCRS(p);
+        if (crs == null) {
+            // no crs specified, use layer crs
+            crs = layer.crs();
+        }
 
         if (bbox == null) {
             //use layer bounds
@@ -257,18 +261,16 @@ public class FeatureHandler extends Handler {
             // may have to reproject it
             if (crs != null) {
                 CoordinateReferenceSystem lcrs = layer.crs();
-                if (lcrs != null && !Proj.equal(crs, lcrs)) {
-                    bbox = Proj.reproject(bbox, lcrs, crs);
-                }
+                bbox = reprojectIfNecessary(bbox, lcrs, crs);
             }
         }
+
         vars.put("bbox", Envelopes.toString(bbox));
 
         if (p.containsKey("srs")) {
             vars.put("srs", p.getProperty("srs"));
         }
         else {
-            crs = layer.crs();
             String srs = null;
             if (crs != null) {
                 Integer epsg = Proj.epsgCode(crs);
@@ -276,11 +278,26 @@ public class FeatureHandler extends Handler {
                     srs = "epsg:" + epsg; 
                 }
             }
-            
-            vars.put("srs", srs != null ? srs : "epsg:4326");
+
+            if (srs != null) {
+                vars.put("srs", srs);
+            }
+            else {
+                // fall back to epsg:4326, may have to reproject bbox again
+                vars.put("srs", "epsg:4326");
+                vars.put("bbox", Envelopes.toString(reprojectIfNecessary(bbox, crs, Proj.EPSG_4326)));
+            }
         }
 
         return new Response(HTTP_OK, MIME_HTML, renderTemplate("feature.html", vars));
+    }
+
+    Envelope reprojectIfNecessary(Envelope bbox, 
+        CoordinateReferenceSystem from, CoordinateReferenceSystem to) {
+        if (from != null && !Proj.equal(to, from)) {
+            bbox = Proj.reproject(bbox, from, to);
+        }
+        return bbox;
     }
 
     Response getAsPNG(VectorDataset layer, Request request, NanoServer server) throws IOException {

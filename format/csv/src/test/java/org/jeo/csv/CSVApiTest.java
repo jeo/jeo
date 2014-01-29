@@ -15,6 +15,7 @@
 package org.jeo.csv;
 
 import java.io.File;
+import java.io.IOException;
 
 import org.jeo.Tests;
 import org.jeo.data.VectorApiTestBase;
@@ -28,5 +29,10 @@ public class CSVApiTest extends VectorApiTestBase {
         Tests.unzip(getClass().getResourceAsStream("states.csv.zip"), tmp);
 
         return CSV.open(new File(tmp, "states.csv"), new CSVOpts().wkt("wkt").delimiter(';'));
+    }
+
+    @Override
+    public void testCRS() throws IOException {
+        // ignore for now, we don't have any mechanism for projection in csv
     }
 }

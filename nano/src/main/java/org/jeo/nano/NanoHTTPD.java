@@ -40,6 +40,7 @@ import java.util.Vector;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.RejectedExecutionException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -272,7 +273,8 @@ public class NanoHTTPD
 		HTTP_BADREQUEST = "400 Bad Request",
 		HTTP_METHOD_NOT_ALLOWED = "405 Method Not Allowed",
 		HTTP_INTERNALERROR = "500 Internal Server Error",
-		HTTP_NOTIMPLEMENTED = "501 Not Implemented";
+		HTTP_NOTIMPLEMENTED = "501 Not Implemented",
+        HTTP_SERVICE_UNAVAILABLE = "503 Service Unavailable";
 
 	/**
 	 * Common mime types for dynamic content
@@ -305,19 +307,51 @@ public class NanoHTTPD
 			{
 				public void run()
 				{
-					try
-					{
-						while( true ) {
-                            myThreadPool.submit(new HTTPSession(myServerSocket.accept()));
-                        }
-					}
-					catch ( IOException ioe )
-					{}
+                    serve();
 				}
 			});
 		myThread.setDaemon( true );
 		myThread.start();
 	}
+
+    private void serve() {
+        notifyStarted();
+        try {
+            while (true) {
+                Socket socket;
+                try {
+                    socket = myServerSocket.accept();
+                } catch (IOException ex) {
+                    if (myServerSocket.isClosed()) {
+                        break;
+                    }
+                    error("Error accepting client: " + ex.getMessage(), null);
+                    continue;
+                }
+                HTTPSession session = new HTTPSession(socket);
+                try {
+                    myThreadPool.submit(session);
+                } catch (RejectedExecutionException ree) {
+                    try {
+                        session.sendResponse(HTTP_SERVICE_UNAVAILABLE, MIME_PLAINTEXT, null, 
+                                Response.newStreamContent("HTTP_SERVICE_UNAVAILABLE"));
+                    } catch (Throwable t) {
+                        error("Error sending error response", t);
+                    }
+                }
+            }
+        } finally {
+            notifyStopped();
+        }
+    }
+
+    protected void notifyStarted() {
+
+    }
+
+    protected void notifyStopped() {
+
+    }
 
 	/**
 	 * Stops the server.
@@ -915,6 +949,13 @@ public class NanoHTTPD
 
 		private Socket mySocket;
 	}
+
+    protected void error(String message, Throwable t) {
+        myErr.println(message);
+        if (t != null) {
+            t.printStackTrace(myErr);
+        }
+    }
 
 	/**
 	 * URL-encodes everything between "/"-characters.

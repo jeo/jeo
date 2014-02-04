@@ -21,6 +21,20 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Shapefile driver.
+ * <p>
+ * Usage:
+ * <pre><code>
+ * Dataset shp = Shapefile.open('states.shp');
+ * </code></pre>
+ * </p>
+ * </p>
+ * <p>
+ * This driver is implemented on top of the OGR library.
+ * </p>
+ * @author Justin Deoliveira, Boundless
+ */
 public class Shapefile extends OGRDriver<OGRDataset> {
 
     public static OGRDataset open(File file) throws IOException {

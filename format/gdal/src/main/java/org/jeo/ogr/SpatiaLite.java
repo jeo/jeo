@@ -19,6 +19,20 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.Map;
 
+/**
+ * SpatiaLite driver.
+ * <p>
+ * Usage:
+ * <pre><code>
+ * Workspace db = SpatiaLite.open('usa.db');
+ * </code></pre>
+ * </p>
+ * </p>
+ * <p>
+ * This driver is implemented on top of the OGR library.
+ * </p>
+ * @author Justin Deoliveira, Boundless
+ */
 public class SpatiaLite extends OGRDriver<OGRWorkspace> {
 
     public static OGRWorkspace open(File file) throws IOException {

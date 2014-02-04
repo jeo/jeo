@@ -31,7 +31,17 @@ import org.jeo.util.Messages;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
+/**
+ * Driver for formats supported by the OGR/GDAL library.
+ * <p>
+ * Usage:
+ * <pre><code>
+ * Workspace ws = OGR.open('states.csv');
+ * </code></pre>
+ * </p>
+ *
+ * @author Justin Deoliveira, Boundless
+ */
 public class OGR extends FileVectorDriver<OGRWorkspace> implements Disposable {
 
     public static final Key<String> DRIVER = new Key<String>("driver", String.class);

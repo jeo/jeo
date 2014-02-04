@@ -17,7 +17,6 @@ package org.jeo.ogr;
 import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.util.Collections;
 import java.util.Map;
 
 import org.gdal.ogr.DataSource;

@@ -119,6 +119,12 @@ public class HandlerTestSupport {
     Response makeRequest(Request request, String expectedStatus, String expectedMime) throws Exception {
         assertTrue(handler.canHandle(request, mock.server));
         Response resp = handler.handle(request, mock.server);
+        // close these since we're mocking the server
+        if (resp.toClose != null) {
+            for (int i = 0; i < resp.toClose.length; i++) {
+                resp.toClose[i].close();
+            }
+        }
         assertEquals(expectedStatus, resp.status);
         assertEquals(expectedMime, resp.mimeType);
         return resp;

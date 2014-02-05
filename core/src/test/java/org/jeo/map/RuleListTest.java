@@ -30,7 +30,10 @@ public class RuleListTest {
         RuleList rules = style.getRules();
         assertEquals(2, rules.size());
 
-        assertEquals(1, rules.selectByName("Map", false).size());
+        assertEquals(1, rules.selectByName("Map", false, true).size());
+        assertEquals(1, rules.selectByName("Map", false, false).size());
+        assertEquals(0, rules.selectByName("map", false, true).size());
+        assertEquals(1, rules.selectByName("map", false, false).size());
         assertEquals(1, rules.selectById("widgets", false).size());
     }
 }

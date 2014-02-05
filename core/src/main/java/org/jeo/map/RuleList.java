@@ -124,17 +124,20 @@ public class RuleList extends ArrayList<Rule> {
      * specified <tt>name</tt>.
      * <p>
      * If <tt>wildcard</tt> is <code>true</code> the result includes rules containing a wildcard
-     * selector.
+     * selector. The <tt>matchCase</tt> argument controls case sensitivity of the name match.
      * </p>
      */
-    public RuleList selectByName(final String name, final boolean wildcard) {
+    public RuleList selectByName(final String name, final boolean wildcard, final boolean matchCase) {
         return select(new SelectorVisitor() {
             @Override
             public boolean visit(Selector selector, Rule rule) {
                 if (wildcard && selector.isWildcard()) {
                     return true;
                 }
-                return name == null && selector.getName() == null || name.equals(selector.getName());
+
+                String selName = selector.getName();
+                return (name == null && selName == null) || 
+                    (matchCase ? name.equals(selName) : name.equalsIgnoreCase(selName));
             }
         });
     }

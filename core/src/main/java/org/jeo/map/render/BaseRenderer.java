@@ -111,7 +111,7 @@ public abstract class BaseRenderer implements Renderer {
     }
 
     void renderBackground() throws IOException {
-        RuleList rules = view.getMap().getStyle().getRules().selectByName("Map", false);
+        RuleList rules = view.getMap().getStyle().getRules().selectByName("Map", false, false);
         if (rules.isEmpty()) {
             //nothing to do
             return;

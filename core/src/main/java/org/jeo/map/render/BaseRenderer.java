@@ -87,6 +87,8 @@ public abstract class BaseRenderer implements Renderer {
                 continue;
             }
 
+            onLayerStart(l);
+
             Dataset data = l.getData();
             Filter<Feature> filter = l.getFilter();
 
@@ -101,6 +103,8 @@ public abstract class BaseRenderer implements Renderer {
             else {
                 render((TileDataset)data, rules);
             }
+
+            onLayerFinish(l);
         }
 
         //labels

@@ -20,8 +20,15 @@
     </dependency>
     <dependency>
       <groupId>org.geotools</groupId>
-      <artifactId>gt-main</artifactId>
+      <artifactId>gt-render</artifactId>
       <version>${geotools.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.jeo</groupId>
+      <artifactId>jeo</artifactId>
+      <classifier>tests</classifier>
+      <version>${project.version}</version>
+      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.geotools</groupId>

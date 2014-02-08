@@ -14,7 +14,6 @@
  */
 package org.jeo.cli.cmd;
 
-import java.io.IOError;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;

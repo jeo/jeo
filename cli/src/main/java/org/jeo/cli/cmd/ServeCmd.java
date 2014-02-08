@@ -21,9 +21,9 @@ import java.util.List;
 import jline.console.ConsoleReader;
 
 import org.jeo.cli.JeoCLI;
-import org.jeo.data.DirectoryRepository;
 import org.jeo.data.DataRepository;
 import org.jeo.data.DataRepositoryView;
+import org.jeo.data.DirectoryRepository;
 import org.jeo.data.JSONRepository;
 import org.jeo.nano.NanoServer;
 

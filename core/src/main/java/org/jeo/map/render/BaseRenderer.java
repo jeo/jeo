@@ -162,7 +162,7 @@ public abstract class BaseRenderer {
         switch(Geom.Type.from(g)) {
         case POINT:
         case MULTIPOINT:
-            drawPoint(f, rule);
+            drawPoint(f, rule, g);
             return;
         case LINESTRING:
         case MULTILINESTRING:
@@ -203,7 +203,7 @@ public abstract class BaseRenderer {
 
     protected abstract void drawBackground(RGB color);
 
-    protected abstract void drawPoint(Feature f, Rule rule);
+    protected abstract void drawPoint(Feature f, Rule rule, Geometry point);
 
     protected abstract void drawLine(Feature f, Rule rule, Geometry line);
 

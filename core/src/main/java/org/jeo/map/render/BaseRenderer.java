@@ -1,8 +1,23 @@
+/* Copyright 2013 The jeo project. All rights reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.jeo.map.render;
 
 import static org.jeo.map.CartoCSS.*;
 
 import java.io.IOException;
+import java.io.OutputStream;
 
 import org.jeo.data.Dataset;
 import org.jeo.data.Query;
@@ -26,25 +41,42 @@ import org.slf4j.LoggerFactory;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 
-public abstract class BaseRenderer {
+/**
+ * Base class for renderers.
+ *
+ */
+public abstract class BaseRenderer implements Renderer {
 
     static final Logger LOG = LoggerFactory.getLogger(BaseRenderer.class);
 
     protected View view;
+    protected java.util.Map<?, Object> opts;
 
     protected LabelIndex labels = new LabelIndex();
     protected Labeller labeller;
 
-    public void init(View view) {
+    protected OutputStream output;
+
+    public void init(View view, java.util.Map<?,Object> opts) {
         this.view = view;
+        this.opts = opts;
+
         this.labeller = createLabeller();
     }
 
+    /**
+     * Creates a new labeller instance.
+     * <p>
+     * By default this method returns {@link org.jeo.map.render.Labeller#NULL}.
+     * </p>
+     */
     protected Labeller createLabeller() {
         return Labeller.NULL;
     }
 
-    public void render() {
+    public void render(OutputStream output) throws IOException {
+        this.output = output;
+
         LOG.debug("Rendering map at " + view.getBounds());
         onStart();
 
@@ -78,7 +110,7 @@ public abstract class BaseRenderer {
         onFinish();
     }
 
-    void renderBackground() {
+    void renderBackground() throws IOException {
         RuleList rules = view.getMap().getStyle().getRules().selectByName("Map", false);
         if (rules.isEmpty()) {
             //nothing to do
@@ -94,7 +126,49 @@ public abstract class BaseRenderer {
         }
     }
 
-    void renderLabels() {
+    void render(VectorDataset data, RuleList rules, Filter<Feature> filter) throws IOException {
+        // build up the data query
+        Query q = new Query();
+
+        // bounds, we may have to reproject it
+        Envelope bbox = view.getBounds();
+        CoordinateReferenceSystem crs = data.crs();
+
+        // reproject
+        if (crs != null) {
+            if (view.getCRS() != null && !Proj.equal(view.getCRS(), data.crs())) {
+                q.reproject(view.getCRS());
+                bbox = Proj.reproject(bbox, view.getCRS(), crs);
+            }
+        }
+        else {
+            LOG.debug(
+                "Layer "+data.getName()+" specifies no projection, assuming map projection");
+        }
+
+        q.bounds(bbox);
+        if (filter != null) {
+            q.filter(filter);
+        }
+
+        for (Feature f : data.cursor(q)) {
+            RuleList rs = rules.match(f);
+            if (rs.isEmpty()) {
+                continue;
+            }
+
+            Rule r = rules.match(f).collapse();
+            if (r != null) {
+                draw(f, r);
+            }
+        }
+    }
+
+    void render(TileDataset data, RuleList rules) throws IOException {
+        throw new UnsupportedOperationException("rendering tile datasets not implemented");
+    }
+
+    void renderLabels() throws IOException {
         if (labeller == Labeller.NULL) {
             return;
         }
@@ -103,52 +177,7 @@ public abstract class BaseRenderer {
         }
     }
 
-    void render(VectorDataset data, RuleList rules, Filter<Feature> filter) {
-        try {
-            // build up the data query
-            Query q = new Query();
-
-            // bounds, we may have to reproject it
-            Envelope bbox = view.getBounds();
-            CoordinateReferenceSystem crs = data.crs();
-
-            // reproject
-            if (crs != null) {
-                if (view.getCRS() != null && !Proj.equal(view.getCRS(), data.crs())) {
-                    q.reproject(view.getCRS());
-                    bbox = Proj.reproject(bbox, view.getCRS(), crs);
-                }
-            }
-            else {
-                LOG.debug(
-                    "Layer "+data.getName()+" specifies no projection, assuming map projection");
-            }
-
-            q.bounds(bbox);
-            if (filter != null) {
-                q.filter(filter);
-            }
-
-            for (Feature f : data.cursor(q)) {
-                RuleList rs = rules.match(f);
-                if (rs.isEmpty()) {
-                    continue;
-                }
-
-                Rule r = rules.match(f).collapse();
-                if (r != null) {
-                    draw(f, r);
-                }
-            }
-        } catch (IOException e) {
-            LOG.error("Error querying layer " + data.getName(), e);
-        }
-    }
-
-    void render(TileDataset data, RuleList rules) {
-    }
-
-    void draw(Feature f, Rule rule) {
+    void draw(Feature f, Rule rule) throws IOException {
         Geometry g = f.geometry();
         if (g == null) {
             return;
@@ -177,12 +206,18 @@ public abstract class BaseRenderer {
         }
     }
 
+    /**
+     * Clips a geometry to the view bounds before rendering.
+     */
     protected Geometry clipGeometry(Geometry g) {
         // TODO: doing a full intersection is sub-optimal, look at a more efficient clipping 
         // algorithm, like cohen-sutherland
         return g.intersection(Envelopes.toPolygon(view.getBounds()));
     }
 
+    /**
+     * Passes off a new label to the labeller.
+     */
     protected boolean insertLabel(Label label) {
         if (labeller == null) {
             throw new IllegalStateException("labeller not set");
@@ -191,21 +226,54 @@ public abstract class BaseRenderer {
         return labeller.layout(label, labels);
     }
 
+    /**
+     * Returns a filter that transforms coordinates from world space to screen space.
+     */
     protected ViewTransformFilter toScreenTransform() {
         return new ViewTransformFilter(view);
     }
 
-    protected void onStart() {
+    /**
+     * Callback invoked before a new rendering job starts.
+     */
+    protected void onStart() throws IOException {
     }
 
-    protected void onFinish() {
+    /**
+     * Callback invoked before starting to render a new layer.
+     */
+    protected void onLayerStart(Layer layer) throws IOException {
     }
 
-    protected abstract void drawBackground(RGB color);
+    /**
+     * Callback invoked after a layer has been rendered.
+     */
+    protected void onLayerFinish(Layer layer) {
+    }
 
-    protected abstract void drawPoint(Feature f, Rule rule, Geometry point);
+    /**
+     * Callback invoked after a rendering job has completed.
+     */
+    protected void onFinish() throws IOException {
+    }
 
-    protected abstract void drawLine(Feature f, Rule rule, Geometry line);
+    /**
+     * Draws the map background.
+     */
+    protected abstract void drawBackground(RGB color) throws IOException;
 
-    protected abstract void drawPolygon(Feature f, Rule rule, Geometry poly);
+    /**
+     * Draws a point feature.
+     */
+    protected abstract void drawPoint(Feature f, Rule rule, Geometry point)  throws IOException;
+
+    /**
+     * Draws a line feature.
+     */
+    protected abstract void drawLine(Feature f, Rule rule, Geometry line) throws IOException;
+
+    /**
+     * Draws a line feature.
+     */
+    protected abstract void drawPolygon(Feature f, Rule rule, Geometry poly)  throws IOException;
 }

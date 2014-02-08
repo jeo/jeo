@@ -63,6 +63,11 @@ public class Label {
     Geometry shape = null;
 
     /**
+     * Anchor point of the label
+     */
+    Coordinate anchor;
+
+    /**
      * additional rendering specific details
      */
     Map<Object,Object> stuff;
@@ -187,6 +192,32 @@ public class Label {
         }
 
         return Envelopes.toPolygon(bounds);
+    }
+
+    /**
+     * Returns the label anchor.
+     * <p>
+     * Unless set with {@link #setAnchor(com.vividsolutions.jts.geom.Coordinate)} this method returns
+     * the centroid of {@link #getGeometry()}.
+     * </p>
+     */
+    public Coordinate anchor() {
+        if (anchor != null) {
+            return anchor;
+        }
+
+        if (geom != null) {
+            return geom.getCentroid().getCoordinate();
+        }
+
+        return null;
+    }
+
+    /**
+     * Sets the label anchor;
+     */
+    public void setAnchor(Coordinate anchor) {
+        this.anchor = anchor;
     }
 
     @Override

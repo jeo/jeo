@@ -27,6 +27,7 @@ import org.jeo.cli.cmd.DriversCmd;
 import org.jeo.cli.cmd.InfoCmd;
 import org.jeo.cli.cmd.JeoCmd;
 import org.jeo.cli.cmd.QueryCmd;
+import org.jeo.cli.cmd.RenderCmd;
 import org.jeo.cli.cmd.RootCmd;
 import org.jeo.cli.cmd.ServeCmd;
 import org.jeo.cli.conv.JeoCLIConverterFactory;
@@ -108,6 +109,7 @@ public class JeoCLI {
         jcmdr.addCommand("info", new InfoCmd());
         jcmdr.addCommand("convert", new ConvertCmd());
         jcmdr.addCommand("serve", new ServeCmd());
+        jcmdr.addCommand("render", new RenderCmd());
         return jcmdr;
     }
 

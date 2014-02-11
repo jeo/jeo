@@ -14,7 +14,9 @@
  */
 package org.jeo.cli.conv;
 
+import org.jeo.cli.cmd.Dimension;
 import org.jeo.filter.Filter;
+import org.jeo.map.Style;
 import org.osgeo.proj4j.CoordinateReferenceSystem;
 
 import com.beust.jcommander.IStringConverter;
@@ -33,6 +35,15 @@ public class JeoCLIConverterFactory implements IStringConverterFactory {
         }
         if (clazz == CoordinateReferenceSystem.class) {
             return CRSConverter.class;
+        }
+        if (clazz == Style.class) {
+            return StyleConverter.class;
+        }
+        if (clazz == Dimension.class) {
+            return DimensionConverter.class;
+        }
+        if (clazz == java.util.Map.class) {
+            return MapConverter.class;
         }
         return null;
     }

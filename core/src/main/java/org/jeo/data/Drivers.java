@@ -269,6 +269,15 @@ public class Drivers {
     }
 
     /**
+     * Opens a connection to data of the specified type described by the specified uri.
+     *
+     * @see Drivers#open(URI, Class, DriverRegistry)
+     */
+    public static <T> T open(URI uri, Class<T> clazz) throws IOException {
+        return open(uri, clazz, REGISTRY);
+    }
+
+    /**
      * Opens a connection to data described by the specified uri.
      * <p>
      * The <tt>uri</tt> can take one of two forms. The first is a file uri:

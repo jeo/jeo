@@ -134,25 +134,18 @@ public class FeatureHandler extends Handler {
         String format = parseFormat(request);
 
         VectorDataset layer = p.second();
-        try {
-            if ("html".equalsIgnoreCase(format)) {
-                return getAsHTML(layer, request, server);
-            }
-            else if ("png".equalsIgnoreCase(format)) {
-                return getAsPNG(layer, request, server);
-            }
-            else {
-                return getAsJSON(layer, request, server);
-            }
+        Response resp;
+        if ("html".equalsIgnoreCase(format)) {
+            resp = getAsHTML(layer, request, server);
         }
-        finally {
-            layer.close();
-
-            Workspace ws = p.first();
-            if (ws != null) {
-                ws.close();
-            }
+        else if ("png".equalsIgnoreCase(format)) {
+            resp = getAsPNG(layer, request, server);
         }
+        else {
+            resp = getAsJSON(layer, request, server);
+        }
+        resp.toClose(layer, p.first());
+        return resp;
     }
 
     Response getAsJSON(VectorDataset layer, Request request, NanoServer server) 

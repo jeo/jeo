@@ -193,6 +193,14 @@ public class JSONEncoder {
 
     }
 
+    public JSONEncoder value(double value) throws IOException {
+        return doValue(Double.toString(value));
+    }
+
+    public JSONEncoder value(long value) throws IOException {
+        return doValue(Long.toString(value));
+    }
+
     /**
      * Specifies a numeric value for an object property.
      * 

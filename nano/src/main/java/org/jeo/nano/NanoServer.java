@@ -82,6 +82,11 @@ public class NanoServer extends NanoHTTPD {
         }
     }
 
+    @Override
+    protected void error(String message, Throwable t) {
+        LOG.error(message, t);
+    }
+
     public DataRepositoryView getRegistry() {
         return reg;
     }

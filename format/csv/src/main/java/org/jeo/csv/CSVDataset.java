@@ -127,6 +127,7 @@ public class CSVDataset implements VectorDataset, FileData {
 
     @Override
     public CoordinateReferenceSystem crs() {
+        // TODO: support a .prj file
         return null;
     }
 

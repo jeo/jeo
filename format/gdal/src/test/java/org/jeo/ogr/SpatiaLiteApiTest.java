@@ -1,4 +1,4 @@
-/* Copyright 2013 The jeo project. All rights reserved.
+/* Copyright 2014 The jeo project. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,27 +12,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jeo.csv;
+package org.jeo.ogr;
 
 import java.io.File;
-import java.io.IOException;
 
 import org.jeo.Tests;
 import org.jeo.data.VectorApiTestBase;
 import org.jeo.data.VectorDataset;
+import org.junit.BeforeClass;
 
-public class CSVApiTest extends VectorApiTestBase {
+public class SpatiaLiteApiTest extends VectorApiTestBase {
+
+    @BeforeClass
+    public static void initOGR() {
+        OGRTest.initOGR();
+    }
 
     @Override
     protected VectorDataset createVectorData() throws Exception {
-        File tmp = Tests.newTmpDir("states", "csv");
-        Tests.unzip(getClass().getResourceAsStream("states.csv.zip"), tmp);
+        File dir = Tests.newTmpDir("spatialite", "data");
+        Tests.unzip(getClass().getResourceAsStream("usa.db.zip"), dir);
 
-        return CSV.open(new File(tmp, "states.csv"), new CSVOpts().wkt("wkt").delimiter(';'));
+        OGRWorkspace ws = SpatiaLite.open(new File(dir, "usa.db"));
+        return ws.get("states");
     }
 
-    @Override
-    public void testCRS() throws IOException {
-        // ignore for now, we don't have any mechanism for projection in csv
-    }
 }

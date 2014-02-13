@@ -24,13 +24,17 @@ import org.jeo.TestData;
 import org.jeo.feature.Feature;
 import org.jeo.feature.Schema;
 import org.jeo.geom.Envelopes;
+import org.jeo.geom.Geom;
+import org.jeo.proj.Proj;
 import org.junit.Before;
 import org.junit.Test;
+import org.osgeo.proj4j.CoordinateReferenceSystem;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
 import com.vividsolutions.jts.geom.Envelope;
+import com.vividsolutions.jts.geom.Point;
 
 /**
  * Abstract test case that exercises all aspects of the {@link VectorDataset} interface.
@@ -78,6 +82,17 @@ public abstract class VectorApiTestBase {
         assertEquals(24.96, bbox.getMinY(), 0.01);
         assertEquals(-66.96, bbox.getMaxX(), 0.01);
         assertEquals(49.37, bbox.getMaxY(), 0.01);
+    }
+
+    @Test
+    public void testCRS() throws IOException {
+        CoordinateReferenceSystem crs = data.crs();
+        assertNotNull(crs);
+
+        CoordinateReferenceSystem geo = Proj.EPSG_4326;
+        Point p = Proj.reproject(Geom.point(115.37, 51.08), crs, geo);
+        assertEquals(115.37, p.getX(), 0.01);
+        assertEquals(51.08, p.getY(), 0.01);
     }
 
     @Test

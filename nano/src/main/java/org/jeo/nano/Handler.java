@@ -1,3 +1,17 @@
+/* Copyright 2013 The jeo project. All rights reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.jeo.nano;
 
 import java.io.BufferedReader;
@@ -61,53 +75,53 @@ public abstract class Handler {
         return m.group(1) + (second == null ? "" : "/" + second);
     }
 
+    /**
+     * Find a workspace by key.
+     * @param key
+     * @param reg
+     * @return a non-null workspace
+     * @throws IOException
+     * @throws HttpException a Not Found status if nothing found
+     */
     protected Workspace findWorkspace(String key, DataRepository reg) throws IOException {
-        Object obj = reg.get(key);
-        if (obj == null || !(obj instanceof Workspace)) {
-            //no such layer
+        Workspace workspace = reg.get(key, Workspace.class);
+        if (workspace == null) {
             throw new HttpException(HTTP_NOTFOUND, "No such workspace: " + key);
         }
-        return (Workspace) obj;
+        return (Workspace) workspace;
     }
 
-    protected Pair<Dataset, Workspace> findDataset(Request request, DataRepository reg) throws IOException {
-        Pair<Object, Object> found = findObject(request, reg);
-        if (found == null || !(found.first() instanceof Dataset)) {
-            throw new HttpException(HTTP_NOTFOUND, "No such dataset at: " + request.getUri());
-        }
-        return Pair.of((Dataset) found.first(), (Workspace) found.second());
-    }
-
-    protected Pair<Object,Object> findObject(Request request, DataRepository reg) throws IOException {
+    /**
+     * Find a workspace or dataset (and it's workspace). If only the first
+     * group of the matcher contains a path, only the Workspace will be returned.
+     * If neither group is supplied, null will be returned.
+     * If either of the specified paths are missing, a Not Found exception will
+     * be thrown.
+     * 
+     * @param request
+     * @param reg
+     * @return null or A Pair of Workspace and if requested and found, a Dataset
+     * @throws IOException
+     * @throws HttpException a Not Found status if nothing found
+     */
+    protected Pair<Workspace,? extends Dataset> findWorkspaceOrDataset(Request request, DataRepository reg) throws IOException {
         Matcher m = (Matcher) request.getContext().get(Matcher.class);
         String first = m.group(1);
+        String second = m.group(2);
+        Pair retval = null;
         if (first != null) {
-            String second = m.group(2);
+            Workspace ws = findWorkspace(first, reg);
+            Dataset ds = null;
             if (second != null) {
-                try {
-                    Workspace ws = (Workspace) reg.get(first);
-                    if (ws == null) {
-                        throw new HttpException(HTTP_NOTFOUND, "no such workspace: " + first);
-                    }
-
-                    Dataset ds = ws.get(second);
-                    if (ds == null) {
-                        throw new HttpException(HTTP_NOTFOUND,
+                ds = ws.get(second);
+                if (ds == null) {
+                    throw new HttpException(HTTP_NOTFOUND,
                             "no such dataset: " + second + " in workspace: " + first);
-                    }
-
-                    return new Pair<Object,Object>(ds, ws);
-                } catch (ClassCastException e) {
-                    throw new HttpException(HTTP_BADREQUEST, first + " is not a workspace");
                 }
             }
-            else {
-                return Pair.of((Object)reg.get(first), null);
-            }
+            retval = new Pair(ws, ds);
         }
-        else {
-            return null;
-        }
+        return retval;
     }
 
     protected String renderTemplate(String template, Map<String,String> vars) throws IOException {

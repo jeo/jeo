@@ -1,3 +1,17 @@
+/* Copyright 2013 The jeo project. All rights reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.jeo.filter;
 
 import java.util.ArrayList;
@@ -11,7 +25,7 @@ import org.jeo.feature.Feature;
  * 
  * @author Justin Deoliveira, OpenGeo
  */
-public class Id extends Filter {
+public class Id<T> extends Filter<T> {
 
     List<Expression> ids;
 
@@ -31,7 +45,7 @@ public class Id extends Filter {
     }
 
     @Override
-    public boolean apply(Object obj) {
+    public boolean apply(T obj) {
         if (obj instanceof Feature) {
             for (Expression e : ids) {
                 Object val = e.evaluate(obj);
@@ -69,7 +83,7 @@ public class Id extends Filter {
             return false;
         if (getClass() != obj.getClass())
             return false;
-        Id other = (Id) obj;
+        Id<?> other = (Id<?>) obj;
         if (ids == null) {
             if (other.ids != null)
                 return false;

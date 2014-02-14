@@ -1,22 +1,31 @@
+/* Copyright 2013 The jeo project. All rights reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.jeo.nano;
 
 import static org.jeo.nano.NanoHTTPD.HTTP_OK;
-import static org.jeo.nano.NanoHTTPD.HTTP_INTERNALERROR;
-import static org.jeo.nano.NanoHTTPD.HTTP_NOTFOUND;
 import static org.jeo.nano.NanoHTTPD.MIME_JSON;
 
 import java.io.IOException;
 import java.io.StringWriter;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.jeo.data.Dataset;
-import org.jeo.data.DatasetHandle;
 import org.jeo.data.Disposable;
 import org.jeo.data.Driver;
 import org.jeo.data.Handle;
 import org.jeo.data.Query;
-import org.jeo.data.DataRepository;
 import org.jeo.data.TileDataset;
 import org.jeo.data.TileGrid;
 import org.jeo.data.TilePyramid;
@@ -31,6 +40,7 @@ import org.jeo.util.Pair;
 import org.osgeo.proj4j.CoordinateReferenceSystem;
 
 import com.vividsolutions.jts.geom.Envelope;
+import org.jeo.data.DataRepositoryView;
 
 public class DataHandler extends Handler {
 
@@ -44,9 +54,9 @@ public class DataHandler extends Handler {
 
     @Override
     public Response handle(Request request, NanoServer server) throws Exception {
-        DataRepository reg = server.getRegistry();
+        DataRepositoryView reg = server.getRegistry();
 
-        Pair<Object,Object> p = findObject(request, reg);
+        Pair<Workspace, ? extends Dataset> p = findWorkspaceOrDataset(request, reg);
 
         StringWriter out = new StringWriter();
         GeoJSONWriter writer = new GeoJSONWriter(out);
@@ -57,21 +67,11 @@ public class DataHandler extends Handler {
         }
         else {
             try {
-                Object obj = p.first();
-                if (obj instanceof Workspace) {
-                    handleWorkspace((Workspace) obj, writer);
-                }
-                else if (obj instanceof Dataset) {
-                    handleDataset((Dataset)obj, writer, request);
-                }
-                else if (obj instanceof Style) {
-                    handleStyle((Style) obj, writer, request);
-                }
-                else if (obj == null) {
-                    throw new HttpException(HTTP_NOTFOUND, "not found : " + request.getUri());
+                if (p.second() != null) {
+                    handleDataset(p.second(), writer, request);
                 }
                 else {
-                    throw new HttpException(HTTP_INTERNALERROR, "unknown object: " + obj);
+                    handleWorkspace(p.first(), writer);
                 }
             }
             finally {
@@ -84,7 +84,7 @@ public class DataHandler extends Handler {
         return new Response(HTTP_OK, MIME_JSON, out.toString());
     }
 
-    void handleAll(DataRepository reg, GeoJSONWriter w) throws IOException {
+    void handleAll(DataRepositoryView reg, GeoJSONWriter w) throws IOException {
         w.object();
         
         for (Handle<?> item : reg.list()) {
@@ -96,7 +96,8 @@ public class DataHandler extends Handler {
                 w.value("workspace");
             }
             else if (Dataset.class.isAssignableFrom(t)) {
-                w.value("dataset");
+                // we represent the dataset as a workspace
+                w.value("workspace");
             }
             else if (Style.class.isAssignableFrom(t)) {
                 w.value("style");
@@ -121,7 +122,7 @@ public class DataHandler extends Handler {
         w.key("driver").value(ws.getDriver().getName());
         w.key("datasets").array();
 
-        for (DatasetHandle ref : ws.list()) {
+        for (Handle<Dataset> ref : ws.list()) {
             w.value(ref.getName());
         }
 

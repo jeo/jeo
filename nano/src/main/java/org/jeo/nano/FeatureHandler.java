@@ -1,3 +1,17 @@
+/* Copyright 2013 The jeo project. All rights reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.jeo.nano;
 
 import static org.jeo.nano.NanoHTTPD.HTTP_BADREQUEST;
@@ -18,6 +32,8 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -56,6 +72,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.vividsolutions.jts.geom.Envelope;
+
 import org.jeo.filter.Id;
 import org.jeo.filter.Literal;
 
@@ -113,29 +130,22 @@ public class FeatureHandler extends Handler {
     }
 
     Response handleGet(Request request, NanoServer server) throws IOException {
-        Pair<VectorDataset,Workspace> p = findVectorLayer(request, server);
+        Pair<Workspace,VectorDataset> p = findVectorLayer(request, server);
         String format = parseFormat(request);
 
-        VectorDataset layer = p.first();
-        try {
-            if ("html".equalsIgnoreCase(format)) {
-                return getAsHTML(layer, request, server);
-            }
-            else if ("png".equalsIgnoreCase(format)) {
-                return getAsPNG(layer, request, server);
-            }
-            else {
-                return getAsJSON(layer, request, server);
-            }
+        VectorDataset layer = p.second();
+        Response resp;
+        if ("html".equalsIgnoreCase(format)) {
+            resp = getAsHTML(layer, request, server);
         }
-        finally {
-            layer.close();
-
-            Workspace ws = p.second();
-            if (ws != null) {
-                ws.close();
-            }
+        else if ("png".equalsIgnoreCase(format)) {
+            resp = getAsPNG(layer, request, server);
         }
+        else {
+            resp = getAsJSON(layer, request, server);
+        }
+        resp.toClose(layer, p.first());
+        return resp;
     }
 
     Response getAsJSON(VectorDataset layer, Request request, NanoServer server) 
@@ -143,8 +153,8 @@ public class FeatureHandler extends Handler {
 
         Query q = buildQuery(layer, request);
         
-        Cursor<Feature> c = layer.cursor(q);
-        
+        final Cursor<Feature> c = layer.cursor(q);
+
         // if requesting a specific feature, fail if not found
         String fid = parseFeatureId(request);
         if (fid != null) {
@@ -153,13 +163,22 @@ public class FeatureHandler extends Handler {
             }
         }
 
-        String json;
-        try {
-            json = GeoJSONWriter.toString(c);
-        } finally {
-            c.close();
-        }
-        return new Response(HTTP_OK, MIME_JSON, json);
+        return new Response(HTTP_OK, MIME_JSON, new Response.Content() {
+
+            GeoJSONWriter w;
+
+            @Override
+            public void write(OutputStream output) throws IOException {
+                w = new GeoJSONWriter(new OutputStreamWriter(output));
+                w.featureCollection(c);
+                w.flush();
+            }
+
+            @Override
+            public void close() throws IOException {
+                c.close();
+            }
+        });
     }
 
     Query buildQuery(VectorDataset layer, Request request) throws IOException {
@@ -223,6 +242,10 @@ public class FeatureHandler extends Handler {
 
         Envelope bbox = p.containsKey("bbox") ? parseBBOX(p.getProperty("bbox")) : null;
         CoordinateReferenceSystem crs = parseCRS(p);
+        if (crs == null) {
+            // no crs specified, use layer crs
+            crs = layer.crs();
+        }
 
         if (bbox == null) {
             //use layer bounds
@@ -231,18 +254,16 @@ public class FeatureHandler extends Handler {
             // may have to reproject it
             if (crs != null) {
                 CoordinateReferenceSystem lcrs = layer.crs();
-                if (lcrs != null && !Proj.equal(crs, lcrs)) {
-                    bbox = Proj.reproject(bbox, lcrs, crs);
-                }
+                bbox = reprojectIfNecessary(bbox, lcrs, crs);
             }
         }
+
         vars.put("bbox", Envelopes.toString(bbox));
 
         if (p.containsKey("srs")) {
             vars.put("srs", p.getProperty("srs"));
         }
         else {
-            crs = layer.crs();
             String srs = null;
             if (crs != null) {
                 Integer epsg = Proj.epsgCode(crs);
@@ -250,11 +271,26 @@ public class FeatureHandler extends Handler {
                     srs = "epsg:" + epsg; 
                 }
             }
-            
-            vars.put("srs", srs != null ? srs : "epsg:4326");
+
+            if (srs != null) {
+                vars.put("srs", srs);
+            }
+            else {
+                // fall back to epsg:4326, may have to reproject bbox again
+                vars.put("srs", "epsg:4326");
+                vars.put("bbox", Envelopes.toString(reprojectIfNecessary(bbox, crs, Proj.EPSG_4326)));
+            }
         }
 
         return new Response(HTTP_OK, MIME_HTML, renderTemplate("feature.html", vars));
+    }
+
+    Envelope reprojectIfNecessary(Envelope bbox, 
+        CoordinateReferenceSystem from, CoordinateReferenceSystem to) {
+        if (from != null && !Proj.equal(to, from)) {
+            bbox = Proj.reproject(bbox, from, to);
+        }
+        return bbox;
     }
 
     Response getAsPNG(VectorDataset layer, Request request, NanoServer server) throws IOException {
@@ -291,7 +327,7 @@ public class FeatureHandler extends Handler {
         if (p.containsKey("style") && !p.getProperty("style").isEmpty()) {
             String s = p.getProperty("style");
             try {
-                style = (Style) server.getRegistry().get(s);
+                style = server.getRegistry().get(s, Style.class);
                 if (style == null) {
                     throw new HttpException(HTTP_NOTFOUND, "No such style: " + s);
                 }
@@ -384,11 +420,11 @@ public class FeatureHandler extends Handler {
     }
 
     void handleWrite(Request request, NanoServer server, Query query, boolean shouldExist) throws IOException {
-        Pair<VectorDataset,Workspace> p = findVectorLayer(request, server);
+        Pair<Workspace, VectorDataset> p = findVectorLayer(request, server);
 
         Object obj = new GeoJSONReader().read(getInput(request));
 
-        VectorDataset layer = p.first();
+        VectorDataset layer = p.second();
         try {
             Cursor<Feature> c = layer.cursor(query);
             if (shouldExist && ! c.hasNext()) {
@@ -415,7 +451,7 @@ public class FeatureHandler extends Handler {
         }
         finally {
             layer.close();
-            Workspace ws = p.second();
+            Workspace ws = p.first();
             if (ws != null ) {
                 ws.close();
             }
@@ -429,9 +465,9 @@ public class FeatureHandler extends Handler {
         }
 
         Query query = new Query().update().filter(new Id(new Literal(fid)));
-        Pair<VectorDataset,Workspace> p = findVectorLayer(request, server);
+        Pair<Workspace, VectorDataset> p = findVectorLayer(request, server);
 
-        VectorDataset layer = p.first();
+        VectorDataset layer = p.second();
         Cursor<Feature> c = layer.cursor(query);
         try {
             if (! c.hasNext()) {
@@ -442,19 +478,17 @@ public class FeatureHandler extends Handler {
         } finally {
             c.close();
             layer.close();
-            p.second().close();
+            p.first().close();
         }
         return new Response(HTTP_OK, MIME_PLAINTEXT, "");
     }
 
-    Pair<VectorDataset,Workspace> findVectorLayer(Request request, NanoServer server) throws IOException {
-        Pair<Dataset,Workspace> p = findDataset(request, server.getRegistry());
-        if (p == null || !(p.first() instanceof VectorDataset)) {
-            //no such layer
-            throw new HttpException(HTTP_NOTFOUND, "No such feature layer at: " + request.getUri());
+    Pair<Workspace, VectorDataset> findVectorLayer(Request request, NanoServer server) throws IOException {
+        Pair<Workspace, ? extends Dataset> p = findWorkspaceOrDataset(request, server.getRegistry());
+        if (!(p.second() instanceof VectorDataset)) {
+            throw new HttpException(HTTP_BADREQUEST, request.getUri() + " is not a feature layer");
         }
-
-        return Pair.of((VectorDataset) p.first(), p.second());
+        return (Pair<Workspace, VectorDataset>) p;
     }
 
     InputStream getInput(Request request) throws IOException {

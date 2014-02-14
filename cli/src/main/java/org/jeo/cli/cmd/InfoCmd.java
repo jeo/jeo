@@ -1,3 +1,17 @@
+/* Copyright 2013 The jeo project. All rights reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.jeo.cli.cmd;
 
 import java.io.File;
@@ -7,7 +21,6 @@ import java.util.List;
 
 import org.jeo.cli.JeoCLI;
 import org.jeo.data.Dataset;
-import org.jeo.data.DatasetHandle;
 import org.jeo.data.DirectoryRepository;
 import org.jeo.data.Drivers;
 import org.jeo.data.Handle;
@@ -17,8 +30,8 @@ import org.jeo.data.TileGrid;
 import org.jeo.data.TilePyramid;
 import org.jeo.data.VectorDataset;
 import org.jeo.data.Workspace;
-import org.jeo.data.WorkspaceHandle;
 import org.jeo.feature.Field;
+import org.jeo.filter.Filters;
 import org.jeo.geojson.GeoJSONWriter;
 import org.jeo.geom.Envelopes;
 import org.jeo.map.Style;
@@ -60,8 +73,8 @@ public class InfoCmd extends JeoCmd {
                 if (f != null && f.exists() && f.isDirectory()) {
                     DirectoryRepository reg = new DirectoryRepository(f);
                     try {
-                        for (Handle<?> h : reg.list()) {
-                            print(reg.get(h.getName()), w, cli);
+                        for (Handle<?> h : reg.query(Filters.all())) {
+                            print(h.resolve(), w, cli);
                         }
                     }
                     finally {
@@ -171,7 +184,7 @@ public class InfoCmd extends JeoCmd {
             w.key("driver").value(workspace.getDriver().getName());
             w.key("datasets").array();
     
-            for (DatasetHandle h : workspace.list()) {
+            for (Handle<Dataset> h : workspace.list()) {
                 w.value(h.getName());
             }
     

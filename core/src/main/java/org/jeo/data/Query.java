@@ -1,10 +1,26 @@
+/* Copyright 2013 The jeo project. All rights reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.jeo.data;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.jeo.feature.Feature;
 import org.jeo.filter.Filter;
+import org.jeo.filter.Filters;
 import org.jeo.filter.cql.CQL;
 import org.jeo.filter.cql.ParseException;
 import org.jeo.geom.Envelopes;
@@ -39,7 +55,7 @@ public class Query {
     /**
      * Filter of the query
      */
-    Filter filter;
+    Filter<Feature> filter;
 
     /**
      * Limit / offset
@@ -95,7 +111,7 @@ public class Query {
     /**
      * Constraint on the query, may be <code>null</code> meaning no constraint.
      */
-    public Filter getFilter() {
+    public Filter<Feature> getFilter() {
         return filter;
     }
 
@@ -193,7 +209,7 @@ public class Query {
      * 
      * @return This object.
      */
-    public Query filter(Filter filter) {
+    public Query filter(Filter<Feature> filter) {
         this.filter = filter;
         return this;
     }
@@ -343,7 +359,7 @@ public class Query {
      * Determines if the query constrains results with or filter.
      */
     public boolean isFiltered() {
-        return !Filter.isTrueOrNull(filter);
+        return !Filters.isTrueOrNull(filter);
     }
 
     /**

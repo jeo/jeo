@@ -1,3 +1,17 @@
+/* Copyright 2013 The jeo project. All rights reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.jeo.filter;
 
 import java.util.Arrays;
@@ -9,7 +23,7 @@ import java.util.List;
  * 
  * @author Justin Deoliveira, OpenGeo
  */
-public class Logic extends Filter {
+public class Logic<T> extends Filter<T> {
     
     /**
      * Logical operator type.  
@@ -19,13 +33,13 @@ public class Logic extends Filter {
     }
 
     Type type;
-    List<Filter> parts;
+    List<Filter<T>> parts;
 
-    public Logic(Type type, Filter... parts) {
+    public Logic(Type type, Filter<T>... parts) {
         this(type, Arrays.asList(parts));
     }
     
-    public Logic(Type type, List<Filter> parts) {
+    public Logic(Type type, List<Filter<T>> parts) {
         this.type = type;
         this.parts = parts;
 
@@ -41,12 +55,12 @@ public class Logic extends Filter {
         return type;
     }
 
-    public List<Filter> getParts() {
+    public List<Filter<T>> getParts() {
         return parts;
     }
 
     @Override
-    public boolean apply(Object obj) {
+    public boolean apply(T obj) {
         switch(type) {
         case AND:
             return and(obj);
@@ -59,12 +73,12 @@ public class Logic extends Filter {
         }
     }
 
-    boolean not(Object obj) {
+    boolean not(T obj) {
         return !parts.get(0).apply(obj);
     }
 
-    boolean and(Object obj) {
-        Iterator<Filter> it = parts.iterator();
+    boolean and(T obj) {
+        Iterator<Filter<T>> it = parts.iterator();
         boolean result = it.next().apply(obj);
         while (it.hasNext()) {
             result =  it.next().apply(obj) && result;
@@ -72,8 +86,8 @@ public class Logic extends Filter {
         return result;
     }
 
-    boolean or(Object obj) {
-        Iterator<Filter> it = parts.iterator();
+    boolean or(T obj) {
+        Iterator<Filter<T>> it = parts.iterator();
         boolean result = it.next().apply(obj);
         while (it.hasNext() && !result) {
             result = result || it.next().apply(obj);
@@ -103,7 +117,7 @@ public class Logic extends Filter {
             return false;
         if (getClass() != obj.getClass())
             return false;
-        Logic other = (Logic) obj;
+        Logic<?> other = (Logic<?>) obj;
         if (parts == null) {
             if (other.parts != null)
                 return false;
@@ -121,7 +135,7 @@ public class Logic extends Filter {
         }
         else {
             StringBuilder sb = new StringBuilder();
-            for (Filter f : parts) {
+            for (Filter<T> f : parts) {
                 sb.append(f).append(" ").append(type.name()).append(" ");
             }
             if (sb.length() > 0) {

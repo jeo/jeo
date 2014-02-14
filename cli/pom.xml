@@ -107,11 +107,11 @@
  
   <profiles>
     <profile>
-      <id>protobuf</id>
+      <id>gdal</id>
       <dependencies>
         <dependency>
           <groupId>org.jeo</groupId>
-          <artifactId>jeo-protobuf</artifactId>
+          <artifactId>jeo-gdal</artifactId>
           <version>${project.version}</version>
         </dependency>
       </dependencies>

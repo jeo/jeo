@@ -1,3 +1,17 @@
+/* Copyright 2013 The jeo project. All rights reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.jeo.geogit;
 
 import static org.junit.Assert.assertEquals;
@@ -27,7 +41,8 @@ import org.geotools.util.NullProgressListener;
 import org.jeo.TestData;
 import org.jeo.Tests;
 import org.jeo.data.Cursor;
-import org.jeo.data.DatasetHandle;
+import org.jeo.data.Dataset;
+import org.jeo.data.Handle;
 import org.jeo.data.Query;
 import org.jeo.data.Transaction;
 import org.jeo.data.VectorDataset;
@@ -115,15 +130,15 @@ public class GeoGitTest {
     @Test
     public void testLayers() throws IOException {
         assertEquals(4, Iterables.size(ws.list()));
-        Iterables.find(ws.list(), new Predicate<DatasetHandle>() {
+        Iterables.find(ws.list(), new Predicate<Handle<Dataset>>() {
             @Override
-            public boolean apply(DatasetHandle input) {
+            public boolean apply(Handle<Dataset> input) {
                 return input.getName().equals("states");
             }
         });
-        Iterables.find(ws.list(), new Predicate<DatasetHandle>() {
+        Iterables.find(ws.list(), new Predicate<Handle<Dataset>>() {
             @Override
-            public boolean apply(DatasetHandle input) {
+            public boolean apply(Handle<Dataset> input) {
                 return input.getName().equals("point");
             }
         });

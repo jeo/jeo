@@ -1,3 +1,17 @@
+/* Copyright 2013 The jeo project. All rights reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.jeo.data;
 
 import static org.junit.Assert.*;
@@ -10,13 +24,17 @@ import org.jeo.TestData;
 import org.jeo.feature.Feature;
 import org.jeo.feature.Schema;
 import org.jeo.geom.Envelopes;
+import org.jeo.geom.Geom;
+import org.jeo.proj.Proj;
 import org.junit.Before;
 import org.junit.Test;
+import org.osgeo.proj4j.CoordinateReferenceSystem;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
 import com.vividsolutions.jts.geom.Envelope;
+import com.vividsolutions.jts.geom.Point;
 
 /**
  * Abstract test case that exercises all aspects of the {@link VectorDataset} interface.
@@ -64,6 +82,17 @@ public abstract class VectorApiTestBase {
         assertEquals(24.96, bbox.getMinY(), 0.01);
         assertEquals(-66.96, bbox.getMaxX(), 0.01);
         assertEquals(49.37, bbox.getMaxY(), 0.01);
+    }
+
+    @Test
+    public void testCRS() throws IOException {
+        CoordinateReferenceSystem crs = data.crs();
+        assertNotNull(crs);
+
+        CoordinateReferenceSystem geo = Proj.EPSG_4326;
+        Point p = Proj.reproject(Geom.point(115.37, 51.08), crs, geo);
+        assertEquals(115.37, p.getX(), 0.01);
+        assertEquals(51.08, p.getY(), 0.01);
     }
 
     @Test

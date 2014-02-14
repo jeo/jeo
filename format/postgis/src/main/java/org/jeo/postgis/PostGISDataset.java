@@ -1,3 +1,17 @@
+/* Copyright 2013 The jeo project. All rights reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.jeo.postgis;
 
 import static org.jeo.postgis.PostGISWorkspace.LOG;
@@ -25,6 +39,7 @@ import org.jeo.feature.Feature;
 import org.jeo.feature.Field;
 import org.jeo.feature.Schema;
 import org.jeo.filter.Filter;
+import org.jeo.filter.Filters;
 import org.jeo.geom.Envelopes;
 import org.jeo.sql.DbOP;
 import org.jeo.sql.FilterSQLEncoder;
@@ -126,7 +141,7 @@ public class PostGISDataset implements VectorDataset {
         final List<Pair<Object,Integer>> args = new ArrayList<Pair<Object,Integer>>();
 
         encodeQuery(sql, q, qp, args);
-        if (!Filter.isTrueOrNull(q.getFilter()) && qp.isFiltered()) {
+        if (!Filters.isTrueOrNull(q.getFilter()) && qp.isFiltered()) {
             return pg.run(new DbOP<Long>() {
                 @Override
                 protected Long doRun(Connection cx) throws Exception {
@@ -248,8 +263,8 @@ public class PostGISDataset implements VectorDataset {
             //values.add(new Pair(srid ,Types.INTEGER));
         }
 
-        Filter filter = q.getFilter();
-        if (!Filter.isTrueOrNull(filter)) {
+        Filter<Feature> filter = q.getFilter();
+        if (!Filters.isTrueOrNull(filter)) {
             FilterSQLEncoder sqle = new PostGISFilterEncoder(this);
             try {
                 String where = sqle.encode(filter, null);

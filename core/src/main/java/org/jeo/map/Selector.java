@@ -1,9 +1,24 @@
+/* Copyright 2013 The jeo project. All rights reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.jeo.map;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import org.jeo.filter.Filter;
+import org.jeo.filter.Filters;
 
 public class Selector {
 
@@ -12,7 +27,7 @@ public class Selector {
     String attachment;
     boolean wildcard = false;
     List<String> classes = new ArrayList<String>();
-    Filter filter;
+    Filter<Object> filter;
     
     public String getId() {
         return id;
@@ -50,11 +65,11 @@ public class Selector {
         return classes;
     }
     
-    public Filter getFilter() {
+    public Filter<Object> getFilter() {
         return filter;
     }
     
-    public void setFilter(Filter filter) {
+    public void setFilter(Filter<Object> filter) {
         this.filter = filter;
     }
     
@@ -90,7 +105,7 @@ public class Selector {
         merged.getClasses().addAll(getClasses());
         merged.getClasses().addAll(other.getClasses());
     
-        Filter filter = getFilter() != null ? getFilter() : Filter.TRUE;
+        Filter<Object> filter = getFilter() != null ? getFilter() : Filters.all();
         if (other.getFilter() != null) {
             filter = filter.and(other.getFilter());
         }
@@ -132,7 +147,7 @@ public class Selector {
         for (String c : classes) {
             sb.append(".").append(c);
         }
-        if (filter != null && filter != Filter.TRUE) {
+        if (!Filters.isTrueOrNull(filter)) {
             sb.append("[").append(filter).append("]");
         }
         if (attachment != null) {

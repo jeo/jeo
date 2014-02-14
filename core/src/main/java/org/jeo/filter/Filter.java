@@ -1,3 +1,17 @@
+/* Copyright 2013 The jeo project. All rights reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.jeo.filter;
 
 /**
@@ -5,7 +19,7 @@ package org.jeo.filter;
  *   
  * @author Justin Deoliveira, OpenGeo
  */
-public abstract class Filter {
+public abstract class Filter<T> {
 
     /**
      * Returns a new filter builder.
@@ -15,30 +29,6 @@ public abstract class Filter {
     }
 
     /**
-     * Returns true if the filter is <tt>null</tt> or equal to {@link #TRUE}.
-     */
-    public static boolean isTrueOrNull(Filter f) {
-        return f == TRUE || f == null;
-    }
-
-    /**
-     * Returns true if the filter is <tt>null</tt> or equal to {@link #FALSE}.
-     */
-    public static boolean isFalseOrNull(Filter f) {
-        return f == FALSE || f == null;
-    }
-
-    /**
-     * Identity filter that always returns true.
-     */
-    public static final Filter TRUE = new All();
-
-    /**
-     * Identity filter that always returns false.
-     */
-    public static final Filter FALSE = new None();
-
-    /**
      * Applies the filter to the specified input.
      * 
      * @param obj The input.
@@ -46,50 +36,47 @@ public abstract class Filter {
      * @return The result, <code>true</code> if the filter matches the specific input, otherwise
      *   <code>false</code>.
      */
-    public abstract boolean apply(Object obj);
+    public abstract boolean apply(T obj);
 
     /**
      * Creates a new filter that is a logical AND of this filter and the specified filter.
      */
-    public Filter and(Filter other) {
-        if (other == Filter.TRUE) {
+    public Filter<T> and(Filter<T> other) {
+        if (other instanceof All) {
             return this;
         }
-        if (other == Filter.FALSE) {
+        if (other instanceof None) {
             return other;
         }
 
-        return new Logic(Logic.Type.AND, this, other);
+        return new Logic<T>(Logic.Type.AND, this, other);
     }
 
     /**
      * Creates a new filter that is a logical OR of this filter and the specified filter.
      */
-    public Filter or(Filter other) {
-        if (other == Filter.TRUE) {
+    public Filter<T> or(Filter<T> other) {
+        if (other instanceof All) {
             return other;
         }
-        if (other == Filter.FALSE) {
+        if (other instanceof None) {
             return this;
         }
-        return new Logic(Logic.Type.OR, this, other);
+        return new Logic<T>(Logic.Type.OR, this, other);
     }
 
     /**
      * Creates a new filter that is the negation of this filter.
      */
-    public Filter not() {
-        return new Logic(Logic.Type.NOT, this); 
+    public Filter<T> not() {
+        return new Logic<T>(Logic.Type.NOT, this); 
     }
 
     /**
      * Applies a visitor to the filter.
      */
-    public abstract Object accept(FilterVisitor v, Object obj);
+    public Object accept(FilterVisitor v, Object obj) {
+        return v.visit(this, obj);
+    }
 
-    @Override
-    public abstract boolean equals(Object obj);
-
-    @Override
-    public abstract int hashCode();
 }

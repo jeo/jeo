@@ -1,8 +1,23 @@
+/* Copyright 2013 The jeo project. All rights reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.jeo.nano;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.Closeable;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -17,7 +32,7 @@ import java.net.Socket;
 import java.net.URLEncoder;
 import java.util.Date;
 import java.util.Enumeration;
-import java.util.Hashtable;
+import java.util.HashMap;
 import java.util.Locale;
 import java.util.Properties;
 import java.util.StringTokenizer;
@@ -25,6 +40,9 @@ import java.util.TimeZone;
 import java.util.Vector;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.RejectedExecutionException;
+
+import org.jeo.nano.NanoHTTPD.Response.Content;
 
 /**
  * A simple, tiny, nicely embeddable HTTP 1.0 (partially 1.1) server in Java
@@ -121,6 +139,7 @@ public class NanoHTTPD
 	 */
 	public static class Response
 	{
+        Closeable[] toClose;
 		/**
 		 * Default constructor: response = HTTP_OK, data = mime = 'null'
 		 */
@@ -134,9 +153,7 @@ public class NanoHTTPD
 		 */
 		public Response( String status, String mimeType, InputStream data )
 		{
-			this.status = status;
-			this.mimeType = mimeType;
-			this.data = data;
+			this(status, mimeType, new StreamContent(data));
 		}
 
 		/**
@@ -145,17 +162,34 @@ public class NanoHTTPD
 		 */
 		public Response( String status, String mimeType, String txt )
 		{
-			this.status = status;
-			this.mimeType = mimeType;
-			try
-			{
-				this.data = new ByteArrayInputStream( txt.getBytes("UTF-8"));
-			}
-			catch ( java.io.UnsupportedEncodingException uee )
-			{
-				uee.printStackTrace();
-			}
+		        this(status, mimeType, newStreamContent(txt));
 		}
+
+		static StreamContent newStreamContent(String txt) {
+		    try {
+		        return new StreamContent(new ByteArrayInputStream( txt.getBytes("UTF-8")));
+                    }
+                    catch ( java.io.UnsupportedEncodingException uee ) {
+                           throw new RuntimeException(uee);
+                    }
+		}
+
+		/**
+                 * Constructor taking direct content.
+                 */
+                public Response( String status, String mimeType, Content content )
+                {
+                    this.status = status;
+                    this.mimeType = mimeType;
+                    this.data = content;
+                }
+
+        public void toClose(Closeable... toClose) {
+            if (this.toClose != null) {
+                throw new IllegalArgumentException("toClose not null");
+            }
+            this.toClose = toClose;
+        }
 
 		/**
 		 * Adds given line to the header.
@@ -178,13 +212,55 @@ public class NanoHTTPD
 		/**
 		 * Data of the response, may be null.
 		 */
-		public InputStream data;
+		public Content data;
 
 		/**
 		 * Headers for the HTTP response. Use addHeader()
 		 * to add lines.
 		 */
 		public Properties header = new Properties();
+
+		public InputStream stream() throws IOException {
+		    if (data instanceof StreamContent) {
+		        return ((StreamContent) data).data;
+		    }
+
+		    ByteArrayOutputStream bout = new ByteArrayOutputStream();
+		    data.write(bout);
+		    data.close();
+		    return new ByteArrayInputStream(bout.toByteArray());
+
+		}
+
+		static interface Content extends Closeable {
+		    void write(OutputStream output) throws IOException;
+		}
+
+		static class StreamContent implements Content {
+		    InputStream data;
+
+		    StreamContent(InputStream data) {
+		        this.data = data;
+		    }
+
+		    @Override
+		    public void write(OutputStream out) throws IOException {
+                        int pending = data.available(); // This is to support partial sends, see serveFile()
+                        byte[] buff = new byte[theBufferSize];
+                        while (pending>0)
+                        {
+                                int read = data.read( buff, 0, ( (pending>theBufferSize) ?  theBufferSize : pending ));
+                                if (read <= 0)  break;
+                                out.write( buff, 0, read );
+                                pending -= read;
+                        }
+		    }
+
+		    @Override
+		    public void close() throws IOException {
+		        this.data.close();
+		    }
+		}
 	}
 
 	/**
@@ -202,7 +278,8 @@ public class NanoHTTPD
 		HTTP_BADREQUEST = "400 Bad Request",
 		HTTP_METHOD_NOT_ALLOWED = "405 Method Not Allowed",
 		HTTP_INTERNALERROR = "500 Internal Server Error",
-		HTTP_NOTIMPLEMENTED = "501 Not Implemented";
+		HTTP_NOTIMPLEMENTED = "501 Not Implemented",
+        HTTP_SERVICE_UNAVAILABLE = "503 Service Unavailable";
 
 	/**
 	 * Common mime types for dynamic content
@@ -235,19 +312,51 @@ public class NanoHTTPD
 			{
 				public void run()
 				{
-					try
-					{
-						while( true ) {
-                            myThreadPool.submit(new HTTPSession(myServerSocket.accept()));
-                        }
-					}
-					catch ( IOException ioe )
-					{}
+                    serve();
 				}
 			});
 		myThread.setDaemon( true );
 		myThread.start();
 	}
+
+    private void serve() {
+        notifyStarted();
+        try {
+            while (true) {
+                Socket socket;
+                try {
+                    socket = myServerSocket.accept();
+                } catch (IOException ex) {
+                    if (myServerSocket.isClosed()) {
+                        break;
+                    }
+                    error("Error accepting client: " + ex.getMessage(), null);
+                    continue;
+                }
+                HTTPSession session = new HTTPSession(socket);
+                try {
+                    myThreadPool.submit(session);
+                } catch (RejectedExecutionException ree) {
+                    try {
+                        session.sendResponse(HTTP_SERVICE_UNAVAILABLE, MIME_PLAINTEXT, null, 
+                                Response.newStreamContent("HTTP_SERVICE_UNAVAILABLE"));
+                    } catch (Throwable t) {
+                        error("Error sending error response", t);
+                    }
+                }
+            }
+        } finally {
+            notifyStopped();
+        }
+    }
+
+    protected void notifyStarted() {
+
+    }
+
+    protected void notifyStopped() {
+
+    }
 
 	/**
 	 * Stops the server.
@@ -329,9 +438,11 @@ public class NanoHTTPD
 
 		public void run()
 		{
+            InputStream is = null;
+            Response response = null;
 			try
 			{
-				InputStream is = mySocket.getInputStream();
+				is = mySocket.getInputStream();
 				if ( is == null) return;
 
 				// Read the first 8192 bytes.
@@ -460,27 +571,27 @@ public class NanoHTTPD
 					files.put("content", saveTmpFile( fbuf, 0, f.size()));
 
 				// Ok, now do the serve()
-				Response r = serve( uri, method, header, parms, files );
-				if ( r == null )
+				response = serve( uri, method, header, parms, files );
+				if ( response == null )
 					sendError( HTTP_INTERNALERROR, "SERVER INTERNAL ERROR: Serve() returned a null response." );
 				else
-					sendResponse( r.status, r.mimeType, r.header, r.data );
-
-				in.close();
-				is.close();
+					sendResponse( response.status, response.mimeType, response.header, response.data );
 			}
-			catch ( IOException ioe )
+			catch ( Throwable t1 )
 			{
-				try
-				{
-					sendError( HTTP_INTERNALERROR, "SERVER INTERNAL ERROR: IOException: " + ioe.getMessage());
-				}
-				catch ( Throwable t ) {}
+                if (t1 instanceof InterruptedException) {
+                    // Thrown by sendError, ignore and exit
+                } else {
+                    error("Unexpected error", t1);
+                    sendResponse(HTTP_INTERNALERROR, MIME_PLAINTEXT, null, Response.newStreamContent("SERVER INTERNAL ERROR"));
+                }
 			}
-			catch ( InterruptedException ie )
-			{
-				// Thrown by sendError, ignore and exit the thread.
-			}
+            finally {
+                if (response.toClose != null) {
+                    safeClose(response.toClose);
+                }
+                safeClose(is);
+            }
 		}
 
 		/**
@@ -784,17 +895,22 @@ public class NanoHTTPD
 			throw new InterruptedException();
 		}
 
+		private void sendResponse( String status, String mime, Properties header, InputStream data ) {
+		    sendResponse(status, mime, header, new Response.StreamContent(data));
+		}
+
 		/**
 		 * Sends given response to the socket.
 		 */
-		private void sendResponse( String status, String mime, Properties header, InputStream data )
+		private void sendResponse( String status, String mime, Properties header, Content data )
 		{
+            OutputStream out = null;
 			try
 			{
 				if ( status == null )
-					throw new Error( "sendResponse(): Status can't be null." );
+					throw new NullPointerException( "sendResponse(): Status can't be null." );
 
-				OutputStream out = mySocket.getOutputStream();
+				out = mySocket.getOutputStream();
 				PrintWriter pw = new PrintWriter( out );
 				pw.print("HTTP/1.0 " + status + " \r\n");
 
@@ -818,32 +934,46 @@ public class NanoHTTPD
 				pw.print("\r\n");
 				pw.flush();
 
-				if ( data != null )
-				{
-					int pending = data.available();	// This is to support partial sends, see serveFile()
-					byte[] buff = new byte[theBufferSize];
-					while (pending>0)
-					{
-						int read = data.read( buff, 0, ( (pending>theBufferSize) ?  theBufferSize : pending ));
-						if (read <= 0)	break;
-						out.write( buff, 0, read );
-						pending -= read;
-					}
-				}
-				out.flush();
-				out.close();
-				if ( data != null )
-					data.close();
+                if (data != null) {
+                    data.write(out);
+                }
 			}
-			catch( IOException ioe )
+			catch( Throwable ioe )
 			{
-				// Couldn't write? No can do.
-				try { mySocket.close(); } catch( Throwable t ) {}
+                error("Error responding", ioe);
 			}
+            finally {
+                safeClose(out, data);
+                try {
+                    // socket is not Closeable on android until kitkat(API 19) :(
+                    mySocket.close();
+                } catch (IOException ioe) {
+                    // pass
+                }
+            }
 		}
 
 		private Socket mySocket;
 	}
+
+    private void safeClose(Closeable... toClose) {
+        for (int i = 0; i < toClose.length; i++) {
+            try {
+                if (toClose[i] != null) {
+                    toClose[i].close();
+                }
+            } catch (IOException ioe) {
+                error("Error closing resource:", ioe);
+            }
+        }
+    }
+
+    protected void error(String message, Throwable t) {
+        myErr.println(message);
+        if (t != null) {
+            t.printStackTrace(myErr);
+        }
+    }
 
 	/**
 	 * URL-encodes everything between "/"-characters.
@@ -1088,7 +1218,7 @@ public class NanoHTTPD
 	/**
 	 * Hashtable mapping (String)FILENAME_EXTENSION -> (String)MIME_TYPE
 	 */
-	private static Hashtable theMimeTypes = new Hashtable();
+	private static HashMap theMimeTypes = new HashMap();
 	static
 	{
 		StringTokenizer st = new StringTokenizer(

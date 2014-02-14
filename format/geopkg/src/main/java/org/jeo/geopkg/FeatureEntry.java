@@ -1,3 +1,17 @@
+/* Copyright 2013 The jeo project. All rights reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.jeo.geopkg;
 
 import org.jeo.feature.Schema;
@@ -14,9 +28,9 @@ import org.jeo.sql.PrimaryKey;
 public class FeatureEntry extends Entry {
 
     Geom.Type geometryType;
-    Integer coordDimension;
     String geometryColumn;
-
+    boolean z, m;
+    
     Schema schema;
     PrimaryKey primaryKey;
 
@@ -40,12 +54,20 @@ public class FeatureEntry extends Entry {
         this.geometryType = geometryType;
     }
 
-    public Integer getCoordDimension() {
-        return coordDimension;
+    public boolean hasZ() {
+        return z;
     }
 
-    public void setCoordDimension(Integer coordDimension) {
-        this.coordDimension = coordDimension;
+    public void setZ(boolean z) {
+        this.z = z;
+    }
+
+    public boolean hasM() {
+        return m;
+    }
+
+    public void setM(boolean m) {
+        this.m = m;
     }
 
     Schema getSchema() {
@@ -68,7 +90,8 @@ public class FeatureEntry extends Entry {
         super.init(e);
         setGeometryColumn(e.getGeometryColumn());
         setGeometryType(e.getGeometryType());
-        setCoordDimension(e.getCoordDimension());
+        setZ(e.hasZ());
+        setM(e.hasM());
     }
 
     @Override

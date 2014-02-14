@@ -1,3 +1,17 @@
+/* Copyright 2013 The jeo project. All rights reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.jeo.filter;
 
 import org.jeo.util.Convert;
@@ -8,7 +22,7 @@ import org.jeo.util.Optional;
  * 
  * @author Justin Deoliveira, OpenGeo
  */
-public class Comparison extends Filter {
+public class Comparison<T> extends Filter<T> {
 
     /**
      * Comparison operator type.  
@@ -55,7 +69,7 @@ public class Comparison extends Filter {
     }
 
     @Override
-    public boolean apply(Object obj) {
+    public boolean apply(T obj) {
         Object o1 = left.evaluate(obj);
         Object o2 = right.evaluate(obj);
 
@@ -131,7 +145,7 @@ public class Comparison extends Filter {
             return false;
         if (getClass() != obj.getClass())
             return false;
-        Comparison other = (Comparison) obj;
+        Comparison<?> other = (Comparison<?>) obj;
         if (left == null) {
             if (other.left != null)
                 return false;

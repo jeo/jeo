@@ -37,6 +37,7 @@ import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -46,6 +47,8 @@ import java.util.regex.Pattern;
 import org.jeo.data.Cursor;
 import org.jeo.data.Dataset;
 import org.jeo.data.Query;
+import org.jeo.data.Transaction;
+import org.jeo.data.Transactional;
 import org.jeo.data.VectorDataset;
 import org.jeo.data.Workspace;
 import org.jeo.feature.Feature;
@@ -229,6 +232,16 @@ public class FeatureHandler extends Handler {
         }
 
         return q;
+    }
+
+    Transaction buildTransaction(VectorDataset layer, Request request) {
+        // create a transaction object
+        Properties q  = request.getParms();
+        Map<String,Object> opts = 
+            q.containsKey("options") ? parseOptions(q.getProperty("options")) : null;
+
+        return layer instanceof Transactional ? 
+                ((Transactional)layer).transaction(opts) : Transaction.NULL;
     }
 
     Response getAsHTML(VectorDataset layer, Request request, NanoServer server) 
@@ -426,11 +439,15 @@ public class FeatureHandler extends Handler {
 
         VectorDataset layer = p.second();
         try {
+            Transaction tx = buildTransaction(layer, request);
+            query.transaction(tx);
+
             Cursor<Feature> c = layer.cursor(query);
-            if (shouldExist && ! c.hasNext()) {
-                throw new HttpException(HTTP_NOTFOUND, "requested feature does not exist : " + request.getUri());
-            }
             try {
+                if (shouldExist && ! c.hasNext()) {
+                    throw new HttpException(HTTP_NOTFOUND, "requested feature does not exist : " + request.getUri());
+                }
+
                 if (obj instanceof Feature) {
                     Features.copy((Feature)obj, c.next());
                     c.write();
@@ -444,6 +461,10 @@ public class FeatureHandler extends Handler {
                 else {
                     throw new HttpException(HTTP_BADREQUEST, "unable to add features from: " + obj);
                 }
+                tx.commit();
+            }
+            catch(Exception e) {
+                tx.rollback();
             }
             finally {
                 c.close();
@@ -464,10 +485,12 @@ public class FeatureHandler extends Handler {
             throw new HttpException(HTTP_BADREQUEST, "must provide feature id for PUT");
         }
 
-        Query query = new Query().update().filter(new Id(new Literal(fid)));
         Pair<Workspace, VectorDataset> p = findVectorLayer(request, server);
 
         VectorDataset layer = p.second();
+        Transaction tx = buildTransaction(layer, request);
+
+        Query query = new Query().update().filter(new Id(new Literal(fid))).transaction(tx);
         Cursor<Feature> c = layer.cursor(query);
         try {
             if (! c.hasNext()) {
@@ -475,6 +498,9 @@ public class FeatureHandler extends Handler {
             }
             c.next();
             c.remove();
+            tx.commit();
+        } catch(Exception e) {
+            tx.rollback();
         } finally {
             c.close();
             layer.close();
@@ -577,5 +603,15 @@ public class FeatureHandler extends Handler {
          }
  
          return new Schema(name, fields);
+    }
+
+    Map<String,Object> parseOptions(String options) {
+        Map<String,Object> map = new LinkedHashMap<String, Object>();
+        String[] pairs = options.split(" *; *");
+        for (String p : pairs) {
+            String[] kvp = p.split(" *: *");
+            map.put(kvp[0].toLowerCase(), kvp.length > 1 ? kvp[1] : null);
+        }
+        return map;
     }
 }

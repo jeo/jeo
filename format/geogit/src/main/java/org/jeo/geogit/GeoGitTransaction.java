@@ -16,8 +16,10 @@ package org.jeo.geogit;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.Iterator;
+import java.util.Map;
 
 import org.geogit.api.GeogitTransaction;
 import org.geogit.api.plumbing.DiffIndex;
@@ -26,41 +28,48 @@ import org.geogit.api.porcelain.AddOp;
 import org.geogit.api.porcelain.CommitOp;
 import org.geogit.api.porcelain.NothingToCommitException;
 import org.jeo.data.Transaction;
+import org.jeo.util.Convert;
+import org.jeo.util.Optional;
 
 import com.google.common.base.Preconditions;
 
 public class GeoGitTransaction implements Transaction {
 
+    static final String AUTHOR = "author";
+    static final String MESSAGE = "message";
+
     GeogitTransaction ggtx;
     GeoGitDataset dataset;
+    Map<String,Object> opts;
 
-    GeoGitTransaction(GeogitTransaction ggtx, GeoGitDataset dataset) {
+    GeoGitTransaction(GeogitTransaction ggtx, GeoGitDataset dataset, Map<String,Object> opts) {
         this.ggtx = ggtx;
         this.dataset = dataset;
+        this.opts = opts != null ? opts : Collections.EMPTY_MAP;
     }
 
     @Override
     public void commit() throws IOException {
-        commit(null, null, null);
-    }
-
-    public void commit(String message, String author, Date timestamp) {
         Preconditions.checkState(ggtx != null);
 
         try {
             ggtx.command(AddOp.class).call();
 
             CommitOp commitOp = ggtx.command(CommitOp.class);
-            commitOp.setMessage(message != null ? message : autoMessage());
 
-            if (author != null) {
-                commitOp.setAuthor(author, null);
-                commitOp.setCommitter(author, null);
+            Optional<String> message = Convert.toString(opts.get(MESSAGE));
+            commitOp.setMessage(message.has() ? message.get() : autoMessage());
+
+            Optional<String> author = Convert.toString(opts.get(AUTHOR));
+            if (author.has()) {
+                commitOp.setAuthor(author.get(), null);
+                commitOp.setCommitter(author.get(), null);
             }
-            if (timestamp != null) {
+
+            /*if (timestamp != null) {
                 commitOp.setAuthorTimestamp(timestamp.getTime());
                 commitOp.setCommitterTimestamp(timestamp.getTime());
-            }
+            }*/
 
             commitOp.call();
             ggtx.commit();

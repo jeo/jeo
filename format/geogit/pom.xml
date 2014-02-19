@@ -19,18 +19,18 @@
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>org.jeo</groupId>
-      <artifactId>jeo-geotools</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
       <groupId>org.geogit</groupId>
       <artifactId>geogit-core</artifactId>
       <version>${geogit.version}</version>
     </dependency>
     <dependency>
       <groupId>org.geogit</groupId>
-      <artifactId>geogit-bdbje</artifactId>
+      <artifactId>geogit-sqlite-core</artifactId>
+      <version>${geogit.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.geogit</groupId>
+      <artifactId>geogit-sqlite-xerial</artifactId>
       <version>${geogit.version}</version>
     </dependency>
     <dependency>
@@ -47,6 +47,6 @@
   </dependencies>
 
   <properties>
-    <geogit.version>0.4-SNAPSHOT</geogit.version>
+    <geogit.version>0.7-SNAPSHOT</geogit.version>
   </properties>
 </project>

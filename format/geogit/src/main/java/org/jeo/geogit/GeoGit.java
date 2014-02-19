@@ -25,32 +25,39 @@ import org.geogit.api.porcelain.ConfigOp;
 import org.geogit.api.porcelain.ConfigOp.ConfigAction;
 import org.geogit.di.GeogitModule;
 import org.geogit.repository.Repository;
-import org.geogit.storage.bdbje.JEStorageModule;
 import org.jeo.data.FileVectorDriver;
 import org.jeo.feature.Schema;
 import org.jeo.util.Key;
 import org.jeo.util.Messages;
+import org.jeo.util.Util;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import com.google.inject.Module;
 import com.google.inject.util.Modules;
 
 public class GeoGit extends FileVectorDriver<GeoGitWorkspace> {
 
+    static Logger LOG = LoggerFactory.getLogger(GeoGit.class);
+
     /**
      * Username key, defaults to <tt>System.getProperty("user.name")</tt>
      */
-    public static final Key<String> USER = 
-        new Key<String>("user.name", String.class, System.getProperty("user.name"));
+    public static final Key<String> USER = new Key<String>("user.name", String.class, 
+        Util.nullIfEmpty(System.getProperty("user.name")));
 
     /**
      * Email key, defaults to <tt>System.getProperty("user.name") + "@localhost"</tt>
      */
     public static final Key<String> EMAIL = 
-        new Key<String>("user.email", String.class, USER.getDefault() + "@localhost");
+        new Key<String>("user.email", String.class, 
+            USER.getDefault() != null ? USER.getDefault() + "@localhost" : null);
 
     public static GeoGitWorkspace open(GeoGitOpts opts) throws IOException {
-        return new GeoGitWorkspace(newGeoGIT(opts), opts);
+        return new GeoGit().doOpen(opts);
     }
 
     @Override
@@ -90,8 +97,11 @@ public class GeoGit extends FileVectorDriver<GeoGitWorkspace> {
 
     @Override
     public GeoGitWorkspace open(File file, Map<?, Object> opts) throws IOException {
-        GeoGitOpts ggopts = ggopts(file, opts);
-        return new GeoGitWorkspace(newGeoGIT(ggopts), ggopts);
+        return doOpen(ggopts(file, opts));
+    }
+
+    GeoGitWorkspace doOpen(GeoGitOpts opts) throws IOException {
+        return new GeoGitWorkspace(createGeoGIT(opts), opts);
     }
 
     @Override
@@ -116,22 +126,42 @@ public class GeoGit extends FileVectorDriver<GeoGitWorkspace> {
         return ggopts;
     }
 
-    static GeoGIT newGeoGIT(GeoGitOpts opts) throws IOException {
+    protected GeoGIT createGeoGIT(GeoGitOpts opts) throws IOException {
         File file = opts.getFile();
 
-        //TODO: something about this
-        Injector i = Guice.createInjector(
-            Modules.override(new GeogitModule()).with(new JEStorageModule()));
+        Injector i = createGeoGITInjector();
 
         GeoGIT gg = new GeoGIT(i, file);
         gg.getOrCreateRepository();
 
         Repository repo = gg.getRepository();
-        repo.command(ConfigOp.class).setAction(ConfigAction.CONFIG_SET)
+        if (opts.getUser() != null) {
+            repo.command(ConfigOp.class).setAction(ConfigAction.CONFIG_SET)
             .setName("user.name").setValue(opts.getUser()).call();
-        repo.command(ConfigOp.class).setAction(ConfigAction.CONFIG_SET)
+        }
+        if (opts.getEmail() != null) {
+            repo.command(ConfigOp.class).setAction(ConfigAction.CONFIG_SET)
             .setName("user.email").setValue(opts.getEmail()).call();
-        
+        }
+
         return gg;
+    }
+
+    protected Injector createGeoGITInjector() {
+        Module m = new GeogitModule();
+        try {
+            // first try loading the sqlite based storage module
+            Class<Module> c = 
+                (Class<Module>) Class.forName("org.geogit.storage.sqlite.XerialSQLiteModule");
+            m = Modules.override(m).with(c.newInstance());
+        }
+        catch(Exception e) {
+            // just use defaults
+            if (LOG.isTraceEnabled()) {
+                LOG.trace("Unable to load SQLite storage module", e);
+            }
+        }
+        
+        return Guice.createInjector(m);
     }
 }

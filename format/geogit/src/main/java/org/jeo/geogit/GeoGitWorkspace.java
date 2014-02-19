@@ -48,10 +48,8 @@ import org.jeo.data.FileData;
 import org.jeo.data.Handle;
 import org.jeo.data.Workspace;
 import org.jeo.feature.Schema;
-import org.jeo.geotools.GT;
 import org.jeo.util.Key;
 import org.jeo.util.Pair;
-import org.opengis.feature.simple.SimpleFeatureType;
 
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
@@ -160,9 +158,9 @@ public class GeoGitWorkspace implements Workspace, FileData {
         }
 
         gg.command(CheckoutOp.class).setSource(ref.second().getId().toString()).call();
-        SimpleFeatureType featureType = featureType(ref.first());
-        if (featureType != null) {
-            return new GeoGitDataset(ref, GT.schema(featureType), this);
+        Schema schema = schema(ref.first());
+        if (schema != null) {
+            return new GeoGitDataset(ref, schema, this);
         }
 
         throw new IllegalStateException("No schema for tree: " + layer); 
@@ -239,10 +237,10 @@ public class GeoGitWorkspace implements Workspace, FileData {
         return repo.command(FindFeatureTypeTrees.class).setRootTreeRef(refOrBranch(rev)).call();
     }
 
-    SimpleFeatureType featureType(NodeRef ref) {
+    Schema schema(NodeRef ref) {
         Optional<RevFeatureType> type = gg.command(RevObjectParse.class)
             .setObjectId(ref.getMetadataId()).call(RevFeatureType.class);
-        return (SimpleFeatureType) (type.isPresent() ? type.get().type() : null);
+        return type.isPresent() ? type.get().type() : null;
     }
 
     @Override
@@ -258,7 +256,7 @@ public class GeoGitWorkspace implements Workspace, FileData {
 
             // now we can use the transaction working tree with the correct branch checked out
             WorkingTree workingTree = tx.getWorkingTree();
-            workingTree.createTypeTree(treePath, GT.featureType(schema));
+            workingTree.createTypeTree(treePath, schema);
 
             tx.command(AddOp.class).addPattern(treePath).call();
             tx.command(CommitOp.class).setMessage("Created type tree " + treePath).call();

@@ -36,7 +36,6 @@ import org.geogit.api.porcelain.ConfigOp.ConfigAction;
 import org.geogit.api.porcelain.LogOp;
 import org.geogit.di.GeogitModule;
 import org.geogit.repository.Repository;
-import org.geogit.storage.bdbje.JEStorageModule;
 import org.geotools.util.NullProgressListener;
 import org.jeo.TestData;
 import org.jeo.Tests;
@@ -50,7 +49,6 @@ import org.jeo.feature.Feature;
 import org.jeo.feature.Schema;
 import org.jeo.feature.SchemaBuilder;
 import org.jeo.geom.GeomBuilder;
-import org.jeo.geotools.GT;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -73,7 +71,7 @@ public class GeoGitTest {
     @Before
     public void setUp() throws IOException {
         Injector i = Guice.createInjector(
-            Modules.override(new GeogitModule()).with(new JEStorageModule()));
+            Modules.override(new GeogitModule()).with(GeoGit.loadStorageModule()));
 
         GeoGIT gg = new GeoGIT(i, Tests.newTmpDir("geogit", "tmp")); 
 
@@ -100,8 +98,7 @@ public class GeoGitTest {
 
     void addShp(VectorDataset data, Repository repo) throws IOException {
         String name = data.getName();
-        repo.getWorkingTree().insert(name, GT.iterator(data.cursor(new Query())), 
-            new NullProgressListener(), null, null);
+        repo.getWorkingTree().insert(name, data, new Query(), new NullProgressListener());
         data.close();
 
         AddOp add = repo.command(AddOp.class);

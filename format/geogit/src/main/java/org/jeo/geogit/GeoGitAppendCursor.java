@@ -15,27 +15,23 @@
 package org.jeo.geogit;
 
 import java.io.IOException;
+import java.util.List;
 
-import org.geotools.feature.simple.SimpleFeatureBuilder;
 import org.jeo.data.Cursor;
+import org.jeo.feature.BasicFeature;
 import org.jeo.feature.Feature;
-import org.jeo.geotools.GT;
-import org.jeo.geotools.GTFeature;
 
 public class GeoGitAppendCursor extends Cursor<Feature> {
 
     GeoGitDataset dataset;
     GeoGitTransaction tx;
 
-    GTFeature curr;
-    SimpleFeatureBuilder featureBuilder;
+    Feature curr;
 
     GeoGitAppendCursor(GeoGitDataset dataset, GeoGitTransaction tx) {
         super(Mode.APPEND);
         this.dataset = dataset;
         this.tx = tx;
-
-        featureBuilder = new SimpleFeatureBuilder(dataset.featureType());
     }
 
     @Override
@@ -45,13 +41,13 @@ public class GeoGitAppendCursor extends Cursor<Feature> {
 
     @Override
     public Feature next() throws IOException {
-        curr = GT.feature(featureBuilder.buildFeature(null), dataset.schema());
+        curr = new BasicFeature(null, (List) null, dataset.schema());
         return curr;
     }
 
     @Override
     protected void doWrite() throws IOException {
-        dataset.insert(curr.getFeature(), tx);
+        dataset.insert(curr, tx);
     }
 
     @Override

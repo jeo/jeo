@@ -42,8 +42,6 @@ import org.jeo.feature.Schema;
 import org.jeo.geom.Envelopes;
 import org.jeo.util.Key;
 import org.jeo.util.Pair;
-import org.opengis.feature.simple.SimpleFeature;
-import org.opengis.feature.simple.SimpleFeatureType;
 import org.osgeo.proj4j.CoordinateReferenceSystem;
 
 import com.google.common.base.Optional;
@@ -156,7 +154,7 @@ public class GeoGitDataset implements VectorDataset, Transactional {
         GeogitTransaction ggtx = geogit.getGeoGIT().command(TransactionBegin.class).call();
         ggtx.command(CheckoutOp.class).setSource(geogit.branch()).call();
 
-        return new GeoGitTransaction(ggtx, this);
+        return new GeoGitTransaction(ggtx, this, options);
     }
 
     @Override
@@ -178,11 +176,7 @@ public class GeoGitDataset implements VectorDataset, Transactional {
         return tree.get();
     }
 
-    SimpleFeatureType featureType() {
-        return geogit.featureType(getRef());
-    }
-
-    void insert(SimpleFeature feature, GeoGitTransaction tx) {
+    void insert(Feature feature, GeoGitTransaction tx) {
         workingTree(tx).insert(getRef().path(), feature);
     }
 

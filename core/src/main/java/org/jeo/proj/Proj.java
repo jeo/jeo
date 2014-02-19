@@ -82,9 +82,21 @@ public class Proj {
      * @return The matching crs object, or <code>null</code> if none found.
      */
     public static CoordinateReferenceSystem crs(String s) {
-        
+        if (s == null || s.isEmpty()) {
+            return null;
+        }
         if (!AUTH_CODE.matcher(s).matches()) {
-            return crs(new String[]{s});
+            try {
+                return crs(new String[]{s});
+            }
+            catch(RuntimeException e) {
+                try {
+                    return new ProjWKTParser().parse(s);
+                }
+                catch(Exception e2) {
+                    throw e;
+                }
+            }
         }
 
         if ("epsg:4326".equalsIgnoreCase(s) && EPSG_4326 != null) {

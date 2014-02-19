@@ -24,6 +24,18 @@ import java.io.IOException;
 public interface Transaction {
 
     /**
+     * Null transaction object.
+     */
+    Transaction NULL = new Transaction() {
+        @Override
+        public void rollback() throws IOException {
+        }
+        @Override
+        public void commit() throws IOException {
+        }
+    };
+
+    /**
      * Commits the transaction.
      */
     void commit() throws IOException;

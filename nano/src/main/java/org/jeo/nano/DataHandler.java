@@ -159,11 +159,12 @@ public class DataHandler extends Handler {
          if (crs != null) {
             w.key("crs");
             w.array();
-            
-            for (String s : crs.getParameters()) {
-                w.value(s);
+
+            if (crs.getParameters() != null) {
+                for (String s : crs.getParameters()) {
+                    w.value(s);
+                }
             }
-        
             w.endArray();
          }
 

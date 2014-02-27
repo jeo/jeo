@@ -24,6 +24,9 @@ public class Tile {
     Integer z, x, y;
     byte[] data;
     String mimeType;
+
+    private static final int[] JPG = new int[] { 0xFF, 0xD8, 0xFF };
+    private static final int[] PNG = new int[] { 0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A };
     
     /**
      * Constructs an empty tile object.
@@ -118,8 +121,17 @@ public class Tile {
      * The mime type specifying the format of the tile image data.
      */
     public String getMimeType() {
+        if (mimeType == null && data != null) {
+            // try sniffing the data
+            if (isMagic(JPG)) {
+                mimeType = "image/jpg";
+            } else if (isMagic(PNG)) {
+                mimeType = "image/png";
+            }
+        }
         return mimeType;
     }
+
 
     /**
      * Sets the mime type specifying the format of the tile image data.
@@ -179,4 +191,13 @@ public class Tile {
     public String toString() {
         return String.format("(z=%d, x=%d, y=%d)", z, y, x);
     }
+    
+    private boolean isMagic(int[] bytes) {
+        boolean match = data.length > bytes.length;
+        for (int i = 0; i < bytes.length && match; i++) {
+            match &= bytes[i] == data[i];
+        }
+        return match;
+    }
+
 }

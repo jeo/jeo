@@ -92,4 +92,11 @@ public class Util {
         }
         return map;
     }
+
+    /**
+     * Returns null if a string is null or empty.
+     */
+    public static String nullIfEmpty(String s) {
+        return "".equals(s) ? null : s;
+    }
 }

@@ -161,7 +161,7 @@ public class GeoGit extends FileVectorDriver<GeoGitWorkspace> {
                 LOG.trace("Unable to load SQLite storage module", e);
             }
         }
-        
+
         return Guice.createInjector(m);
     }
 }

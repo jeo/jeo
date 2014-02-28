@@ -238,7 +238,7 @@ public class FeatureHandler extends Handler {
         // create a transaction object
         Properties q  = request.getParms();
         Map<String,Object> opts = 
-            q.containsKey("options") ? parseOptions(q.getProperty("options")) : null;
+            q != null && q.containsKey("options") ? parseOptions(q.getProperty("options")) : null;
 
         return layer instanceof Transactional ? 
                 ((Transactional)layer).transaction(opts) : Transaction.NULL;
@@ -463,8 +463,9 @@ public class FeatureHandler extends Handler {
                 }
                 tx.commit();
             }
-            catch(Exception e) {
+            catch(RuntimeException e) {
                 tx.rollback();
+                throw e;
             }
             finally {
                 c.close();
@@ -499,8 +500,9 @@ public class FeatureHandler extends Handler {
             c.next();
             c.remove();
             tx.commit();
-        } catch(Exception e) {
+        } catch(RuntimeException e) {
             tx.rollback();
+            throw e;
         } finally {
             c.close();
             layer.close();

@@ -34,7 +34,6 @@ import org.geogit.api.porcelain.CommitOp;
 import org.geogit.api.porcelain.ConfigOp;
 import org.geogit.api.porcelain.ConfigOp.ConfigAction;
 import org.geogit.api.porcelain.LogOp;
-import org.geogit.di.GeogitModule;
 import org.geogit.repository.Repository;
 import org.geotools.util.NullProgressListener;
 import org.jeo.TestData;
@@ -70,8 +69,7 @@ public class GeoGitTest {
 
     @Before
     public void setUp() throws IOException {
-        Injector i = Guice.createInjector(
-            Modules.override(new GeogitModule()).with(GeoGit.loadStorageModule()));
+        Injector i = new GeoGit().createGeoGITInjector();
 
         GeoGIT gg = new GeoGIT(i, Tests.newTmpDir("geogit", "tmp")); 
 

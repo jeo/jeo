@@ -80,7 +80,7 @@ public class Query {
     /**
      * Transaction associated with the query
      */
-    Transaction transaction;
+    Transaction transaction = Transaction.NULL;
 
     /**
      * Cursor mode

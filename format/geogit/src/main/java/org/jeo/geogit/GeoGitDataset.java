@@ -35,6 +35,7 @@ import org.jeo.data.Cursor.Mode;
 import org.jeo.data.Cursors;
 import org.jeo.data.Query;
 import org.jeo.data.QueryPlan;
+import org.jeo.data.Transaction;
 import org.jeo.data.Transactional;
 import org.jeo.data.VectorDataset;
 import org.jeo.feature.Feature;
@@ -127,7 +128,7 @@ public class GeoGitDataset implements VectorDataset, Transactional {
             throw new IllegalArgumentException("Writable cursor requires a transaction");
         }
 
-        GeoGitTransaction tx =  (GeoGitTransaction) q.getTransaction();
+        Transaction tx =  (Transaction) q.getTransaction();
 
         if (q.getMode() == Mode.APPEND) {
             return new GeoGitAppendCursor(this, tx);
@@ -182,16 +183,17 @@ public class GeoGitDataset implements VectorDataset, Transactional {
         return geogit.featureType(getRef());
     }
 
-    void insert(SimpleFeature feature, GeoGitTransaction tx) {
+    void insert(SimpleFeature feature, Transaction tx) {
         workingTree(tx).insert(getRef().path(), feature);
     }
 
-    void delete(String fid, GeoGitTransaction tx) {
+    void delete(String fid, Transaction tx) {
         workingTree(tx).delete(getRef().path(), fid);
     }
 
-    WorkingTree workingTree(GeoGitTransaction tx) {
-        return tx != null ? tx.ggtx.getWorkingTree() : 
+    WorkingTree workingTree(Transaction tx) {
+        GeoGitTransaction gtx = tx instanceof GeoGitTransaction ? (GeoGitTransaction) tx : null; 
+        return gtx != null ? gtx.ggtx.getWorkingTree() : 
             geogit.getGeoGIT().getRepository().getWorkingTree();
     }
 }

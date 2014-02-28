@@ -18,6 +18,7 @@ import java.io.IOException;
 
 import org.geotools.feature.simple.SimpleFeatureBuilder;
 import org.jeo.data.Cursor;
+import org.jeo.data.Transaction;
 import org.jeo.feature.Feature;
 import org.jeo.geotools.GT;
 import org.jeo.geotools.GTFeature;
@@ -25,12 +26,12 @@ import org.jeo.geotools.GTFeature;
 public class GeoGitAppendCursor extends Cursor<Feature> {
 
     GeoGitDataset dataset;
-    GeoGitTransaction tx;
+    Transaction tx;
 
     GTFeature curr;
     SimpleFeatureBuilder featureBuilder;
 
-    GeoGitAppendCursor(GeoGitDataset dataset, GeoGitTransaction tx) {
+    GeoGitAppendCursor(GeoGitDataset dataset, Transaction tx) {
         super(Mode.APPEND);
         this.dataset = dataset;
         this.tx = tx;

@@ -22,6 +22,7 @@ import org.geogit.api.NodeRef;
 import org.geogit.api.RevFeature;
 import org.geogit.api.plumbing.RevObjectParse;
 import org.jeo.data.Cursor;
+import org.jeo.data.Transaction;
 import org.jeo.feature.Feature;
 import org.jeo.geotools.GT;
 import org.jeo.geotools.GTFeature;
@@ -39,9 +40,9 @@ public class GeoGitCursor extends Cursor<Feature> {
     FeatureBuilder featureBuilder;
 
     GTFeature curr;
-    GeoGitTransaction tx;
+    Transaction tx;
 
-    GeoGitCursor(Mode mode, Iterator<NodeRef> nodeit, GeoGitDataset dataset, GeoGitTransaction tx) {
+    GeoGitCursor(Mode mode, Iterator<NodeRef> nodeit, GeoGitDataset dataset, Transaction tx) {
         super(mode);
         this.nodeit = nodeit;
         this.dataset = dataset;

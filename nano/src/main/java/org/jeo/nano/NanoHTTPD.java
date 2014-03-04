@@ -943,6 +943,7 @@ public class NanoHTTPD
                 error("Error responding", ioe);
 			}
             finally {
+                requestComplete();
                 safeClose(out, data);
                 try {
                     // socket is not Closeable on android until kitkat(API 19) :(
@@ -955,6 +956,10 @@ public class NanoHTTPD
 
 		private Socket mySocket;
 	}
+
+    protected void requestComplete() {
+        // hook
+    }
 
     private void safeClose(Closeable... toClose) {
         for (int i = 0; i < toClose.length; i++) {

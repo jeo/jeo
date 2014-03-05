@@ -20,8 +20,9 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FilenameFilter;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -96,46 +97,36 @@ public class DirectoryRepository implements DataRepository {
         throws IOException {
 
         // list all files, possibly filtering by extension
-        final Map<String,String> metaFiles = new HashMap<String, String>();
+        //final Map<String,String> metaFiles = new HashMap<String, String>();
+        CompositeFilenameFilter fileFilter = new CompositeFilenameFilter();
+        if (exts != null) {
+            fileFilter.and(new ExtensionFilter(exts));
+        }
 
-        FilenameFilter fileFilter = new FilenameFilter() {
-            @Override
-            public boolean accept(File dir, String name) {
-                String ext = Util.extension(name);
-                if ("jeo".equalsIgnoreCase(ext)) {
-                    // meta file, save for later
-                    metaFiles.put(Util.base(name), name);
-                    return false;
-                }
-
-                return exts != null ? exts.contains(ext) : true;
-            }
-        };
-
-        String[] files = baseDir.list(fileFilter);
+        Map<String,FileGroup> files = listFiles(fileFilter);
 
         // process files to see what ones we have drivers for
         LinkedHashSet<Handle<?>> items = new LinkedHashSet<Handle<?>>();
-        for (String fn : files) {
-            File file = new File(baseDir, fn);
-            String name = Util.base(fn);
+        for (Map.Entry<String, FileGroup> e : files.entrySet()) {
+            String name = e.getKey();
+            FileGroup grp = e.getValue();
 
             Driver<?> drv = null;
 
             // check for a meta file
-            if (metaFiles.containsKey(name)) {
-                File metaFile = new File(baseDir, metaFiles.get(name));
-                Pair<Driver<?>,Map<String,Object>> meta = readMetaFile(metaFile);
+            if (grp.meta() != null) {
+                Pair<Driver<?>,Map<String,Object>> meta = readMetaFile(grp.meta());
                 if (meta != null) {
                     drv = meta.first();
                 }
-
-                // remove the meta file from the list
-                metaFiles.remove(name);
             }
 
             if (drv == null) {
-                drv = Drivers.find(file.toURI(), drivers);
+                // no meta file, look through list and try to load one of them
+                Iterator<File> it = grp.files().iterator();
+                while(drv == null && it.hasNext()) {
+                    drv = Drivers.find(it.next().toURI(), drivers);
+                }
             }
 
             if (drv != null) {
@@ -145,55 +136,30 @@ public class DirectoryRepository implements DataRepository {
                 }
             }
             else {
-                LOG.debug("unable to load driver for file: " + file.getPath());
+                LOG.debug("unable to load driver for files: " + grp.files());
             }
         }
 
-        // handle left over meta files
-        for (Map.Entry<String, String> e : metaFiles.entrySet()) {
-            String name = e.getKey();
-            File file = new File(baseDir, e.getValue());
-
-            Pair<Driver<?>,Map<String,Object>> meta = readMetaFile(file);
-            if (meta != null) {
-                Driver<?> drv = meta.first();
-                Handle<?> h = Handle.to(name, handleType(drv), drv, this);
-                if (filter.apply(h)) {
-                    items.add(h);
-                }
-            }
-        }
         return items;
     }
 
     @Override
     public <T> T get(final String key, Class<T> type) throws IOException {
-        if (exts == null) {
-            //search for any file with this base name
-            String[] files = baseDir.list(new FilenameFilter() {
-                @Override
-                public boolean accept(File dir, String name) {
-                    return name.startsWith(key+".");
-                }
-            });
-            for (String file : files) {
-                T result = objOrNull(new File(baseDir, file), type); 
-                if (result != null) {
-                    return result;
-                }
+        CompositeFilenameFilter fileFilter = new CompositeFilenameFilter(new FilenameFilter() {
+            @Override
+            public boolean accept(File dir, String name) {
+                String base = Util.base(name);
+                return base.equalsIgnoreCase(key);
             }
+        });
+        if (exts != null) {
+            fileFilter.and(new ExtensionFilter(exts));
         }
-        else {
-            //look for one of our specific extensions
-            for (String ext : exts) {
-                File f = new File(baseDir, key + "." + ext);
-                if (f.exists()) {
-                    T result = objOrNull(f, type);
-                    if (result != null) {
-                        return result;
-                    }
-                }
-            }
+
+        Map<String,FileGroup> files = listFiles(fileFilter);
+        if (!files.isEmpty()) {
+            FileGroup grp = files.values().iterator().next();
+            return objOrNull(grp, type);
         }
 
         return null;
@@ -254,47 +220,37 @@ public class DirectoryRepository implements DataRepository {
         } 
     }
 
-    <T> T objOrNull(File file, Class<T> type) throws IOException {
-        // handle a meta file
-        String base = Util.base(file.getName());
-        String ext = Util.extension(file.getName());
-
-        if ("jeo".equalsIgnoreCase(ext)) {
-            Pair<Driver<?>,Map<String,Object>> meta = readMetaFile(file);
+    <T> T objOrNull(FileGroup grp, Class<T> type) throws IOException {
+        File metaFile = grp.meta();
+        if (metaFile != null) {
+            Pair<Driver<?>,Map<String,Object>> meta = readMetaFile(metaFile);
             if (meta != null) {
                 Object data = meta.first().open(meta.second());
-                return objOrNull(data, file, type);
+                return objOrNull(data, grp, type);
             }
         }
         else {
-            //check for a sidecar meta file
-            File metaFile = new File(baseDir, base + ".jeo");
-            if (metaFile.exists()) {
-                Pair<Driver<?>,Map<String,Object>> meta = readMetaFile(metaFile);
-                if (meta != null) {
-                    Map<String,Object> opts = meta.second();
-                    opts.put(FileDriver.FILE.getName(), file);
+            // regular direct file base
+            Iterator<File> it = grp.files().iterator();
+            Object obj = null;
+            while (obj == null && it.hasNext()) {
+                obj = Drivers.open(it.next(), type, drivers);
+            }
 
-                    return objOrNull(meta.first().open(opts), file, type);
-                }
-            }
-            else {
-                // regular direct file base
-                Object obj = Drivers.open(file, type, drivers);
-                return objOrNull(obj, file, type);
-            }
+            return objOrNull(obj, grp, type);
         }
+
         return null;
     }
 
-    <T> T objOrNull(Object obj, File file, Class<T> type) throws IOException {
+    <T> T objOrNull(Object obj, FileGroup grp, Class<T> type) throws IOException {
         if (obj != null) {
             if (obj instanceof Dataset) {
                 obj = new SingleWorkspace((Dataset) obj);
             }
         }
         else {
-            LOG.debug("Unable to open file: " + file.getPath());
+            LOG.debug("Unable to open file: " + grp.files());
         }
         
         return type.cast(obj);
@@ -303,4 +259,83 @@ public class DirectoryRepository implements DataRepository {
     Class<?> handleType(Driver<?> drv) {
         return Style.class.isAssignableFrom(drv.getType()) ? Style.class : Workspace.class;
     }
-}
+
+    Map<String,FileGroup> listFiles(FilenameFilter filter) {
+        LinkedHashMap<String, FileGroup> map = new LinkedHashMap<String, FileGroup>();
+        for (String file : baseDir.list(filter)) {
+            String base = Util.base(file);
+            FileGroup grp = map.get(base);
+            if (grp == null) {
+                grp = new FileGroup();
+                map.put(base, grp);
+            }
+
+            grp.add(new File(baseDir, file));
+        }
+        return map;
+    }
+
+    static class FileGroup {
+
+        private File meta = null;
+        private List<File> files = new ArrayList<File>();
+
+        void add(File file) {
+            if ("jeo".equalsIgnoreCase(Util.extension(file.getName()))) {
+                meta = file;
+            }
+            else {
+                files.add(file);
+            }
+        }
+
+        List<File> files() {
+            return files;
+        }
+
+        File meta() {
+            return meta;
+        }
+    }
+
+    static class CompositeFilenameFilter implements FilenameFilter {
+
+        List<FilenameFilter> filters = new ArrayList<FilenameFilter>();
+
+        public CompositeFilenameFilter(FilenameFilter... filters) {
+            this.filters.addAll(Arrays.asList(filters));
+        }
+
+        public CompositeFilenameFilter and(FilenameFilter filter) {
+            filters.add(filter);
+            return this;
+        }
+
+        @Override
+        public boolean accept(File dir, String name) {
+            boolean accept = true;
+            Iterator<FilenameFilter> it = filters.iterator();
+            while (accept && it.hasNext()) {
+                accept = it.next().accept(dir, name);
+            }
+            return accept;
+        }
+
+    }
+
+    static class ExtensionFilter implements FilenameFilter {
+
+        List<String> exts;
+
+        ExtensionFilter(List<String> exts) {
+            this.exts = exts;
+        }
+
+        @Override
+        public boolean accept(File dir, String name) {
+            String ext = Util.extension(name);
+            return exts.contains(ext);
+        }
+
+    }
+ }

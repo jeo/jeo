@@ -19,16 +19,17 @@ import java.util.List;
 
 import org.jeo.data.Cursor;
 import org.jeo.feature.BasicFeature;
+import org.jeo.data.Transaction;
 import org.jeo.feature.Feature;
 
 public class GeoGitAppendCursor extends Cursor<Feature> {
 
     GeoGitDataset dataset;
-    GeoGitTransaction tx;
+    Transaction tx;
 
     Feature curr;
 
-    GeoGitAppendCursor(GeoGitDataset dataset, GeoGitTransaction tx) {
+    GeoGitAppendCursor(GeoGitDataset dataset, Transaction tx) {
         super(Mode.APPEND);
         this.dataset = dataset;
         this.tx = tx;

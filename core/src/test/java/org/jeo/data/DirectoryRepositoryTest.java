@@ -17,20 +17,26 @@ package org.jeo.data;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.easymock.classextension.EasyMock.*;
 
 import java.io.File;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.util.Iterator;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.io.FileUtils;
 import org.easymock.IAnswer;
 import org.jeo.Tests;
 import org.jeo.filter.Filters;
 import org.jeo.geojson.GeoJSON;
+import org.jeo.geojson.GeoJSONDataset;
 import org.jeo.json.JSONObject;
 import org.jeo.json.JSONValue;
 import org.jeo.map.Style;
+import org.jeo.util.Util;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -38,6 +44,7 @@ import org.junit.Test;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Iterators;
+import com.google.common.io.Files;
 
 public class DirectoryRepositoryTest {
 
@@ -160,6 +167,48 @@ public class DirectoryRepositoryTest {
                     && Style.class.isAssignableFrom(input.getType());
             }
         });
-        repo2.close();  
+        repo2.close();
+    }
+
+    @Test
+    public void testMetaFileWithOtherFile() throws Exception {
+        File root = repo.getDirectory();
+        FileUtils.deleteDirectory(root);
+
+        root.mkdir();
+        Files.touch(new File(root, "baz.abc"));
+        Files.touch(new File(root, "baz.json"));
+
+        JSONObject meta = new JSONObject();
+        meta.put("driver", "geojson");
+
+        JSONObject opts = new JSONObject();
+        opts.put("file", "baz.json");
+        meta.put("options", opts);
+
+        FileWriter fw = new FileWriter(new File(repo.getDirectory(), "baz.jeo"));
+        JSONValue.writeJSONString(meta, fw);
+        fw.flush();
+        fw.close();
+
+        final AtomicBoolean hit = new AtomicBoolean(false);
+        final Driver<?> d = new GeoJSON() {
+            @Override
+            public GeoJSONDataset open(File file, Map<?, Object> opts) throws IOException {
+                hit.set(true);
+                assertEquals("json", Util.extension(file.getName()));
+                return super.open(file, opts);
+            }
+        };
+
+        DirectoryRepository repo2 = new DirectoryRepository(root, new DriverRegistry() {
+            @Override
+            public Iterator<Driver<?>> list() {
+                return (Iterator) Iterators.singletonIterator(d);
+            }
+        });
+
+        repo2.get("baz", Object.class);
+        assertTrue(hit.get());
     }
 }

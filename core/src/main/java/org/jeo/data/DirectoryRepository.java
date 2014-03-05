@@ -114,8 +114,8 @@ public class DirectoryRepository implements DataRepository {
             Driver<?> drv = null;
 
             // check for a meta file
-            if (grp.meta() != null) {
-                Pair<Driver<?>,Map<String,Object>> meta = readMetaFile(grp.meta());
+            if (grp.hasMeta()) {
+                Pair<Driver<?>,Map<String,Object>> meta = readMetaFile(grp);
                 if (meta != null) {
                     drv = meta.first();
                 }
@@ -169,7 +169,8 @@ public class DirectoryRepository implements DataRepository {
     public void close() {
     }
 
-    Pair<Driver<?>,Map<String,Object>> readMetaFile(File f) {
+    Pair<Driver<?>,Map<String,Object>> readMetaFile(FileGroup grp) {
+        File f = grp.meta();
         try {
             BufferedReader r = new BufferedReader(new FileReader(f));
             JSONObject obj = (JSONObject) JSONValue.parseWithException(r);
@@ -212,6 +213,12 @@ public class DirectoryRepository implements DataRepository {
                }
             }
 
+            if (drv instanceof FileDriver && !FileDriver.FILE.has(opts) && !grp.files().isEmpty()) {
+                // TODO: instead of grab first perhaps we should figure out what the primary 
+                // file is
+                opts.put(FileDriver.FILE.getName(), grp.files().get(0));
+            }
+
             return new Pair(drv, opts);
         }
         catch(Exception e) {
@@ -221,9 +228,8 @@ public class DirectoryRepository implements DataRepository {
     }
 
     <T> T objOrNull(FileGroup grp, Class<T> type) throws IOException {
-        File metaFile = grp.meta();
-        if (metaFile != null) {
-            Pair<Driver<?>,Map<String,Object>> meta = readMetaFile(metaFile);
+        if (grp.hasMeta()) {
+            Pair<Driver<?>,Map<String,Object>> meta = readMetaFile(grp);
             if (meta != null) {
                 Object data = meta.first().open(meta.second());
                 return objOrNull(data, grp, type);
@@ -293,8 +299,17 @@ public class DirectoryRepository implements DataRepository {
             return files;
         }
 
+        boolean hasMeta() {
+            return meta != null;
+        }
+
         File meta() {
             return meta;
+        }
+
+        @Override
+        public String toString() {
+            return files.toString();
         }
     }
 

@@ -136,10 +136,7 @@ public class DirectoryRepositoryTest {
         opts.put("name", "baz");
         meta.put("options", opts);
 
-        FileWriter fw = new FileWriter(new File(repo.getDirectory(), "baz.jeo"));
-        JSONValue.writeJSONString(meta, fw);
-        fw.flush();
-        fw.close();
+        writeMetaFile(meta, "baz.jeo");
     }
 
     @Test
@@ -172,10 +169,8 @@ public class DirectoryRepositoryTest {
 
     @Test
     public void testMetaFileWithOtherFile() throws Exception {
-        File root = repo.getDirectory();
-        FileUtils.deleteDirectory(root);
+        File root = clearRepo();
 
-        root.mkdir();
         Files.touch(new File(root, "baz.abc"));
         Files.touch(new File(root, "baz.json"));
 
@@ -186,10 +181,7 @@ public class DirectoryRepositoryTest {
         opts.put("file", "baz.json");
         meta.put("options", opts);
 
-        FileWriter fw = new FileWriter(new File(repo.getDirectory(), "baz.jeo"));
-        JSONValue.writeJSONString(meta, fw);
-        fw.flush();
-        fw.close();
+        writeMetaFile(meta, "baz.jeo");
 
         final AtomicBoolean hit = new AtomicBoolean(false);
         final Driver<?> d = new GeoJSON() {
@@ -210,5 +202,36 @@ public class DirectoryRepositoryTest {
 
         repo2.get("baz", Object.class);
         assertTrue(hit.get());
+    }
+
+    @Test
+    public void testMetaFileWithNoFileOption() throws Exception {
+        File root = clearRepo();
+        Files.touch(new File(root, "baz.json"));
+        Files.touch(new File(root, "baz.jeo"));
+
+        JSONObject meta = new JSONObject();
+        meta.put("driver", "geojson");
+
+        JSONObject opts = new JSONObject();
+        meta.put("options", opts);
+
+        writeMetaFile(meta, "baz.jeo");
+        assertNotNull(repo.get("baz", Object.class));
+    }
+
+    void writeMetaFile(JSONObject meta, String name) throws IOException {
+        FileWriter fw = new FileWriter(new File(repo.getDirectory(), name));
+        JSONValue.writeJSONString(meta, fw);
+        fw.flush();
+        fw.close();
+    }
+
+    File clearRepo() throws IOException {
+        File root = repo.getDirectory();
+        FileUtils.deleteDirectory(root);
+
+        root.mkdir();
+        return root;
     }
 }

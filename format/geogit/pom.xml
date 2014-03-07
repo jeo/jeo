@@ -47,6 +47,6 @@
   </dependencies>
 
   <properties>
-    <geogit.version>0.8-SNAPSHOT</geogit.version>
+    <geogit.version>0.8-android-m1</geogit.version>
   </properties>
 </project>

@@ -20,10 +20,10 @@ import java.util.Map;
 
 import org.jeo.data.Cursor;
 import org.jeo.data.Driver;
-import org.jeo.data.Tile;
+import org.jeo.tile.Tile;
 import org.jeo.data.TileDataset;
-import org.jeo.data.TileGrid;
-import org.jeo.data.TilePyramid;
+import org.jeo.tile.TileGrid;
+import org.jeo.tile.TilePyramid;
 import org.jeo.util.Key;
 import org.osgeo.proj4j.CoordinateReferenceSystem;
 

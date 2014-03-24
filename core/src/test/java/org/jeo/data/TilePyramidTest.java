@@ -17,6 +17,9 @@ package org.jeo.data;
 import static org.junit.Assert.*;
 
 import org.jeo.geom.Envelopes;
+import org.jeo.tile.Tile;
+import org.jeo.tile.TileCover;
+import org.jeo.tile.TilePyramid;
 import org.junit.Before;
 import org.junit.Test;
 

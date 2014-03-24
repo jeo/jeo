@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jeo.data;
+package org.jeo.tile;
 
 import static java.lang.Math.ceil;
 import static java.lang.Math.floor;

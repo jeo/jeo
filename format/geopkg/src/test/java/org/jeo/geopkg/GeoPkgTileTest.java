@@ -26,7 +26,7 @@ import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 import org.jeo.data.Cursor;
-import org.jeo.data.Tile;
+import org.jeo.tile.Tile;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;

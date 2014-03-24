@@ -17,6 +17,7 @@ package org.jeo.data;
 import static org.junit.Assert.*;
 
 import org.jeo.TestData;
+import org.jeo.tile.TilePyramid;
 import org.junit.Before;
 import org.junit.Test;
 

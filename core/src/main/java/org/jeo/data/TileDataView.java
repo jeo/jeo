@@ -20,13 +20,15 @@ import java.util.List;
 import org.jeo.Pending;
 
 import com.vividsolutions.jts.geom.Envelope;
+import org.jeo.tile.Tile;
+import org.jeo.tile.TileGrid;
 
 @Pending
-public class TileSetView implements Disposable {
+public class TileDataView implements Disposable {
 
     TileDataset tiles;
 
-    public TileSetView(TileDataset tiles) {
+    public TileDataView(TileDataset tiles) {
         this.tiles = tiles;
     }
 

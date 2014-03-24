@@ -12,7 +12,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jeo.data;
+package org.jeo.tile;
+
+import org.jeo.data.Cursor;
+import org.jeo.data.TileDataset;
 
 import java.io.IOException;
 

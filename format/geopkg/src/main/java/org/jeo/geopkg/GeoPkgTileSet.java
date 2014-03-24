@@ -15,13 +15,11 @@
 package org.jeo.geopkg;
 
 import java.io.IOException;
-import java.util.List;
 import java.util.Map;
 
 import org.jeo.data.Cursor;
-import org.jeo.data.Tile;
-import org.jeo.data.TileGrid;
-import org.jeo.data.TilePyramid;
+import org.jeo.tile.Tile;
+import org.jeo.tile.TilePyramid;
 import org.jeo.data.TileDataset;
 import org.jeo.proj.Proj;
 import org.jeo.util.Key;

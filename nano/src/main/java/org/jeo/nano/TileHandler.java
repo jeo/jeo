@@ -30,11 +30,11 @@ import java.util.regex.Pattern;
 
 import org.jeo.data.Cursor;
 import org.jeo.data.Dataset;
-import org.jeo.data.Tile;
+import org.jeo.tile.Tile;
 import org.jeo.data.TileDataset;
-import org.jeo.data.TileGrid;
-import org.jeo.data.TilePyramid;
-import org.jeo.data.TilePyramid.Origin;
+import org.jeo.tile.TileGrid;
+import org.jeo.tile.TilePyramid;
+import org.jeo.tile.TilePyramid.Origin;
 import org.jeo.data.Workspace;
 import org.jeo.geom.Envelopes;
 import org.jeo.nano.NanoHTTPD.Response;

@@ -16,30 +16,16 @@ package org.jeo.cli.cmd;
 
 import java.net.URI;
 import java.util.List;
-import java.util.Map;
-
-import jline.console.ConsoleReader;
 
 import org.jeo.cli.JeoCLI;
-import org.jeo.data.Cursor;
-import org.jeo.data.Cursors;
-import org.jeo.data.Dataset;
-import org.jeo.data.Drivers;
-import org.jeo.data.Query;
-import org.jeo.data.Tile;
-import org.jeo.data.TileDataset;
-import org.jeo.data.TileSetView;
-import org.jeo.data.VectorDataset;
-import org.jeo.feature.Feature;
+import org.jeo.data.*;
+import org.jeo.tile.Tile;
+import org.jeo.data.TileDataView;
 import org.jeo.filter.Filter;
 import org.jeo.geojson.GeoJSONWriter;
-import org.jeo.geom.Envelopes;
 
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.Parameters;
-import com.google.common.base.Strings;
-import com.google.common.collect.Ordering;
-import com.google.common.primitives.Ints;
 import com.vividsolutions.jts.geom.Envelope;
 
 @Parameters(commandNames="query", commandDescription="Executes a query against a data set")
@@ -116,7 +102,7 @@ public class QueryCmd extends JeoCmd {
 
         GeoJSONWriter w = cli.newGeoJSONWriter();
 
-        Cursor<Tile> cursor = new TileSetView(dataset).cursor(bbox, 1024, 1024);
+        Cursor<Tile> cursor = new TileDataView(dataset).cursor(bbox, 1024, 1024);
         if (count != null) {
             cursor = Cursors.limit(cursor, count);
         }

@@ -16,9 +16,9 @@ package org.jeo;
 
 import java.util.Arrays;
 
-import org.jeo.data.Tile;
+import org.jeo.tile.Tile;
 import org.jeo.data.TileDataset;
-import org.jeo.data.TilePyramid;
+import org.jeo.tile.TilePyramid;
 import org.jeo.data.VectorDataset;
 import org.jeo.data.mem.MemTileDataset;
 import org.jeo.data.mem.MemVector;

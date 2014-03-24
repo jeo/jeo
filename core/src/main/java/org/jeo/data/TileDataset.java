@@ -14,10 +14,13 @@
  */
 package org.jeo.data;
 
+import org.jeo.tile.Tile;
+import org.jeo.tile.TilePyramid;
+
 import java.io.IOException;
 
 /**
- * A layer consisting of {@link Tile} objects.
+ * A layer consisting of {@link org.jeo.tile.Tile} objects.
  * 
  * @author Justin Deoliveira, OpenGeo
  */

@@ -20,7 +20,7 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 
 import org.jeo.data.Cursor;
-import org.jeo.data.Tile;
+import org.jeo.tile.Tile;
 
 public class TileCursor extends Cursor<Tile> {
 

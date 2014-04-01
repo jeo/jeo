@@ -184,7 +184,11 @@ public class MapBuilder {
             }
         }
 
-        map.setView(view);
         return map;
+    }
+
+    public View view() {
+        map();
+        return view;
     }
 }

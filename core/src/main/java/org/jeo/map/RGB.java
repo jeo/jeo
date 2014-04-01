@@ -382,6 +382,24 @@ public class RGB {
         return false;
     }
 
+    /**
+     * The hex rgb string of this color.
+     *
+     * @return String of the format: <tt>#rrggbb</tt> 
+     */
+    public String rgbhex() {
+        return String.format("#%02x%02x%02x", r, g, b);
+    }
+
+    /**
+     * The hex rgba string of this color.
+     *
+     * @return String of the format: <tt>#rrggbbaa</tt> 
+     */
+    public String rgbahex() {
+        return String.format("#%02x%02x%02x%02x", r, g, b, a);
+    }
+
     @Override
     public String toString() {
         return new StringBuilder("RGB(").append(r).append(",").append(g).append(",").append(b)

@@ -18,11 +18,17 @@ import java.net.URI;
 import java.util.List;
 
 import org.jeo.cli.JeoCLI;
-import org.jeo.data.*;
-import org.jeo.tile.Tile;
+import org.jeo.data.Cursor;
+import org.jeo.data.Cursors;
+import org.jeo.data.Dataset;
+import org.jeo.data.Drivers;
+import org.jeo.data.Query;
+import org.jeo.data.TileDataset;
 import org.jeo.data.TileDataView;
+import org.jeo.data.VectorDataset;
 import org.jeo.filter.Filter;
 import org.jeo.geojson.GeoJSONWriter;
+import org.jeo.tile.Tile;
 
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.Parameters;

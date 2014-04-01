@@ -93,7 +93,7 @@ public class View {
     public Map getMap() {
         return map;
     }
-    
+
     /**
      * The width of the map in "rendering" units, usually pixels. 
      */
@@ -263,7 +263,16 @@ public class View {
     public double translateY() {
         return (bounds.getMinY() * scaleY()) + getHeight();
     }
-    
+
+    /**
+     * The window of the view as a bounding box.
+     *
+     * @return The bounding box 0,0,width,height
+     */
+    public Envelope window() {
+        return new Envelope(0, width, 0, height);
+    }
+
     /**
      * Binds a callback to the viewport for listening to view property changes. 
      * <p>

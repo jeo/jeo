@@ -101,14 +101,6 @@ public class Map implements Disposable {
         fireStyleChanged(oldStyle);
     }
 
-    public View getView() {
-        return view;
-    }
-
-    public void setView(View view) {
-        this.view = view;
-    }
-
     /**
      * Disposable resources to dispose when the map is disposed. 
      */

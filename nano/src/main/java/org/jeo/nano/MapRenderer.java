@@ -17,9 +17,9 @@ package org.jeo.nano;
 import java.io.IOException;
 import java.io.OutputStream;
 
-import org.jeo.map.Map;
+import org.jeo.map.View;
 
 public interface MapRenderer {
 
-    void render(Map map, OutputStream output) throws IOException;
+    void render(View view, OutputStream output) throws IOException;
 }

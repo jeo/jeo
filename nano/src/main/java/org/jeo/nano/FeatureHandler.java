@@ -371,7 +371,7 @@ public class FeatureHandler extends Handler {
         mb.style(style);
 
         ByteArrayOutputStream bout = new ByteArrayOutputStream();
-        renderer.render(mb.map(), bout);
+        renderer.render(mb.view(), bout);
 
         return new Response(HTTP_OK, MIME_PNG, new ByteArrayInputStream(bout.toByteArray()));
     }

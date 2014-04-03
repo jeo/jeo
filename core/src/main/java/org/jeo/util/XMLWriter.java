@@ -17,6 +17,9 @@ package org.jeo.util;
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.UnsupportedEncodingException;
+import java.io.Writer;
 import java.util.Properties;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.TransformerConfigurationException;
@@ -45,13 +48,27 @@ public final class XMLWriter implements Closeable {
     private final AttributesImpl atts;
     private TransformerHandler tx;
 
+    /**
+     * Create an uninitialized WMLWriter.
+     *
+     * @see #init
+     */
     public XMLWriter() {
         outputProps = new Properties();
         outputProps.put(OutputKeys.METHOD, "XML");
         atts = new AttributesImpl();
     }
 
-    private TransformerHandler createTransformer(OutputStream out) throws TransformerConfigurationException {
+    /**
+     * Create a XMLWriter initialized with the given Writer.
+     * @param out non-null Writer
+     */
+    public XMLWriter(Writer out) {
+        this();
+        init(out);
+    }
+
+    private TransformerHandler createTransformer(Writer out) throws TransformerConfigurationException {
         //create the document seriaizer
         SAXTransformerFactory txFactory
                 = (SAXTransformerFactory) SAXTransformerFactory.newInstance();
@@ -65,11 +82,10 @@ public final class XMLWriter implements Closeable {
         return tx;
     }
 
-
     /**
      * Turns on indentation and sets the indent size.
      * <p>
-     * This method needs to be called prior to {@link #init(java.io.OutputStream)}.
+     * This method needs to be called prior to {@link #init}.
      * </p>
      * @param size The number of spaces to indent.
      */
@@ -83,18 +99,30 @@ public final class XMLWriter implements Closeable {
     }
 
     /**
-     * Initializes the XML encoding process, this must be invoked prior to use.
-     *
-     * @param out The output stream to encode to.
+     * One form of {@link #init} must be invoked before use.
+     * @param writer non-null Writer to output to
      */
-    public XMLWriter init(OutputStream out) {
+    public XMLWriter init(Writer writer) {
         if (tx != null) {
             throw new IllegalStateException("init");
         }
         try {
-            tx = createTransformer(out);
+            tx = createTransformer(writer);
             tx.startDocument();
         } catch (Exception ex) {
+            throw new RuntimeException(ex);
+        }
+        return this;
+    }
+
+    /**
+     * One form of {@link #init} must be invoked before use.
+     * @param out non-null OutputStream to output to
+     */
+    public XMLWriter init(OutputStream out) {
+        try {
+            init(new OutputStreamWriter(out, "utf-8"));
+        } catch (UnsupportedEncodingException ex) {
             throw new RuntimeException(ex);
         }
         return this;
@@ -115,7 +143,8 @@ public final class XMLWriter implements Closeable {
     public XMLWriter start(String name, Object... kv) {
         atts(kv);
         try {
-            tx.startElement(null, null, name, atts);
+            // prevent potential NPE by passing empty strings
+            tx.startElement("", "", name, atts);
             atts.clear();
         } catch (SAXException e) {
             throw new RuntimeException(e);
@@ -184,7 +213,8 @@ public final class XMLWriter implements Closeable {
      */
     public XMLWriter end(String name) {
         try {
-            tx.endElement(null, null, name);
+            // prevent potential NPE by passing empty strings
+            tx.endElement("", "", name);
             return this;
         } catch (SAXException e) {
             throw new RuntimeException(e);

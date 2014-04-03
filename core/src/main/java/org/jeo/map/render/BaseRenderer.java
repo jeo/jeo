@@ -130,18 +130,15 @@ public abstract class BaseRenderer implements Renderer {
         }
     }
 
-    void render(VectorDataset data, RuleList rules, Filter<Feature> filter) throws IOException {
-        // build up the data query
-        Query q = new Query();
-
-        // bounds, we may have to reproject it
-        Envelope bbox = view.getBounds();
+    protected Envelope reproject(Query q, Envelope bbox, Dataset data) throws IOException {
         CoordinateReferenceSystem crs = data.crs();
 
         // reproject
         if (crs != null) {
             if (view.getCRS() != null && !Proj.equal(view.getCRS(), data.crs())) {
-                q.reproject(view.getCRS());
+                if (q != null) {
+                    q.reproject(view.getCRS());
+                }
                 bbox = Proj.reproject(bbox, view.getCRS(), crs);
             }
         }
@@ -150,6 +147,16 @@ public abstract class BaseRenderer implements Renderer {
                 "Layer "+data.getName()+" specifies no projection, assuming map projection");
         }
 
+        return bbox;
+    }
+
+    void render(VectorDataset data, RuleList rules, Filter<Feature> filter) throws IOException {
+        // build up the data query
+        Query q = new Query();
+
+        // bounds, we may have to reproject it
+        Envelope bbox = reproject(q, view.getBounds(), data);
+        
         q.bounds(bbox);
         if (filter != null) {
             q.filter(filter);
@@ -187,7 +194,7 @@ public abstract class BaseRenderer implements Renderer {
             return;
         }
 
-        g = clipGeometry(g);
+        //g = clipGeometry(g);
         if (g.isEmpty()) {
             return;
         }

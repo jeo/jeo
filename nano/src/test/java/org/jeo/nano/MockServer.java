@@ -21,12 +21,17 @@ import com.vividsolutions.jts.geom.Point;
 import java.io.OutputStream;
 import java.util.*;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
 import static org.easymock.EasyMock.anyObject;
 import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.expectLastCall;
+import org.easymock.IAnswer;
 import org.easymock.IExpectationSetters;
 import org.easymock.classextension.EasyMock;
-import static org.easymock.classextension.EasyMock.createMock;
 import org.jeo.data.Cursor;
 import org.jeo.data.Cursors;
 import org.jeo.data.DataRepositoryView;
@@ -54,6 +59,7 @@ import org.jeo.filter.Filter;
 import org.jeo.filter.Id;
 import org.jeo.filter.Literal;
 import org.jeo.proj.Proj;
+import org.osgeo.proj4j.CoordinateReferenceSystem;
 
 public class MockServer {
 
@@ -65,6 +71,7 @@ public class MockServer {
     private Workspace workspace;
     private final DataRepositoryView reg;
     private RendererRegistry rendererRegistry;
+    private List<Handle<?>> registryItems = new ArrayList<Handle<?>>();
 
     private MockServer() {
         server = createMock(NanoServer.class);
@@ -105,8 +112,6 @@ public class MockServer {
         expect(vectorLayer.bounds()).andReturn(null);
         expect(vectorLayer.getName()).andReturn("emptylayer");
         Schema schema = createMock(Schema.class);
-        Field field = new Field("geom", Point.class);
-        expect(schema.geometry()).andReturn(field).atLeastOnce();
         expect(vectorLayer.schema()).andReturn(schema);
         return this;
     }
@@ -215,6 +220,53 @@ public class MockServer {
         return this;
     }
 
+    MockServer buildRegistry() throws Exception {
+        expect(server.getRegistry()).andReturn(reg).anyTimes();
+        expect(reg.list()).andReturn(registryItems);
+        return this;
+    }
+    
+    Handle<Dataset> createVectorDataset(String name, String title, Envelope env, Schema schema) throws Exception {
+        CoordinateReferenceSystem crs = schema.geometry().getCRS();
+        VectorDataset dataSet = createMock(VectorDataset.class);
+        expect(dataSet.bounds()).andReturn(env).anyTimes();
+        expect(dataSet.getName()).andReturn(name).anyTimes();
+        expect(dataSet.getTitle()).andReturn(title).anyTimes();
+        expect(dataSet.crs()).andReturn(crs).anyTimes();
+        expect(dataSet.schema()).andReturn(schema).anyTimes();
+        Handle handle = createMock(Handle.class);
+        expect(handle.getType()).andReturn(VectorDataset.class).anyTimes();
+        expect(handle.bounds()).andReturn(env).anyTimes();
+        expect(handle.getName()).andReturn(name).anyTimes();
+        expect(handle.getTitle()).andReturn(title).anyTimes();
+        expect(handle.crs()).andReturn(crs).anyTimes();
+        expect(handle.resolve()).andReturn(dataSet).anyTimes();
+        return handle;
+    }
+
+    Handle<Workspace> createWorkspace(String name, final Handle<Dataset>... ds) throws Exception {
+        Handle<Workspace> handle = createMock(Handle.class);
+        expect(handle.getName()).andReturn(name).anyTimes();
+        expect(handle.getType()).andReturn(Workspace.class).anyTimes();
+        Workspace ws = createMock(Workspace.class);
+        registryItems.add(handle);
+        expect(ws.list()).andReturn(Arrays.asList(ds)).anyTimes();
+        expect(ws.get((String) anyObject())).andAnswer(new IAnswer<Dataset>() {
+
+            @Override
+            public Dataset answer() throws Throwable {
+                String name = (String) EasyMock.getCurrentArguments()[0];
+                for (Handle<Dataset> d: ds) {
+                    if (name.equals(d.getName())) return d.resolve();
+                }
+                return null;
+            }
+        });
+        expect(handle.resolve()).andReturn(ws).anyTimes();
+        expect(reg.get(name, Workspace.class)).andReturn(ws).anyTimes();
+        return handle;
+    }
+
     MockServer expectSchemaCreated() throws Exception {
         VectorDataset layer = createMock(VectorDataset.class);
         expect(workspace.get((String) anyObject())).andReturn(null).anyTimes();
@@ -291,11 +343,16 @@ public class MockServer {
         png.render((OutputStream) anyObject());
         expectLastCall().anyTimes();
 
-        RendererFactory rf = createMock(RendererFactory.class);
-        expect(rf.getFormats()).andReturn(Arrays.asList("png")).anyTimes();
+        final RendererFactory rf = createMock(RendererFactory.class);
+        expect(rf.getFormats()).andReturn(Arrays.asList("png","image/png")).anyTimes();
         expect(rf.create((View)anyObject(), (Map)anyObject())).andReturn(png).anyTimes();
 
-        expect(rendererRegistry.list()).andReturn((Iterator) Iterators.singletonIterator(rf)).anyTimes();
+        expect(rendererRegistry.list()).andAnswer(new IAnswer<Iterator<RendererFactory<?>>>() {
+            @Override
+            public Iterator<RendererFactory<?>> answer() throws Throwable {
+                return (Iterator) Iterators.singletonIterator(rf);
+            }
+        }).anyTimes();
         expect(server.getRendererRegistry()).andReturn(rendererRegistry).anyTimes();
         return this;
     }

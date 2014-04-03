@@ -14,9 +14,12 @@
  */
 package org.jeo.nano;
 
+import com.vividsolutions.jts.geom.Envelope;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.regex.Matcher;
@@ -25,6 +28,14 @@ import java.util.regex.Pattern;
 import org.jeo.data.Dataset;
 import org.jeo.data.DataRepository;
 import org.jeo.data.Workspace;
+import org.jeo.feature.Schema;
+import org.jeo.geom.Geom;
+import static org.jeo.geom.Geom.Type.MULTIPOINT;
+import static org.jeo.geom.Geom.Type.MULTIPOLYGON;
+import static org.jeo.geom.Geom.Type.POINT;
+import static org.jeo.geom.Geom.Type.POLYGON;
+import org.jeo.map.CartoCSS;
+import org.jeo.map.Style;
 import static org.jeo.nano.NanoHTTPD.HTTP_BADREQUEST;
 import static org.jeo.nano.NanoHTTPD.HTTP_NOTFOUND;
 import org.jeo.nano.NanoHTTPD.Response;
@@ -141,6 +152,108 @@ public abstract class Handler {
         }
         finally {
             in.close();
+        }
+    }
+
+    protected Style createStyle() {
+        return Style.build().select("*")
+                .set(CartoCSS.LINE_COLOR, "gray")
+                .set(CartoCSS.MARKER_FILL, "gray")
+                .set(CartoCSS.POLYGON_FILL, "gray")
+                .set(CartoCSS.POLYGON_OPACITY, .75)
+                .style();
+    }
+    
+    interface DelegateHandler {
+        NanoHTTPD.Response handle(Request req, NanoServer server) throws Exception;
+    }
+
+    static class RequestParser {
+        List<String> errors;
+        Properties parms;
+
+        RequestParser(Request req) {
+            this.parms = req.parms;
+        }
+
+        final void addError(String message) {
+            if (errors == null) {
+                errors = new ArrayList<String>();
+            }
+            errors.add(message);
+        }
+
+        String getParameter(String key, String defaultValue) {
+            return parms.getProperty(key, defaultValue);
+        }
+
+        String getParameter(String key, boolean req) {
+            String val = parms.getProperty(key);
+            if (req && val == null) {
+                missingParameter(key);
+            }
+            return val;
+        }
+
+        String[] getList(String key, boolean required) {
+            String val = getParameter(key, required);
+            return val == null ? null : val.length() == 0 ? null : val.split(",");
+        }
+
+        Envelope getBBox() {
+            return getBBox(false);
+        }
+
+        Envelope getBBox(boolean flippedAxis) {
+            String[] bbox = getList("bbox", true);
+            Envelope e = null;
+            if (bbox != null) {
+                if (bbox.length != 4) {
+                    addError("BBOX invalid, must have 4 values");
+                } else {
+                    try {
+                        int xi = 0, yi = 1;
+                        if (flippedAxis) {
+                            xi = 1; yi = 0;
+                        }
+//                        double minx = Double.parseDouble(bbox[0]);
+//                        double maxx = Double.parseDouble(bbox[2]);
+//                        double miny = Double.parseDouble(bbox[1]);
+//                        double maxy = Double.parseDouble(bbox[3]);
+                        double minx = Double.parseDouble(bbox[xi]);
+                        double maxx = Double.parseDouble(bbox[xi + 2]);
+                        double miny = Double.parseDouble(bbox[yi]);
+                        double maxy = Double.parseDouble(bbox[yi + 2]);
+                        if (minx > maxx) {
+                            addError("Invalid bbox, minx > maxx");
+                        }
+                        if (miny > maxy) {
+                            addError("Invalid bbox, miny > maxy");
+                        }
+                        e = new Envelope(minx, maxx, miny, maxy);
+                    } catch (NumberFormatException nfe) {
+                        addError("BBOX invalid, bad number");
+                    }
+                }
+            }
+            return e;
+        }
+
+        Integer getInteger(String key, boolean b) {
+            String spec = getParameter(key, b);
+            Integer val = null;
+            if (spec != null) {
+                try {
+                    val = Integer.parseInt(spec);
+                } catch (NumberFormatException nfe) {
+                    addError("Invalid " + key + " value : " + spec);
+                }
+            }
+            return val;
+        }
+
+        void missingParameter(String key) {
+            addError("Missing required parameter : " + key);
         }
     }
 }

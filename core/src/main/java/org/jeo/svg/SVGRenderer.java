@@ -587,7 +587,7 @@ public class SVGRenderer extends BaseRenderer implements Labeller {
     }
 
     boolean debugLabels() {
-        RuleList rules = view.getMap().getStyle().getRules().selectByName("Map", false);
+        RuleList rules = view.getMap().getStyle().getRules().selectByName("Map", false, false);
         if (rules.isEmpty()) {
             return false;
         }

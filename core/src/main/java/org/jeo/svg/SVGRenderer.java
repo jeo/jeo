@@ -17,17 +17,9 @@ package org.jeo.svg;
 import static org.jeo.map.CartoCSS.*;
 
 import java.io.IOException;
-import java.io.OutputStream;
-import java.util.Map;
 import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import javax.xml.transform.OutputKeys;
-import javax.xml.transform.TransformerConfigurationException;
-import javax.xml.transform.sax.SAXTransformerFactory;
-import javax.xml.transform.sax.TransformerHandler;
-import javax.xml.transform.stream.StreamResult;
 
 import org.jeo.feature.Feature;
 import org.jeo.geom.CoordinatePath;
@@ -35,7 +27,6 @@ import org.jeo.geom.Envelopes;
 import org.jeo.map.RGB;
 import org.jeo.map.Rule;
 import org.jeo.map.RuleList;
-import org.jeo.map.View;
 import org.jeo.map.render.BaseRenderer;
 import org.jeo.map.render.Label;
 import org.jeo.map.render.LabelIndex;
@@ -43,13 +34,12 @@ import org.jeo.map.render.Labeller;
 import org.jeo.util.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.xml.sax.Attributes;
-import org.xml.sax.SAXException;
-import org.xml.sax.helpers.AttributesImpl;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
+import org.jeo.map.render.ViewTransformFilter;
+import org.jeo.util.XMLWriter;
 
 /**
  * Renderer producing Scalable Vector Graphics (SVG) output.
@@ -65,50 +55,26 @@ public class SVGRenderer extends BaseRenderer implements Labeller {
 
     static enum TextAnchor { start,  middle, end };
 
-    Properties outputProps;
-    TransformerHandler tx;
+    final XMLWriter xml;
 
     public SVGRenderer() {
-        outputProps = new Properties();
-        outputProps.put(OutputKeys.METHOD, "XML");
+        xml = XMLWriter.create();
     }
 
     public SVGRenderer indent(int size) {
         if (size > 0) {
-            outputProps.put(OutputKeys.INDENT, "yes");
-            outputProps.put(INDENT_AMOUNT_KEY, String.valueOf(size));
-            //outputProps.put(OutputKeys.INDENT, "yes");
+            xml.indent(size);
         }
         return this;
-    }
-
-    protected TransformerHandler createTransformer(OutputStream output) throws IOException {
-        //create the document seriaizer
-        SAXTransformerFactory txFactory = 
-            (SAXTransformerFactory) SAXTransformerFactory.newInstance();
-        
-        TransformerHandler tx;
-        try {
-            tx = txFactory.newTransformerHandler();
-        } catch (TransformerConfigurationException e) {
-            throw new IOException(e);
-        }
-        //tx.getTransformer().setOutputProperties(outputProps);
-        //tx.getTransformer().setOutputProperty(OutputKeys.METHOD, "XML");
-        tx.getTransformer().setOutputProperties(outputProps);
-        tx.setResult(new StreamResult(output));
-
-        return tx;
     }
 
     @Override
     protected void onStart() {
         try {
-            this.tx = createTransformer(output);
-            tx.startDocument();
-            start("svg", atts("width", view.getWidth(), "height", view.getHeight(), 
+            xml.init(output);
+            xml.start("svg", "width", view.getWidth(), "height", view.getHeight(),
                 "zoomAndPan", "magnify", 
-                "xmlns", URI, "version", VERSION, "baseProfile", PROFILE).get());
+                "xmlns", URI, "version", VERSION, "baseProfile", PROFILE);
 
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -118,17 +84,17 @@ public class SVGRenderer extends BaseRenderer implements Labeller {
     @Override
     protected void onFinish() {
         try {
-            end("svg");
-            tx.endDocument();
-        } catch (SAXException e) {
+            xml.end("svg");
+            xml.close();
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
     @Override
     protected void drawBackground(RGB color) {
-        start("rect", atts("width", "100%", "height", "100%", "fill", color.rgbhex(), 
-            "fill-opacity", color.getOpacity()).get()).end("rect");
+        xml.start("rect", "width", "100%", "height", "100%", "fill", color.rgbhex(),
+            "fill-opacity", color.getOpacity()).end("rect");
     }
 
     @Override
@@ -142,16 +108,17 @@ public class SVGRenderer extends BaseRenderer implements Labeller {
 
         Geometry point = f.geometry();
 
+        ViewTransformFilter vtf = toScreenTransform();
+        Coordinate coord = vtf.apply(point.getCoordinate());
+
         if (fillColor != null || lineColor != null) {
-            CoordinatePath path = path(point);
-            drawShape(path, shape, width, height, fillColor, lineColor);
+            drawSimpleShape(coord, shape, width, height, fillColor, lineColor);
         }
 
         String label = rule.eval(f, TEXT_NAME, String.class);
         if (label != null) {
-            Coordinate a = toScreenTransform().apply(point.getCoordinate());
             Label l = new Label(label, rule, f, point);
-            l.setAnchor(a);
+            l.setAnchor(coord);
             l.put(Text.class, text(f, rule, label));
             insertLabel(l);
         }
@@ -178,41 +145,49 @@ public class SVGRenderer extends BaseRenderer implements Labeller {
         drawPath(path(poly), polyFill, s);
     }
 
-    void drawShape(CoordinatePath path, String type, float width, float height, RGB fill, RGB stroke) {
+    void drawSimpleShape(Coordinate c, String type, float width, float height, RGB fill, RGB stroke) {
         Shape shape = shape(type);
 
         type = shape.name().toLowerCase();
 
-        AttributeBuilder ab = atts();
         if (fill != null) {
-            ab.kv("fill", fill.rgbhex(), "fill-opacity", fill.getOpacity());
+            xml.atts("fill", fill.rgbhex(), "fill-opacity", fill.getOpacity());
         }
         if (stroke != null) {
-            ab.kv("stroke", stroke.rgbhex(), "stroke-opacity", stroke.getOpacity());
+            xml.atts("stroke", stroke.rgbhex(), "stroke-opacity", stroke.getOpacity());
         }
 
         switch(shape) {
         case circle:
-            ab.kv("r", width);
+            xml.atts("r", width);
             break;
         case ellipse:
-            ab.kv("rx", width, "ry", height);
+            xml.atts("rx", width, "ry", height);
             break;
         case rect:
-            ab.kv("width", width, "height", height);
+            xml.atts("width", width, "height", height);
+            break;
         }
 
-        while(path.hasNext()) {
-            Coordinate c = path.next();
-            ab.kv("cx", c.x, "cy", c.y);
-
-            start(type, ab.get()).end(type);
+        switch(shape) {
+        case circle: case ellipse:
+            xml.atts("cx", c.x, "cy", c.y);
+            break;
+        case rect:
+            // locate the corner of the rectangle so the center draws on the coordinate
+            double cx = c.x - (width / 2);
+            double cy = c.y - (height / 2);
+            xml.atts("x", cx, "y", cy);
+            break;
         }
+
+        xml.emptyElement(type);
     }
 
     void drawPath(CoordinatePath path, RGB fill, Stroke stroke) {
 
-        AttributeBuilder ab = apply(stroke, atts("fill", fill != null ? fill.rgbhex() : "none")); 
+        applyStroke(stroke);
+        xml.atts("fill", fill != null ? fill.rgbhex() : "none");
 
         StringBuilder d = new StringBuilder();
         while(path.hasNext()) {
@@ -230,7 +205,7 @@ public class SVGRenderer extends BaseRenderer implements Labeller {
             }
         }
 
-        start("path", ab.kv("d", d.toString(), "focusable", "true").get()).end("path");
+        xml.emptyElement("path", "d", d.toString(), "focusable", "true");
     }
 
     String toString(float[] array) {
@@ -379,68 +354,13 @@ public class SVGRenderer extends BaseRenderer implements Labeller {
         return prim;
     }
 
-
-    SVGRenderer start(String name, Attributes atts) {
-        try {
-            tx.startElement(null, null, name, atts);
-            return this;
-        } catch (SAXException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    SVGRenderer text(String text) {
-        try {
-            tx.characters(text.toCharArray(), 0, text.length());
-            return this;
-        } catch (SAXException e) {
-            throw new RuntimeException(e);
-        }
-    } 
-
-    SVGRenderer end(String name) {
-        try {
-            tx.endElement(null, null, name);
-            return this;
-        } catch (SAXException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    AttributeBuilder atts(Object... kv) {
-        return new AttributeBuilder().kv(kv);
-    }
-
-    AttributeBuilder apply(Stroke s, AttributeBuilder ab) {
+    void applyStroke(Stroke s) {
         if (s != null) {
-            ab.kv("stroke", s.color.rgbhex(), "stroke-width", s.width, "stroke-linejoin", s.join, 
+            xml.atts("stroke", s.color.rgbhex(), "stroke-width", s.width, "stroke-linejoin", s.join,
                 "stroke-linecap", s.cap);
             if (s.dash != null) {
-                ab.kv("stroke-dasharray", toString(s.dash), "stroke-dashoffset", s.dashOffset);
+                xml.atts("stroke-dasharray", toString(s.dash), "stroke-dashoffset", s.dashOffset);
             }
-        }
-        return ab;
-    }
-
-    static class AttributeBuilder {
-        AttributesImpl atts;
-
-        public AttributeBuilder() {
-            atts = new AttributesImpl();
-        }
-
-        public AttributeBuilder kv(Object...kv) {
-            if (kv.length % 2 != 0) {
-                throw new IllegalArgumentException("non even number of key value pairs");
-            }
-            for (int i = 0; i < kv.length; i+=2) {
-                atts.addAttribute(null, null, String.valueOf(kv[i]), null, String.valueOf(kv[i+1]));
-            }
-            return this;
-        }
-
-        public Attributes get() {
-            return atts;
         }
     }
 
@@ -568,18 +488,17 @@ public class SVGRenderer extends BaseRenderer implements Labeller {
     public void render(Label label) {
         if (debugLabels()) {
             Envelope box = label.bounds();
-            start("rect", atts("fill", "none", "stroke", "black", "x", box.getMinX(), 
+            xml.emptyElement("rect", "fill", "none", "stroke", "black", "x", box.getMinX(),
                 "y", box.getMinY() - box.getHeight(), "width", box.getWidth(), 
-                "height", box.getHeight()).get()).end("rect");
+                "height", box.getHeight());
         }
 
         Coordinate a = label.anchor();
         Text text = label.get(Text.class, Text.class);
         Font font = text.font;
 
-        Attributes atts = atts("x", a.x, "y", a.y, "font-family", font.family,
-                "font-size", font.size, "text-anchor", text.anchor, "direction", text.direction).get();
-        start("text", atts).text(label.getText()).end("text");
+        xml.element("text", label.getText(), "x", a.x, "y", a.y, "font-family", font.family,
+                "font-size", font.size, "text-anchor", text.anchor, "direction", text.direction);
     }
 
     @Override

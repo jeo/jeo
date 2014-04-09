@@ -58,7 +58,7 @@ public class SVGRenderer extends BaseRenderer implements Labeller {
     final XMLWriter xml;
 
     public SVGRenderer() {
-        xml = XMLWriter.create();
+        xml = new XMLWriter();
     }
 
     public SVGRenderer indent(int size) {

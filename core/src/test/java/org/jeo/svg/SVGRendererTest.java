@@ -68,6 +68,26 @@ public class SVGRendererTest {
     }
 
     @Test
+    public void pointsAsRect() throws Exception {
+        Style s = Style.build()
+            .select("*")
+                .set(MARKER_FILL, "red")
+                .set(MARKER_WIDTH, 25)
+                .set(MARKER_HEIGHT, 10)
+                .set(MARKER_TYPE, "rect")
+                .set(TEXT_NAME, new Property("name"))
+                .set(TEXT_ALIGN, "middle")
+                .set(TEXT_FACE_NAME, "Arial")
+                .set(TEXT_DY, 5)
+                .style();
+
+        Envelope bbox = Envelopes.scale(TestData.point().bounds(), 1.5);
+        View v = Map.build().layer(TestData.point()).style(s).bounds(bbox).size(256,256).view();
+        r.init(v, null);
+        r.render(output);
+    }
+
+    @Test
     public void lines() throws IOException {
         Style s = Style.build().select("*")
             .set(LINE_DASHARRAY, "5 3 2 5 3 2")

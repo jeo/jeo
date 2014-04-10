@@ -27,7 +27,17 @@ import org.xml.sax.SAXException;
 import org.xml.sax.helpers.AttributesImpl;
 
 /**
+ * Produces an XML document.
+ * <p>
+ * Usage:
+ * <pre><code>
+ * XMLWriter w = new XMLWriter();
+ * w.init(output).start("message").text("Hello World").end("message").close();
+ * </code></pre>
  *
+ * The above would produce the following XML document:
+ *   <pre>   &lt;message>Hello World&lt;message></pre>.
+ * </p>
  */
 public final class XMLWriter implements Closeable {
 
@@ -35,7 +45,7 @@ public final class XMLWriter implements Closeable {
     private final AttributesImpl atts;
     private TransformerHandler tx;
 
-    private XMLWriter() {
+    public XMLWriter() {
         outputProps = new Properties();
         outputProps.put(OutputKeys.METHOD, "XML");
         atts = new AttributesImpl();
@@ -55,25 +65,14 @@ public final class XMLWriter implements Closeable {
         return tx;
     }
 
-    public static XMLWriter create() {
-        return new XMLWriter();
-    }
 
     /**
-     * Must be invoked prior to use.
+     * Turns on indentation and sets the indent size.
+     * <p>
+     * This method needs to be called prior to {@link #init(java.io.OutputStream)}.
+     * </p>
+     * @param size The number of spaces to indent.
      */
-    public void init(OutputStream out) {
-        if (tx != null) {
-            throw new IllegalStateException("init");
-        }
-        try {
-            tx = createTransformer(out);
-            tx.startDocument();
-        } catch (Exception ex) {
-            throw new RuntimeException(ex);
-        }
-    }
-
     public XMLWriter indent(int size) {
         if (size > 0) {
             String INDENT_AMOUNT_KEY = "{http://xml.apache.org/xslt}indent-amount";
@@ -84,12 +83,33 @@ public final class XMLWriter implements Closeable {
     }
 
     /**
-     * Start an element with the provided name and attribute key-value pairs.
-     * Whatever attributes that have been set via calling atts will also be
-     * written. Attributes will be cleared after writing this element.
+     * Initializes the XML encoding process, this must be invoked prior to use.
      *
-     * @param name element name
-     * @param kv key-value pairs
+     * @param out The output stream to encode to.
+     */
+    public XMLWriter init(OutputStream out) {
+        if (tx != null) {
+            throw new IllegalStateException("init");
+        }
+        try {
+            tx = createTransformer(out);
+            tx.startDocument();
+        } catch (Exception ex) {
+            throw new RuntimeException(ex);
+        }
+        return this;
+    }
+
+    /**
+     * Starts an element with the provided name and attribute key-value pairs.
+     * <p>
+     * Whatever attributes that have been set via calling {@link #atts(Object...)}
+     * will also be written out. The list of attributes will be cleared after this
+     * method is called.
+     * </p>
+     *
+     * @param name The name of the element to encode.
+     * @param kv key-value pairs representing attributes, must be an even number.
      * @return this
      */
     public XMLWriter start(String name, Object... kv) {
@@ -103,17 +123,47 @@ public final class XMLWriter implements Closeable {
         return this;
     }
 
-    public void emptyElement(String name, Object... kv) {
-        start(name, kv);
-        end(name);
-    }
-
-    public void element(String name, Object value, Object... kv) {
+    /**
+     * Encodes a full element (start and end) with the specified name.
+     * <p>
+     * This method is short hand for the following:
+     * <pre><code>
+     *     start(name, kv);
+     *     text(value);
+     *     end(name);
+     * </code></pre>
+     * </p>
+     * @param name The name of the element.
+     * @param value The text value of the element, <tt>null</tt> means no text content.
+     * @param kv Attribute key-value pairs.
+     */
+    public XMLWriter element(String name, Object value, Object... kv) {
         start(name, kv);
         text(value);
         end(name);
+        return this;
     }
 
+    /**
+     * Encodes an element with no text content or children.
+     *
+     * @param name The name of the element.
+     * @param kv The attribute key value pairs.
+     */
+    public XMLWriter emptyElement(String name, Object... kv) {
+        return element(name, null, kv);
+    }
+
+    /**
+     * Encodes text content.
+     * <p>
+     * This method is called between {@link #start(String, Object...)} and
+     * {@link #end()} invocations.
+     * </p>
+     * @param value The value to encode as text, <tt>null</tt> makes this method a
+     *              no-op.
+     *
+     */
     public XMLWriter text(Object value) {
         if (value != null) {
             String text = value.toString();
@@ -126,6 +176,12 @@ public final class XMLWriter implements Closeable {
         return this;
     }
 
+    /**
+     * Ends the current element.
+     * <p>
+     * This method must be called after {@link #start(String, Object...)}.
+     * </p>
+     */
     public XMLWriter end(String name) {
         try {
             tx.endElement(null, null, name);
@@ -136,10 +192,9 @@ public final class XMLWriter implements Closeable {
     }
 
     /**
-     * Add any attributes to use on the next invocation of start.
+     * Add any attributes to use on the next invocation of {@link #start(String, Object...)}.
      *
-     * @param kv
-     * @return
+     * @param kv An even number of key value attribute pairs.
      */
     public XMLWriter atts(Object... kv) {
         if (kv.length % 2 != 0) {

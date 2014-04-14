@@ -41,7 +41,12 @@ public interface RendererFactory<T extends Renderer> {
     List<String> getAliases();
 
     /**
-     * List of image formats the render can product.
+     * List of image formats the render can produce.
+     * <p>
+     * This list contains "well known names" for the format including common file
+     * name extension, and mime types. For example if the renderer supports the
+     * PNG format this list would include "png", "image/png", etc...
+     * </p>
      */
     List<String> getFormats();
 

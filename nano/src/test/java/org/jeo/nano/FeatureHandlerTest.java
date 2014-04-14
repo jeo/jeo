@@ -116,10 +116,8 @@ public class FeatureHandlerTest extends HandlerTestSupport {
         mock = MockServer.create()
                 .withVectorLayer()
                     .withPointGeometry()
+                .withPngRenderer()
                 .replay();
-
-        MapRenderer renderer = createMock(MapRenderer.class);
-        handler = new FeatureHandler(renderer);
 
         makeRequest(
                 new Request("/features/foo/bar.png", "GET", null, q(), null),

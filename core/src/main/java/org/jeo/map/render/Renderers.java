@@ -14,9 +14,12 @@
  */
 package org.jeo.map.render;
 
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
+import org.jeo.map.View;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -77,25 +80,58 @@ public class Renderers {
     }
 
     /**
-     * Creates a new renderer from name and options.
+     * Lists all renderer factories that can produce the specified format.
      *
-     * @see {@link #factory(String, RendererRegistry)}
+     * @param format The name of the format.
+     *
+     * @see RendererFactory#getFormats()
      */
-    public static Renderer create(String name, Map<?,Object> opts) {
-        return create(name, opts, REGISTRY);
+    public static Iterator<RendererFactory<?>> listForFormat(String format) {
+        return listForFormat(format, REGISTRY);
     }
 
     /**
-     * Creates a new renderer from name, options and the specified registry.
+     * Lists all renderer factories in the specified registry that can produce the specified format.
+     *
+     * @param format The name of the format.
+     * @param reg The registry of renderers.
+     *
+     * @see RendererFactory#getFormats()
+     */
+    public static Iterator<RendererFactory<?>> listForFormat(String format, RendererRegistry reg) {
+        reg = reg != null ? reg : REGISTRY;
+        List<RendererFactory<?>> factories = new ArrayList<RendererFactory<?>>();
+        for (Iterator<RendererFactory<?>> it = reg.list(); it.hasNext(); ) {
+            RendererFactory<?> rf = it.next();
+            for (String supportedFormat : rf.getFormats()) {
+                if (supportedFormat.equalsIgnoreCase(format)) {
+                    factories.add(rf);
+                }
+            }
+        }
+        return factories.iterator();
+    }
+
+    /**
+     * Creates a new renderer from name, view, and options.
+     *
+     * @see {@link #factory(String, RendererRegistry)}
+     */
+    public static Renderer create(String name, View view, Map<?,Object> opts) {
+        return create(name, view, opts, REGISTRY);
+    }
+
+    /**
+     * Creates a new renderer from name, view, options and the specified registry.
      *
      * @throws java.lang.IllegalArgumentException If no such render matching <tt>name</tt> exists.
      */
-    public static Renderer create(String name, Map<?,Object> opts, RendererRegistry reg) {
+    public static Renderer create(String name, View view, Map<?,Object> opts, RendererRegistry reg) {
         RendererFactory<?> rf = factory(name, reg);
         if (rf == null) {
             throw new IllegalArgumentException("no renderer named " + name);
         }
 
-        return rf.create(opts);
+        return rf.create(view, opts);
     }
 }

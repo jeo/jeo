@@ -29,6 +29,7 @@ import org.jeo.geojson.GeoJSONWriter;
 import org.jeo.map.Map;
 import org.jeo.map.MapBuilder;
 import org.jeo.map.Style;
+import org.jeo.map.View;
 import org.jeo.map.render.Renderer;
 import org.jeo.map.render.RendererFactory;
 import org.jeo.map.render.Renderers;
@@ -71,14 +72,6 @@ public class RenderCmd extends JeoCmd {
             list(cli);
         }
         else {
-            opts.put(RendererFactory.WIDTH, size.width);
-            opts.put(RendererFactory.HEIGHT, size.height);
-
-            Renderer r = Renderers.create(renderer, opts);
-            if (r == null) {
-                throw new IllegalArgumentException(String.format(
-                    "Unable to create renderer '%s' from options: %s", renderer, opts));
-            }
 
             MapBuilder mb = Map.build();
 
@@ -100,8 +93,17 @@ public class RenderCmd extends JeoCmd {
                 mb.bounds(bbox);
             }
 
-            OutputStream out = file != null ? new FileOutputStream(new File(file)) : System.out; 
-            r.init(mb.view(), opts);
+            OutputStream out = file != null ? new FileOutputStream(new File(file)) : System.out;
+
+            View view = mb.view();
+
+            Renderer r = Renderers.create(renderer, view, opts);
+            if (r == null) {
+                throw new IllegalArgumentException(String.format(
+                        "Unable to create renderer '%s' from options: %s", renderer, opts));
+            }
+
+            r.init(view, opts);
             r.render(out);
             out.flush();
             if (file != null) {

@@ -67,6 +67,10 @@ import org.jeo.json.JSONValue;
 import org.jeo.map.CartoCSS;
 import org.jeo.map.MapBuilder;
 import org.jeo.map.Style;
+import org.jeo.map.View;
+import org.jeo.map.render.Renderer;
+import org.jeo.map.render.RendererFactory;
+import org.jeo.map.render.Renderers;
 import org.jeo.nano.NanoHTTPD.Response;
 import org.jeo.proj.Proj;
 import org.jeo.util.Pair;
@@ -86,23 +90,6 @@ public class FeatureHandler extends Handler {
     // /features/<workspace>[/<layer>][/<id>]
     static final Pattern FEATURES_URI_RE =
         Pattern.compile("/features(?:/([\\w-]+)(?:/([\\w-]+))?)(?:/([\\w-]+))?(?:\\.([\\w]+))?/?", Pattern.CASE_INSENSITIVE);
-
-    MapRenderer renderer;
-
-    public FeatureHandler() {
-        this(null);
-    }
-
-    public FeatureHandler(MapRenderer renderer) {
-        this.renderer = renderer;
-    }
-
-    @Override
-    public void init(NanoServer server) {
-        if (renderer == null) {
-            renderer = server.getRenderer();
-        }
-    }
 
     @Override
     public boolean canHandle(Request request, NanoServer server) {
@@ -138,15 +125,16 @@ public class FeatureHandler extends Handler {
 
         VectorDataset layer = p.second();
         Response resp;
-        if ("html".equalsIgnoreCase(format)) {
-            resp = getAsHTML(layer, request, server);
-        }
-        else if ("png".equalsIgnoreCase(format)) {
-            resp = getAsPNG(layer, request, server);
-        }
-        else {
+        if (format == null || "json".equalsIgnoreCase(format)) {
             resp = getAsJSON(layer, request, server);
         }
+        else if ("html".equalsIgnoreCase(format)) {
+            resp = getAsHTML(layer, request, server);
+        }
+        else {
+            resp = getAsRendered(layer, format, request, server);
+        }
+
         resp.toClose(layer, p.first());
         return resp;
     }
@@ -306,10 +294,14 @@ public class FeatureHandler extends Handler {
         return bbox;
     }
 
-    Response getAsPNG(VectorDataset layer, Request request, NanoServer server) throws IOException {
-        if (renderer == null) {
-            throw new HttpException(HTTP_FORBIDDEN, "No rendering engine avaialble, map endpoint unavailable"); 
+    Response getAsRendered(VectorDataset layer, String format, Request request, NanoServer server) throws IOException {
+
+        Iterator<RendererFactory<?>> it = Renderers.listForFormat(format, server.getRendererRegistry());
+        if (!it.hasNext()) {
+            throw new HttpException(HTTP_BADREQUEST, String.format("No renderer for format '%s' found", format));
         }
+
+        RendererFactory<?> rf = it.next();
 
         Properties p = request.getParms();
         Filter filter = null;
@@ -371,7 +363,11 @@ public class FeatureHandler extends Handler {
         mb.style(style);
 
         ByteArrayOutputStream bout = new ByteArrayOutputStream();
-        renderer.render(mb.view(), bout);
+        View view = mb.view();
+
+        Renderer renderer = rf.create(view, null);
+        renderer.init(view, null);
+        renderer.render(bout);
 
         return new Response(HTTP_OK, MIME_PNG, new ByteArrayInputStream(bout.toByteArray()));
     }

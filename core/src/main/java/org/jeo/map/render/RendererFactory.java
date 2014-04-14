@@ -17,6 +17,7 @@ package org.jeo.map.render;
 import java.util.List;
 import java.util.Map;
 
+import org.jeo.map.View;
 import org.jeo.util.Key;
 
 /**
@@ -30,16 +31,6 @@ import org.jeo.util.Key;
 public interface RendererFactory<T extends Renderer> {
 
     /**
-     * Key to specify width of surface to render to.
-     */
-    static Key<Integer> WIDTH = new Key<Integer>("width", Integer.class, 256);
-
-    /**
-     * Key to specify height of surface to render to.
-     */
-    static Key<Integer> HEIGHT = new Key<Integer>("height", Integer.class, 256);
-
-    /**
      * Name of renderer.
      */
     String getName();
@@ -50,11 +41,17 @@ public interface RendererFactory<T extends Renderer> {
     List<String> getAliases();
 
     /**
+     * List of image formats the render can product.
+     */
+    List<String> getFormats();
+
+    /**
      * Creates a renderer instance.
-     * 
+     *
+     * @param view The view to be rendered.
      * @param opts Rendering specific options.
      * 
      * @return A new instance of the renderer.
      */
-    T create(Map<?,Object> opts);
+    T create(View view, Map<?,Object> opts);
 }

@@ -29,6 +29,7 @@ import org.jeo.data.DataRepository;
 import org.jeo.data.DataRepositoryView;
 import org.jeo.data.DirectoryRepository;
 import org.jeo.data.mem.MemRepository;
+import org.jeo.map.render.RendererRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,9 +40,8 @@ public class NanoServer extends NanoHTTPD {
     static final Logger LOG = LoggerFactory.getLogger(NanoServer.class);
 
     DataRepositoryView reg;
+    RendererRegistry rendererRegistry;
     List<Handler> handlers;
-
-    MapRenderer renderer;
 
     public NanoServer(int port, File wwwRoot, int nThreads, DataRepositoryView reg, List<Handler> handlers)
         throws IOException {
@@ -49,11 +49,11 @@ public class NanoServer extends NanoHTTPD {
     }
     
     public NanoServer(int port, File wwwRoot, int nThreads, DataRepositoryView reg, List<Handler> handlers,
-        MapRenderer renderer) throws IOException {
+        RendererRegistry rendererRegistry) throws IOException {
         super(port, wwwRoot, nThreads);
 
         this.reg = reg;
-        this.renderer = renderer;
+        this.rendererRegistry = rendererRegistry;
 
         this.handlers = new ArrayList<Handler>();
         this.handlers.add(new DataHandler());
@@ -91,16 +91,16 @@ public class NanoServer extends NanoHTTPD {
         return reg;
     }
 
+    public RendererRegistry getRendererRegistry() {
+        return rendererRegistry;
+    }
+
+    public void setRendererRegistry(RendererRegistry rendererRegistry) {
+        this.rendererRegistry = rendererRegistry;
+    }
+
     public File getWWWRoot() {
         return getRootDir();
-    }
-
-    public MapRenderer getRenderer() {
-        return renderer;
-    }
-
-    public void setRenderer(MapRenderer renderer) {
-        this.renderer = renderer;
     }
 
     @Override

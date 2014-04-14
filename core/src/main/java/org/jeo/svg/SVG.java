@@ -14,8 +14,10 @@
  */
 package org.jeo.svg;
 
+import org.jeo.map.View;
 import org.jeo.map.render.RendererFactory;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -36,7 +38,12 @@ public class SVG implements RendererFactory<SVGRenderer> {
     }
 
     @Override
-    public SVGRenderer create(Map<?, Object> opts) {
+    public List<String> getFormats() {
+        return Arrays.asList("svg", "image/svg+xml");
+    }
+
+    @Override
+    public SVGRenderer create(View view, Map<?, Object> opts) {
         return new SVGRenderer();
     }
 }

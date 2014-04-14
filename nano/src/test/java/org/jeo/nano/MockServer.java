@@ -17,10 +17,10 @@ package org.jeo.nano;
 import com.google.common.collect.Iterators;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Point;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
+
+import java.io.OutputStream;
+import java.util.*;
+
 import static org.easymock.EasyMock.anyObject;
 import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.expectLastCall;
@@ -34,6 +34,10 @@ import org.jeo.data.Dataset;
 import org.jeo.data.Driver;
 import org.jeo.data.Handle;
 import org.jeo.data.Query;
+import org.jeo.map.View;
+import org.jeo.map.render.Renderer;
+import org.jeo.map.render.RendererFactory;
+import org.jeo.map.render.RendererRegistry;
 import org.jeo.tile.Tile;
 import org.jeo.data.TileDataset;
 import org.jeo.tile.TilePyramid;
@@ -60,10 +64,12 @@ public class MockServer {
     private TileDataset tileLayer;
     private Workspace workspace;
     private final DataRepositoryView reg;
+    private RendererRegistry rendererRegistry;
 
     private MockServer() {
         server = createMock(NanoServer.class);
         reg = createMock(DataRepositoryView.class);
+        rendererRegistry = createMock(RendererRegistry.class);
     }
 
     public static MockServer create() {
@@ -278,4 +284,19 @@ public class MockServer {
         return this;
     }
 
+    MockServer withPngRenderer() throws Exception {
+        Renderer png = createMock(Renderer.class);
+        png.init((View)anyObject(), (Map)anyObject());
+        expectLastCall().anyTimes();
+        png.render((OutputStream) anyObject());
+        expectLastCall().anyTimes();
+
+        RendererFactory rf = createMock(RendererFactory.class);
+        expect(rf.getFormats()).andReturn(Arrays.asList("png")).anyTimes();
+        expect(rf.create((View)anyObject(), (Map)anyObject())).andReturn(png).anyTimes();
+
+        expect(rendererRegistry.list()).andReturn((Iterator) Iterators.singletonIterator(rf)).anyTimes();
+        expect(server.getRendererRegistry()).andReturn(rendererRegistry).anyTimes();
+        return this;
+    }
 }

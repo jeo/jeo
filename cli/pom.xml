@@ -116,6 +116,16 @@
         </dependency>
       </dependencies>
     </profile>
+    <profile>
+      <id>geotools</id>
+      <dependencies>
+        <dependency>
+          <groupId>org.jeo</groupId>
+          <artifactId>jeo-geotools</artifactId>
+          <version>${project.version}</version>
+        </dependency>
+      </dependencies>
+    </profile>
   </profiles>
 
 </project>

@@ -124,12 +124,17 @@ public class RenderCmd extends JeoCmd {
              w.object();
              w.key("name").value(rf.getName());
              if (!rf.getAliases().isEmpty()) {
-                 w.array();
+                 w.key("aliases").array();
                  for (String a : rf.getAliases()) {
                      w.value(a);
                  }
                  w.endArray();
              }
+             w.key("formats").array();
+             for (String format : rf.getFormats()) {
+                 w.value(format);
+             }
+             w.endArray();
              w.endObject();
          }
 

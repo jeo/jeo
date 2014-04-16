@@ -153,12 +153,13 @@ public class WMSHandlerTest extends HandlerTestSupport {
         handler = new WMSHandler() {
 
             @Override
-            NanoHTTPD.Response render(RendererFactory f, List<Dataset> dataSet, List<Style> styles, CoordinateReferenceSystem crs, Envelope bbox, int width, int height) throws IOException {
+            NanoHTTPD.Response render(RendererFactory f, List<Dataset> dataSet, List<Style> styles, CoordinateReferenceSystem crs, Envelope bbox, int width, int height, String format) throws IOException {
                 assertEquals("ds1", dataSet.get(0).getName());
                 assertEquals(1, styles.size()); // generated style
                 assertEquals(new Integer(4326), Proj.epsgCode(crs));
                 assertEquals(512, width);
                 assertEquals(256, height);
+                assertEquals("image/png", format);
                 called[0] = true;
                 return null;
             }

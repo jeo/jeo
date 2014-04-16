@@ -68,7 +68,7 @@ public class WMSHandler extends OWSHandler {
     }
 
     // for testing
-    NanoHTTPD.Response render(RendererFactory factory, List<Dataset> dataSet, List<Style> styles, CoordinateReferenceSystem crs, Envelope bbox, int width, int height) throws IOException {
+    NanoHTTPD.Response render(RendererFactory factory, List<Dataset> dataSet, List<Style> styles, CoordinateReferenceSystem crs, Envelope bbox, int width, int height, String mimeType) throws IOException {
         MapBuilder mb = new MapBuilder();
         ByteArrayOutputStream bout = new ByteArrayOutputStream();
 
@@ -88,7 +88,7 @@ public class WMSHandler extends OWSHandler {
             mb.map().close();
         }
 
-        return new NanoHTTPD.Response(HTTP_OK, MIME_PNG, new ByteArrayInputStream(bout.toByteArray()));
+        return new NanoHTTPD.Response(HTTP_OK, mimeType, new ByteArrayInputStream(bout.toByteArray()));
     }
 
     class GetCaps implements DelegateHandler {
@@ -327,7 +327,7 @@ public class WMSHandler extends OWSHandler {
 
             NanoHTTPD.Response resp;
             if (errors == null) {
-                 resp = render(it.next(), datasets, styles, crs, bbox, width, height);
+                 resp = render(it.next(), datasets, styles, crs, bbox, width, height, format);
             } else {
                 StringBuilder sb = new StringBuilder();
                 for (String e : errors) {

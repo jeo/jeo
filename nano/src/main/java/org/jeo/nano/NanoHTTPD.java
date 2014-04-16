@@ -570,6 +570,10 @@ public class NanoHTTPD
 				if ( method.equalsIgnoreCase( "PUT" ))
 					files.put("content", saveTmpFile( fbuf, 0, f.size()));
 
+                if ( !header.contains("HOST")) {
+                    header.put("HOST", mySocket.getLocalAddress().getHostAddress() + ":" + mySocket.getLocalPort());
+                }
+
 				// Ok, now do the serve()
 				response = serve( uri, method, header, parms, files );
 				if ( response == null )
@@ -1005,7 +1009,7 @@ public class NanoHTTPD
 		return newUri;
 	}
 
-	private int myTcpPort;
+	private final int myTcpPort;
 	private final ServerSocket myServerSocket;
 	private Thread myThread;
 	private File myRootDir;

@@ -22,9 +22,11 @@ import java.io.InputStream;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
-
+import java.util.logging.Level;
 import org.jeo.data.DataRepository;
 import org.jeo.data.DataRepositoryView;
 import org.jeo.data.DirectoryRepository;
@@ -59,7 +61,8 @@ public class NanoServer extends NanoHTTPD {
         this.handlers.add(new DataHandler());
 
         if (handlers == null || handlers.isEmpty()) {
-            handlers = Arrays.asList(new TileHandler(), new FeatureHandler(), new StyleHandler());
+            handlers = Arrays.asList(new TileHandler(), new FeatureHandler(), new StyleHandler(),
+                    new WMSHandler(), new WMTSHandler());
         }
 
         this.handlers.addAll(handlers);
@@ -162,7 +165,13 @@ public class NanoServer extends NanoHTTPD {
         }
 
         Opts opts = parseOpts(args);
-        
+
+        if (opts.verbose) {
+            Level level = Level.ALL;
+            java.util.logging.Logger.getLogger("").setLevel(level);
+            java.util.logging.Logger.getLogger("").getHandlers()[0].setLevel(level);
+        }
+
         // make number of threads configurable
         try {
             new NanoServer(opts.port, opts.root, DEFAULT_NUM_THREADS, loadRegistry(opts), 
@@ -175,21 +184,25 @@ public class NanoServer extends NanoHTTPD {
     }
 
     static Opts parseOpts(String[] args) {
-        if (args.length % 2 != 0) {
+        List<String> argList = new LinkedList(Arrays.asList(args));
+        Opts opts = new Opts();
+
+        opts.verbose = argList.remove("-v");
+
+        if (argList.size() % 2 != 0) {
             usage();
         }
 
-        Opts opts = new Opts();
-        for (int i = 0; i < args.length; i += 2) {
-            String arg = args[i];
+        for (Iterator<String> a = argList.iterator(); a.hasNext();) {
+            String arg = a.next();
             if ("-p".equalsIgnoreCase(arg)) {
-                opts.port = Integer.parseInt(args[i+1]);
+                opts.port = Integer.parseInt(a.next());
             }
             else if ("-r".equalsIgnoreCase(arg)) {
-                opts.root = new File(args[i+1]);
+                opts.root = new File(a.next());
             }
             else if ("-d".equalsIgnoreCase(arg)) {
-                opts.data = new File(args[i+1]);
+                opts.data = new File(a.next());
             }
             else {
                 usage();
@@ -217,5 +230,6 @@ public class NanoServer extends NanoHTTPD {
         Integer port = 8000;
         File root = null;
         File data = null;
+        boolean verbose = false;
     }
 }

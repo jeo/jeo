@@ -15,9 +15,11 @@
 package org.jeo.map.render;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.jeo.map.View;
 import org.slf4j.Logger;
@@ -35,6 +37,43 @@ public class Renderers {
 
     /** renderer registry */
     public static final RendererRegistry REGISTRY = new ServiceLoaderRendererRegistry();
+
+    /**
+     * List all available formats specifiers.
+     */
+    public static Set<String> listFormats() {
+        return listFormats(null);
+    }
+
+    /**
+     * List available format extensions.
+     */
+    public static Set<String> listFormatExtensions() {
+        return listFormats(Boolean.TRUE);
+    }
+
+    /**
+     * List available format mime-types.
+     */
+    public static Set<String> listFormatMimeTypes() {
+        return listFormats(Boolean.FALSE);
+    }
+
+    private static Set<String> listFormats(Boolean onlyExtensions) {
+        Set<String> all = new HashSet<String>();
+        for (Iterator<RendererFactory<?>> i = list(); i.hasNext();) {
+            if (onlyExtensions == null) {
+                all.addAll(i.next().getFormats());
+            } else {
+                for (String f: i.next().getFormats()) {
+                    if (onlyExtensions && f.indexOf('/') < 0) {
+                        all.add(f);
+                    }
+                }
+            }
+        }
+        return all;
+    }
 
     /**
      * Lists all available renderer factories from the default registry.

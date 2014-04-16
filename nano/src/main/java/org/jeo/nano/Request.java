@@ -27,6 +27,20 @@ public class Request {
     Properties files;
     Map<Object, Object> context;
 
+    public Request(String uri, String method) {
+        this(uri, method, null, null, null);
+    }
+
+    /**
+     * Short cut to create a Request with the given uri, method and query.
+     * @param uri
+     * @param method
+     * @param parms
+     */
+    public Request(String uri, String method, Properties parms) {
+        this(uri, method, null, parms, null);
+    }
+
     public Request(String uri, String method, Properties header, Properties parms, Properties files) {
         this.uri = uri;
         this.method = method;
@@ -59,4 +73,5 @@ public class Request {
     public Map<Object, Object> getContext() {
         return context;
     }
+
 }

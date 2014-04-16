@@ -46,7 +46,6 @@
            <groupId>org.jeo</groupId>
            <artifactId>jeo-geogit</artifactId>
            <version>${project.version}</version>
-           <scope>test</scope>
          </dependency>
         </dependencies>
       </profile>
@@ -57,13 +56,21 @@
             <groupId>org.jeo</groupId>
             <artifactId>jeo-geopkg</artifactId>
             <version>${project.version}</version>
-            <scope>test</scope>
           </dependency>
           <dependency>
             <groupId>org.jeo</groupId>
             <artifactId>jeo-postgis</artifactId>
             <version>${project.version}</version>
-            <scope>test</scope>
+          </dependency>
+        </dependencies>
+      </profile>
+      <profile>
+        <id>gdal</id>
+        <dependencies>
+          <dependency>
+            <groupId>org.jeo</groupId>
+            <artifactId>jeo-gdal</artifactId>
+            <version>${project.version}</version>
           </dependency>
         </dependencies>
       </profile>

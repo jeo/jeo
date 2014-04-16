@@ -74,4 +74,11 @@ public class Request {
         return context;
     }
 
+    /**
+     * Returns the base url (host + port) from the perspective of the client.
+     */
+    public String baseURL() {
+        return header.getProperty("host");
+    }
+
 }

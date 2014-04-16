@@ -96,7 +96,7 @@ public class WMTSHandler extends OWSHandler {
 
         @Override
         public NanoHTTPD.Response handle(Request req, NanoServer server) throws Exception {
-            uri = "http://" + req.getHeader().getProperty("HOST") + "/" + serviceName;//server.getServerURI() + serviceName;
+            uri = "http://" + req.baseURL() + "/" + serviceName;
             Iterable<Handle<?>> list = server.getRegistry().list();
             for (Handle h : list) {
                 if (h.getType() == Workspace.class) {

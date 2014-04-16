@@ -124,7 +124,7 @@ public class WMSHandler extends OWSHandler {
                     "xsi:schemaLocation", "http://www.opengis.net/wms http://schemas.opengis.net/wms/1.3.0/capabilities_1_3_0.xsd"
                     );
             writeService();
-            writeCapabilities();
+            writeCapabilities(req);
             xml.end("WMS_Capabilities");
             xml.close();
             return new NanoHTTPD.Response(HTTP_OK, "text/xml", writer.toString());
@@ -138,7 +138,7 @@ public class WMSHandler extends OWSHandler {
             xml.end("Service");
         }
 
-        private void writeCapabilities() {
+        private void writeCapabilities(Request req) {
             xml.start("Capability");
 
             xml.start("Request");
@@ -152,7 +152,7 @@ public class WMSHandler extends OWSHandler {
             xml.start("DCPType");
             xml.start("HTTP");
             xml.start("Get");
-            xml.element("OnlineResource", null, "xlink:type", "simple", "xlink:href", "http://192.168.56.100:8000/wms?SERVICE=WMS&");
+            xml.element("OnlineResource", null, "xlink:type", "simple", "xlink:href", "http://"+req.baseURL()+"/wms?SERVICE=WMS&");
             xml.end("Get");
             xml.end("HTTP");
             xml.end("DCPType");

@@ -68,7 +68,10 @@ public class WMSHandlerTest extends HandlerTestSupport {
         Properties parms = q(kv);
         parms.setProperty("service", "wms");
         parms.setProperty("version", "1.3.0");
-        return new Request("/wms", "GET", null, parms, null);
+
+        Properties header = new Properties();
+        header.setProperty("host", "http://localhost:800");
+        return new Request("/wms", "GET", header, parms, null);
     }
 
     private String wmsResponse(String... kv) throws Exception {

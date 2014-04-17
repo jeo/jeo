@@ -33,9 +33,9 @@ import org.jeo.map.Style;
 import org.jeo.map.View;
 import org.jeo.map.render.Renderer;
 import org.jeo.map.render.RendererFactory;
+import org.jeo.map.render.RendererRegistry;
 import org.jeo.map.render.Renderers;
 import static org.jeo.nano.NanoHTTPD.HTTP_OK;
-import static org.jeo.nano.NanoHTTPD.MIME_PNG;
 import org.jeo.proj.Proj;
 import org.jeo.util.XMLWriter;
 import org.osgeo.proj4j.CoordinateReferenceSystem;
@@ -124,7 +124,7 @@ public class WMSHandler extends OWSHandler {
                     "xsi:schemaLocation", "http://www.opengis.net/wms http://schemas.opengis.net/wms/1.3.0/capabilities_1_3_0.xsd"
                     );
             writeService();
-            writeCapabilities(req);
+            writeCapabilities(req, server);
             xml.end("WMS_Capabilities");
             xml.close();
             return new NanoHTTPD.Response(HTTP_OK, "text/xml", writer.toString());
@@ -138,7 +138,7 @@ public class WMSHandler extends OWSHandler {
             xml.end("Service");
         }
 
-        private void writeCapabilities(Request req) {
+        private void writeCapabilities(Request req, NanoServer server) {
             xml.start("Capability");
 
             xml.start("Request");
@@ -146,7 +146,7 @@ public class WMSHandler extends OWSHandler {
             // @todo - needed?
             xml.end("GetCapabilities");
             xml.start("GetMap");
-            for (String mimeType: Renderers.listFormatMimeTypes()) {
+            for (String mimeType: Renderers.listFormatMimeTypes(server.getRendererRegistry())) {
                 xml.element("Format", mimeType);
             }
             xml.start("DCPType");

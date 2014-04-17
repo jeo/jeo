@@ -42,31 +42,39 @@ public class Renderers {
      * List all available formats specifiers.
      */
     public static Set<String> listFormats() {
-        return listFormats(null);
+        return listFormats(null, null);
     }
 
     /**
      * List available format extensions.
      */
-    public static Set<String> listFormatExtensions() {
-        return listFormats(Boolean.TRUE);
+    public static Set<String> listFormatExtensions(RendererRegistry registry) {
+        return listFormats(Boolean.TRUE, registry);
     }
 
     /**
      * List available format mime-types.
      */
-    public static Set<String> listFormatMimeTypes() {
-        return listFormats(Boolean.FALSE);
+    public static Set<String> listFormatMimeTypes(RendererRegistry registry) {
+        return listFormats(Boolean.FALSE, registry);
     }
 
-    private static Set<String> listFormats(Boolean onlyExtensions) {
+    private static Set<String> listFormats(Boolean onlyExtensions, RendererRegistry registry) {
         Set<String> all = new HashSet<String>();
-        for (Iterator<RendererFactory<?>> i = list(); i.hasNext();) {
+        if (registry == null) {
+            registry = REGISTRY;
+        }
+        for (Iterator<RendererFactory<?>> i = list(registry); i.hasNext();) {
             if (onlyExtensions == null) {
                 all.addAll(i.next().getFormats());
             } else {
                 for (String f: i.next().getFormats()) {
-                    if (onlyExtensions && f.indexOf('/') < 0) {
+                    int slash = f.indexOf('/');
+                    if (onlyExtensions) {
+                        if (slash < 0) {
+                            all.add(f);
+                        }
+                    } else if (slash > 0) {
                         all.add(f);
                     }
                 }

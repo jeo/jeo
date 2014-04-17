@@ -68,7 +68,6 @@ public class WMSHandlerTest extends HandlerTestSupport {
         Properties parms = q(kv);
         parms.setProperty("service", "wms");
         parms.setProperty("version", "1.3.0");
-
         Properties header = new Properties();
         header.setProperty("host", "http://localhost:800");
         return new Request("/wms", "GET", header, parms, null);
@@ -147,6 +146,7 @@ public class WMSHandlerTest extends HandlerTestSupport {
         n = (Node) xpath.evaluate("//Layer[Name/text()=\"ws:ds2\"]", dom, XPathConstants.NODE);
         assertNotNull(n);
         assertEquals("DataSet 2", xpath.evaluate("Title", n));
+        assertEquals("image/png", xpath.evaluate("//GetMap/Format/text()", dom));
     }
 
     @Test

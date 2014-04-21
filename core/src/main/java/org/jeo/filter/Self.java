@@ -31,4 +31,13 @@ public class Self implements Expression {
         return visitor.visit(this, obj);
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        return obj instanceof Self;
+    }
+
+    @Override
+    public int hashCode() {
+        return Self.class.hashCode();
+    }
 }

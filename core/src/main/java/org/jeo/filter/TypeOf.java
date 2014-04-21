@@ -52,4 +52,23 @@ public class TypeOf<T> extends Filter<T> {
         return v.visit(this, obj);
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        TypeOf typeOf = (TypeOf) o;
+
+        if (!expr.equals(typeOf.expr)) return false;
+        if (!type.equals(typeOf.type)) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = expr.hashCode();
+        result = 31 * result + type.hashCode();
+        return result;
+    }
 }

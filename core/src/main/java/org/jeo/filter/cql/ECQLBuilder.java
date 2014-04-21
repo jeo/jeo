@@ -121,6 +121,13 @@ public class ECQLBuilder extends ECQLParser {
             return;
             //return buildLogicFilter(JJTBOOLEAN_NOT_NODE);
 
+        case JJTIN_PREDICATE_NODE:
+            h.in();
+            return;
+        case JJTNOT_IN_PREDICATE_NODE:
+            h.notIn();
+            return;
+
             // ----------------------------------------
             // between predicate actions
             // ----------------------------------------

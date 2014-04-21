@@ -17,6 +17,7 @@ package org.jeo.filter;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -164,6 +165,28 @@ public class FilterBuilder {
         Expression e2 = (Expression) stack.pop();
         Expression e1 = (Expression) stack.pop();
         stack.push(new Comparison<Object>(type, e1, e2));
+        return this;
+    }
+
+    void inFilter(boolean not) {
+        List<Expression> values = new ArrayList<Expression>(stack.size() - 1);
+        Iterator i = stack.descendingIterator();
+        i.next();
+        while (i.hasNext()) {
+            values.add( (Expression) i.next());
+            i.remove();
+        }
+        Property prop = (Property) stack.pop();
+        stack.push(new In(prop, values, not));
+    }
+
+    public <T> FilterBuilder in() {
+        inFilter(false);
+        return this;
+    }
+
+    public <T> FilterBuilder notIn() {
+        inFilter(true);
         return this;
     }
 

@@ -187,6 +187,14 @@ class CQLHelper {
         builder.id();
     }
 
+    public void in() {
+        builder.in();
+    }
+
+    public void notIn() {
+        builder.notIn();
+    }
+
     public void pop() {
         builder.pop();
     }

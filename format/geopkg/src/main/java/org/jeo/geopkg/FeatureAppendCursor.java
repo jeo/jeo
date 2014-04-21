@@ -18,6 +18,7 @@ import static org.jeo.geopkg.GeoPkgWorkspace.LOG;
 
 import java.io.IOException;
 import java.sql.Connection;
+import java.sql.SQLException;
 
 import org.jeo.data.Cursor;
 import org.jeo.feature.BasicFeature;
@@ -32,11 +33,13 @@ public class FeatureAppendCursor extends Cursor<Feature> {
 
     Feature next;
 
-    public FeatureAppendCursor(Connection cx, FeatureEntry entry, GeoPkgWorkspace ws) {
+    public FeatureAppendCursor(Connection cx, FeatureEntry entry, GeoPkgWorkspace ws) throws SQLException {
         super(Mode.APPEND);
         this.cx = cx;
         this.entry = entry;
         this.ws = ws;
+
+        cx.setAutoCommit(false);
     }
 
     @Override
@@ -58,10 +61,16 @@ public class FeatureAppendCursor extends Cursor<Feature> {
     public void close() throws IOException {
         if (cx != null) {
             try {
-                cx.close();
-            }
-            catch(Exception e) {
-                LOG.debug("error closing Connection", e);
+                cx.commit();
+            } catch (SQLException ex) {
+                throw new IOException("error committing", ex);
+            } finally {
+                try {
+                    cx.close();
+                }
+                catch(Exception e) {
+                    LOG.debug("error closing Connection", e);
+                }
             }
         }
     }

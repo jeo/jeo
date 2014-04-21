@@ -60,6 +60,10 @@ public abstract class OWSHandler extends Handler {
     Dataset resolve(DataRepositoryView registry, String wsDatasetSpec, RequestParser parser) throws IOException {
         Dataset resolved = null;
         String[] parts = wsDatasetSpec.split(":", 2);
+        if (parts.length == 1) {
+            parts = new String[]{parts[0], parts[0]};
+        }
+
         Workspace ws = registry.get(parts[0], Workspace.class);
         if (ws == null) {
             parser.addError("No workspace: " + parts[0]);

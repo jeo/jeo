@@ -92,7 +92,7 @@ public class Key<T> {
      * Determines if the key exists in a map.
      */
     public boolean has(Map<?,Object> map) {
-        return map.containsKey(this) || map.containsKey(name);
+        return map != null && (map.containsKey(this) || map.containsKey(name));
     }
 
     /**

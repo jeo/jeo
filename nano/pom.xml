@@ -50,13 +50,18 @@
         </dependencies>
       </profile>
       <profile>
-        <id>main</id>
+        <id>geopkg</id>
         <dependencies>
           <dependency>
             <groupId>org.jeo</groupId>
             <artifactId>jeo-geopkg</artifactId>
             <version>${project.version}</version>
           </dependency>
+        </dependencies>
+      </profile>
+      <profile>
+        <id>postgis</id>
+        <dependencies>
           <dependency>
             <groupId>org.jeo</groupId>
             <artifactId>jeo-postgis</artifactId>
@@ -70,6 +75,16 @@
           <dependency>
             <groupId>org.jeo</groupId>
             <artifactId>jeo-gdal</artifactId>
+            <version>${project.version}</version>
+          </dependency>
+        </dependencies>
+      </profile>
+      <profile>
+        <id>geotools</id>
+        <dependencies>
+          <dependency>
+            <groupId>org.jeo</groupId>
+            <artifactId>jeo-geotools</artifactId>
             <version>${project.version}</version>
           </dependency>
         </dependencies>

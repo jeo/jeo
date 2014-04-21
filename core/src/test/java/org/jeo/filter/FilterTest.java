@@ -18,6 +18,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -100,5 +101,20 @@ public class FilterTest {
 
         Logic l = new Logic(Logic.Type.AND, c1, c2);
         assertTrue(l.apply(f));
+    }
+
+    @Test
+    public void testIn() {
+        Map<String,Object> map = new HashMap<String, Object>();
+        map.put("str", "one");
+        map.put("int", 1);
+
+        Feature f = new BasicFeature(null, map);
+
+        assertTrue(new In(new Property("str"), Arrays.asList(new Literal("one")), false).apply(f));
+        assertTrue(new In(new Property("str"), Arrays.asList(new Literal("two"), new Literal("one")), false).apply(f));
+
+        assertFalse(new In(new Property("str"), Arrays.asList(new Literal("one")), true).apply(f));
+        assertFalse(new In(new Property("str"), Arrays.asList(new Literal("two")), false).apply(f));
     }
 }

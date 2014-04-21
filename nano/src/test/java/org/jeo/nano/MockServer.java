@@ -14,7 +14,10 @@
  */
 package org.jeo.nano;
 
+import com.google.common.base.Function;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Iterators;
+import com.google.common.collect.Lists;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Point;
 
@@ -39,6 +42,8 @@ import org.jeo.data.Dataset;
 import org.jeo.data.Driver;
 import org.jeo.data.Handle;
 import org.jeo.data.Query;
+import org.jeo.filter.*;
+import org.jeo.map.Style;
 import org.jeo.map.View;
 import org.jeo.map.render.Renderer;
 import org.jeo.map.render.RendererFactory;
@@ -55,9 +60,6 @@ import org.jeo.feature.Features;
 import org.jeo.feature.Field;
 import org.jeo.feature.Schema;
 import org.jeo.feature.SchemaBuilder;
-import org.jeo.filter.Filter;
-import org.jeo.filter.Id;
-import org.jeo.filter.Literal;
 import org.jeo.proj.Proj;
 import org.osgeo.proj4j.CoordinateReferenceSystem;
 
@@ -71,7 +73,8 @@ public class MockServer {
     private Workspace workspace;
     private final DataRepositoryView reg;
     private RendererRegistry rendererRegistry;
-    private List<Handle<?>> registryItems = new ArrayList<Handle<?>>();
+    private List<Handle<?>> workspaces = new ArrayList<Handle<?>>();
+    private List<Handle<?>> styles = new ArrayList<Handle<?>>();
 
     private MockServer() {
         server = createMock(NanoServer.class);
@@ -222,7 +225,9 @@ public class MockServer {
 
     MockServer buildRegistry() throws Exception {
         expect(server.getRegistry()).andReturn(reg).anyTimes();
-        expect(reg.list()).andReturn(registryItems);
+        expect(reg.query(new TypeOf<Handle<?>>(new Property("type"), Workspace.class))).andReturn(workspaces).anyTimes();
+        expect(reg.query(new TypeOf<Handle<?>>(new Property("type"), Style.class))).andReturn(styles).anyTimes();
+        expect(reg.list()).andReturn(Lists.newArrayList(Iterables.concat(workspaces, styles)));
         return this;
     }
     
@@ -249,7 +254,7 @@ public class MockServer {
         expect(handle.getName()).andReturn(name).anyTimes();
         expect(handle.getType()).andReturn(Workspace.class).anyTimes();
         Workspace ws = createMock(Workspace.class);
-        registryItems.add(handle);
+        workspaces.add(handle);
         expect(ws.list()).andReturn(Arrays.asList(ds)).anyTimes();
         expect(ws.get((String) anyObject())).andAnswer(new IAnswer<Dataset>() {
 
@@ -264,6 +269,24 @@ public class MockServer {
         });
         expect(handle.resolve()).andReturn(ws).anyTimes();
         expect(reg.get(name, Workspace.class)).andReturn(ws).anyTimes();
+        return handle;
+    }
+
+    Handle<Style> createStyle(String name) throws Exception {
+        Handle<Style> handle = createMock(Handle.class);
+        expect(handle.getName()).andReturn(name).anyTimes();
+        expect(handle.getType()).andReturn(Style.class).anyTimes();
+
+        Driver drv = createNiceMock(Driver.class);
+        expect(drv.getName()).andReturn("mock").anyTimes();
+        expect(handle.getDriver()).andReturn(drv).anyTimes();
+
+        Style style = createMock(Style.class);
+        expect(handle.resolve()).andReturn(style).anyTimes();
+
+        expect(reg.get(name, Style.class)).andReturn(style).anyTimes();
+
+        styles.add(handle);
         return handle;
     }
 

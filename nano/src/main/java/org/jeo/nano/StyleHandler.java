@@ -17,17 +17,24 @@ package org.jeo.nano;
 import static org.jeo.nano.NanoHTTPD.*;
 
 import java.io.IOException;
+import java.io.StringWriter;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.jeo.data.DataRepository;
+import org.jeo.data.DataRepositoryView;
+import org.jeo.data.Handle;
+import org.jeo.filter.Property;
+import org.jeo.filter.Self;
+import org.jeo.filter.TypeOf;
+import org.jeo.geojson.GeoJSONWriter;
 import org.jeo.map.Style;
 import org.jeo.nano.NanoHTTPD.Response;
 
 public class StyleHandler extends Handler {
 
     static final Pattern STYLE_URI_RE =
-            Pattern.compile("/styles/([\\w-]+)/?", Pattern.CASE_INSENSITIVE);
+            Pattern.compile("/styles(?:/([\\w-]+)/?)?", Pattern.CASE_INSENSITIVE);
 
     @Override
     public boolean canHandle(Request request, NanoServer server) {
@@ -36,22 +43,46 @@ public class StyleHandler extends Handler {
     
     @Override
     public Response handle(Request request, NanoServer server) throws Exception {
-        Style s = findStyle(request, server.getRegistry());
-        if (s == null) {
-            throw new HttpException(HTTP_NOTFOUND, "no such style: " + s);
-        }
-
-        return new Response(HTTP_OK, MIME_CSS, s.toString());
-    }
-
-    Style findStyle(Request request, DataRepository data) throws IOException {
+        DataRepositoryView reg = server.getRegistry();
         Matcher m = (Matcher) request.getContext().get(Matcher.class);
         String s = m.group(1);
+        if (s == null) {
+            return listAllStyles(reg);
+        }
+        else {
+            Style style = findStyle(s, reg);
+            if (style == null) {
+                throw new HttpException(HTTP_NOTFOUND, "no such style: " + s);
+            }
+
+            return new Response(HTTP_OK, MIME_CSS, style.toString());
+        }
+
+    }
+
+    Response listAllStyles(DataRepositoryView reg) throws IOException {
+        StringWriter out = new StringWriter();
+        GeoJSONWriter w = new GeoJSONWriter(out);
+        w.object();
+
+        for (Handle h : reg.query(new TypeOf<Handle<?>>(new Property("type"), Style.class))) {
+            w.key(h.getName()).object()
+                .key("type").value("style")
+                .key("driver").value(h.getDriver().getName())
+                .endObject();
+        }
+
+        w.endObject();
+
+        return new Response(HTTP_OK, MIME_JSON, out.toString());
+    }
+
+    Style findStyle(String name, DataRepository data) throws IOException {
         try {
-            return data.get(s, Style.class);
+            return data.get(name, Style.class);
         }
         catch(ClassCastException e) {
-            throw new HttpException(HTTP_BADREQUEST, s + " is not a style");
+            throw new HttpException(HTTP_BADREQUEST, name + " is not a style");
         }
     }
 

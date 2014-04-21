@@ -14,13 +14,17 @@
  */
 package org.jeo.filter.cql;
 
+import java.util.List;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import org.jeo.filter.Comparison;
+import org.jeo.filter.Expression;
 import org.jeo.filter.Filter;
 import org.jeo.filter.Id;
+import org.jeo.filter.In;
 import org.jeo.filter.Literal;
 import org.jeo.filter.Logic;
 import org.jeo.filter.Property;
@@ -78,6 +82,22 @@ public class CQLTest {
     public void testId() throws ParseException {
         Filter f = CQL.parse("IN ('foo.1', 'foo.2')");
         assertTrue(f instanceof Id);
+    }
+
+    @Test
+    public void testIn() throws ParseException {
+        In f = (In) CQL.parse("STATE_NAME IN ('Virginia','Maryland')");
+        assertTrue(!f.isNegated());
+        assertEquals("STATE_NAME", f.getProperty().getProperty());
+        List<Expression> values = f.getValues();
+        assertEquals("Virginia", values.get(0).evaluate(null));
+        assertEquals("Maryland", values.get(1).evaluate(null));
+    }
+
+    @Test
+    public void testNotIn() throws ParseException {
+        In f = (In) CQL.parse("STATE_NAME NOT IN ('Virginia','Maryland')");
+        assertTrue(f.isNegated());
     }
 
     @Test

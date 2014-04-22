@@ -28,12 +28,14 @@ import org.jeo.data.DataRepositoryView;
 import org.jeo.data.Dataset;
 import org.jeo.data.Handle;
 import org.jeo.data.Workspace;
+import org.jeo.filter.Filter;
+import org.jeo.filter.cql.CQL;
+import org.jeo.filter.cql.ParseException;
 import org.jeo.map.MapBuilder;
 import org.jeo.map.Style;
 import org.jeo.map.View;
 import org.jeo.map.render.Renderer;
 import org.jeo.map.render.RendererFactory;
-import org.jeo.map.render.RendererRegistry;
 import org.jeo.map.render.Renderers;
 import static org.jeo.nano.NanoHTTPD.HTTP_OK;
 import org.jeo.proj.Proj;
@@ -68,14 +70,16 @@ public class WMSHandler extends OWSHandler {
     }
 
     // for testing
-    NanoHTTPD.Response render(RendererFactory factory, List<Dataset> dataSet, List<Style> styles, CoordinateReferenceSystem crs, Envelope bbox, int width, int height, String mimeType) throws IOException {
+    NanoHTTPD.Response render(RendererFactory factory, List<Dataset> dataSet, List<Style> styles,
+            CoordinateReferenceSystem crs, Envelope bbox, int width, int height,
+            String mimeType, Filter filter) throws IOException {
         MapBuilder mb = new MapBuilder();
         ByteArrayOutputStream bout = new ByteArrayOutputStream();
 
         try {
             mb.bounds(bbox).crs(crs).size(width, height);
             for (Dataset ds : dataSet) {
-                mb.layer(ds);
+                mb.layer(ds, filter);
             }
             for (Style s : styles) {
                 mb.style(s);
@@ -304,8 +308,11 @@ public class WMSHandler extends OWSHandler {
             Integer width = getInteger("width", true);
             Integer height = getInteger("height", true);
             String format = getParameter("format", "image/png");
+            String filterSpec = getParameter("cql_filter", false);
             CoordinateReferenceSystem crs = getCRS();
             Envelope bbox = null;
+            Filter filter = null;
+
             if (crs != null) {
                 // if geographic, flip axis parsing
                 boolean flippedAxis = Units.DEGREES.name.equals(crs.getProjection().getUnits().name);
@@ -325,9 +332,17 @@ public class WMSHandler extends OWSHandler {
                 crs = datasets.get(0).crs();
             }
 
+            if (filterSpec != null) {
+                try {
+                    filter = CQL.parse(filterSpec);
+                } catch (ParseException pe) {
+                    addError("Invalid filter specifier : " + pe.getMessage());
+                }
+            }
+
             NanoHTTPD.Response resp;
             if (errors == null) {
-                 resp = render(it.next(), datasets, styles, crs, bbox, width, height, format);
+                 resp = render(it.next(), datasets, styles, crs, bbox, width, height, format, filter);
             } else {
                 StringBuilder sb = new StringBuilder();
                 for (String e : errors) {

@@ -34,6 +34,7 @@ import org.jeo.data.Dataset;
 import org.jeo.data.Handle;
 import org.jeo.feature.Schema;
 import org.jeo.feature.SchemaBuilder;
+import org.jeo.filter.Filter;
 import org.jeo.map.Style;
 import org.jeo.map.render.RendererFactory;
 import org.jeo.proj.Proj;
@@ -156,13 +157,16 @@ public class WMSHandlerTest extends HandlerTestSupport {
         handler = new WMSHandler() {
 
             @Override
-            NanoHTTPD.Response render(RendererFactory f, List<Dataset> dataSet, List<Style> styles, CoordinateReferenceSystem crs, Envelope bbox, int width, int height, String format) throws IOException {
+            NanoHTTPD.Response render(RendererFactory f, List<Dataset> dataSet, List<Style> styles,
+                CoordinateReferenceSystem crs, Envelope bbox, int width, int height,
+                String format, Filter filter) throws IOException {
                 assertEquals("ds1", dataSet.get(0).getName());
                 assertEquals(1, styles.size()); // generated style
                 assertEquals(new Integer(4326), Proj.epsgCode(crs));
                 assertEquals(512, width);
                 assertEquals(256, height);
                 assertEquals("image/png", format);
+                assertNotNull(filter);
                 called[0] = true;
                 return null;
             }
@@ -175,7 +179,8 @@ public class WMSHandlerTest extends HandlerTestSupport {
                                "crs","epsg:4326",
                                "bbox","-180,-90,180,90",
                                "width","512",
-                               "height","256"), server.server);
+                               "height","256",
+                               "cql_filter","VALUE > 5"), server.server);
         assertTrue(called[0]);
     }
 }

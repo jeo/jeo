@@ -161,7 +161,7 @@ public class FilterBuilder {
         return this;
     }
 
-    public <T> FilterBuilder cmp(Comparison.Type type) {
+    public FilterBuilder cmp(Comparison.Type type) {
         Expression e2 = (Expression) stack.pop();
         Expression e1 = (Expression) stack.pop();
         stack.push(new Comparison<Object>(type, e1, e2));
@@ -180,12 +180,12 @@ public class FilterBuilder {
         stack.push(new In(prop, values, not));
     }
 
-    public <T> FilterBuilder in() {
+    public FilterBuilder in() {
         inFilter(false);
         return this;
     }
 
-    public <T> FilterBuilder notIn() {
+    public FilterBuilder notIn() {
         inFilter(true);
         return this;
     }

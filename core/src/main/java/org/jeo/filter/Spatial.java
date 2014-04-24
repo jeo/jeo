@@ -32,7 +32,7 @@ public class Spatial<T> extends Filter<T> {
      * Spatial operator type.  
      */
     public static enum Type {
-        INTERSECT, TOUCH, DISJOINT, OVERLAP, CROSS, COVER, WITHIN, CONTAIN, BBOX;
+        EQUALS, INTERSECT, TOUCH, DISJOINT, OVERLAP, CROSS, COVER, WITHIN, CONTAIN, BBOX;
     }
 
     Type type;
@@ -81,6 +81,8 @@ public class Spatial<T> extends Filter<T> {
         Geometry g2 = toGeometry(o2);
 
         switch(type) {
+        case EQUALS:
+            return g1.equalsTopo(g2);
         case INTERSECT:
             return g1.intersects(g2);
         case TOUCH:

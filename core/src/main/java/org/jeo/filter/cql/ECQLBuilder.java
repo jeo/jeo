@@ -99,9 +99,16 @@ public class ECQLBuilder extends ECQLParser {
 
             // Math Nodes
         case JJTADDNODE:
+            h.add();
+            return;
         case JJTSUBTRACTNODE:
+            h.substract();
+            return;
         case JJTMULNODE:
+            h.multiply();
+            return;
         case JJTDIVNODE:
+            h.divide();
             return;
             //return buildBinaryExpression(cqlNode.getType());
 
@@ -180,10 +187,12 @@ public class ECQLBuilder extends ECQLParser {
             // Text predicate (Like)
             // ----------------------------------------
         case JJTLIKE_NODE:
+            h.like();
             return;
             //return this.builder.buildLikeFilter(true);
 
         case JJTNOT_LIKE_NODE:
+            h.notLike();
             return;
             //return this.builder.buildNotLikeFilter(true);
 
@@ -260,8 +269,10 @@ public class ECQLBuilder extends ECQLParser {
             // routine invocation Geo Operation
             // -------------------TokenAdapter.newAdapterFor(cqlNode.getToken())---------------------
         case JJTROUTINEINVOCATION_GEOOP_EQUAL_NODE:
+            h.equals();
             return;
         case JJTROUTINEINVOCATION_GEOOP_DISJOINT_NODE:
+            h.disjoint();
             return;
         case JJTROUTINEINVOCATION_GEOOP_INTERSECT_NODE:
             h.intersect();

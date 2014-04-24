@@ -117,4 +117,19 @@ public class FilterTest {
         assertFalse(new In(new Property("str"), Arrays.asList(new Literal("one")), true).apply(f));
         assertFalse(new In(new Property("str"), Arrays.asList(new Literal("two")), false).apply(f));
     }
+
+    @Test
+    public void testLike() {
+        Map<String,Object> map = new HashMap<String, Object>();
+        map.put("name", "abcdef");
+        map.put("num", 123456);
+
+        Feature f = new BasicFeature(null, map);
+        assertTrue(new Like(new Property("name"), new Literal("%cd%"), false).apply(f));
+        assertFalse(new Like(new Property("name"), new Literal("%cd"), false).apply(f));
+        assertFalse(new Like(new Property("name"), new Literal("cd%"), false).apply(f));
+        assertTrue(new Like(new Property("name"), new Literal("cd%"), true).apply(f));
+
+        assertTrue(new Like(new Property("num"), new Literal("123%"), false).apply(f));
+    }
 }

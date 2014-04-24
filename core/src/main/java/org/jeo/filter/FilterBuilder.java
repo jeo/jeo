@@ -107,6 +107,26 @@ public class FilterBuilder {
         return log(Logic.Type.NOT);
     }
 
+    void likeFilter(boolean not) {
+        Expression match = (Expression) stack.pop();
+        Property prop = (Property) stack.pop();
+        stack.push(new Like(prop, match, not));
+    }
+
+    public FilterBuilder like() {
+        likeFilter(false);
+        return this;
+    }
+
+    public FilterBuilder notLike() {
+        likeFilter(true);
+        return this;
+    }
+
+    public FilterBuilder equals() {
+        return spatial(Spatial.Type.EQUALS);
+    }
+
     public FilterBuilder intersect() {
         return spatial(Spatial.Type.INTERSECT);
     }
@@ -208,6 +228,32 @@ public class FilterBuilder {
         Expression e2 = (Expression) stack.pop();
         Expression e1 = (Expression) stack.pop();
         stack.push(new Spatial<Object>(type, e1, e2));
+        return this;
+    }
+
+    void math(char type) {
+        Expression e2 = (Expression) stack.pop();
+        Expression e1 = (Expression) stack.pop();
+        stack.push(new Maths(type, e1, e2));
+    }
+
+    public FilterBuilder add() {
+        math(Maths.ADD);
+        return this;
+    }
+
+    public FilterBuilder subtract() {
+        math(Maths.SUBTRACT);
+        return this;
+    }
+
+    public FilterBuilder multiply() {
+        math(Maths.MULTIPLY);
+        return this;
+    }
+
+    public FilterBuilder divide() {
+        math(Maths.DIVIDE);
         return this;
     }
 }

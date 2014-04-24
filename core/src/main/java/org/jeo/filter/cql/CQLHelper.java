@@ -131,6 +131,18 @@ class CQLHelper {
         builder.gte();
     }
 
+    public void like() {
+        builder.like();
+    }
+
+    public void notLike() {
+        builder.notLike();
+    }
+
+    public void equals() {
+        builder.equals();
+    }
+
     public void intersect() {
         builder.intersect();
     }
@@ -197,5 +209,21 @@ class CQLHelper {
 
     public void pop() {
         builder.pop();
+    }
+
+    public void add() {
+        builder.add();
+    }
+
+    public void substract() {
+        builder.subtract();
+    }
+
+    public void multiply() {
+        builder.multiply();
+    }
+
+    public void divide() {
+        builder.divide();
     }
 }

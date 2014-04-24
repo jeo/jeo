@@ -36,6 +36,7 @@ import java.util.List;
 
 import static junit.framework.Assert.assertNotNull;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 
 /**
  * Abstract test case that exercises all aspects of the {@link org.jeo.data.RasterDataset} interface.
@@ -123,21 +124,57 @@ public abstract class RasterApiTestBase {
 
     @Test
     public void testRead() throws IOException {
+        // read all data
         ByteBuffer buf = dem.read(new RasterQuery().datatype(DataType.FLOAT)
-            .bounds(new Envelope(589980.0, 599490.0, 4920855.0, 4928010.0)));
+            .bounds(new Envelope(589980.0, 609000.0, 4913700.0, 4928010.0)));
         assertNotNull(buf);
 
         FloatBuffer fb = buf.asFloatBuffer();
-        assertEquals(25, fb.limit());
-        assertEquals(1099.0, fb.get(), 0.1);
-        assertEquals(1234.0, fb.get(), 0.1);
+        assertEquals(100, fb.limit());
+        assertEquals(1099.0, fb.get(0), 0.1);
+        assertEquals(1234.0, fb.get(1), 0.1);
+        assertEquals(1393.0, fb.get(98), 0.1);
+        assertEquals(1461.0, fb.get(99), 0.1);
 
-        for (int i = 0; i < 21; i++) {
-            fb.get();
-        }
+        // read subset
+        buf = dem.read(new RasterQuery().datatype(DataType.FLOAT)
+            .bounds(new Envelope(589980.0, 599490.0, 4920855.0, 4928010.0)));
+        assertNotNull(buf);
 
-        assertEquals(1369.0, fb.get(), 0.1);
-        assertEquals(1326.0, fb.get(), 0.1);
+        fb = buf.asFloatBuffer();
+        assertEquals(100, fb.limit());
+
+        assertEquals(1099.0, fb.get(0), 0.1);
+        assertEquals(1099.0, fb.get(1), 0.1);
+        assertEquals(1234.0, fb.get(2), 0.1);
+        assertEquals(1234.0, fb.get(3), 0.1);
+        assertEquals(1099.0, fb.get(10), 0.1);
+        assertEquals(1099.0, fb.get(11), 0.1);
+        assertEquals(1234.0, fb.get(12), 0.1);
+        assertEquals(1234.0, fb.get(13), 0.1);
+
+        assertEquals(1369.0, fb.get(86), 0.1);
+        assertEquals(1369.0, fb.get(87), 0.1);
+        assertEquals(1326.0, fb.get(88), 0.1);
+        assertEquals(1326.0, fb.get(89), 0.1);
+        assertEquals(1369.0, fb.get(96), 0.1);
+        assertEquals(1369.0, fb.get(97), 0.1);
+        assertEquals(1326.0, fb.get(98), 0.1);
+        assertEquals(1326.0, fb.get(99), 0.1);
+
+        // read superset
+//        buf = dem.read(new RasterQuery().datatype(DataType.FLOAT)
+//            .bounds(new Envelope(580470.0, 618510.0, 4906545.0, 4935165.0)));
+//        assertNotNull(buf);
+//
+//        fb = buf.asFloatBuffer();
+//        assertEquals(100, fb.limit());
+//        assertEquals(0.0, fb.get(), 0.1);
+//        assertEquals(0.0, fb.get(), 0.1);
+//
+//        assertNotEquals(0, fb.get(22), 0.1);
+//        assertNotEquals(0, fb.get(66), 0.1);
+//        assertEquals(0.0, fb.get(67), 0.1);
     }
 
     @Test

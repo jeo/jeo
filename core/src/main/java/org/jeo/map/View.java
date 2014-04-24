@@ -18,6 +18,7 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 import org.jeo.proj.Proj;
+import org.jeo.util.Rect;
 import org.osgeo.proj4j.CoordinateReferenceSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -265,12 +266,33 @@ public class View {
     }
 
     /**
+     * Maps the specified envelope to view window.
+     *
+     * @param e The envelope to map.
+     *
+     * @return The rectangle corresponding to the intersecting portion of
+     *  of the specified envelope, or <tt>null</tt> if it does not intersect.
+     */
+    public Rect mapToWindow(Envelope e) {
+        e = bounds.intersection(e);
+        if (e.isNull()) {
+            return null;
+        }
+
+        int l = (int)((e.getMinX() - bounds.getMinX()) / bounds.getWidth() * width);
+        int t = (int)((bounds.getMaxY()-e.getMaxY()) / bounds.getHeight() * height);
+        int w = (int)(e.getWidth() / bounds.getWidth() * width);
+        int h = (int)(e.getHeight() / bounds.getHeight() * height);
+        return new Rect(l, t, l+w, t+h);
+    }
+
+    /**
      * The window of the view as a bounding box.
      *
      * @return The bounding box 0,0,width,height
      */
-    public Envelope window() {
-        return new Envelope(0, width, 0, height);
+    public Rect window() {
+        return new Rect(0, 0, width, height);
     }
 
     /**

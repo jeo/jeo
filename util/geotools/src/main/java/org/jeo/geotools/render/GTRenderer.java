@@ -3,18 +3,13 @@ package org.jeo.geotools.render;
 import static org.jeo.map.CartoCSS.*;
 import static org.jeo.geotools.render.GTRendererFactory.*;
 
-import java.awt.AlphaComposite;
-import java.awt.BasicStroke;
-import java.awt.Color;
-import java.awt.Composite;
-import java.awt.Graphics2D;
-import java.awt.Paint;
-import java.awt.Rectangle;
-import java.awt.RenderingHints;
-import java.awt.Shape;
-import java.awt.Stroke;
-import java.awt.image.BufferedImage;
+import java.awt.*;
+import java.awt.color.ColorSpace;
+import java.awt.geom.AffineTransform;
+import java.awt.image.*;
+import java.io.File;
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.Iterator;
 
@@ -46,6 +41,7 @@ import org.jeo.map.RGB;
 import org.jeo.map.Rule;
 import org.jeo.map.View;
 import org.jeo.map.render.BaseRenderer;
+import org.jeo.util.Rect;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.filter.FilterFactory;
 import org.opengis.style.Font;
@@ -103,6 +99,21 @@ public class GTRenderer extends BaseRenderer {
 
     public GTRenderer(BufferedImage img) {
         this.img = img;
+    }
+
+    @Override
+    protected boolean canRenderVectors() {
+        return true;
+    }
+
+    @Override
+    protected boolean canRenderRasters() {
+        return true;
+    }
+
+    @Override
+    protected boolean canRenderTiles() {
+        return false;
     }
 
     @Override
@@ -167,9 +178,8 @@ public class GTRenderer extends BaseRenderer {
         }
     }
 
-    Rectangle rect(Envelope win) {
-        return new Rectangle(
-            (int) win.getMinX(), (int) win.getMinY(), (int) win.getWidth(), (int) win.getHeight());
+    Rectangle rect(Rect win) {
+        return new Rectangle(win.left, win.top, win.width(), win.height());
     }
 
     @Override
@@ -583,5 +593,45 @@ public class GTRenderer extends BaseRenderer {
 
     boolean eq(float f1, float f2) {
         return Math.abs(f1 - f1) < 0.00000001;
+    }
+
+    ByteBuffer toHeap(ByteBuffer buf) {
+        if (buf.isDirect()) {
+            ByteBuffer tmp = ByteBuffer.allocate(buf.capacity());
+            tmp.order(buf.order());
+            tmp.put(buf);
+            tmp.flip();
+            buf = tmp;
+        }
+        return buf;
+    }
+    @Override
+    protected void drawRasterGray(ByteBuffer gray, Rect pos, Rule rule) throws IOException {
+        gray = toHeap(gray);
+        WritableRaster raster = Raster.createBandedRaster(new DataBufferByte(gray.array(), gray.capacity()),
+            pos.width(), pos.height(), pos.width(), new int[]{0}, new int[]{0},null);
+
+        ColorModel cm = new ComponentColorModel(ColorSpace.getInstance(ColorSpace.CS_GRAY), false, false,
+            Transparency.TRANSLUCENT, DataBuffer.TYPE_BYTE);
+        BufferedImage img = new BufferedImage(cm, raster, false, null);
+        g.drawRenderedImage(img, transform(pos));
+    }
+
+    @Override
+    protected void drawRasterABGR(ByteBuffer abgr, Rect pos, Rule rule) throws IOException {
+        abgr = toHeap(abgr);
+        WritableRaster raster = Raster.createInterleavedRaster(
+            new DataBufferByte(abgr.array(), abgr.capacity()), pos.width(), pos.height(),
+            pos.width() * 4, 4, new int[]{3,2,1}, null) ;
+        ColorModel cm = new ComponentColorModel(ColorSpace.getInstance(ColorSpace.CS_sRGB), false, false,
+                Transparency.OPAQUE, DataBuffer.TYPE_BYTE);
+        BufferedImage img = new BufferedImage(cm, raster, false, null);
+        g.drawRenderedImage(img, transform(pos));
+    }
+
+    AffineTransform transform(Rect pos) {
+        AffineTransform tx = new AffineTransform();
+        tx.translate(pos.left, pos.top);
+        return tx;
     }
 }

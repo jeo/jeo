@@ -35,7 +35,8 @@ public class MemTileDataset implements TileDataset {
     TilePyramid pyramid;
     Tile[][][] tiles; // z, y, x
 
-    public MemTileDataset(TilePyramid pyramid) {
+    public MemTileDataset(String name, TilePyramid pyramid) {
+        this.name = name;
         this.pyramid = pyramid;
         tiles = new Tile[pyramid.getGrids().size()][][];
     }

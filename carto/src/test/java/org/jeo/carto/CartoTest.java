@@ -22,6 +22,9 @@ import java.util.List;
 import java.util.Map;
 
 import org.jeo.feature.BasicFeature;
+import org.jeo.filter.Expression;
+import org.jeo.filter.Function;
+import org.jeo.filter.Mixed;
 import org.jeo.filter.cql.CQL;
 import org.jeo.map.RGB;
 import org.jeo.map.Rule;
@@ -373,4 +376,28 @@ public class CartoTest {
         assertEquals(2.0, arr[1], 0.1);
         assertEquals(3.0, arr[2], 0.1);
     }
+
+    @Test
+    public void testParseListProperty() throws Exception {
+        String css =
+        "* {" +
+          "raster-colorizer-stops:" +
+                "stop(0, red)" +
+                "stop(1, green)" +
+                "stop(2, blue);" +
+            "}";
+
+        Style result = Carto.parse(css);
+        assertNotNull(result);
+
+        Rule r = result.getRules().get(0);
+        Mixed m = (Mixed) r.get("raster-colorizer-stops");
+        assertNotNull(m);
+
+        assertEquals(3, m.getExpressions().size());
+        for (Expression expr : m.getExpressions()) {
+            assertTrue(expr instanceof Function);
+        }
+    }
+
 }

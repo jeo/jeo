@@ -44,7 +44,14 @@ public class FunctionHandler extends TokenHandler {
                 else if (name.equals("interpolate")) {
                     stack.push(new InterpolateFunction());
                 }
-
+                else {
+                    stack.push(new Function(name){
+                        @Override
+                        public Object evaluate(Object obj) {
+                            return null;
+                        }
+                    });
+                }
                 break;
             
             case Delimiter:

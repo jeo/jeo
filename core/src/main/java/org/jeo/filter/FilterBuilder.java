@@ -107,6 +107,26 @@ public class FilterBuilder {
         return log(Logic.Type.NOT);
     }
 
+    void likeFilter(boolean not) {
+        Expression match = (Expression) stack.pop();
+        Property prop = (Property) stack.pop();
+        stack.push(new Like(prop, match, not));
+    }
+
+    public FilterBuilder like() {
+        likeFilter(false);
+        return this;
+    }
+
+    public FilterBuilder notLike() {
+        likeFilter(true);
+        return this;
+    }
+
+    public FilterBuilder equals() {
+        return spatial(Spatial.Type.EQUALS);
+    }
+
     public FilterBuilder intersect() {
         return spatial(Spatial.Type.INTERSECT);
     }

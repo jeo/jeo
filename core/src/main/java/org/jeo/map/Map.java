@@ -66,8 +66,6 @@ public class Map implements Disposable {
 
     Style style = new Style();
 
-    View view;
-
     List<Disposable> cleanup = new ArrayList<Disposable>(); 
     Set<Listener> callbacks = new LinkedHashSet<Listener>();
 
@@ -75,7 +73,6 @@ public class Map implements Disposable {
      * Creates a new empty map.
      */
     public Map() {
-        view = new View(this);
     }
 
     /**

@@ -168,6 +168,7 @@ public class WMSHandlerTest extends HandlerTestSupport {
                 assertEquals("image/png", format);
                 assertNotNull(filter);
                 called[0] = true;
+                super.render(f, dataSet, styles, crs, bbox, width, height, format, filter);
                 return null;
             }
 

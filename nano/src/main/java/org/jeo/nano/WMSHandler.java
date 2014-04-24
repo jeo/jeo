@@ -75,20 +75,20 @@ public class WMSHandler extends OWSHandler {
             String mimeType, Filter filter) throws IOException {
         MapBuilder mb = new MapBuilder();
         ByteArrayOutputStream bout = new ByteArrayOutputStream();
-
+        mb.bounds(bbox).crs(crs).size(width, height);
+        for (Dataset ds : dataSet) {
+            mb.layer(ds, filter);
+        }
+        for (Style s : styles) {
+            mb.style(s);
+        }
+        View view = mb.view();
+        Renderer renderer = factory.create(view, null);
+        renderer.init(view, null);
         try {
-            mb.bounds(bbox).crs(crs).size(width, height);
-            for (Dataset ds : dataSet) {
-                mb.layer(ds, filter);
-            }
-            for (Style s : styles) {
-                mb.style(s);
-            }
-            View view = mb.view();
-            Renderer renderer = factory.create(view, null);
-            renderer.init(view, null);
             renderer.render(bout);
         } finally {
+            renderer.close();
             mb.map().close();
         }
 

@@ -352,7 +352,12 @@ public class FeatureHandler extends Handler {
 
         Renderer renderer = rf.create(view, null);
         renderer.init(view, null);
-        renderer.render(bout);
+        try {
+            renderer.render(bout);
+        } finally {
+            mb.map().close();
+            renderer.close();
+        }
 
         return new Response(HTTP_OK, MIME_PNG, new ByteArrayInputStream(bout.toByteArray()));
     }

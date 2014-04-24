@@ -365,6 +365,8 @@ public class MockServer {
         expectLastCall().anyTimes();
         png.render((OutputStream) anyObject());
         expectLastCall().anyTimes();
+        png.close();
+        expectLastCall().once();
 
         final RendererFactory rf = createMock(RendererFactory.class);
         expect(rf.getFormats()).andReturn(Arrays.asList("png","image/png")).anyTimes();

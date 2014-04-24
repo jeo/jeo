@@ -37,7 +37,10 @@ public class StyleBuilder {
     }
 
     public StyleBuilder rule() {
-        Rule r = new Rule();
+        return rule(new Rule());
+    }
+
+    public StyleBuilder rule(Rule r) {
         if (ruleStack.isEmpty()) {
             style.getRules().add(r);
         }

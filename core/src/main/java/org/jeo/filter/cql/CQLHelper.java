@@ -210,4 +210,20 @@ class CQLHelper {
     public void pop() {
         builder.pop();
     }
+
+    public void add() {
+        builder.add();
+    }
+
+    public void substract() {
+        builder.subtract();
+    }
+
+    public void multiply() {
+        builder.multiply();
+    }
+
+    public void divide() {
+        builder.divide();
+    }
 }

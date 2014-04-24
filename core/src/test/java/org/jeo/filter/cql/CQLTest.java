@@ -149,4 +149,10 @@ public class CQLTest {
         Filter f = CQL.parse("BBOX(pp,30, -125, 40, -110,'EPSG:4326')");
         assertTrue(f instanceof Spatial);
     }
+
+    @Test
+    public void testMaths() throws ParseException {
+        Filter f = CQL.parse("UNEMPLOY / (EMPLOYED + UNEMPLOY) > .07");
+        assertEquals("([UNEMPLOY] / ([EMPLOYED] + [UNEMPLOY])) > 0.07", f.toString());
+    }
 }

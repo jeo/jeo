@@ -99,9 +99,16 @@ public class ECQLBuilder extends ECQLParser {
 
             // Math Nodes
         case JJTADDNODE:
+            h.add();
+            return;
         case JJTSUBTRACTNODE:
+            h.substract();
+            return;
         case JJTMULNODE:
+            h.multiply();
+            return;
         case JJTDIVNODE:
+            h.divide();
             return;
             //return buildBinaryExpression(cqlNode.getType());
 

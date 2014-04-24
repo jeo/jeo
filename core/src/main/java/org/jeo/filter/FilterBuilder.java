@@ -230,4 +230,30 @@ public class FilterBuilder {
         stack.push(new Spatial<Object>(type, e1, e2));
         return this;
     }
+
+    void math(char type) {
+        Expression e2 = (Expression) stack.pop();
+        Expression e1 = (Expression) stack.pop();
+        stack.push(new Maths(type, e1, e2));
+    }
+
+    public FilterBuilder add() {
+        math(Maths.ADD);
+        return this;
+    }
+
+    public FilterBuilder subtract() {
+        math(Maths.SUBTRACT);
+        return this;
+    }
+
+    public FilterBuilder multiply() {
+        math(Maths.MULTIPLY);
+        return this;
+    }
+
+    public FilterBuilder divide() {
+        math(Maths.DIVIDE);
+        return this;
+    }
 }

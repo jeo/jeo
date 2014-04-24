@@ -246,7 +246,7 @@ public class ConvertCmd extends JeoCmd {
 
         @Override
         public void start(VectorDataset data, JeoCLI cli) throws IOException {
-            out = cli.newGeoJSONWriter();
+            out = cli.newJSONWriter();
             out.featureCollection();
         }
 

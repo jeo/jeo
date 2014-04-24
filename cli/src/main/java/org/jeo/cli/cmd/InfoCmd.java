@@ -14,32 +14,18 @@
  */
 package org.jeo.cli.cmd;
 
+import com.beust.jcommander.Parameter;
+import com.beust.jcommander.Parameters;
+import org.jeo.cli.JeoCLI;
+import org.jeo.data.*;
+import org.jeo.filter.Filters;
+import org.jeo.json.JeoJSONWriter;
+import org.jeo.map.Style;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.util.List;
-
-import org.jeo.cli.JeoCLI;
-import org.jeo.data.Dataset;
-import org.jeo.data.DirectoryRepository;
-import org.jeo.data.Drivers;
-import org.jeo.data.Handle;
-import org.jeo.data.Query;
-import org.jeo.data.TileDataset;
-import org.jeo.tile.TileGrid;
-import org.jeo.tile.TilePyramid;
-import org.jeo.data.VectorDataset;
-import org.jeo.data.Workspace;
-import org.jeo.feature.Field;
-import org.jeo.filter.Filters;
-import org.jeo.geojson.GeoJSONWriter;
-import org.jeo.geom.Envelopes;
-import org.jeo.map.Style;
-import org.osgeo.proj4j.CoordinateReferenceSystem;
-
-import com.beust.jcommander.Parameter;
-import com.beust.jcommander.Parameters;
-import com.vividsolutions.jts.geom.Envelope;
 
 @Parameters(commandNames="info", commandDescription="Provides information about a data source")
 public class InfoCmd extends JeoCmd {
@@ -49,7 +35,7 @@ public class InfoCmd extends JeoCmd {
 
     @Override
     protected void doCommand(JeoCLI cli) throws Exception {
-        GeoJSONWriter w = cli.newGeoJSONWriter();
+        JeoJSONWriter w = cli.newJSONWriter();
 
         for (String data : datas) {
             URI uri = parseDataURI(data);
@@ -89,15 +75,12 @@ public class InfoCmd extends JeoCmd {
         }
     }
 
-    void print(Object obj, GeoJSONWriter w, JeoCLI cli) throws IOException {
+    void print(Object obj, JeoJSONWriter w, JeoCLI cli) throws IOException {
         if (obj instanceof Workspace) {
-            print((Workspace)obj, w, cli);
+            print((Workspace) obj, w, cli);
         }
-        else if (obj instanceof VectorDataset) {
-            print((VectorDataset)obj, w, cli);
-        }
-        else if (obj instanceof TileDataset) {
-            print((TileDataset)obj, w, cli);
+        else if (obj instanceof Dataset) {
+            print((Dataset)obj, w, cli);
         }
         else if (obj instanceof Style) {
             print((Style)obj, w, cli);
@@ -108,105 +91,15 @@ public class InfoCmd extends JeoCmd {
         }
     }
 
-    void print(Dataset dataset, GeoJSONWriter w, JeoCLI cli) throws IOException {
-        
-         w.key("name").value(dataset.getName());
-         w.key("driver").value(dataset.getDriver().getName());
-  
-         Envelope bbox = dataset.bounds();
-         if (!Envelopes.isNull(bbox)) {
-             w.key("bbox");
-             w.bbox(bbox);
-         }
-  
-          CoordinateReferenceSystem crs = dataset.crs();
-          if (crs != null) {
-             w.key("crs");
-             print(crs, w, cli);
-          }
+    void print(Dataset dataset, JeoJSONWriter w, JeoCLI cli) throws IOException {
+        w.dataset(dataset);
     }
 
-    void print(VectorDataset dataset, GeoJSONWriter w, JeoCLI cli) throws IOException {
-        w.object();
-        w.key("type").value("vector");
-    
-        try {
-            print((Dataset) dataset, w, cli);
-    
-            w.key("count").value(dataset.count(new Query()));
-            w.key("schema").object();
-    
-            for (Field fld : dataset.schema()) {
-                w.key(fld.getName()).value(fld.getType().getSimpleName());
-            }
-
-            w.endObject();
-        } finally {
-            dataset.close();
-        }
-    
-        w.endObject();
+    void print(Workspace workspace, JeoJSONWriter w, JeoCLI cli) throws IOException {
+        w.workspace(workspace);
     }
 
-    void print(TileDataset dataset, GeoJSONWriter w, JeoCLI cli) throws IOException {
-        w.object();
-        w.key("type").value("tile");
-    
-        try {
-            print((Dataset) dataset, w, cli);
-    
-            TilePyramid pyr = dataset.pyramid();
-            w.key("tilesize").array().value(pyr.getTileWidth())
-                    .value(pyr.getTileHeight()).endArray();
-    
-            w.key("grids").array();
-            for (TileGrid grid : dataset.pyramid().getGrids()) {
-                w.object().key("zoom").value(grid.getZ()).key("width")
-                    .value(grid.getWidth()).key("height")
-                    .value(grid.getHeight()).key("res").array()
-                    .value(grid.getXRes()).value(grid.getYRes()).endArray()
-                    .endObject();
-    
-            }
-            w.endArray();
-        } finally {
-            dataset.close();
-        }
-    
-        w.endObject();
-    }
-
-    void print(Workspace workspace, GeoJSONWriter w, JeoCLI cli) throws IOException {
-        w.object();
-    
-        try {
-            w.key("type").value("workspace");
-            w.key("driver").value(workspace.getDriver().getName());
-            w.key("datasets").array();
-    
-            for (Handle<Dataset> h : workspace.list()) {
-                w.value(h.getName());
-            }
-    
-            w.endArray();
-        } finally {
-            workspace.close();
-        }
-    
-        w.endObject();
-    }
-
-    void print(CoordinateReferenceSystem crs, GeoJSONWriter w, JeoCLI cli) throws IOException {
-        w.array();
-    
-        for (String s : crs.getParameters()) {
-            w.value(s);
-        }
-    
-        w.endArray();
-    }
-
-    void print(Style style, GeoJSONWriter w, JeoCLI cli) throws IOException {
+    void print(Style style, JeoJSONWriter w, JeoCLI cli) throws IOException {
         cli.getConsole().getOutput().write(style.toString());
     }
 }

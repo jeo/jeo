@@ -114,7 +114,7 @@ public class RenderCmd extends JeoCmd {
     }
 
      void list(JeoCLI cli) throws IOException {
-         GeoJSONWriter w = cli.newGeoJSONWriter();
+         GeoJSONWriter w = cli.newJSONWriter();
          w.array();
 
          Iterator<RendererFactory<?>> it = Renderers.list();

@@ -14,6 +14,8 @@
  */
 package org.jeo.util;
 
+import org.jeo.map.RGB;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -184,6 +186,18 @@ public class Convert {
             }
         }
         return Optional.nil(Number.class);
+    }
+
+    public static Optional<RGB> toColor(Object obj) {
+        if (obj == null) {
+            return Optional.nil(RGB.class);
+        }
+
+        if (obj instanceof RGB) {
+            return Optional.of((RGB)obj);
+        }
+
+        return Optional.of(new RGB(obj.toString()));
     }
 
     public static Optional<Reader> toReader(Object obj) throws IOException {

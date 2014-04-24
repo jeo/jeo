@@ -69,6 +69,10 @@ public class Rule {
         return nested;
     }
 
+    public boolean has(String key) {
+        return props().containsKey(key);
+    }
+
     public Object get(String key) {
         Map<String,Object> props = props();
         return props.get(key);
@@ -174,6 +178,10 @@ public class Rule {
         return eval(obj, key, String.class, def);
     }
 
+    public Integer number(Object obj, String key, Integer def) {
+        return eval(obj, key, Integer.class, def);
+    }
+
     public Double number(Object obj, String key, Double def) {
         return eval(obj, key, Double.class, def);
     }
@@ -184,6 +192,10 @@ public class Rule {
 
     public Boolean bool(Object obj, String key, Boolean def) {
         return eval(obj, key, Boolean.class, def);
+    }
+
+    public Integer[] numbers(Object obj, String key, Integer... def) {
+        return evalArray(obj, key, Integer.class, def);
     }
 
     public Double[] numbers(Object obj, String key, Double... def) {

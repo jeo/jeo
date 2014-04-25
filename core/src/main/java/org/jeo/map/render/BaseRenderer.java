@@ -18,22 +18,19 @@ import static org.jeo.map.CartoCSS.*;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.ByteBuffer;
+import java.util.List;
 
-import org.jeo.data.Dataset;
-import org.jeo.data.Query;
-import org.jeo.data.TileDataset;
-import org.jeo.data.VectorDataset;
+import org.jeo.data.*;
 import org.jeo.feature.Feature;
 import org.jeo.filter.Filter;
 import org.jeo.geom.Envelopes;
 import org.jeo.geom.Geom;
-import org.jeo.map.Layer;
-import org.jeo.map.Map;
-import org.jeo.map.RGB;
-import org.jeo.map.Rule;
-import org.jeo.map.RuleList;
-import org.jeo.map.View;
+import org.jeo.map.*;
 import org.jeo.proj.Proj;
+import org.jeo.raster.*;
+import org.jeo.util.Function;
+import org.jeo.util.Rect;
 import org.osgeo.proj4j.CoordinateReferenceSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -95,13 +92,16 @@ public abstract class BaseRenderer implements Renderer {
             RuleList rules =
                 view.getMap().getStyle().getRules().selectById(l.getName(), true).flatten();
 
-            if (data instanceof VectorDataset) {
-                for (RuleList ruleList : rules.zgroup()) {
+            for (RuleList ruleList : rules.zgroup()) {
+                if (data instanceof VectorDataset) {
                     render((VectorDataset)data, ruleList, filter);
                 }
-            }
-            else {
-                render((TileDataset)data, rules);
+                else if (data instanceof RasterDataset) {
+                    render((RasterDataset)data, ruleList);
+                }
+                else if (data instanceof TileDataset) {
+                    render((TileDataset)data, rules);
+                }
             }
 
             onLayerFinish(l);
@@ -151,6 +151,10 @@ public abstract class BaseRenderer implements Renderer {
     }
 
     void render(VectorDataset data, RuleList rules, Filter<Feature> filter) throws IOException {
+        if (!canRenderVectors()) {
+            throw new UnsupportedOperationException("renderer does not render vector data");
+        }
+
         // build up the data query
         Query q = new Query();
 
@@ -175,8 +179,147 @@ public abstract class BaseRenderer implements Renderer {
         }
     }
 
+    void render(RasterDataset data, RuleList rules) throws IOException {
+        if (!canRenderRasters()) {
+            throw new UnsupportedOperationException("renderer does not render raster data");
+        }
+
+        // calculate bounding intersection of view and dataset
+        Envelope bbox = data.bounds().intersection(view.getBounds());
+        if (bbox.isNull()) {
+            // nothing to do
+            return;
+        }
+
+        // calculate position of raster on screen
+        Rect pos = view.mapToWindow(bbox);
+
+        // build up the query
+        RasterQuery q = new RasterQuery().bounds(bbox).size(pos.size());
+
+
+        Rule rule = rules.collapse();
+
+        // band selection
+        List<Band> bands = data.bands();
+        if (bands.size() == 1) {
+            // single band case
+            q.bands(0);
+        }
+        else {
+            // multi band case
+            Integer[] bandmap = rule.numbers(null, "raster-bands", (Integer[])null);
+            if (bandmap == null) {
+                if (bands.size() < 3) {
+                    throw new IllegalStateException("unable to map bands " + bands + " to RGB");
+                }
+
+                // band map not explicitly specified, try to infer it
+                int r = -1, b = -1, g = -1;
+                for (int i = 0; i < bands.size(); i++) {
+                    Band band = bands.get(i);
+                    if (r == -1 && band.color() == Band.Color.RED) {
+                        r = i;
+                    }
+                    if (g == -1 && band.color() == Band.Color.GREEN) {
+                        g = i;
+                    }
+                    if (b == -1 && band.color() == Band.Color.BLUE) {
+                        b = i;
+                    }
+                }
+
+                if (r == -1 || g == -1 || b == -1) {
+                    //just take the bands as is in order
+                    q.bands(0,1,2);
+                }
+                else {
+                    q.bands(r,g,b);
+                }
+            }
+            else {
+                q.bands(bandmap);
+            }
+        }
+
+        // buffer data type
+        if (q.getBands().length > 1) {
+            // pack the data into int pixels
+            q.datatype(DataType.INT);
+        }
+        else {
+            // use native data type
+        }
+
+        // get the raw data
+        ByteBuffer raw = data.read(q);
+
+        if (q.getBands().length == 1) {
+            Band band = data.bands().get(q.getBands()[0]);
+
+            final Function<Double,RGB> colormap;
+            if (rule.has("raster-colorizer-stops")) {
+                // map using colorizer
+                final Colorizer colorizer = Colorizer.decode(rule);
+                colormap = new Function<Double, RGB>() {
+                    @Override
+                    public RGB apply(Double value) {
+                        return colorizer.map(value);
+                    }
+                };
+            }
+            else {
+                // interpolate to gray
+                Stats stats = band.stats();
+                final double min = stats.min();
+                final double span = stats.max() - stats.min();
+                colormap = new Function<Double, RGB>() {
+                    @Override
+                    public RGB apply(Double value) {
+                        if (value == null) {
+                            // TODO: replace with an actual nodata color
+                            return RGB.black;
+                        }
+
+                        byte gray = (byte) (255 * ((value-min) / span));
+                        return new RGB(gray, gray, gray);
+                    }
+                };
+            }
+
+            drawRasterABGR(convertToABGR(raw, colormap, band), pos, rule);
+        }
+        else {
+            // draw directly
+            drawRasterABGR(raw, pos, rule);
+        }
+    }
+
+    ByteBuffer convertToABGR(ByteBuffer raw, Function<Double,RGB> colormap, Band band) throws IOException {
+        //TODO: alpha
+        int n = view.getWidth() * view.getHeight();
+
+        ByteBuffer abgr = ByteBuffer.allocate(n*4);
+        DataBuffer<Number> db = DataBuffer.create(raw, band.datatype());
+
+        NoData nodata = NoData.create(band.nodata());
+
+        for (int i = 0; i < db.size(); i++) {
+            Double val = nodata.valueOrNull(db.get().doubleValue());
+            RGB color = colormap.apply(val);
+            abgr.put((byte)255).put((byte) color.getBlue())
+                .put((byte) color.getGreen()).put((byte) color.getRed());
+        }
+
+        abgr.flip();
+        return abgr;
+    }
+
     void render(TileDataset data, RuleList rules) throws IOException {
-        throw new UnsupportedOperationException("rendering tile datasets not implemented");
+        if (!canRenderTiles()) {
+            throw new UnsupportedOperationException("renderer does not render vector data");
+        }
+        throw new UnsupportedOperationException("TODO: implement");
     }
 
     void renderLabels() throws IOException {
@@ -269,22 +412,84 @@ public abstract class BaseRenderer implements Renderer {
     }
 
     /**
+     * Determines if the render can render vector data.
+     */
+    protected abstract boolean canRenderVectors();
+
+    /**
+     * Determines if the render can render raster data.
+     */
+    protected abstract boolean canRenderRasters();
+
+    /**
+     * Determines if the render can render tile data.
+     */
+    protected abstract boolean canRenderTiles();
+
+    /**
      * Draws the map background.
      */
     protected abstract void drawBackground(RGB color) throws IOException;
 
     /**
      * Draws a point feature.
+     * <p>
+     * This method must be implemented by subclasses if {@link #canRenderVectors()}
+     * returns true.
+     * </p>
      */
-    protected abstract void drawPoint(Feature f, Rule rule, Geometry point)  throws IOException;
+    protected void drawPoint(Feature f, Rule rule, Geometry point)  throws IOException {
+        throw new UnsupportedOperationException();
+    }
 
     /**
      * Draws a line feature.
+     * <p>
+     * This method must be implemented by subclasses if {@link #canRenderVectors()}
+     * returns true.
+     * </p>
      */
-    protected abstract void drawLine(Feature f, Rule rule, Geometry line) throws IOException;
+    protected void drawLine(Feature f, Rule rule, Geometry line) throws IOException {
+        throw new UnsupportedOperationException();
+    }
 
     /**
-     * Draws a line feature.
+     * Draws a polygon feature.
+     * <p>
+     * This method must be implemented by subclasses if {@link #canRenderVectors()}
+     * returns true.
+     * </p>
      */
-    protected abstract void drawPolygon(Feature f, Rule rule, Geometry poly)  throws IOException;
+    protected void drawPolygon(Feature f, Rule rule, Geometry poly)  throws IOException {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * Draws a grayscale raster.
+     * <p>
+     * This method must be implemented by subclasses if {@link #canRenderRasters()}
+     * returns true.
+     * </p>
+     *
+     * @param raster A single band buffer with values interpreted as gray-scale values
+     * @param pos The position in the view/window to draw the raster at.
+     * @param rule The matching styling rule for the raster.
+     */
+    protected void drawRasterGray(ByteBuffer raster, Rect pos, Rule rule) throws IOException {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * Draws a rgba raster.
+     * <p>
+     * This method must be implemented by subclasses if {@link #canRenderRasters()}
+     * returns true.
+     * </p>
+     * @param raster A 4 band buffer in the order alpha, blue, green, red
+     * @param pos The position in the view/window to draw the raster at.
+     * @param rule The matching styling rule for the raster.
+     */
+    protected void drawRasterABGR(ByteBuffer raster, Rect pos, Rule rule) throws IOException {
+        throw new UnsupportedOperationException();
+    }
 }

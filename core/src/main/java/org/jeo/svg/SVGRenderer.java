@@ -69,6 +69,21 @@ public class SVGRenderer extends BaseRenderer implements Labeller {
     }
 
     @Override
+    protected boolean canRenderVectors() {
+        return true;
+    }
+
+    @Override
+    protected boolean canRenderRasters() {
+        return false;
+    }
+
+    @Override
+    protected boolean canRenderTiles() {
+        return false;
+    }
+
+    @Override
     protected void onStart() {
         try {
             xml.init(output);
@@ -477,7 +492,7 @@ public class SVGRenderer extends BaseRenderer implements Labeller {
 
         label.setBounds(bbox);
 
-        if (!view.window().contains(bbox)) {
+        if (!view.window().envelope().contains(bbox)) {
             return false;
         }
 

@@ -16,6 +16,12 @@ package org.jeo;
 
 import java.util.Arrays;
 
+import com.vividsolutions.jts.geom.*;
+import org.jeo.data.RasterDataset;
+import org.jeo.data.mem.MemRaster;
+import org.jeo.proj.Proj;
+import org.jeo.raster.Band;
+import org.jeo.raster.DataType;
 import org.jeo.tile.Tile;
 import org.jeo.data.TileDataset;
 import org.jeo.tile.TilePyramid;
@@ -27,11 +33,6 @@ import org.jeo.feature.Feature;
 import org.jeo.feature.Schema;
 import org.jeo.feature.SchemaBuilder;
 
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.LineString;
-import com.vividsolutions.jts.geom.MultiPolygon;
-import com.vividsolutions.jts.geom.Point;
-import com.vividsolutions.jts.geom.Polygon;
 import com.vividsolutions.jts.io.ParseException;
 import com.vividsolutions.jts.io.WKTReader;
 
@@ -210,6 +211,50 @@ public class TestData {
         });
 
         return mem;
+    }
+
+    /**
+     * Returns a raster dem from the Spearfish dataset scaled down to 10x10 dimensions.
+     *
+     * @see {@linkplain http://grass.osgeo.org/uploads/grass/sampledata/spearDB.pdf}
+     */
+    public static RasterDataset dem() throws Exception {
+        MemRaster dem =
+            new MemRaster("dem", new Envelope(589980.0, 609000.0, 4913700.0, 4928010.0), Proj.crs("epsg:26713"));
+        dem.addBand("1", Band.Color.GRAY, DataType.FLOAT, new float[][]{
+            {1099, 1234, 1177, 1157, 1148, 1122, 1121, 1234, 1124, 1188},
+            {1116, 1158, 1182, 1191, 1171, 1142, 1214, 1205, 1133, 1098},
+            {1281, 1193, 1216, 1210, 1195, 1165, 1171, 1274, 1195, 1101},
+            {1167, 1312, 1268, 1264, 1246, 1193, 1198, 1185, 1241, 1195},
+            {1414, 1422, 1361, 1369, 1326, 1243, 1238, 1209, 1264, 1177},
+            {1566, 1510, 1390, 1535, 1330, 1352, 1297, 1310, 1264, 1345},
+            {1716, 1560, 1643, 1560, 1432, 1418, 1357, 1371, 1324, 1400},
+            {1706, 1703, 1592, 1588, 1494, 1592, 1413, 1400, 1411, 1383},
+            {1674, 1738, 1645, 1625, 1591, 1536, 1444, 1393, 1393, 1340},
+            {1746, 1738, 1717, 1679, 1582, 1460, 1425, 1519, 1393, 1461}
+        });
+        return dem;
+    }
+
+    /**
+     * Returns a 2x2 3-band rgb raster consisting of 1 pure red pixel (0,0), 1 pure green pixel (1,0),
+     *  1 pure blue pixel (0,1) and a gray pixel (1,1).
+     */
+    public static RasterDataset rgb() throws Exception {
+        MemRaster rgb = new MemRaster("rgb", new Envelope(-180,180,-90,90), Proj.EPSG_4326);
+        rgb.addBand("red", Band.Color.RED, DataType.BYTE, new byte[][]{
+            {(byte)0xff, 0},
+            {0, (byte) 0x80},
+        });
+        rgb.addBand("green", Band.Color.GREEN, DataType.BYTE, new byte[][]{
+            {0, (byte)0xff},
+            {0, (byte) 0x80},
+        });
+        rgb.addBand("blue", Band.Color.BLUE, DataType.BYTE, new byte[][]{
+            {0, 0},
+            {(byte)0xff, (byte) 0x80},
+        });
+        return rgb;
     }
 
     static Feature feature(Schema schema, Object... values) {

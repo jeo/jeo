@@ -13,14 +13,10 @@ import java.awt.image.BufferedImage;
 import org.jeo.TestData;
 import org.jeo.data.Dataset;
 import org.jeo.filter.Property;
-import org.jeo.map.Map;
-import org.jeo.map.RGB;
-import org.jeo.map.Style;
-import org.jeo.map.StyleBuilder;
-import org.jeo.map.View;
+import org.jeo.map.*;
+import org.jeo.util.Pair;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestName;
 
@@ -28,7 +24,7 @@ import com.google.common.collect.Maps;
 
 public class GTRendererTest {
 
-    @Rule
+    @org.junit.Rule
     public TestName testName = new TestName();
 
     BufferedImage img;
@@ -87,6 +83,34 @@ public class GTRendererTest {
         View view = Map.build()
             .size(img.getWidth(),img.getHeight())
             .layer(polys).style(style).view();
+
+        render(view);
+    }
+
+    @Test
+    public void testRaster() throws Exception {
+        Dataset dem = TestData.dem();
+
+        Colorizer c = Colorizer.build().stop(1000, RGB.white)
+            .interpolate(Pair.of(1000.0, RGB.white), Pair.of(2000.0, RGB.red), 100).colorizer();
+        Style style = Style.build().rule().select("*").rule(Colorizer.encode(c, new Rule())).style();
+
+        View view = Map.build()
+            .size(img.getWidth(),img.getHeight())
+            .layer(dem).style(style).view();
+
+        render(view);
+    }
+
+    @Test
+    public void testRasterRGB() throws Exception {
+        Dataset rgb = TestData.rgb();
+
+        Style style = Style.build().rule().select("*").style();
+
+        View view = Map.build()
+            .size(img.getWidth(),img.getHeight())
+            .layer(rgb).style(style).view();
 
         render(view);
     }

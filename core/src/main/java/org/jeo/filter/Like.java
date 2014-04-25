@@ -14,24 +14,30 @@
  */
 package org.jeo.filter;
 
-import java.util.Collections;
-import java.util.List;
+import java.util.regex.Pattern;
+import org.jeo.feature.Feature;
 
 /**
- * 'In' predicate filter. Returns true if the value of the property is
- *  present in the values list.
+ * 'Like' predicate filter. Returns true if the String value of the property
+ * completely matches the specified match expression. A wild card can be
+ * specified using the '%' character. Escaping is not supported and the match
+ * is interpreted as a regular expression.
  *
  * @author Ian Schneider <ischneider@boundlessgeo.com>
  */
-public class In<T> extends Filter<T> {
+public class Like<T> extends Filter<T> {
 
     final Property prop;
-    final List<Expression> values;
+    final Expression match;
+    final Pattern pattern;
     final boolean not;
 
-    public In(Property prop, List<? extends Expression> values, boolean not) {
+    public Like(Property prop, Expression match, boolean not) {
         this.prop = prop;
-        this.values = Collections.unmodifiableList(values);
+        this.match = match;
+        String value = (String) match.evaluate(null);
+        // @todo escaping
+        this.pattern = Pattern.compile(value.replace("%", ".*"));
         this.not = not;
     }
 
@@ -43,18 +49,21 @@ public class In<T> extends Filter<T> {
         return prop;
     }
 
-    public List<Expression> getValues() {
-        return values;
+    public Expression getMatch() {
+        return match;
+    }
+
+    public Pattern getPattern() {
+        return pattern;
     }
 
     @Override
     public boolean apply(T obj) {
-        Object evaluate = prop.evaluate(obj);
         boolean result = false;
-        for (int i = 0; i < values.size() && !result; i++) {
-            Object val = values.get(i).evaluate(obj);
+        if (obj instanceof Feature) {
+            Object val = prop.evaluate((Feature) obj);
             if (val != null) {
-                result = val.equals(evaluate);
+                result = pattern.matcher(val.toString()).matches();
             }
         }
         return not != result;
@@ -68,9 +77,9 @@ public class In<T> extends Filter<T> {
     @Override
     public int hashCode() {
         int hash = 7;
-        hash = 89 * hash + (this.prop != null ? this.prop.hashCode() : 0);
-        hash = 89 * hash + (this.values != null ? this.values.hashCode() : 0);
-        hash = 89 * hash + (this.not ? 1 : 0);
+        hash = 83 * hash + (this.prop != null ? this.prop.hashCode() : 0);
+        hash = 83 * hash + (this.match != null ? this.match.hashCode() : 0);
+        hash = 83 * hash + (this.not ? 1 : 0);
         return hash;
     }
 
@@ -82,11 +91,11 @@ public class In<T> extends Filter<T> {
         if (getClass() != obj.getClass()) {
             return false;
         }
-        final In<?> other = (In<?>) obj;
+        final Like<?> other = (Like<?>) obj;
         if (this.prop != other.prop && (this.prop == null || !this.prop.equals(other.prop))) {
             return false;
         }
-        if (this.values != other.values && (this.values == null || !this.values.equals(other.values))) {
+        if (this.match != other.match && (this.match == null || !this.match.equals(other.match))) {
             return false;
         }
         if (this.not != other.not) {
@@ -97,18 +106,7 @@ public class In<T> extends Filter<T> {
 
     @Override
     public String toString() {
-        StringBuilder b = new StringBuilder();
-        if (not) {
-            b.append("not ");
-        }
-        b.append("in").append('(');
-        b.append(prop).append(',');
-        for (int i = 0; i < values.size(); i++) {
-            b.append(values.get(i));
-            b.append(',');
-        }
-        b.setCharAt(b.length() - 1, ')');
-        return b.toString();
+        return prop + (not ? "NOT" : "") + " LIKE " + match;
     }
 
 }

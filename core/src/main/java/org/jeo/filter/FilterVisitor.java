@@ -14,6 +14,8 @@
  */
 package org.jeo.filter;
 
+import java.util.List;
+
 /**
  * Visitor for filter classes.
  * 
@@ -90,6 +92,25 @@ public class FilterVisitor {
 
     public Object visit(TypeOf<?> inst, Object obj) {
         inst.getExpression().accept(this, obj);
+        return obj;
+    }
+
+    public Object visit(In<?> in, Object obj) {
+        in.getProperty().accept(this, obj);
+        List<Expression> values = in.getValues();
+        for (Expression e: values) {
+            e.accept(this, obj);
+        }
+        return obj;
+    }
+
+    public Object visit(Like<?> like, Object obj) {
+        return obj;
+    }
+
+    public Object visit(Math math, Object obj) {
+        math.getLeft().accept(this, obj);
+        math.getRight().accept(this, obj);
         return obj;
     }
 

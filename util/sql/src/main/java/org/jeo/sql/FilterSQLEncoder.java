@@ -37,6 +37,9 @@ import org.jeo.filter.Spatial;
 import org.jeo.util.Pair;
 
 import com.vividsolutions.jts.geom.Geometry;
+import org.jeo.filter.In;
+import org.jeo.filter.Like;
+import org.jeo.filter.Math;
 
 /**
  * Transforms a filter object into SQL.
@@ -295,6 +298,45 @@ public class FilterSQLEncoder extends FilterVisitor {
         sql.add(", ");
         spatial.getRight().accept(this, fld);
         sql.add(")");
+        return obj;
+    }
+
+    @Override
+    public Object visit(Math math, Object obj) {
+        sql.add('(');
+        math.getLeft().accept(this, obj);
+        sql.add(math.getOperator());
+        math.getRight().accept(this, obj);
+        sql.add(')');
+        return obj;
+    }
+
+    @Override
+    public Object visit(Like like, Object obj) {
+        like.getProperty().accept(this, obj);
+        sql.add(" LIKE ");
+        sql.str((String) like.getMatch().evaluate(null));
+        return obj;
+    }
+
+    @Override
+    public Object visit(In in, Object obj) {
+        in.getProperty().accept(this, obj);
+        sql.add(" IN ");
+        sql.add('(');
+        List<Expression> vals = in.getValues();
+        for (int i = 0; i < vals.size(); i++) {
+            Object evaluate = vals.get(i).evaluate(null);
+            if (evaluate instanceof String) {
+                sql.str(evaluate.toString());
+            } else {
+                sql.add(evaluate);
+            }
+            if (i + 1 < vals.size()) {
+                sql.add(',');
+            }
+        }
+        sql.add(')');
         return obj;
     }
 

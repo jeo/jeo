@@ -81,4 +81,22 @@ public class FilterSQLEncoderTest {
             assertEquals(args[i], sqle.getArgs().get(i).first());
         }
     }
+
+    @Test
+    public void testIn() throws Exception {
+        Filter f = Filter.build().property("x").literal("six").literal(6).in().filter();
+        assertEquals("\"x\" IN ('six',6)", sqle.encode(f, null));
+    }
+    
+    @Test
+    public void testLike() throws Exception {
+        Filter f = Filter.build().property("x").literal("foo%bar").like().filter();
+        assertEquals("\"x\" LIKE 'foo%bar'", sqle.encode(f, null));
+    }
+
+    @Test
+    public void testMath() throws Exception {
+        Filter f = Filter.build().property("x").literal(42).multiply().literal(2).eq().filter();
+        assertEquals("(\"x\"*?) = ?", sqle.encode(f, null));
+    }
 }

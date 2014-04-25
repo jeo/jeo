@@ -25,6 +25,7 @@ import org.jeo.filter.Expression;
 import org.jeo.filter.Filter;
 import org.jeo.filter.Id;
 import org.jeo.filter.In;
+import org.jeo.filter.Like;
 import org.jeo.filter.Literal;
 import org.jeo.filter.Logic;
 import org.jeo.filter.Property;
@@ -73,9 +74,36 @@ public class CQLTest {
     }
 
     @Test
-    public void testSpatial() throws ParseException {
-        Filter f = CQL.parse("INTERSECTS(the_geom, POINT(0 0))");
-        assertTrue(f instanceof Spatial);
+    public void testSpatial() {
+        String[] ops = {
+            "EQUALS",
+            "DISJOINT",
+            "INTERSECTS",
+            "TOUCHES",
+            "CROSSES",
+            "WITHIN",
+            "CONTAINS",
+            "OVERLAPS",
+            // @todo
+            // "DWITHIN",
+            // "BEYOND"
+        };
+        for (String op: ops) {
+            try {
+                Filter f = CQL.parse(op + "(the_geom, POINT(0 0))");
+                assertTrue(f instanceof Spatial);
+
+            } catch (ParseException ex) {
+                fail("expected " + op + " to parse");
+            }
+        }
+    }
+
+    @Test
+    public void testLike() throws ParseException {
+        Like like = (Like) CQL.parse("name LIKE 'pattern'");
+        assertEquals("name", like.getProperty().getProperty());
+        assertEquals("pattern", like.getPattern().pattern());
     }
 
     @Test
@@ -120,5 +148,11 @@ public class CQLTest {
 
         Filter f = CQL.parse("BBOX(pp,30, -125, 40, -110,'EPSG:4326')");
         assertTrue(f instanceof Spatial);
+    }
+
+    @Test
+    public void testMaths() throws ParseException {
+        Filter f = CQL.parse("UNEMPLOY / (EMPLOYED + UNEMPLOY) > .07");
+        assertEquals("([UNEMPLOY] / ([EMPLOYED] + [UNEMPLOY])) > 0.07", f.toString());
     }
 }

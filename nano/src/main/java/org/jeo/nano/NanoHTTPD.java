@@ -130,7 +130,7 @@ public class NanoHTTPD
 								files.getProperty( value ) + "'" );
 		}
 
-		return serveFile( uri, header, myRootDir, true );
+		return serveFile( uri, header, myRootDir, true, null );
 	}
 
 	/**
@@ -988,7 +988,7 @@ public class NanoHTTPD
 	 * URL-encodes everything between "/"-characters.
 	 * Encodes spaces as '%20' instead of '+'.
 	 */
-	private String encodeUri( String uri )
+	private static String encodeUri( String uri )
 	{
 		String newUri = "";
 		StringTokenizer st = new StringTokenizer( uri, "/ ", true );
@@ -1028,8 +1028,8 @@ public class NanoHTTPD
 	 * Serves file from homeDir and its' subdirectories (only).
 	 * Uses only URI, ignores all headers and HTTP parameters.
 	 */
-	public Response serveFile( String uri, Properties header, File homeDir,
-							   boolean allowDirectoryListing )
+	public static Response serveFile( String uri, Properties header, File homeDir,
+							   boolean allowDirectoryListing, String prefix )
 	{
 		Response res = null;
 
@@ -1051,6 +1051,10 @@ public class NanoHTTPD
 					"FORBIDDEN: Won't serve ../ for security reasons." );
 		}
 
+        if (prefix != null) {
+            uri = uri.replaceFirst("/apps", "");
+        }
+
 		File f = new File( homeDir, uri );
 		if ( res == null && !f.exists())
 			res = new Response( HTTP_NOTFOUND, MIME_PLAINTEXT,
@@ -1064,6 +1068,9 @@ public class NanoHTTPD
 			if ( !uri.endsWith( "/" ))
 			{
 				uri += "/";
+                if (prefix != null) {
+                    uri = prefix + uri;
+                }
 				res = new Response( HTTP_REDIRECT, MIME_HTML,
 					"<html><body>Redirected: <a href=\"" + uri + "\">" +
 					uri + "</a></body></html>");

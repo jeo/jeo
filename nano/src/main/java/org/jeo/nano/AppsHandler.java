@@ -56,12 +56,7 @@ public class AppsHandler extends Handler {
 
     @Override
     public Response handle(Request request, NanoServer server) throws Exception {
-        String uri = request.getUri();
-        if (uri.startsWith("/apps")) {
-            uri = uri.replaceFirst("/apps", "");
-        }
-
-        return server.serveFile(uri, request.getHeader(), appsDir, true);
+        return NanoServer.serveFile(request.getUri(), request.getHeader(), appsDir, true, "/apps");
     }
 
 }

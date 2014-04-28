@@ -54,6 +54,17 @@ public class SchemaBuilder {
     }
 
     /**
+     * Create a new SchemaBuilder initialized to the state of the provided
+     * schema not including any field properties.
+     *
+     * @param schema the non-null schema to copy
+     * @return a new SchemaBuilder
+     */
+    public static SchemaBuilder clone(Schema schema) {
+        return new SchemaBuilder(schema.name).uri(schema.uri).fields(schema.fields);
+    }
+
+    /**
      * Sets the namespace of the schema.
      * 
      * @param uri A namespace uri.
@@ -202,5 +213,15 @@ public class SchemaBuilder {
      */
     public Schema schema() {
         return new Schema(name, uri, fields);
+    }
+
+    /**
+     * Remove a field (by equality) from the Schema being built.
+     * 
+     * @param field the field to remove
+     * @return true if successfully removed
+     */
+    public boolean remove(Field field) {
+        return fields.remove(field);
     }
 }

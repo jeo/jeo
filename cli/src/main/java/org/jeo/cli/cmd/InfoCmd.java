@@ -96,7 +96,7 @@ public class InfoCmd extends JeoCmd {
     }
 
     void print(Workspace workspace, JeoJSONWriter w, JeoCLI cli) throws IOException {
-        w.workspace(workspace);
+        w.workspace(workspace, true);
     }
 
     void print(Style style, JeoJSONWriter w, JeoCLI cli) throws IOException {

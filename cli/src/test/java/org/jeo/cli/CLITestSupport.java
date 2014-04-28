@@ -34,6 +34,7 @@ import org.junit.After;
 import org.junit.Before;
 
 import com.vividsolutions.jts.geom.Point;
+import org.jeo.proj.Proj;
 
 /**
  * Base test for CLI command tests.
@@ -60,7 +61,7 @@ public class CLITestSupport {
     public void setUpData() throws IOException {
         MemWorkspace mem = Memory.open();
         MemVector widgets = mem.create(Schema.build("cities")
-            .field("geometry", Point.class).field("name", String.class).schema());
+            .field("geometry", Point.class, Proj.EPSG_4326).field("name", String.class).schema());
 
         Cursor<Feature> c = widgets.cursor(new Query().append());
 

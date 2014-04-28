@@ -68,17 +68,35 @@ public class JeoJSONWriter extends GeoJSONWriter {
     }
 
     /**
-     * Encodes a workspace object.
+     * Encodes a workspace object but not it's Datasets.
      */
     public JeoJSONWriter workspace(Workspace ws) throws IOException {
+        return workspace(ws, false);
+    }
+
+    /**
+     * Encodes a workspace object and optionally, its Datasets.
+     *
+     * @param children if true, include the Datasets
+     */
+    public JeoJSONWriter workspace(Workspace ws, boolean children) throws IOException {
         object();
 
         key("type").value("workspace");
         key("driver").value(ws.getDriver().getName());
 
-        key("datasets").array();
+        key("datasets");
+        array();
         for (Handle<Dataset> ref : ws.list()) {
-            value(ref.getName());
+            if (children) {
+                try {
+                    dataset(ref.resolve());
+                } finally {
+                    ref.close();
+                }
+            } else {
+                value(ref.getName());
+            }
         }
         endArray();
 

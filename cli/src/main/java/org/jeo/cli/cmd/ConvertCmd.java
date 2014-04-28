@@ -32,14 +32,18 @@ import org.jeo.data.VectorDataset;
 import org.jeo.data.Workspace;
 import org.jeo.feature.Feature;
 import org.jeo.feature.Features;
+import org.jeo.feature.Field;
 import org.jeo.feature.Schema;
+import org.jeo.feature.SchemaBuilder;
 import org.jeo.filter.Filter;
 import org.jeo.geojson.GeoJSONWriter;
+import org.jeo.proj.Proj;
 import org.osgeo.proj4j.CoordinateReferenceSystem;
 
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.Parameters;
 import com.vividsolutions.jts.geom.Envelope;
+import com.vividsolutions.jts.geom.Geometry;
 
 @Parameters(commandNames="convert", commandDescription="Converts between data sets")
 public class ConvertCmd extends JeoCmd {
@@ -62,6 +66,9 @@ public class ConvertCmd extends JeoCmd {
     @Parameter(names = {"-mu", "--multify"}, description="Wrap single geometry objects in collection")
     boolean multify = false;
 
+    @Parameter(names = {"-w", "--overwrite"}, description="Overwrite existing")
+    boolean overwrite = false;
+
     @Override
     protected void doCommand(JeoCLI cli) throws Exception {
         Object from = Drivers.open(parseDataURI(datas.get(0)));
@@ -71,53 +78,29 @@ public class ConvertCmd extends JeoCmd {
 
         VectorDataset orig = open((VectorDataset) from);
         Schema schema = orig.schema();
+        CoordinateReferenceSystem nativeCrs = schema.crs();
 
-        // choose a sink, if user specified a destination dataset copy over otherwise just
-        // output as geojson
-        Sink sink = null;
-
+        // if src only, dump to geojson and don't require a SRID
+        // some target formats require an SRID, so require it
         if (datas.size() > 1) {
-            URI uri = parseDataURI(datas.get(1));
-    
-            VectorDataset dest = null;
-            
-            //first see if dest is a workspace
-            Object to = null;
-            try {
-                to = open((Disposable)Drivers.open(uri));
+            Integer epsgCode = null;
+            if (nativeCrs != null) {
+                epsgCode = Proj.epsgCode(nativeCrs);
             }
-            catch(Exception e) {
-                if (debug) {
-                    print(e, cli);
-                }
+            if (epsgCode == null && fromCRS == null) {
+                throw new IllegalStateException("cannot determince crs from " + datas.get(0) + ", "
+                        + "please provide one using the --from-crs option");
             }
-            if (to instanceof Dataset) {
-                throw new IllegalArgumentException("Destination dataset already exists");
+            // retype with geometry as specified
+            if (fromCRS != null) {
+                SchemaBuilder sb = SchemaBuilder.clone(schema);
+                Field geom = schema.geometry();
+                sb.remove(geom);
+                sb.field(geom.getName(), (Class<? extends Geometry>) geom.getType(), fromCRS);
+                schema = sb.schema();
             }
+        }
 
-            if (to == null) {
-                //see if we can create a new dataset directly
-                if (uri.getFragment() != null) {
-                    schema = Schema.build(uri.getFragment()).fields(schema.getFields()).schema();
-                }
-                dest = Drivers.create(schema, uri, VectorDataset.class);
-                if (dest == null) {
-                    throw new IllegalArgumentException("Unable to create dataset: " + uri);
-                }
-            }
-            else if (to instanceof Workspace) {
-                dest = open((Workspace)to).create(schema);
-            }
-            else {
-                throw new IllegalArgumentException("Invalid destination: " + uri);
-            }
-            
-            sink = new ToDataset(dest, orig);
-        }
-        else {
-            sink = new ToGeoJSON();
-        }
-        
         if (multify) {
             schema = Features.multify(schema);
         }
@@ -137,10 +120,65 @@ public class ConvertCmd extends JeoCmd {
         if (toCRS != null) {
             if (fromCRS == null && orig.crs() == null) {
                 throw new IllegalArgumentException(
-                    "Could not determine source crs, must supply it with --src-crs");
+                    "Could not determine source crs, must supply it with --from-crs");
             }
 
             q.reproject(fromCRS, toCRS);
+        }
+
+        // choose a sink, if user specified a destination dataset copy over otherwise just
+        // output as geojson
+        Sink sink = null;
+
+        if (datas.size() > 1) {
+            URI uri = parseDataURI(datas.get(1));
+
+            VectorDataset dest = null;
+
+            //first see if dest is a workspace
+            Object to = null;
+            try {
+                to = open((Disposable)Drivers.open(uri));
+            }
+            catch(Exception e) {
+                if (debug) {
+                    print(e, cli);
+                }
+            }
+            if (to instanceof Dataset && !overwrite) {
+                throw destinationExists();
+            }
+
+            if (to == null) {
+                //see if we can create a new dataset directly
+                if (uri.getFragment() != null) {
+                    schema = Schema.build(uri.getFragment()).fields(schema.getFields()).schema();
+                }
+                dest = Drivers.create(schema, uri, VectorDataset.class);
+                if (dest == null) {
+                    throw new IllegalArgumentException("Unable to create dataset: " + uri);
+                }
+            }
+            else if (to instanceof Workspace) {
+                Workspace workspace = (Workspace) to;
+                Dataset existing = workspace.get(schema.getName());
+                if (existing == null) {
+                    dest = open((Workspace)to).create(schema);
+                } else {
+                    if (!overwrite) {
+                        throw destinationExists();
+                    }
+                    dest = (VectorDataset) existing;
+                }
+            }
+            else {
+                throw new IllegalArgumentException("Invalid destination: " + uri);
+            }
+
+            sink = new ToDataset(dest, orig);
+        }
+        else {
+            sink = new ToGeoJSON();
         }
 
         Cursor<Feature> o = null;
@@ -171,6 +209,10 @@ public class ConvertCmd extends JeoCmd {
             sink.cleanup(cli);
         }
 
+    }
+
+    private Exception destinationExists() {
+        throw new IllegalArgumentException("Destination dataset already exists, use --overwrite to force");
     }
 
     interface Sink {

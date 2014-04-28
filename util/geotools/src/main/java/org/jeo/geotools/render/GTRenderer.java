@@ -618,13 +618,13 @@ public class GTRenderer extends BaseRenderer {
     }
 
     @Override
-    protected void drawRasterABGR(ByteBuffer abgr, Rect pos, Rule rule) throws IOException {
-        abgr = toHeap(abgr);
+    protected void drawRasterRGBA(ByteBuffer rgba, Rect pos, Rule rule) throws IOException {
+        rgba = toHeap(rgba);
         WritableRaster raster = Raster.createInterleavedRaster(
-            new DataBufferByte(abgr.array(), abgr.capacity()), pos.width(), pos.height(),
-            pos.width() * 4, 4, new int[]{3,2,1}, null) ;
-        ColorModel cm = new ComponentColorModel(ColorSpace.getInstance(ColorSpace.CS_sRGB), false, false,
-                Transparency.OPAQUE, DataBuffer.TYPE_BYTE);
+            new DataBufferByte(rgba.array(), pos.area()), pos.width(), pos.height(),
+            pos.width() * 4, 4, new int[]{0,1,2,3}, null) ;
+        ColorModel cm = new ComponentColorModel(ColorSpace.getInstance(ColorSpace.CS_sRGB), true, false,
+                Transparency.TRANSLUCENT, DataBuffer.TYPE_BYTE);
         BufferedImage img = new BufferedImage(cm, raster, false, null);
         g.drawRenderedImage(img, transform(pos));
     }

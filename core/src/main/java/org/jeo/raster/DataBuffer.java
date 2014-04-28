@@ -119,6 +119,7 @@ public abstract class DataBuffer<T> {
      */
     public static <T> DataBuffer<T> resample(DataBuffer<T> buffer, Dimension from, Dimension to) {
         DataBuffer resampled = create(to.width()*to.height(), buffer.datatype());
+        resampled.buffer().order(buffer.buffer().order());
 
         double xratio = from.width() / (double)to.width();
         double yratio = from.height() / (double)to.height();

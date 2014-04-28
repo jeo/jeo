@@ -287,19 +287,26 @@ public abstract class BaseRenderer implements Renderer {
                 };
             }
 
-            drawRasterABGR(convertToABGR(raw, colormap, band), pos, rule);
+            drawRasterRGBA(convertToRGBA(raw, colormap, band, rule), pos, rule);
         }
         else {
-            // draw directly
-            drawRasterABGR(raw, pos, rule);
+            // apply opacity and draw directly
+            float opacity = rule.number(null, "raster-opacity", 1.0f);
+            byte alpha = (byte)(opacity*255);
+
+            for (int i = 3; i < raw.capacity(); i+= 4) {
+                raw.put(i, alpha);
+            }
+            raw.rewind();
+            drawRasterRGBA(raw, pos, rule);
         }
     }
 
-    ByteBuffer convertToABGR(ByteBuffer raw, Function<Double,RGB> colormap, Band band) throws IOException {
-        //TODO: alpha
+    ByteBuffer convertToRGBA(ByteBuffer raw, Function<Double,RGB> colormap, Band band, Rule rule) throws IOException {
+        byte alpha = (byte)(255*rule.number(null, "raster-opacity", 1f));
         int n = view.getWidth() * view.getHeight();
 
-        ByteBuffer abgr = ByteBuffer.allocate(n*4);
+        ByteBuffer rgba = ByteBuffer.allocate(n*4);
         DataBuffer<Number> db = DataBuffer.create(raw, band.datatype());
 
         NoData nodata = NoData.create(band.nodata());
@@ -307,12 +314,14 @@ public abstract class BaseRenderer implements Renderer {
         for (int i = 0; i < db.size(); i++) {
             Double val = nodata.valueOrNull(db.get().doubleValue());
             RGB color = colormap.apply(val);
-            abgr.put((byte)255).put((byte) color.getBlue())
-                .put((byte) color.getGreen()).put((byte) color.getRed());
+            rgba.put((byte) color.getRed());
+            rgba.put((byte) color.getGreen());
+            rgba.put((byte) color.getBlue());
+            rgba.put(alpha);
         }
 
-        abgr.flip();
-        return abgr;
+        rgba.flip();
+        return rgba;
     }
 
     void render(TileDataset data, RuleList rules) throws IOException {
@@ -489,7 +498,7 @@ public abstract class BaseRenderer implements Renderer {
      * @param pos The position in the view/window to draw the raster at.
      * @param rule The matching styling rule for the raster.
      */
-    protected void drawRasterABGR(ByteBuffer raster, Rect pos, Rule rule) throws IOException {
+    protected void drawRasterRGBA(ByteBuffer raster, Rect pos, Rule rule) throws IOException {
         throw new UnsupportedOperationException();
     }
 }

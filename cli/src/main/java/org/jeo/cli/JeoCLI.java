@@ -38,6 +38,7 @@ import com.google.common.base.Strings;
 import com.google.common.base.Throwables;
 import com.google.common.collect.Ordering;
 import com.google.common.primitives.Ints;
+import org.jeo.json.JeoJSONWriter;
 
 public class JeoCLI {
 
@@ -94,10 +95,10 @@ public class JeoCLI {
     }
 
     /**
-     * Returns a new GeoJSON writer connected to the console output stream.
+     * Returns a new JSON writer connected to the console output stream.
      */
-    public GeoJSONWriter newGeoJSONWriter() {
-        return new GeoJSONWriter(getConsole().getOutput(), 2);
+    public JeoJSONWriter newJSONWriter() {
+        return new JeoJSONWriter(getConsole().getOutput(), 2);
     }
 
     JCommander initJCommander() {

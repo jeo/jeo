@@ -29,6 +29,7 @@ import java.lang.reflect.Array;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -86,12 +87,12 @@ public class MemRaster implements RasterDataset {
 
     @Override
     public Driver<?> getDriver() {
-        return null;
+        return new Memory();
     }
 
     @Override
     public Map<Key<?>, Object> getDriverOptions() {
-        return null;
+        return Collections.EMPTY_MAP;
     }
 
     @Override

@@ -38,7 +38,7 @@ public class DriversCmd extends JeoCmd {
 
     @Override
     protected void doCommand(JeoCLI cli) throws Exception {
-        GeoJSONWriter w = cli.newGeoJSONWriter();
+        GeoJSONWriter w = cli.newJSONWriter();
 
         if (drivers != null && !drivers.isEmpty()) {
             if (drivers.size() > 1) {

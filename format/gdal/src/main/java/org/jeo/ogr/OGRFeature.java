@@ -80,6 +80,11 @@ public class OGRFeature extends BasicFeature {
         }
 
         @Override
+        protected boolean has(String key) {
+            return "geometry".equals(key) || f.GetFieldIndex(key) >= 0;
+        }
+
+        @Override
         protected Object get(String key) {
             return "geometry".equals(key) ? geo() : raw(f.GetFieldIndex(key)); 
         }

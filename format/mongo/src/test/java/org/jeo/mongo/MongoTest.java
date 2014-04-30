@@ -127,6 +127,9 @@ public class MongoTest {
             count++;
             assertNotNull(f.geometry());
             assertNotNull(f.get("STATE_NAME"));
+            assertTrue(f.has(f.schema().geometry().getName()));
+            assertTrue(f.has("STATE_NAME"));
+            assertFalse(f.has("NOT THERE AT ALL"));
         }
 
         assertEquals(49, count);

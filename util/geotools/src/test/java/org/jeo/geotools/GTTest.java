@@ -95,6 +95,9 @@ public class GTTest {
         assertEquals("bomb", f.get("name"));
         assertEquals(1, f.get("id"));
         assertEquals(10.99, f.get("price"));
+        assertTrue(f.has("geometry"));
+        assertTrue(f.has("price"));
+        assertFalse(f.has("NOT THERE AT ALL"));
     }
 
     @Test

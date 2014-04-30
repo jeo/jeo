@@ -45,4 +45,13 @@ public class EnvelopesTest {
         assertEquals(y1, e.getMinY(), 1e-6);
         assertEquals(y2, e.getMaxY(), 1e-6);
     }
+
+    @Test
+    public void testRandom() {
+        Envelope e = new Envelope(0,10,0,10);
+        Envelope r = Envelopes.random(e, 0.5f);
+        assertTrue(e.contains(r));
+        assertEquals(0.5f, r.getWidth() / e.getWidth(), 0.1);
+        assertEquals(0.5f, r.getHeight() / e.getHeight(), 0.1);
+    }
 }

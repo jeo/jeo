@@ -18,6 +18,9 @@ import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Polygon;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Utility class for {@link Envelope}.
  * 
@@ -143,6 +146,59 @@ public class Envelopes {
         double y2 = Double.parseDouble(split[3]);
 
         return new Envelope(x1,x2,y1,y2);
+    }
+
+    /**
+     * Generates a random envelope at the specified resolution and constrained by
+     * the specified bounds.
+     *
+     * @param bbox Envelope containing the randomly generated envelope.
+     * @param res Resolution of containing envelope to generate random envelope at, in the exclusive range (0,1).
+     *
+     * @return The randomly generated envelope.
+     */
+    public static Envelope random(Envelope bbox, float res) {
+        if (!(res > 0f && res < 1f)) {
+            throw new IllegalArgumentException("res must be in range (0,1)");
+        }
+        double w = bbox.getWidth() * res;
+        double h = bbox.getHeight() * res;
+
+        double maxx = bbox.getMaxX();
+        double maxy = bbox.getMaxY();
+
+        double x = maxx;
+        double y = maxy;
+        while ((x + w > maxx) || (y + h > maxy)) {
+            x = bbox.getMinX() + w*Math.random();
+            y = bbox.getMinY() + h*Math.random();
+        }
+
+        return new Envelope(x, x+w, y, y+h);
+    }
+
+    /**
+     * Generates a set of random bounding box constrained by area and resolution.
+     *
+     * @param bbox Envelope containing the randomly generated envelope.
+     * @param minRes Minimum resolution constraint.
+     * @param maxRes Maximum resolution constraint.
+     * @param n Number of bounding boxes to generate.
+     *
+     * @see #random(com.vividsolutions.jts.geom.Envelope, float)
+     */
+    public static List<Envelope> randoms(Envelope bbox, float minRes, float maxRes, int n) {
+        List<Envelope> list = new ArrayList<Envelope>(n);
+        for (int i = 0; i < n; i++) {
+            float r = 0;
+            do {
+                r = (float)(minRes + Math.random()*(maxRes - minRes));
+            }
+            while(!(r > 0 && r < 1));
+
+            list.add(random(bbox, r));
+        }
+        return list;
     }
 
     static void checkContains(Envelope e, Coordinate c) {

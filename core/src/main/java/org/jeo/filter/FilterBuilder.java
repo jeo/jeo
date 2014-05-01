@@ -256,4 +256,14 @@ public class FilterBuilder {
         math(Math.DIVIDE);
         return this;
     }
+
+    public FilterBuilder isNull() {
+        stack.push(new Null((Property) stack.pop(), false));
+        return this;
+    }
+
+    public FilterBuilder isNotNull() {
+        stack.push(new Null((Property) stack.pop(), true));
+        return this;
+    }
 }

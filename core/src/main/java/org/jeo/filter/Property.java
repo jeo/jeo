@@ -41,6 +41,24 @@ public class Property implements Expression {
         return property;
     }
 
+    /**
+     * Check to see if the provided object has the property. The return
+     * value of evaluate can be ambiguous (is there a property with a null value
+     * or just no property) so this method can be used if needed.
+     *
+     * @param obj the object to evaluate
+     * @return true if the property exists and false otherwise but does not check the value
+     */
+    public boolean hasProperty(Object obj) {
+        boolean has;
+        if (obj instanceof Feature) {
+            has = ((Feature) obj).has(property);
+        } else {
+            has = resolveMethod(obj, property) != null;
+        }
+        return has;
+    }
+
     @Override
     public Object evaluate(Object obj) {
         return resolve(obj);
@@ -68,23 +86,39 @@ public class Property implements Expression {
         return target;
     }
 
-    protected Object get(Object target, String prop) {
+    protected Method resolveMethod(Object target, String prop) {
         Class<?> clazz = target.getClass();
-        for (String name : 
+        Method found = null;
+        for (String name :
             Arrays.asList(prop, "get"+Character.toUpperCase(prop.charAt(0))+prop.substring(1))) {
-
             try {
                 Method m = clazz.getMethod(name);
                 if (m != null && m.getReturnType() != null) {
-                    return m.invoke(target);
+                    found = m;
+                    break;
                 }
+            } catch (NoSuchMethodException ex) {
+                // try again
+            } catch (SecurityException ex) {
+                // dang
+            }
+        }
+        return found;
+    }
+
+    protected Object get(Object target, String prop) {
+        Object result = null;
+        Method method = resolveMethod(target, prop);
+        if (method != null) {
+            try {
+                result = method.invoke(target);
             } catch (Exception e) {
                 if (LOG.isTraceEnabled()) {
-                    LOG.trace("Error invoking method: "+name+" of class " + clazz.getName(), e);
+                    LOG.trace("Error invoking method: "+ method.getName() +" of class " + target.getClass().getName(), e);
                 }
-            } 
+            }
         }
-        return null;
+        return result;
     }
 
     @Override

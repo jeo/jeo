@@ -114,6 +114,10 @@ public class FilterVisitor {
         return obj;
     }
 
+    public Object visit(Null<?> isNull, Object obj) {
+        return obj;
+    }
+
     public Object visit(Filter<?> filter, Object obj) {
         return obj;
     }

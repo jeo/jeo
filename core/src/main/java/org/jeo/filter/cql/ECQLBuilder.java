@@ -200,12 +200,12 @@ public class ECQLBuilder extends ECQLParser {
             // Null predicate
             // ----------------------------------------
         case JJTNULLPREDICATENODE:
+            h.isNull();
             return;
-            //return this.builder.buildPropertyIsNull();
 
         case JJTNOTNULLPREDICATENODE:
+            h.isNotNull();
             return;
-            //return this.builder.buildPorpertyNotIsNull();
 
             // ----------------------------------------
             // temporal predicate actions

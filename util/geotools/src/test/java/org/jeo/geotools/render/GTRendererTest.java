@@ -91,7 +91,7 @@ public class GTRendererTest {
     public void testRaster() throws Exception {
         Dataset dem = TestData.dem();
 
-        Colorizer c = Colorizer.build().stop(1000, RGB.white)
+        Colorizer c = Colorizer.build().stop(1000d, RGB.white)
             .interpolate(Pair.of(1000.0, RGB.white), Pair.of(2000.0, RGB.red), 100).colorizer();
         Style style = Style.build().rule().select("*").rule(Colorizer.encode(c, new Rule())).style();
 

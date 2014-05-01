@@ -22,10 +22,7 @@ import org.jeo.util.Convert;
 import org.jeo.util.Interpolate;
 import org.jeo.util.Pair;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.TreeSet;
+import java.util.*;
 
 /**
  * Maps numeric values to colors.
@@ -63,9 +60,14 @@ public class Colorizer {
     }
 
     /**
+     * Default default mode.
+     */
+    static final Mode DEFAULT_MODE = Mode.DISCRETE;
+
+    /**
      * Default mode.
      */
-    Mode mode = Mode.LINEAR;
+    Mode mode = DEFAULT_MODE;
 
     /**
      * Default color.
@@ -106,19 +108,48 @@ public class Colorizer {
      * @return The mapped color.
      */
     public RGB map(Double value) {
-        if (value == null || value.isNaN()) {
+        if (value == null || value.isNaN() || stops.isEmpty()) {
             return color;
         }
 
-        Stop last = null;
-        for (Stop stop : stops) {
-            if (stop.value >= value) {
+        Iterator<Stop> it = stops.iterator();
+        Stop curr = null, next = null;
+        do {
+            next = it.next();
+            if (next.value > value) {
                 break;
             }
-            last = stop;
+
+            curr = next;
+            next = null;
+        }
+        while (it.hasNext());
+
+        if (curr == null) {
+            return color;
         }
 
-        return last != null ? last.color : color;
+        switch(curr.mode) {
+            case DISCRETE:
+                return curr.color;
+            case LINEAR:
+                if (next != null) {
+                    double amt = (value-curr.value)/(next.value - curr.value);
+                    return curr.color.interpolate(next.color, amt);
+                }
+                return curr.color;
+            case EXACT:
+                if (Math.abs(value.doubleValue() - curr.value) < curr.epsilon) {
+                    return curr.color;
+                }
+                return color;
+        }
+
+        return color;
+    }
+
+    public Rule rule() {
+        return encode(this, new Rule());
     }
 
     /**
@@ -128,11 +159,18 @@ public class Colorizer {
         public final Double value;
         public final RGB color;
         public final Mode mode;
+        public final Double epsilon;
 
-        public Stop(double value, RGB color, Mode mode) {
+        public Stop(double value, RGB color, Mode mode, Double epsilon) {
             this.value = value;
             this.color = color;
             this.mode = mode;
+            this.epsilon = epsilon;
+        }
+
+        @Override
+        public String toString() {
+            return String.format("stop(%.2f, %s, %s, %.2f)", value, color, mode, epsilon);
         }
     }
 
@@ -153,6 +191,8 @@ public class Colorizer {
             };
             f.getArgs().add(new Literal(stop.value));
             f.getArgs().add(new Literal(stop.color));
+            f.getArgs().add(new Literal(stop.mode));
+            f.getArgs().add(new Literal(stop.epsilon));
             mixed.getExpressions().add(f);
         }
 
@@ -167,7 +207,7 @@ public class Colorizer {
         Colorizer.Builder cb = Colorizer.build();
 
         cb.mode(Colorizer.Mode.valueOf(
-            rule.string(null, "raster-colorizer-default-mode", "linear").toUpperCase()));
+                rule.string(null, "raster-colorizer-default-mode", "linear").toUpperCase()));
         cb.color(rule.color(null, "raster-colorizer-default-color", RGB.black));
 
         if (rule.has("raster-colorizer-stops")) {
@@ -176,10 +216,26 @@ public class Colorizer {
             for (Expression expr : m.getExpressions()) {
                 Function stop = (Function) expr;
                 List<Expression> args = stop.getArgs();
-                Number value =  Convert.toNumber(args.get(0).evaluate(null)).get();
+                Double value =  Convert.toNumber(args.get(0).evaluate(null)).get().doubleValue();
                 RGB color = Convert.toColor(args.get(1).evaluate(null)).get();
-
-                cb.stop(value.doubleValue(), color);
+                if (args.size() > 2) {
+                    Mode mode = Mode.valueOf(args.get(2).evaluate(null).toString().toUpperCase());
+                    if (args.size() > 3) {
+                        double epsilon = Convert.toNumber(args.get(3).evaluate(null), Double.class).get();
+                        if (epsilon != 0d) {
+                            cb.stop(value, color, epsilon);
+                        }
+                        else {
+                            cb.stop(value, color, mode);
+                        }
+                    }
+                    else {
+                        cb.stop(value, color, mode);
+                    }
+                }
+                else {
+                    cb.stop(value, color);
+                }
             }
         }
 
@@ -226,15 +282,27 @@ public class Colorizer {
         /**
          * Adds a new stop to the colorizer using the default mode.
          */
-        public Builder stop(double value, RGB color) {
-            return stop(value, color, null);
+        public Builder stop(Double value, RGB color) {
+            return stop(value, color, DEFAULT_MODE);
         }
 
         /**
          * Adds a new stop to the colorizer using the specified mode.
          */
-        public Builder stop(double value, RGB color, Mode mode) {
-            stops.add(new Stop(value, color, mode));
+        public Builder stop(Double value, RGB color, Mode mode) {
+            stops.add(new Stop(value, color, mode, 0d));
+            return this;
+        }
+
+        /**
+         * Adds a new stop to the colorizer using exact mode.
+         * <p>
+         * The <tt>epsilon</tt> parameter is used to create "fuzzy" match. The stop will match values in the range
+         * [stop.value, stop.value+epsilon)
+         * </p>
+         */
+        public Builder stop(Double value, RGB color, double epsilon) {
+            stops.add(new Stop(value, color, Mode.EXACT, epsilon));
             return this;
         }
 

@@ -14,9 +14,12 @@
  */
 package org.jeo.geotools;
 
+import java.awt.*;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.awt.image.BufferedImage;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Iterator;
+import java.util.*;
 import java.util.List;
 
 import org.geotools.factory.CommonFactoryFinder;
@@ -34,6 +37,9 @@ import org.jeo.filter.Function;
 import org.jeo.filter.Literal;
 import org.jeo.filter.Mixed;
 import org.jeo.filter.Property;
+import org.jeo.geotools.render.GTRenderer;
+import org.jeo.geotools.render.GTRendererFactory;
+import org.jeo.map.View;
 import org.jeo.proj.Proj;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
@@ -193,6 +199,56 @@ public class GT {
         }
 
         return e;
+    }
+
+    /**
+     * Renders the view to a buffered image.
+     *
+     * @param v The map view.
+     *
+     * @return The rendered image.
+     */
+    public static BufferedImage draw(View v) throws IOException {
+        BufferedImage img = new BufferedImage(v.getWidth(), v.getHeight(), BufferedImage.TYPE_4BYTE_ABGR);
+
+        Map<Object,Object> opts = new HashMap<Object, Object>();
+        opts.put(GTRendererFactory.IMAGE, img);
+
+        GTRenderer r = new GTRendererFactory().create(v, opts);
+        r.init(v, null);
+        r.render(null);
+
+        return img;
+    }
+
+    /**
+     * Renders the view into a Frame and shows it.
+     *
+     * @param v The map view.
+     */
+    public static void drawAndShow(View v) throws IOException {
+        final BufferedImage img = draw(v);
+
+        Frame frame = new Frame();
+        frame.addWindowListener(new WindowAdapter() {
+            public void windowClosing(WindowEvent e) {
+                e.getWindow().dispose();
+            }
+        });
+
+        Panel p = new Panel() {
+            {
+                setPreferredSize(new Dimension(img.getWidth(), img.getHeight()));
+            }
+
+            public void paint(Graphics g) {
+                g.drawImage(img, 0, 0, this);
+            }
+        };
+
+        frame.add(p);
+        frame.pack();
+        frame.setVisible(true);
     }
 }
 

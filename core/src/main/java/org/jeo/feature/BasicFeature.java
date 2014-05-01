@@ -124,40 +124,22 @@ public class BasicFeature implements Feature {
         this.storage = storage;
     }
 
-    /**
-     * Feature identifier.
-     */
+    @Override
     public String getId() {
         return id;
     }
     
-    /**
-     * Coordinate reference system for the feature.
-     * <p>
-     * Generally the method {@link #crs()} should be used.
-     * </p>
-     * @return The crs, or <code>null</code> if none been set.
-     */
+    @Override
     public CoordinateReferenceSystem getCRS() {
         return crs;
     }
     
-    /**
-     * Sets the coordinate reference system for the feature.
-     */
+    @Override
     public void setCRS(CoordinateReferenceSystem crs) {
         this.crs = crs;
     }
     
-    /**
-     * The derived coordinate reference system for the feature.
-     * <p>
-     * If {@link #getCRS()} returns a value it is returned, otherwise if the feature has a 
-     * schema object then {@link Schema#crs()} is returned. Otherwise this method returns 
-     * <code>null</code>.
-     * </p>
-     * @return The derived crs.
-     */
+    @Override
     public CoordinateReferenceSystem crs() {
         if (crs != null) {
             return crs;
@@ -165,37 +147,23 @@ public class BasicFeature implements Feature {
     
         return storage.crs();
     }
+
+    @Override
+    public boolean has(String key) {
+        return storage.has(key);
+    }
     
-    /**
-     * Gets a named attribute of the feature.
-     * <p>
-     * This method should return <code>null</code> if no such attribute named <tt>key</tt> exists.
-     * </p>
-     * @param key The key or name of the attribute.
-     * 
-     * @return The attribute value or <code>null</code>.
-     */
+    @Override
     public Object get(String key) {
         return storage.get(key);
     }
     
-    /**
-     * Sets a named attribute of the feature.
-     *
-     * @param key The key or name of the attribute. 
-     * @param val The new value of the attribute. 
-     */
+    @Override
     public void put(String key, Object val) {
         storage.put(key, val);
     }
 
-    /**
-     * Sets the default geometry for the feature.
-     * 
-     * @param g The geometry.
-     * 
-     * @see #geometry()
-     */
+    @Override
     public void put(Geometry g) {
         //TODO:optimize before triggering schema creation
         Field gf = schema().geometry();
@@ -206,48 +174,32 @@ public class BasicFeature implements Feature {
         put(gf.getName(), g);
     }
 
+    @Override
     public Object get(int index) {
         return storage.get(index);
     }
-
+    
+    @Override
     public void set(int index, Object val) {
         storage.set(index, val);
     }
 
-    /**
-     * Derived (default) geometry of the feature.
-     * <p>
-     * If the feature object has a schema set then {@link Schema#geometry()} is used to locate 
-     * a geometry object. If unavailable the {@link #findGeometry()} is used to locate a geometry
-     * instance.
-     * </p>
-     * @return a {@link Geometry} object, or <code>null</code> if it could not be found.
-     */
+    @Override
     public Geometry geometry() {
         return storage.geometry();
     }
 
-    /**
-     * The lazily created schema for the feature. 
-     * <p>
-     * If the {@link #schema} member is set for the feature it is returned. Otherwise the 
-     * {@link #buildSchema()} is used to derive a schema for the feature.
-     * </p>
-     */
+    @Override
     public Schema schema() {
         return storage.schema();
     }
 
-    /**
-     * Returns an immutable list view of the feature
-     */
+    @Override
     public List<Object> list() {
         return storage.list();
     }
     
-    /**
-     * Returns an immutable map view of the feature.
-     */
+    @Override
     public Map<String,Object> map() {
         return storage.map();
     }
@@ -349,6 +301,8 @@ public class BasicFeature implements Feature {
         protected abstract List<Object> list();
 
         protected abstract Map<String,Object> map();
+
+        protected abstract boolean has(String key);
     }
 
     static class ListStorage extends Storage {
@@ -384,6 +338,7 @@ public class BasicFeature implements Feature {
             return null;
         }
 
+        @Override
         protected Schema buildSchema() {
             List<Field> fields = new ArrayList<Field>();
             int i = 0;
@@ -402,10 +357,17 @@ public class BasicFeature implements Feature {
             return new Schema("feature", fields);
         }
 
+        @Override
+        protected boolean has(String key) {
+            return schema().indexOf(key) >= 0;
+        }
+
+        @Override
         protected Object get(int i) {
             return list.get(i);
         }
 
+        @Override
         protected void set(int i, Object value) {
             list.set(i,  value);
         }
@@ -469,6 +431,11 @@ public class BasicFeature implements Feature {
             }
 
             return null;
+        }
+
+        @Override
+        protected boolean has(String key) {
+            return map.containsKey(key);
         }
 
         @Override

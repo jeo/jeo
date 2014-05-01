@@ -38,30 +38,42 @@ public class FeatureWrapper implements Feature {
         return delegate;
     }
 
+    @Override
     public String getId() {
         return delegate.getId();
     }
 
+    @Override
     public CoordinateReferenceSystem getCRS() {
         return delegate.getCRS();
     }
 
+    @Override
     public void setCRS(CoordinateReferenceSystem crs) {
         delegate.setCRS(crs);
     }
 
+    @Override
     public CoordinateReferenceSystem crs() {
         return delegate.crs();
     }
 
+    @Override
+    public boolean has(String key) {
+        return delegate.has(key);
+    }
+
+    @Override
     public Object get(String key) {
         return delegate.get(key);
     }
 
+    @Override
     public Object get(int index) {
         return delegate.get(index);
     }
 
+    @Override
     public void put(String key, Object val) {
         delegate.put(key, val);
     }
@@ -71,22 +83,27 @@ public class FeatureWrapper implements Feature {
         delegate.put(g);
     }
 
+    @Override
     public void set(int index, Object val) {
         delegate.set(index, val);
     }
 
+    @Override
     public Geometry geometry() {
         return delegate.geometry();
     }
 
+    @Override
     public Schema schema() {
         return delegate.schema();
     }
 
+    @Override
     public List<Object> list() {
         return delegate.list();
     }
 
+    @Override
     public Map<String, Object> map() {
         return delegate.map();
     }

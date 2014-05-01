@@ -43,6 +43,11 @@ public class GTFeature extends BasicFeature {
             }
 
             @Override
+            protected boolean has(String key) {
+                return feature.getFeatureType().indexOf(key) >= 0;
+            }
+
+            @Override
             protected Object get(String key) {
                 return feature.getAttribute(key); 
             }

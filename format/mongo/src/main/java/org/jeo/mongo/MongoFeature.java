@@ -99,11 +99,22 @@ public class MongoFeature extends BasicFeature {
         }
 
         @Override
-        public Object get(String key) {
-            for (Path g : mapping.getGeometryPaths()) {
-                if (g.join().equals(key)) {
-                    return GeoJSON.toGeometry((DBObject)find(g));
+        protected boolean has(String key) {
+            boolean has = mapping.getGeometryPath(key) != null;
+            if (!has) {
+                Object f = find(mapping.getPropertyPath());
+                if (f instanceof DBObject) {
+                    has = ((DBObject) f).containsField(key);
                 }
+            }
+            return has;
+        }
+
+        @Override
+        public Object get(String key) {
+            Path g = mapping.getGeometryPath(key);
+            if (g != null) {
+                return GeoJSON.toGeometry((DBObject)find(g));
             }
             return find(mapping.getPropertyPath().append(key));
         }

@@ -163,6 +163,21 @@ public abstract class VectorApiTestBase {
         assertCovered(data.cursor(new Query().filter(String.format("IN ('%s')", fid))), "TX");
     }
 
+    @Test
+    public void testFeature() throws Exception {
+        Cursor<Feature> cursor = data.cursor(new Query());
+        Feature next;
+        try {
+            assertTrue(cursor.hasNext());
+            next = cursor.next();
+        } finally {
+            cursor.close();
+        }
+        assertTrue(next.has(next.schema().geometry().getName()));
+        assertTrue(next.has("STATE_NAME"));
+        assertFalse(next.has("NOT THERE AT ALL"));
+    }
+
     void assertNotCovered(Cursor<Feature> cursor, String... abbrs) throws IOException {
         final Set<String> set = Sets.newHashSet(abbrs);
         try {

@@ -97,6 +97,17 @@ public class Mapping {
         return this;
     }
 
+    Path getGeometryPath(String key) {
+        Path p = null;
+        for (Path g : geo) {
+            if (g.join().equals(key)) {
+                p = g;
+                break;
+            }
+        }
+        return p;
+    }
+
     List<Path> getGeometryPaths() {
         return geo;
     }

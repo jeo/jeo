@@ -61,6 +61,14 @@ public interface Feature {
     CoordinateReferenceSystem crs();
 
     /**
+     * Check if a feature has an attribute. This should return true if the key
+     * exists even if the value is null.
+     *
+     * @return true if the attribute key is present, false otherwise.
+     */
+    boolean has(String key);
+
+    /**
      * Gets a named attribute of the feature.
      * <p>
      * This method should return <code>null</code> if no such attribute named <tt>key</tt> exists.

@@ -245,6 +245,21 @@ public class RGB {
         return new RGB((int)Math.round(255*r), (int)Math.round(255*g), (int)Math.round(255*b));
     }
 
+    /**
+     * Creates a new color from hue, saturation, lightness (HSL) values.
+     *
+     * @param hsl 3 element array of hue,saturation, and lightness values.
+     *
+     * @return The new color.
+     */
+    public static RGB fromHSL(double[] hsl) {
+        if (hsl.length != 3) {
+            throw new IllegalArgumentException("input must be array of length 3");
+        }
+
+        return fromHSL(hsl[0], hsl[1], hsl[2]);
+    }
+
     static double hueTorgb(double p, double q, double t) {
         if (t < 0) {
             t += 1;
@@ -302,6 +317,26 @@ public class RGB {
     }
 
     /**
+     * Returns the interpolated color value between this color and the specified color.
+     *
+     * @param other The other color.
+     * @param amt Number between 0 and 1 inclusive.
+     *
+     * @return The interpolated value.
+     */
+    public RGB interpolate(RGB other, double amt) {
+        if (amt < 0 || amt > 1) {
+            throw new IllegalArgumentException("amount must be in range [0,1]");
+        }
+
+        double[] hsl1 = hsl();
+        double[] hsl2 = other.hsl();
+        double[] dhsl = sub(hsl2, hsl1, hsl2);
+
+        return fromHSL(doInterpolate(hsl1, dhsl, amt, new double[3]));
+    }
+
+    /**
      * Interpolates a number of RGB values between this color and the specified color.
      * 
      * @param other The color to interpolate to.
@@ -313,22 +348,31 @@ public class RGB {
     public List<RGB> interpolate(RGB other, int n, Interpolate.Method method) {
         double[] hsl1 = hsl();
         double[] hsl2 = other.hsl();
-        double[] dhsl = new double[3];
-        for (int i = 0; i < dhsl.length; i++) {
-            dhsl[i] = hsl2[i] - hsl1[i];
-        }
+        double[] dhsl = sub(hsl2, hsl1, hsl2);
 
         Iterator<Double> alphas = Interpolate.interpolate(a, other.a, n, method).iterator();
         List<RGB> vals = new ArrayList<RGB>(n+1);
+        double[] hsl = new double[3];
         for (Double d : Interpolate.interpolate(0, n, n, method)) {
-            double h = hsl1[0] + (d/((float)n)) * dhsl[0];
-            double s = hsl1[1] + (d/((float)n)) * dhsl[1];
-            double l = hsl1[2] + (d/((float)n)) * dhsl[2];
-
-            vals.add(fromHSL(h, s, l).alpha(alphas.next().intValue()));
+            doInterpolate(hsl1, dhsl, d/((float)n), hsl);
+            vals.add(fromHSL(hsl).alpha(alphas.next().intValue()));
         }
 
         return vals;
+    }
+
+    double[] doInterpolate(double[] hsl, double[] dhsl, double amt,  double[] result) {
+        result[0] = hsl[0] + amt * dhsl[0];
+        result[1] = hsl[1] + amt * dhsl[1];
+        result[2] = hsl[2] + amt * dhsl[2];
+        return result;
+    }
+
+    double[] sub(double[] d1, double[] d2, double[] res) {
+        for (int i = 0; i < d1.length; i++) {
+            res[i] = d1[i] - d2[i];
+        }
+        return res;
     }
 
     void parse(String rgb) {

@@ -51,4 +51,14 @@ public abstract class Function implements Expression {
     public Object accept(FilterVisitor visitor, Object obj) {
         return visitor.visit(this, obj);
     }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder(name).append("(");
+        for (Expression arg : args) {
+            sb.append(arg.toString()).append(",");
+        }
+        sb.setLength(sb.length()-1);
+        return sb.append(")").toString();
+    }
 }

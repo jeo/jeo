@@ -61,4 +61,13 @@ public class Mixed implements Expression {
         mixed.exprs.add(expr);
         return mixed;
     }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        for (Expression e : exprs){
+            sb.append(" ").append(e.toString());
+        }
+        return sb.toString();
+    }
 }

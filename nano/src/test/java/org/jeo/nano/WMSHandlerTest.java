@@ -111,7 +111,9 @@ public class WMSHandlerTest extends HandlerTestSupport {
         Schema s2 = new SchemaBuilder("s2").field("geom", LineString.class, "EPSG:3857").schema();
         Handle<Dataset> ds1 = server.createVectorDataset("ds1", "DataSet 1", new Envelope(-105, -100, 40, 45), s1);
         Handle<Dataset> ds2 = server.createVectorDataset("ds2", "DataSet 2", new Envelope(-42.42, -42, 42, 42.42), s2);
-        server.createWorkspace("ws", ds1, ds2);
+        Handle<Dataset> ds3 = server.createVectorDataset("ds3", "DataSet 3", new Envelope(-42.42, -42, 42, 42.42), s2);
+        Handle<Dataset> ds4 = server.createVectorDataset("ds4", "DataSet 4", new Envelope(-42.42, -42, 42, 42.42), s2);
+        server.createWorkspace("ws", ds1, ds2, ds3, ds4);
         server.buildRegistry().replay();
     }
 
@@ -153,35 +155,56 @@ public class WMSHandlerTest extends HandlerTestSupport {
     @Test
     public void testGetMap() throws Exception {
         makeTestData();
-        final boolean[] called = new boolean[] {false};
-        handler = new WMSHandler() {
+        WMSHandlerRenderCapture handler = new WMSHandlerRenderCapture();
 
-            @Override
-            NanoHTTPD.Response render(RendererFactory f, List<Dataset> dataSet, List<Style> styles,
-                CoordinateReferenceSystem crs, Envelope bbox, int width, int height,
-                String format, Filter filter) throws IOException {
-                assertEquals("ds1", dataSet.get(0).getName());
-                assertEquals(1, styles.size()); // generated style
-                assertEquals(new Integer(4326), Proj.epsgCode(crs));
-                assertEquals(512, width);
-                assertEquals(256, height);
-                assertEquals("image/png", format);
-                assertNotNull(filter);
-                called[0] = true;
-                super.render(f, dataSet, styles, crs, bbox, width, height, format, filter);
-                return null;
-            }
-
-
-        };
         handler.handle(request("request","getmap",
-                               "layers","ws:ds1",
+                               "layers","ws:ds1,ws:ds2,ws:ds3,ws:ds4",
                                "styles","",
                                "crs","epsg:4326",
                                "bbox","-180,-90,180,90",
                                "width","512",
                                "height","256",
-                               "cql_filter","VALUE > 5"), server.server);
-        assertTrue(called[0]);
+                               "cql_filter","VALUE > 5;;VALUE < 5"), server.server);
+
+        assertNotNull(handler.dataSet);
+        assertEquals(4, handler.dataSet.size());
+        assertEquals("ds1", handler.dataSet.get(0).getName());
+        assertEquals("ds2", handler.dataSet.get(1).getName());
+        assertEquals("ds3", handler.dataSet.get(2).getName());
+        assertEquals("ds4", handler.dataSet.get(3).getName());
+        assertEquals(1, handler.styles.size()); // generated style
+        assertEquals(new Integer(4326), Proj.epsgCode(handler.crs));
+        assertEquals(512, handler.width);
+        assertEquals(256, handler.height);
+        assertEquals("image/png", handler.format);
+        assertEquals(3, handler.filters.size());
+        assertEquals("[VALUE] > 5", handler.filters.get(0).toString());
+        assertEquals(null, handler.filters.get(1));
+        assertEquals("[VALUE] < 5", handler.filters.get(2).toString());
+    }
+
+    static class WMSHandlerRenderCapture extends WMSHandler {
+        List<Dataset> dataSet;
+        List<Style> styles;
+        CoordinateReferenceSystem crs;
+        Envelope bbox;
+        int width;
+        int height;
+        String format;
+        List<Filter> filters;
+        @Override
+            NanoHTTPD.Response render(RendererFactory f, List<Dataset> dataSet, List<Style> styles,
+                CoordinateReferenceSystem crs, Envelope bbox, int width, int height,
+                String format, List<Filter> filters) throws IOException {
+                this.dataSet = dataSet;
+                this.styles = styles;
+                this.crs = crs;
+                this.bbox = bbox;
+                this.width = width;
+                this.height = height;
+                this.format = format;
+                this.filters = filters;
+                return super.render(f, dataSet, styles, crs, bbox, width, height, format, filters);
+            }
     }
 }

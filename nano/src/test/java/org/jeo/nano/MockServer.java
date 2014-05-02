@@ -266,7 +266,7 @@ public class MockServer {
                 }
                 return null;
             }
-        });
+        }).anyTimes();
         expect(handle.resolve()).andReturn(ws).anyTimes();
         expect(reg.get(name, Workspace.class)).andReturn(ws).anyTimes();
         return handle;

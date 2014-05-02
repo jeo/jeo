@@ -72,12 +72,13 @@ public class WMSHandler extends OWSHandler {
     // for testing
     NanoHTTPD.Response render(RendererFactory factory, List<Dataset> dataSet, List<Style> styles,
             CoordinateReferenceSystem crs, Envelope bbox, int width, int height,
-            String mimeType, Filter filter) throws IOException {
+            String mimeType, List<Filter> filters) throws IOException {
         MapBuilder mb = new MapBuilder();
         ByteArrayOutputStream bout = new ByteArrayOutputStream();
         mb.bounds(bbox).crs(crs).size(width, height);
-        for (Dataset ds : dataSet) {
-            mb.layer(ds, filter);
+        for (int i = 0; i < dataSet.size(); i++) {
+            Filter filter = i < filters.size() ? filters.get(i) : null;
+            mb.layer(dataSet.get(i), filter);
         }
         for (Style s : styles) {
             mb.style(s);
@@ -311,7 +312,7 @@ public class WMSHandler extends OWSHandler {
             String filterSpec = getParameter("cql_filter", false);
             CoordinateReferenceSystem crs = getCRS();
             Envelope bbox = null;
-            Filter filter = null;
+            List<Filter> filters = new ArrayList<Filter>(3);
 
             if (crs != null) {
                 // if geographic, flip axis parsing
@@ -333,16 +334,23 @@ public class WMSHandler extends OWSHandler {
             }
 
             if (filterSpec != null) {
-                try {
-                    filter = CQL.parse(filterSpec);
-                } catch (ParseException pe) {
-                    addError("Invalid filter specifier : " + pe.getMessage());
+                String[] parts = filterSpec.split(";");
+                if (parts.length > datasets.size()) {
+                    addError(parts.length + " filters provided but only " + datasets.size() + " layers");
+                }
+                for (int i = 0; i < parts.length; i++) {
+                    try {
+                        Filter f = parts[i].length() > 0 ? CQL.parse(parts[i]) : null;
+                        filters.add(f);
+                    } catch (ParseException pe) {
+                        addError("Invalid filter specifier [" + (i+1) + "] : " + pe.getMessage());
+                    }
                 }
             }
 
             NanoHTTPD.Response resp;
             if (errors == null) {
-                 resp = render(it.next(), datasets, styles, crs, bbox, width, height, format, filter);
+                 resp = render(it.next(), datasets, styles, crs, bbox, width, height, format, filters);
             } else {
                 StringBuilder sb = new StringBuilder();
                 for (String e : errors) {

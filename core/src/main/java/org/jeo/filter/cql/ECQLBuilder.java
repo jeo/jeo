@@ -102,7 +102,7 @@ public class ECQLBuilder extends ECQLParser {
             h.add();
             return;
         case JJTSUBTRACTNODE:
-            h.substract();
+            h.subtract();
             return;
         case JJTMULNODE:
             h.multiply();

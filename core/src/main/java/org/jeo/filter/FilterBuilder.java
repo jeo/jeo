@@ -37,7 +37,7 @@ import java.util.List;
  */
 public class FilterBuilder {
 
-    Deque<Object> stack = new ArrayDeque<Object>();
+    protected Deque<Object> stack = new ArrayDeque<Object>();
 
     public FilterBuilder() {
     }

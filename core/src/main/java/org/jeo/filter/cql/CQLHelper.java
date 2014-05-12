@@ -226,4 +226,12 @@ class CQLHelper {
     public void divide() {
         builder.divide();
     }
+
+    public void isNull() {
+        builder.isNull();
+    }
+
+    public void isNotNull() {
+        builder.isNotNull();
+    }
 }

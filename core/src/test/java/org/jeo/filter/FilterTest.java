@@ -132,4 +132,20 @@ public class FilterTest {
 
         assertTrue(new Like(new Property("num"), new Literal("123%"), false).apply(f));
     }
+
+    @Test
+    public void testNull() {
+        Map<String,Object> map = new HashMap<String, Object>();
+        map.put("x", null);
+        map.put("y", 1);
+
+        Feature f = new BasicFeature(null, map);
+        assertTrue(new Null("x", false).apply(f));
+        assertFalse(new Null("y", false).apply(f));
+        assertFalse(new Null("x", true).apply(f));
+        assertTrue(new Null("y", true).apply(f));
+        // missing properties always short-cut to false
+        assertFalse(new Null("z", false).apply(f));
+        assertFalse(new Null("z", true).apply(f));
+    }
 }

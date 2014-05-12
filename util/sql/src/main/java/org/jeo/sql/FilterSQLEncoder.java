@@ -268,22 +268,22 @@ public class FilterSQLEncoder extends FilterVisitor {
         
         String function = null;
         switch(spatial.getType()) {
-        case INTERSECT:
+        case INTERSECTS:
             function = "ST_Intersects";
             break;
-        case COVER:
+        case COVERS:
             function = "ST_Covers";
             break;
-        case CROSS:
+        case CROSSES:
             function = "ST_Crosses";
             break;
         case DISJOINT:
             function = "ST_Disjoint";
             break;
-        case OVERLAP:
+        case OVERLAPS:
             function = "ST_Overlaps";
             break;
-        case TOUCH:
+        case TOUCHES:
             function = "ST_Touches";
             break;
         case WITHIN:

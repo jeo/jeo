@@ -74,7 +74,7 @@ public class CQLTest {
     }
 
     @Test
-    public void testSpatial() {
+    public void testSpatial() throws Exception {
         String[] ops = {
             "EQUALS",
             "DISJOINT",
@@ -89,13 +89,8 @@ public class CQLTest {
             // "BEYOND"
         };
         for (String op: ops) {
-            try {
-                Filter f = CQL.parse(op + "(the_geom, POINT(0 0))");
-                assertTrue(f instanceof Spatial);
-
-            } catch (ParseException ex) {
-                fail("expected " + op + " to parse");
-            }
+            Spatial f = (Spatial) CQL.parse(op + "(the_geom, POINT(0 0))");
+            assertEquals("[the_geom] " + op + " POINT (0 0)", f.toString());
         }
     }
 

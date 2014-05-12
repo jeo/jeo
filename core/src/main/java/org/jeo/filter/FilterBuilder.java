@@ -127,36 +127,36 @@ public class FilterBuilder {
         return spatial(Spatial.Type.EQUALS);
     }
 
-    public FilterBuilder intersect() {
-        return spatial(Spatial.Type.INTERSECT);
+    public FilterBuilder intersects() {
+        return spatial(Spatial.Type.INTERSECTS);
     }
 
-    public FilterBuilder touch() {
-        return spatial(Spatial.Type.TOUCH);
+    public FilterBuilder touches() {
+        return spatial(Spatial.Type.TOUCHES);
     }
 
     public FilterBuilder disjoint() {
         return spatial(Spatial.Type.DISJOINT);
     }
 
-    public FilterBuilder overlap() {
-        return spatial(Spatial.Type.OVERLAP);
+    public FilterBuilder overlaps() {
+        return spatial(Spatial.Type.OVERLAPS);
     }
 
-    public FilterBuilder cross() {
-        return spatial(Spatial.Type.CROSS);
+    public FilterBuilder crosses() {
+        return spatial(Spatial.Type.CROSSES);
     }
 
-    public FilterBuilder cover() {
-        return spatial(Spatial.Type.COVER);
+    public FilterBuilder covers() {
+        return spatial(Spatial.Type.COVERS);
     }
 
     public FilterBuilder within() {
         return spatial(Spatial.Type.WITHIN);
     }
 
-    public FilterBuilder contain() {
-        return spatial(Spatial.Type.CONTAIN);
+    public FilterBuilder contains() {
+        return spatial(Spatial.Type.CONTAINS);
     }
 
     public FilterBuilder bbox() {

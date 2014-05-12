@@ -248,20 +248,21 @@ public class CQLBuilder extends CQLParser {
             // routine invocation Geo Operation
             // -------------------TokenAdapter.newAdapterFor(cqlNode.getToken())---------------------
         case JJTROUTINEINVOCATION_GEOOP_EQUAL_NODE:
+            h.equals();
             return;
         case JJTROUTINEINVOCATION_GEOOP_DISJOINT_NODE:
             h.disjoint();
             return;
         case JJTROUTINEINVOCATION_GEOOP_INTERSECT_NODE:
-            h.intersect();
+            h.intersects();
             return;
 
         case JJTROUTINEINVOCATION_GEOOP_TOUCH_NODE:
-            h.touch();
+            h.touches();
             return;
 
         case JJTROUTINEINVOCATION_GEOOP_CROSS_NODE:
-            h.cross();
+            h.crosses();
             return;
 
         case JJTROUTINEINVOCATION_GEOOP_WITHIN_NODE:
@@ -269,11 +270,11 @@ public class CQLBuilder extends CQLParser {
             return;
 
         case JJTROUTINEINVOCATION_GEOOP_CONTAIN_NODE:
-            h.contain();
+            h.contains();
             return;
 
         case JJTROUTINEINVOCATION_GEOOP_OVERLAP_NODE:
-            h.overlap();
+            h.overlaps();
             return;
 
             //return buildBinarySpatialOperator(cqlNode.getType());

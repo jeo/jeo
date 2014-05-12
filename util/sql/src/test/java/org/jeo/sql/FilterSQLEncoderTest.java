@@ -70,7 +70,7 @@ public class FilterSQLEncoderTest {
     public void testSpatial() throws Exception {
         Geometry geo = new GeomBuilder(4326).point(1, 2).toPoint();
 
-        Filter f = Filter.build().property("geom").literal(geo).intersect().filter();
+        Filter f = Filter.build().property("geom").literal(geo).intersects().filter();
         assertEncoded(f, "ST_Intersects(\"geom\", ST_GeomFromText(?,?))", geo.toText(), 4326);
     }
 

@@ -14,10 +14,6 @@
  */
 package org.jeo.filter.cql;
 
-import java.util.ArrayDeque;
-import java.util.Deque;
-
-import org.jeo.filter.Filter;
 import org.jeo.filter.FilterBuilder;
 import org.jeo.filter.Literal;
 import org.jeo.util.Convert;
@@ -31,38 +27,32 @@ import com.vividsolutions.jts.io.WKTReader;
  * 
  * @author Justin Deoliveira, OpenGeo
  */
-class CQLHelper {
+class CQLHelper extends FilterBuilder {
 
-    FilterBuilder builder = new FilterBuilder(); 
-    Deque<Object> stack = new ArrayDeque<Object>();
     String cql;
 
     public CQLHelper(String cql) {
         this.cql = cql;
     }
 
-    public Filter filter() {
-        return builder.filter();
-    }
-
     public void intLiteral(Token token) {
-        builder.literal(Integer.parseInt(token.image)); 
+        literal(Integer.parseInt(token.image)); 
     }
 
     public void floatLiteral(Token token) {
-        builder.literal(Double.parseDouble(token.image));
+        literal(Double.parseDouble(token.image));
     }
 
     public void stringLiteral(Token token) {
-        builder.literal(dequote(token.image));
+        literal(dequote(token.image));
     }
 
     public void wktLiteral(Token token) throws ParseException {
-        builder.literal(new WKTReader().read(scan(token)));
+        literal(new WKTReader().read(scan(token)));
     }
 
     public void fidLiteral(Token token) {
-        builder.literal(dequote(token.image));
+        literal(dequote(token.image));
     }
 
     String scan(final Token t) {
@@ -88,142 +78,29 @@ class CQLHelper {
     }
 
     public void property() {
-        builder.property((String)stack.pop());
+        property((String)stack.pop());
     }
 
-    public void and() {
-        builder.and();
-    }
-    
-    public void or() {
-        builder.or();
-    }
-    
-    public void not() {
-        builder.not();
-    }
-
-    public void between() {
-        builder.between();
-    }
-
-    public void eq() {
-        builder.eq();
-    }
-
-    public void neq() {
-        builder.neq();
-    }
-
-    public void lt() {
-        builder.lt();
-    }
-    
-    public void lte() {
-        builder.lte();
-    }
-    
-    public void gt() {
-        builder.gt();
-    }
-    
-    public void gte() {
-        builder.gte();
-    }
-
-    public void like() {
-        builder.like();
-    }
-
-    public void notLike() {
-        builder.notLike();
-    }
-
-    public void equals() {
-        builder.equals();
-    }
-
-    public void intersect() {
-        builder.intersect();
-    }
-
-    public void touch() {
-        builder.touch();
-    }
-
-    public void disjoint() {
-        builder.disjoint();
-    }
-
-    public void overlap() {
-        builder.overlap();
-    }
-
-    public void cross() {
-        builder.cross();
-    }
-
-    public void cover() {
-        builder.cover();
-    }
-
-    public void within() {
-        builder.within();
-    }
-
-    public void contain() {
-        builder.contain();
-    }
-
-    public void bbox() {
-        Literal e1 = (Literal) builder.pop();
-        Literal e2 = (Literal) builder.pop();
-        Literal e3 = (Literal) builder.pop();
-        Literal e4 = (Literal) builder.pop();
+    public CQLHelper bbox() {
+        Literal e1 = (Literal) pop();
+        Literal e2 = (Literal) pop();
+        Literal e3 = (Literal) pop();
+        Literal e4 = (Literal) pop();
 
         double x1 = Convert.toNumber(e4.evaluate(null)).get().doubleValue();
         double y1 = Convert.toNumber(e3.evaluate(null)).get().doubleValue();
         double x2 = Convert.toNumber(e2.evaluate(null)).get().doubleValue();
         double y2 = Convert.toNumber(e1.evaluate(null)).get().doubleValue();
 
-        builder.literal(new Envelope(x1, x2, y1, y2));
-        builder.bbox();
+        literal(new Envelope(x1, x2, y1, y2));
+        super.bbox();
+
+        return this;
     }
 
     public void bboxWithSRS() {
-        builder.pop();
+        pop();
         bbox();
     }
 
-    public void id() {
-        builder.id();
-    }
-
-    public void in() {
-        builder.in();
-    }
-
-    public void notIn() {
-        builder.notIn();
-    }
-
-    public void pop() {
-        builder.pop();
-    }
-
-    public void add() {
-        builder.add();
-    }
-
-    public void substract() {
-        builder.subtract();
-    }
-
-    public void multiply() {
-        builder.multiply();
-    }
-
-    public void divide() {
-        builder.divide();
-    }
 }

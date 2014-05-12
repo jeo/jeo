@@ -102,7 +102,7 @@ public class ECQLBuilder extends ECQLParser {
             h.add();
             return;
         case JJTSUBTRACTNODE:
-            h.substract();
+            h.subtract();
             return;
         case JJTMULNODE:
             h.multiply();
@@ -275,22 +275,22 @@ public class ECQLBuilder extends ECQLParser {
             h.disjoint();
             return;
         case JJTROUTINEINVOCATION_GEOOP_INTERSECT_NODE:
-            h.intersect();
+            h.intersects();
             return;
         case JJTROUTINEINVOCATION_GEOOP_TOUCH_NODE:
-            h.touch();
+            h.touches();
             return;
         case JJTROUTINEINVOCATION_GEOOP_CROSS_NODE:
-            h.cross();
+            h.crosses();
             return;
         case JJTROUTINEINVOCATION_GEOOP_WITHIN_NODE:
             h.within();
             return;
         case JJTROUTINEINVOCATION_GEOOP_CONTAIN_NODE:
-            h.contain();
+            h.contains();
             return;
         case JJTROUTINEINVOCATION_GEOOP_OVERLAP_NODE:
-            h.overlap();
+            h.overlaps();
             return;
             //return buildBinarySpatialOperator(cqlNode.getType());
 

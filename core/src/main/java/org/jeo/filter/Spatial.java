@@ -32,20 +32,32 @@ public class Spatial<T> extends Filter<T> {
      * Spatial operator type.  
      */
     public static enum Type {
-        EQUALS, INTERSECTS, TOUCHES, DISJOINT, OVERLAPS, CROSSES, COVERS, WITHIN, CONTAINS, BBOX;
+        EQUALS, INTERSECTS, TOUCHES, DISJOINT, OVERLAPS, CROSSES, COVERS, WITHIN, CONTAINS, BBOX,
+        DWITHIN, BEYOND;
     }
 
-    Type type;
-    Expression left, right;
+    final Type type;
+    final Expression left, right, distance;
 
-    public Spatial(Type type, Expression left, Expression right) {
+    public Spatial(Type type, Expression left, Expression right, Expression distance) {
+        switch (type) {
+            case DWITHIN: case BEYOND:
+                if (distance == null) {
+                    throw new IllegalArgumentException("distance is null");
+                }
+        }
         this.type = type;
         this.left = left;
         this.right = right;
+        this.distance = distance;
     }
 
     public Type getType() {
         return type;
+    }
+
+    public Expression getDistance() {
+        return distance;
     }
 
     public Expression getLeft() {
@@ -60,11 +72,11 @@ public class Spatial<T> extends Filter<T> {
     public boolean apply(T obj) {
         Object o1 = left.evaluate(obj);
         Object o2 = right.evaluate(obj);
-
-        return compare(o1, o2);
+        Number d = (Number) (distance == null ? null : distance.evaluate(obj));
+        return compare(o1, o2, d);
     }
 
-    protected boolean compare(Object o1, Object o2) {
+    protected boolean compare(Object o1, Object o2, Number d) {
         if (o1 == null || o2 == null) {
             throw new IllegalArgumentException("Unable to perform comparison on null operand(s)");
         }
@@ -99,6 +111,10 @@ public class Spatial<T> extends Filter<T> {
             return g1.within(g2);
         case CONTAINS:
             return g1.contains(g2);
+        case DWITHIN:
+            return g1.isWithinDistance(g2, d.doubleValue());
+        case BEYOND:
+            return !g1.isWithinDistance(g2, d.doubleValue());
         default:
             throw new IllegalStateException();
         }
@@ -164,12 +180,23 @@ public class Spatial<T> extends Filter<T> {
             return false;
         if (type != other.type)
             return false;
+        if (distance == null) {
+            if (other.distance != null) {
+                return false;
+            }
+        } else if (!distance.equals(other.distance)) {
+            return false;
+        }
         return true;
     }
 
     @Override
     public String toString() {
-        return new StringBuilder().append(left).append(" ").append(type).append(" ").append(right)
-            .toString();
+        StringBuilder buf = new StringBuilder().append(left).
+                append(" ").append(type).append(" ").append(right);
+        if (distance != null) {
+            buf.append(" ").append(distance);
+        }
+        return buf.toString();
     }
 }

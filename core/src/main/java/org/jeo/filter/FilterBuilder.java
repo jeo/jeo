@@ -163,6 +163,14 @@ public class FilterBuilder {
         return spatial(Spatial.Type.BBOX);
     }
 
+    public FilterBuilder dwithin() {
+        return spatial(Spatial.Type.DWITHIN);
+    }
+
+    public FilterBuilder beyond() {
+        return spatial(Spatial.Type.BEYOND);
+    }
+
     public Object pop() {
         return stack.pop();
     }
@@ -225,9 +233,15 @@ public class FilterBuilder {
     }
 
     FilterBuilder spatial(Spatial.Type type) {
+        Expression top = (Expression) stack.peek();
+        Expression d = null;
+        if ( top.evaluate(null) instanceof Number) {
+            d = top;
+            stack.pop();
+        }
         Expression e2 = (Expression) stack.pop();
         Expression e1 = (Expression) stack.pop();
-        stack.push(new Spatial<Object>(type, e1, e2));
+        stack.push(new Spatial<Object>(type, e1, e2, d));
         return this;
     }
 

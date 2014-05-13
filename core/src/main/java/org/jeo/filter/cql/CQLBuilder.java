@@ -299,15 +299,15 @@ public class CQLBuilder extends CQLParser {
             // routine invocation RelGeo Operatiosn
             // ----------------------------------------
         case JJTTOLERANCE_NODE:
-            //return this.builder.buildTolerance();
-
         case JJTDISTANCEUNITS_NODE:
-            //return this.builder.buildDistanceUnit(getTokenInPosition(0));
+            return;
 
         case JJTROUTINEINVOCATION_RELOP_BEYOND_NODE:
-        case JJTROUTINEINVOCATION_RELOP_DWITHIN_NODE:
+            h.beyond();
             return;
-            //return buildDistanceBufferOperator(cqlNode.getType());
+        case JJTROUTINEINVOCATION_RELOP_DWITHIN_NODE:
+            h.dwithin();
+            return;
 
             // ----------------------------------------
             // Geometries:

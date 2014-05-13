@@ -311,14 +311,15 @@ public class ECQLBuilder extends ECQLParser {
             // routine invocation RelGeo Operatiosn
             // ----------------------------------------
         case JJTTOLERANCE_NODE:
-            //return this.builder.buildTolerance();
-
         case JJTDISTANCEUNITS_NODE:
-            //return this.builder.buildDistanceUnit(getTokenInPosition(0));
+            return;
 
         case JJTROUTINEINVOCATION_RELOP_BEYOND_NODE:
+            h.beyond();
+            return;
         case JJTROUTINEINVOCATION_RELOP_DWITHIN_NODE:
-            //return buildDistanceBufferOperator(cqlNode.getType());
+            h.within();
+            return;
 
             // ----------------------------------------
             // Geometries:

@@ -75,6 +75,8 @@ public class CQLTest {
 
     @Test
     public void testSpatial() throws Exception {
+        // note - the toString format for these is not ideal and we're testing
+        // to verify the object was created correctly, not the correct formatting
         String[] ops = {
             "EQUALS",
             "DISJOINT",
@@ -83,15 +85,15 @@ public class CQLTest {
             "CROSSES",
             "WITHIN",
             "CONTAINS",
-            "OVERLAPS",
-            // @todo
-            // "DWITHIN",
-            // "BEYOND"
+            "OVERLAPS"
         };
         for (String op: ops) {
             Spatial f = (Spatial) CQL.parse(op + "(the_geom, POINT(0 0))");
             assertEquals("[the_geom] " + op + " POINT (0 0)", f.toString());
         }
+
+        assertEquals("[the_geom] DWITHIN POINT (0 0) 42",
+                CQL.parse("DWITHIN(the_geom, POINT(0 0), 42, meters)").toString());
     }
 
     @Test

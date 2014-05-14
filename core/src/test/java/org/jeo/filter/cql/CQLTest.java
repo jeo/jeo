@@ -152,4 +152,13 @@ public class CQLTest {
         Filter f = CQL.parse("UNEMPLOY / (EMPLOYED + UNEMPLOY) > .07");
         assertEquals("([UNEMPLOY] / ([EMPLOYED] + [UNEMPLOY])) > 0.07", f.toString());
     }
+
+    @Test
+    public void testNull() throws ParseException {
+        Filter f = CQL.parse("X IS NULL");
+        assertEquals("[X] IS NULL", f.toString());
+
+        f = CQL.parse("X IS NOT NULL");
+        assertEquals("[X] IS NOT NULL", f.toString());
+    }
 }

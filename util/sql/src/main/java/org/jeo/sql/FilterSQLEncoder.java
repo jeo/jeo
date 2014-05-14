@@ -40,6 +40,7 @@ import com.vividsolutions.jts.geom.Geometry;
 import org.jeo.filter.In;
 import org.jeo.filter.Like;
 import org.jeo.filter.Math;
+import org.jeo.filter.Null;
 
 /**
  * Transforms a filter object into SQL.
@@ -337,6 +338,17 @@ public class FilterSQLEncoder extends FilterVisitor {
             }
         }
         sql.add(')');
+        return obj;
+    }
+
+    @Override
+    public Object visit(Null isNull, Object obj) {
+        sql.add(isNull.getProp().getProperty());
+        sql.add(" IS");
+        if (isNull.isNegated()) {
+            sql.add(" NOT");
+        }
+        sql.add(" NULL");
         return obj;
     }
 

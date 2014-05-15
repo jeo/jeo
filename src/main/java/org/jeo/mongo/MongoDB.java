@@ -16,6 +16,7 @@ package org.jeo.mongo;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
 
@@ -86,5 +87,12 @@ public class MongoDB implements VectorDriver<MongoWorkspace> {
     @Override
     public MongoWorkspace create(Map<?, Object> opts, Schema schema) throws IOException {
         throw new UnsupportedOperationException();
+    }
+
+    static final EnumSet<Capability> CAPABILITIES = EnumSet.of(Capability.BOUND, Capability.LIMIT, Capability.OFFSET);
+
+    @Override
+    public boolean supports(Capability cap) {
+       return CAPABILITIES.contains(cap);
     }
 }

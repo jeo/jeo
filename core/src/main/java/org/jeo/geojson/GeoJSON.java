@@ -17,10 +17,12 @@ package org.jeo.geojson;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
 
 import org.jeo.data.FileVectorDriver;
+import org.jeo.data.VectorDriver;
 import org.jeo.feature.Schema;
 
 /**
@@ -67,5 +69,12 @@ public class GeoJSON extends FileVectorDriver<GeoJSONDataset> {
     protected GeoJSONDataset create(File file, Map<?, Object> opts, Schema schema) 
         throws IOException {
         return new GeoJSONDataset(file);
+    }
+
+    static final EnumSet<VectorDriver.Capability> CAPABILITIES = EnumSet.noneOf(VectorDriver.Capability.class);
+
+    @Override
+    public boolean supports(VectorDriver.Capability cap) {
+        return CAPABILITIES.contains(cap);
     }
 }

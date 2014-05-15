@@ -17,6 +17,7 @@ package org.jeo.geogit;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
 
@@ -27,6 +28,7 @@ import org.geogit.di.GeogitModule;
 import org.geogit.repository.Repository;
 import org.geogit.storage.bdbje.JEStorageModule;
 import org.jeo.data.FileVectorDriver;
+import org.jeo.data.VectorDriver;
 import org.jeo.feature.Schema;
 import org.jeo.util.Key;
 import org.jeo.util.Messages;
@@ -133,5 +135,12 @@ public class GeoGit extends FileVectorDriver<GeoGitWorkspace> {
             .setName("user.email").setValue(opts.getEmail()).call();
         
         return gg;
+    }
+
+    static final EnumSet<Capability> CAPABILITIES = EnumSet.of(Capability.BOUND);
+
+    @Override
+    public boolean supports(VectorDriver.Capability cap) {
+        return CAPABILITIES.contains(cap);
     }
 }

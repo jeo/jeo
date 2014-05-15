@@ -16,10 +16,12 @@ package org.jeo.ogr;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.EnumSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.jeo.data.FileVectorDriver;
+import org.jeo.data.VectorDriver;
 import org.jeo.feature.Schema;
 import org.jeo.util.Messages;
 
@@ -51,4 +53,9 @@ public abstract class OGRDriver<T> extends FileVectorDriver<T> {
     protected abstract T open(OGRWorkspace workspace) throws IOException;
 
     protected abstract String getOGRDriverName();
+
+    @Override
+    public boolean supports(VectorDriver.Capability cap) {
+        return OGR.CAPABILITIES.contains(cap);
+    }
 }

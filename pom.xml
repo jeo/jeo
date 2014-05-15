@@ -48,6 +48,11 @@
         <artifactId>joda-convert</artifactId>
         <version>1.2</version>
       </dependency>
+      <dependency>
+        <groupId>org.gdal</groupId>
+        <artifactId>gdal</artifactId>
+        <version>${gdal.version}</version>
+      </dependency>
     </dependencies>
   </dependencyManagement>
 
@@ -283,6 +288,7 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <gdal.version>1.9.2</gdal.version>
   </properties>
 
 </project>

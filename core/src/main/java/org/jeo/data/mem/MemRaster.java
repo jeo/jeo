@@ -125,16 +125,21 @@ public class MemRaster implements RasterDataset {
     }
 
     @Override
-    public ByteBuffer read(RasterQuery query) throws IOException {
+    public Raster read(RasterQuery query) throws IOException {
+        Raster raster = new Raster();
+        raster.bounds(bounds()).crs(crs());
+
         Rect r = rect();
         if (query.getBounds() != null) {
-            r = r.map(query.getBounds(), bounds());
+            r = r.map(query.getBounds(), raster.bounds());
+            raster.bounds(raster.bounds().intersection(query.getBounds()));
         }
 
         Dimension size = query.getSize();
         if (size == null) {
             size = size();
         }
+        raster.size(size);
 
         List<Band> bands = null;
         if (query.getBands() != null) {
@@ -147,6 +152,7 @@ public class MemRaster implements RasterDataset {
         else {
             bands = bands();
         }
+        raster.bands(bands);
 
         DataType dataType = query.getDataType();
         if (dataType == null) {
@@ -169,7 +175,7 @@ public class MemRaster implements RasterDataset {
             buf = DataBuffer.resample(buf, r.size(), size);
         }
 
-        return buf.rewind().buffer();
+        return raster.data(buf.rewind());
     }
 
     Rect rect() {

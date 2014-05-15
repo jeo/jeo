@@ -24,23 +24,17 @@ import java.io.File;
 public class GeoTIFFApiTest extends RasterApiTestBase {
 
     @BeforeClass
-    public static void initOGR() {
-        GDALTest.initOGR();
+    public static void initGDAL() {
+        GDALTest.initGDAL();
     }
 
     @Override
     protected RasterDataset createRasterDataDEM() throws Exception {
-        File dir = Tests.newTmpDir("gdal", "data");
-        Tests.unzip(getClass().getResourceAsStream("dem.tif.zip"), dir);
-
-        return GeoTIFF.open(new File(dir, "dem.tif"));
+        return GDALTestData.dem();
     }
 
     @Override
     protected RasterDataset createRasterDataRGB() throws Exception {
-        File dir = Tests.newTmpDir("gdal", "data");
-        Tests.unzip(getClass().getResourceAsStream("rgb.tif.zip"), dir);
-
-        return GeoTIFF.open(new File(dir, "rgb.tif"));
+        return GDALTestData.rgb();
     }
 }

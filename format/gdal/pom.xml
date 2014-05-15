@@ -21,7 +21,6 @@
     <dependency>
       <groupId>org.gdal</groupId>
       <artifactId>gdal</artifactId>
-      <version>${gdal.version}</version>
     </dependency>
     <dependency>
       <groupId>org.jeo</groupId>
@@ -31,9 +30,5 @@
       <classifier>tests</classifier>
     </dependency>
   </dependencies>
-
-  <properties>
-    <gdal.version>1.9.2</gdal.version>
-  </properties>
 
 </project>

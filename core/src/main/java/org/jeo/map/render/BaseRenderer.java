@@ -184,19 +184,20 @@ public abstract class BaseRenderer implements Renderer {
             throw new UnsupportedOperationException("renderer does not render raster data");
         }
 
-        // calculate bounding intersection of view and dataset
-        Envelope bbox = data.bounds().intersection(view.getBounds());
-        if (bbox.isNull()) {
-            // nothing to do
-            return;
-        }
-
-        // calculate position of raster on screen
-        Rect pos = view.mapToWindow(bbox);
-
         // build up the query
-        RasterQuery q = new RasterQuery().bounds(bbox).size(pos.size());
+        RasterQuery q = new RasterQuery().bounds(view.getBounds()).crs(view.getCRS());
 
+        // map the result to position on the screen to determine size
+        // of raster to read
+        Envelope bbox = data.bounds();
+        if (view.getCRS() != null) {
+            CoordinateReferenceSystem crs = data.crs();
+            if (!Proj.equal(view.getCRS(), data.crs())) {
+                bbox = Proj.reproject(bbox, crs, view.getCRS());
+            }
+        }
+        Rect pos = view.mapToWindow(bbox);
+        q.size(pos.width(), pos.height());
 
         Rule rule = rules.collapse();
 
@@ -252,7 +253,9 @@ public abstract class BaseRenderer implements Renderer {
         }
 
         // get the raw data
-        ByteBuffer raw = data.read(q);
+        Raster raster = data.read(q);
+
+        ByteBuffer raw = raster.data().buffer();
 
         if (q.getBands().length == 1) {
             Band band = data.bands().get(q.getBands()[0]);

@@ -15,6 +15,7 @@
 package org.jeo.data;
 
 import org.jeo.raster.Band;
+import org.jeo.raster.Raster;
 import org.jeo.util.Dimension;
 
 import java.io.IOException;
@@ -53,7 +54,7 @@ public interface RasterDataset extends Dataset {
      * </p>
      * @param query Query describing the band/region/size/etc... to get from the dataset.
      *
-     * @return Buffer containing the raw image data.
+     * @return Raster object.
      */
-    ByteBuffer read(RasterQuery query) throws IOException;
+    Raster read(RasterQuery query) throws IOException;
 }

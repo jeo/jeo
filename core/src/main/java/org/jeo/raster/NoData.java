@@ -25,6 +25,16 @@ public class NoData {
     public static final double DEFAULT_TOLERANCE = 1E-8;
 
     /**
+     * No NoData, always returns input value.
+     */
+    public static final NoData NONE = new NoData(0, 0) {
+        @Override
+        public Double valueOrNull(Double val) {
+            return val;
+        }
+    };
+
+    /**
      * Creates a new NoData helper with the default matching tolerance.
      *
      * @see {@link #create(Double, Double)}

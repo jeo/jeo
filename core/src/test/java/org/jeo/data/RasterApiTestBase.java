@@ -22,8 +22,10 @@ import org.jeo.proj.Proj;
 import org.jeo.raster.Band;
 
 import org.jeo.raster.DataType;
+import org.jeo.raster.Raster;
 import org.jeo.raster.Stats;
 import org.jeo.util.Dimension;
+import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Test;
 import org.osgeo.proj4j.CoordinateReferenceSystem;
@@ -126,7 +128,7 @@ public abstract class RasterApiTestBase {
     public void testRead() throws IOException {
         // read all data
         ByteBuffer buf = dem.read(new RasterQuery().datatype(DataType.FLOAT)
-            .bounds(new Envelope(589980.0, 609000.0, 4913700.0, 4928010.0)));
+            .bounds(new Envelope(589980.0, 609000.0, 4913700.0, 4928010.0))).data().buffer();
         assertNotNull(buf);
 
         FloatBuffer fb = buf.asFloatBuffer();
@@ -138,7 +140,7 @@ public abstract class RasterApiTestBase {
 
         // read subset
         buf = dem.read(new RasterQuery().datatype(DataType.FLOAT)
-            .bounds(new Envelope(589980.0, 599490.0, 4920855.0, 4928010.0)));
+            .bounds(new Envelope(589980.0, 599490.0, 4920855.0, 4928010.0))).data().buffer();
         assertNotNull(buf);
 
         fb = buf.asFloatBuffer();
@@ -180,7 +182,7 @@ public abstract class RasterApiTestBase {
     @Test
     public void testReadRGB() throws IOException {
         ByteBuffer buf = rgb.read(new RasterQuery()
-            .datatype(DataType.INT).bounds(new Envelope(-180, 180, -90, 90)));
+            .datatype(DataType.INT).bounds(new Envelope(-180, 180, -90, 90))).data().buffer();
         assertNotNull(buf);
 
         IntBuffer ibuf = buf.asIntBuffer();
@@ -189,5 +191,22 @@ public abstract class RasterApiTestBase {
         assertEquals(65280, ibuf.get());
         assertEquals(16711680, ibuf.get());
         assertEquals(8421504, ibuf.get());
+    }
+
+    @Test
+    public void testReproject() throws IOException {
+        Assume.assumeTrue("Driver does not support reprojection",
+            ((RasterDriver)dem.getDriver()).supports(RasterDriver.Capability.REPROJECT));
+
+        RasterQuery q = new RasterQuery()
+            .size(10,10)
+            .bounds(new Envelope(-103.871006154, -103.629326769, 44.37021187, 44.5016256196))
+            .crs(Proj.EPSG_4326);
+
+        Raster ras = dem.read(q);
+        ByteBuffer buf = ras.data().buffer();
+
+        FloatBuffer fb = buf.asFloatBuffer();
+        assertEquals(100, fb.limit());
     }
 }

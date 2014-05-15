@@ -103,6 +103,6 @@ public class FilterSQLEncoderTest {
     @Test
     public void testNull() throws Exception {
         Filter f = Filter.build().property("x").isNull().property("y").isNotNull().or().filter();
-        assertEquals("(x IS NULL) OR (y IS NOT NULL)", sqle.encode(f, null));
+        assertEquals("(\"x\" IS NULL) OR (\"y\" IS NOT NULL)", sqle.encode(f, null));
     }
 }

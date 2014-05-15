@@ -343,7 +343,7 @@ public class FilterSQLEncoder extends FilterVisitor {
 
     @Override
     public Object visit(Null isNull, Object obj) {
-        sql.add(isNull.getProp().getProperty());
+        isNull.getProp().accept(this, obj);
         sql.add(" IS");
         if (isNull.isNegated()) {
             sql.add(" NOT");

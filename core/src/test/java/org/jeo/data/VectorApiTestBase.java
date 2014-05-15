@@ -161,6 +161,24 @@ public abstract class VectorApiTestBase {
         // id filter
         String fid = fidFor(data, "STATE_NAME = 'Texas'");
         assertCovered(data.cursor(new Query().filter(String.format("IN ('%s')", fid))), "TX");
+
+        // in filter
+        assertCovered(data.cursor(new Query().filter("STATE_NAME IN ('Texas','Iowa')")), "TX", "IA");
+
+        // between
+        assertCovered(
+             data.cursor(new Query().filter(String.format("SAMP_POP BETWEEN %s AND %s", 70000, 80000))), "DC");
+
+        // math
+        assertCovered(data.cursor(new Query().filter("SAMP_POP / 2 = 36348")), "DC");
+        assertCovered(data.cursor(new Query().filter("(P_FEMALE - P_MALE) > .05")), "DC");
+
+        // like
+        assertCovered(data.cursor(new Query().filter("STATE_NAME LIKE 'Calif%'")), "CA");
+
+        // null
+        assertEquals(49, Cursors.size(data.cursor(new Query().filter("P_MALE IS NOT NULL"))));
+        assertEquals(0, Cursors.size(data.cursor(new Query().filter("P_MALE IS NULL"))));
     }
 
     @Test
@@ -199,8 +217,7 @@ public abstract class VectorApiTestBase {
             set.remove(cursor.next().get("STATE_ABBR"));
             count++;
         }
-
-        assertTrue(set.isEmpty());
+        assertTrue("expected empty set, found " + set, set.isEmpty());
         assertEquals(abbrs.length, count);
     }
 

@@ -105,6 +105,7 @@ public class FilterVisitor {
     }
 
     public Object visit(Like<?> like, Object obj) {
+        like.getProperty().accept(this, obj);
         return obj;
     }
 
@@ -115,6 +116,7 @@ public class FilterVisitor {
     }
 
     public Object visit(Null<?> isNull, Object obj) {
+        isNull.getProp().accept(this, obj);
         return obj;
     }
 

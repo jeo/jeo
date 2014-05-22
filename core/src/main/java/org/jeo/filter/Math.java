@@ -50,10 +50,16 @@ public class Math implements Expression {
         return right;
     }
 
+    double getValue(Expression e, Object obj) {
+        Object val = e.evaluate(obj);
+        // mask missing values as NaN
+        return val == null ? Double.NaN : ((Number) val).doubleValue();
+    }
+
     @Override
     public Object evaluate(Object obj) {
-        double n1 = ((Number) left.evaluate(obj)).doubleValue();
-        double n2 = ((Number) right.evaluate(obj)).doubleValue();
+        double n1 = getValue(left, obj);
+        double n2 = getValue(right, obj);
         Double res;
         switch (operator) {
             case ADD: res = n1 + n2; break;

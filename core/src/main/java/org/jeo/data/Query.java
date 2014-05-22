@@ -16,9 +16,12 @@ package org.jeo.data;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
-
+import java.util.Set;
 import org.jeo.feature.Feature;
+import org.jeo.feature.Field;
+import org.jeo.feature.Schema;
 import org.jeo.filter.Filter;
 import org.jeo.filter.Filters;
 import org.jeo.filter.cql.CQL;
@@ -381,6 +384,24 @@ public class Query {
         }
 
         return count;
+    }
+
+    /**
+     * Compute missing properties based on the provided schema and the current
+     * filter. This allows a format to defer to CQL filtering instead of using
+     * native (SQL for example) encoding that may result in errors or invalid
+     * results.
+     * @param schema non-null schema to evaluate the filter against
+     * @return non-null Set of any missing properties
+     */
+    public Set<String> missingProperties(Schema schema) {
+        Set<String> queryProperties = (Set<String>) (filter == null ?
+                Collections.emptySet() : Filters.properties(filter));
+        List<Field> f = schema.getFields();
+        for (int i = 0, ii = f.size(); i < ii && !queryProperties.isEmpty(); i++) {
+            queryProperties.remove(f.get(i).getName());
+        }
+        return queryProperties;
     }
 
     @Override

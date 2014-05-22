@@ -32,10 +32,11 @@ import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-
+import java.util.Set;
 import javax.sql.DataSource;
 
 import org.jeo.data.Cursor;
@@ -326,7 +327,9 @@ public class GeoPkgWorkspace implements Workspace, FileData {
         }
 
         final SQL sql = new SQL("SELECT count(*) FROM ").name(entry.getTableName());
-        final List<Object> args = encodeQuery(sql, q, qp);
+        // if filter refers to properties not in the schema, defer to CQL filter
+        final List<Object> args = missingProperties(entry, q) ?
+                Collections.EMPTY_LIST : encodeQuery(sql, q, qp);
 
         if (q.isFiltered() && !qp.isFiltered()) {
             return Cursors.size(cursor(entry, q));
@@ -355,7 +358,8 @@ public class GeoPkgWorkspace implements Workspace, FileData {
 
             //TODO: handle selective fields
             SQL sqlb = new SQL("SELECT * FROM ").name(entry.getTableName());
-            List<Object> args = encodeQuery(sqlb, q, qp);
+            List<Object> args = missingProperties(entry, q) ?
+                Collections.EMPTY_LIST : encodeQuery(sqlb, q, qp);
 
             
             PreparedStatement ps = prepareStatement(log(sqlb.toString()), args, cx);
@@ -403,7 +407,7 @@ public class GeoPkgWorkspace implements Workspace, FileData {
             qp.offsetted();
         }
 
-        List<Object> args = new ArrayList<Object>();
+        List<Object> args = new ArrayList<Object>(sqlfe.getArgs().size());
         for (Pair<Object, Integer> p : sqlfe.getArgs()) {
             args.add(p.first());
         }
@@ -944,6 +948,18 @@ public class GeoPkgWorkspace implements Workspace, FileData {
         }, rs.getStatement().getConnection());
 
         return e;
+    }
+
+    boolean missingProperties(FeatureEntry entry, Query q) throws IOException {
+        boolean hasMissing = false;
+        if (q.getFilter() != null) {
+            Set<String> properties = Filters.properties(q.getFilter());
+            // try to defer resolving the schema unless needed
+            if (!properties.isEmpty()) {
+                hasMissing = !q.missingProperties(schema(entry, null)).isEmpty();
+            }
+        }
+        return hasMissing;
     }
 
     /**

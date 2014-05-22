@@ -14,6 +14,9 @@
  */
 package org.jeo.filter;
 
+import java.util.HashSet;
+import java.util.Set;
+
 /**
  * Filter utility class.
  * 
@@ -46,5 +49,17 @@ public class Filters {
      */
     public static <T> Filter<T> none() {
         return new None<T>();
+    }
+
+    public static Set<String> properties(Filter<?> f) {
+        return (Set<String>) f.accept(new FilterVisitor() {
+
+            @Override
+            public Object visit(Property property, Object obj) {
+                ((HashSet) obj).add(property.getProperty());
+                return obj;
+            }
+
+        }, new HashSet());
     }
 }

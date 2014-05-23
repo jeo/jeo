@@ -16,19 +16,15 @@ package org.jeo.gdal;
 
 import com.vividsolutions.jts.geom.Envelope;
 import org.gdal.gdal.Dataset;
+import org.gdal.gdal.gdal;
 import org.gdal.osr.SpatialReference;
 import org.jeo.data.Driver;
 import org.jeo.data.FileData;
 import org.jeo.data.RasterDataset;
 import org.jeo.data.RasterQuery;
 import org.jeo.proj.Proj;
-import org.jeo.raster.Band;
-import org.jeo.raster.DataType;
-import org.jeo.raster.Stats;
-import org.jeo.util.Dimension;
-import org.jeo.util.Key;
-import org.jeo.util.Rect;
-import org.jeo.util.Util;
+import org.jeo.raster.*;
+import org.jeo.util.*;
 import org.osgeo.proj4j.CoordinateReferenceSystem;
 
 import java.io.File;
@@ -98,19 +94,31 @@ public class GDALDataset implements RasterDataset, FileData {
 
     @Override
     public Envelope bounds() throws IOException {
-        Dimension size = size();
+        return bounds(dataset);
+    }
+
+    Envelope bounds(Dataset dataset) {
+        Dimension size = size(dataset);
         double[] tx = dataset.GetGeoTransform();
         return new Envelope(tx[0], tx[0] + size.width() * tx[1],
-            tx[3], tx[3] + size.width()*tx[4] + size.height()*tx[5]);
+                tx[3], tx[3] + size.width()*tx[4] + size.height()*tx[5]);
     }
 
     @Override
     public Dimension size() {
+        return size(dataset);
+    }
+
+    Dimension size(Dataset dataset) {
         return new Dimension(dataset.getRasterXSize(), dataset.getRasterYSize());
     }
 
     public Rect rect() {
-        Dimension size = size();
+        return rect(dataset);
+    }
+
+    Rect rect(Dataset dataset) {
+        Dimension size = size(dataset);
         return new Rect(0, 0, size.width(), size.height());
     }
 
@@ -127,22 +135,48 @@ public class GDALDataset implements RasterDataset, FileData {
     }
 
     @Override
-    public ByteBuffer read(RasterQuery query) throws IOException {
-        Rect r = rect();
-        Envelope bbox = query.getBounds();
+    public Raster read(RasterQuery query) throws IOException {
+        Raster raster = new Raster();
 
-        if (bbox != null) {
-            Envelope bounds = bounds();
-            r = r.map(bbox, bounds);
+        Dataset data = dataset;
+
+        // reprojection
+        raster.crs(crs());
+        if (query.crs() != null && !Proj.equal(query.crs(), crs())) {
+            String srcWkt = toWKT(crs());
+            String dstWkt = toWKT(query.crs());
+
+            //TODO: allow query to specify interpolation method
+            data = gdal.AutoCreateWarpedVRT(dataset, srcWkt, dstWkt);
+            raster.crs(query.crs());
         }
 
-        // bands to query
+        // area of raster to load
+        Rect r = rect(data);            // raster space
+        Envelope bbox = bounds(data);   // world space
+        if (query.getBounds() != null) {
+            // intersect bounds with query bounds
+            Envelope i = bbox.intersection(query.getBounds());
+            r = r.map(i, bbox);
+            bbox = i;
+        }
+        raster.bounds(bbox);
+
+        // raster size
+        Dimension s = query.getSize();
+        if (s == null) {
+            s = size(data);
+        }
+        raster.size(s);
+
+        // band selection
         List<GDALBand> queryBands = bands(query.getBands());
         int[] bands = new int[queryBands.size()];
         for (int i = 0 ; i < queryBands.size(); i++) {
             GDALBand band = queryBands.get(i);
             bands[i] = band.index();
         }
+        raster.bands((List)queryBands);
 
         // figure out the buffer type if not specified
         DataType datatype = query.getDataType();
@@ -157,26 +191,21 @@ public class GDALDataset implements RasterDataset, FileData {
             }
         }
 
-        Dimension s = query.getSize();
-        if (s == null) {
-            s = size();
-        }
-
         ByteBuffer buffer = ByteBuffer.allocateDirect(s.width()*s.height()*datatype.size());
         buffer.order(ByteOrder.nativeOrder());
 
         if (bands.length == 1) {
             // single band, read in same units as requested buffer
-            dataset.ReadRaster_Direct(r.left, r.top, r.width(), r.height(), s.width(), s.height(),
+            data.ReadRaster_Direct(r.left, r.top, r.width(), r.height(), s.width(), s.height(),
                 toGDAL(datatype), buffer, bands, 0, 0, 0);
         }
         else {
             // multi band mode, read as byte and back into buffer
-            dataset.ReadRaster_Direct(r.left, r.top, r.width(), r.height(), s.width(), s.height(),
+            data.ReadRaster_Direct(r.left, r.top, r.width(), r.height(), s.width(), s.height(),
                 GDT_Byte, buffer, bands, datatype.size(), 0, 1);
         }
 
-        return buffer;
+        return raster.data(DataBuffer.create(buffer, datatype));
     }
 
     int toGDAL(DataType datatype) {
@@ -197,6 +226,12 @@ public class GDALDataset implements RasterDataset, FileData {
                 return GDT_Float64;
         }
         throw new IllegalArgumentException("unsupported data type: " + datatype);
+    }
+
+    String toWKT(CoordinateReferenceSystem crs) {
+        SpatialReference ref = new SpatialReference();
+        ref.ImportFromProj4(Proj.toString(crs));
+        return ref.ExportToWkt();
     }
 
     List<GDALBand> bands(int[] bands) throws IOException {

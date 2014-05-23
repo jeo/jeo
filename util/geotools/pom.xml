@@ -31,6 +31,24 @@
       <scope>test</scope>
     </dependency>
     <dependency>
+      <groupId>org.gdal</groupId>
+      <artifactId>gdal</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.jeo</groupId>
+      <artifactId>jeo-gdal</artifactId>
+      <version>${project.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.jeo</groupId>
+      <artifactId>jeo-gdal</artifactId>
+      <classifier>tests</classifier>
+      <version>${project.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
       <groupId>org.geotools</groupId>
       <artifactId>gt-epsg-hsql</artifactId>
       <version>${geotools.version}</version>

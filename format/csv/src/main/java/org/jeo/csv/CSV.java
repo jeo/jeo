@@ -17,10 +17,12 @@ package org.jeo.csv;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
 
 import org.jeo.data.FileVectorDriver;
+import org.jeo.data.VectorDriver;
 import org.jeo.feature.Schema;
 import org.jeo.util.Key;
 import org.jeo.util.Messages;
@@ -82,5 +84,12 @@ public class CSV extends FileVectorDriver<CSVDataset> {
     @Override
     protected CSVDataset create(File file, Map<?, Object> opts, Schema schema) throws IOException {
         throw new UnsupportedOperationException();
+    }
+
+    static final EnumSet<Capability> CAPABILITIES = EnumSet.noneOf(Capability.class);
+
+    @Override
+    public boolean supports(VectorDriver.Capability cap) {
+        return CAPABILITIES.contains(cap);
     }
 }

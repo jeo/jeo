@@ -15,12 +15,10 @@
 package org.jeo.data.mem;
 
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.jeo.data.RasterDriver;
 import org.jeo.data.VectorDriver;
 import org.jeo.feature.Schema;
 import org.jeo.util.Key;
@@ -35,7 +33,7 @@ import org.jeo.util.Messages;
  * 
  * @author Justin Deoliveira, Boundless
  */
-public class Memory implements VectorDriver<MemWorkspace> {
+public class Memory implements VectorDriver<MemWorkspace>, RasterDriver<MemWorkspace> {
 
     /**
      * Name of the workspace, may be null to signify the default workspace. 
@@ -104,5 +102,18 @@ public class Memory implements VectorDriver<MemWorkspace> {
         MemWorkspace ws = open(opts);
         ws.create(schema);
         return ws;
+    }
+
+    static final EnumSet<VectorDriver.Capability> VECTOR_CAPABILITIES = EnumSet.of(VectorDriver.Capability.BOUND);
+    static final EnumSet<RasterDriver.Capability> RASTER_CAPABILITIES = EnumSet.of(RasterDriver.Capability.RESAMPLE);
+
+    @Override
+    public boolean supports(VectorDriver.Capability cap) {
+       return VECTOR_CAPABILITIES.contains(cap);
+    }
+
+    @Override
+    public boolean supports(RasterDriver.Capability cap) {
+        return RASTER_CAPABILITIES.contains(cap);
     }
 }

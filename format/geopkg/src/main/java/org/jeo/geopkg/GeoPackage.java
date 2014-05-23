@@ -16,13 +16,11 @@ package org.jeo.geopkg;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import org.jeo.data.FileDriver;
 import org.jeo.data.FileVectorDriver;
+import org.jeo.data.VectorDriver;
 import org.jeo.feature.Schema;
 import org.jeo.util.Key;
 import org.jeo.util.Password;
@@ -73,5 +71,12 @@ public class GeoPackage extends FileVectorDriver<GeoPkgWorkspace> {
         GeoPkgWorkspace ws = open(file, opts);
         ws.create(schema);
         return ws;
+    }
+
+    static final EnumSet<Capability> CAPABILITIES = EnumSet.of(Capability.FILTER, Capability.LIMIT, Capability.OFFSET);
+
+    @Override
+    public boolean supports(VectorDriver.Capability cap) {
+        return CAPABILITIES.contains(cap);
     }
 }

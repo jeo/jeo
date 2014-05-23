@@ -25,6 +25,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.EnumSet;
 import java.util.Map;
 
 /**
@@ -114,5 +115,12 @@ public class GDAL extends FileDriver<GDALDataset> implements RasterDriver<GDALDa
         }
 
         return new GDALDataset(file, ds, this);
+    }
+
+    static final EnumSet<Capability> CAPABILITIES = EnumSet.of(Capability.REPROJECT, Capability.RESAMPLE);
+
+    @Override
+    public boolean supports(RasterDriver.Capability cap) {
+        return CAPABILITIES.contains(cap);
     }
 }

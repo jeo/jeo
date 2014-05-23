@@ -20,7 +20,49 @@ import java.util.Map;
 import org.jeo.feature.Schema;
 import org.jeo.util.Messages;
 
+/**
+ * Base interface for vector drivers.
+ */
 public interface VectorDriver<T> extends Driver<T> {
+
+    /**
+     * Vector driver capability enumeration.
+     */
+    public static enum Capability {
+        /**
+         * Ability to handle bounding box queries.
+         */
+        BOUND,
+        /**
+         * Ability to handle filters.
+         */
+        FILTER,
+        /**
+         * Ability to perform reprojection.
+         */
+        REPROJECT,
+        /**
+         * Ability to simplify vector geometries.
+         */
+        SIMPLIFY,
+        /**
+         * Ability to limit a result set.
+         */
+        LIMIT,
+        /**
+         * Ability to handle offset of a result set.
+         */
+        OFFSET,
+        /**
+         * Ability to sort a result set.
+         */
+        SORT;
+    }
+
+    /**
+     * Determines if the driver natively supports the specified capability.
+     */
+    boolean supports(VectorDriver.Capability cap);
 
     boolean canCreate(Map<?,Object> opts, Messages msgs);
 

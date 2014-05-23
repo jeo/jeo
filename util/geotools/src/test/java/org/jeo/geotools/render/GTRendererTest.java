@@ -10,12 +10,16 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
 
+import com.vividsolutions.jts.geom.Envelope;
 import org.jeo.TestData;
 import org.jeo.data.Dataset;
 import org.jeo.filter.Property;
+import org.jeo.gdal.GDALTestData;
 import org.jeo.map.*;
+import org.jeo.proj.Proj;
 import org.jeo.util.Pair;
 import org.junit.After;
+import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.rules.TestName;
@@ -96,6 +100,25 @@ public class GTRendererTest {
         Style style = Style.build().rule().select("*").rule(Colorizer.encode(c, new Rule())).style();
 
         View view = Map.build()
+            .size(img.getWidth(),img.getHeight())
+            .layer(dem).style(style).view();
+
+        render(view);
+    }
+
+    @Test
+    public void testRasterReproject() throws Exception {
+        Assume.assumeTrue(GDALTestData.isAvailable());
+
+        Dataset dem = GDALTestData.dem();
+
+        Colorizer c = Colorizer.build().stop(1000d, RGB.white)
+                .interpolate(Pair.of(1000.0, RGB.white), Pair.of(2000.0, RGB.red), 100).colorizer();
+        Style style = Style.build().rule().select("*").rule(Colorizer.encode(c, new Rule())).style();
+
+        View view = Map.build()
+            .bounds(Proj.reproject(dem.bounds(), dem.crs(), Proj.EPSG_4326))
+            .crs(Proj.EPSG_4326)
             .size(img.getWidth(),img.getHeight())
             .layer(dem).style(style).view();
 

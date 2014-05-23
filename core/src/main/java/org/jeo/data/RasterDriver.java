@@ -20,4 +20,16 @@ package org.jeo.data;
  * Justin Deoliveira, Boundless
  */
 public interface RasterDriver<T> extends Driver<T> {
+
+    /**
+     * Raster driver capability enumeration.
+     */
+    public enum Capability {
+        RESAMPLE, REPROJECT;
+    }
+
+    /**
+     * Determines if the driver natively supports the specified capability.
+     */
+    boolean supports(RasterDriver.Capability cap);
 }

@@ -17,6 +17,8 @@ package org.jeo.data;
 import com.vividsolutions.jts.geom.Envelope;
 import org.jeo.raster.DataType;
 import org.jeo.util.Dimension;
+import org.jeo.util.Pair;
+import org.osgeo.proj4j.CoordinateReferenceSystem;
 
 /**
  * Describes a query against a {@link RasterDataset} dataset.
@@ -29,6 +31,11 @@ public class RasterQuery {
      * spatial extent of query.
      */
     Envelope bounds;
+
+    /**
+     * projection of query.
+     */
+    CoordinateReferenceSystem crs;
 
     /**
      * band selection
@@ -93,9 +100,11 @@ public class RasterQuery {
     /**
      * Sets the bounds constraint of the query.
      * <p>
-     * Specifying <tt>null</tt> means the bounds of the entire dataset.
+     * The bounds should be interpreted in terms of {@link #crs()}. If no crs has been
+     * set the bounds should be interpreted in terms of the native crs of the data being
+     * queried.
      * </p>
-     *
+     * @param bounds The query bounds, specifying <tt>null</tt> means the bounds of the entire dataset.
      * @return This object.
      */
     public RasterQuery bounds(Envelope bounds) {
@@ -110,6 +119,27 @@ public class RasterQuery {
      */
     public Envelope getBounds() {
         return bounds;
+    }
+
+    /**
+     * Sets the crs of the query.
+     * <p>
+     * Datasets handling queries must check this relative to the native crs to determine if
+     * re-projection must occur.
+     * </p>
+     */
+    public RasterQuery crs(CoordinateReferenceSystem crs) {
+        this.crs = crs;
+        return this;
+    }
+
+    /**
+     * The query crs, may be <code>null</code> meaning same crs as the data being queried.
+     *
+     * @see #crs(org.osgeo.proj4j.CoordinateReferenceSystem)
+     */
+    public CoordinateReferenceSystem crs() {
+        return crs;
     }
 
     /**

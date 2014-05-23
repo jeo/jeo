@@ -16,6 +16,7 @@ package org.jeo.postgis;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
 
@@ -101,5 +102,13 @@ public class PostGIS implements VectorDriver<PostGISWorkspace>{
     @Override
     public PostGISWorkspace create(Map<?, Object> opts, Schema schema) throws IOException {
         throw new UnsupportedOperationException();
+    }
+
+    static final EnumSet<Capability> CAPABILITIES =
+        EnumSet.of(Capability.BOUND, Capability.LIMIT, Capability.OFFSET, Capability.FILTER);
+
+    @Override
+    public boolean supports(VectorDriver.Capability cap) {
+        return CAPABILITIES.contains(cap);
     }
 }

@@ -17,6 +17,7 @@ package org.jeo.ogr;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
 
@@ -25,6 +26,7 @@ import org.gdal.ogr.Driver;
 import org.gdal.ogr.ogr;
 import org.jeo.data.Disposable;
 import org.jeo.data.FileVectorDriver;
+import org.jeo.data.VectorDriver;
 import org.jeo.feature.Schema;
 import org.jeo.util.Key;
 import org.jeo.util.Messages;
@@ -171,4 +173,10 @@ public class OGR extends FileVectorDriver<OGRWorkspace> implements Disposable {
         }
     }
 
+    static final EnumSet<Capability> CAPABILITIES = EnumSet.of(Capability.BOUND);
+
+    @Override
+    public boolean supports(VectorDriver.Capability cap) {
+        return CAPABILITIES.contains(cap);
+    }
 }

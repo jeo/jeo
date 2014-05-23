@@ -15,9 +15,12 @@
 package org.jeo.gdal;
 
 import org.gdal.gdal.Dataset;
+import org.gdal.gdal.Driver;
 import org.gdal.gdal.gdal;
 import org.gdal.gdalconst.gdalconst;
+import org.gdal.osr.SpatialReference;
 import org.jeo.Tests;
+import org.jeo.proj.Proj;
 import org.junit.Assume;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -35,7 +38,7 @@ public class GDALTest {
     File data;
 
     @BeforeClass
-    public static void initOGR() {
+    public static void initGDAL() {
         try {
             GDAL.init();
         }
@@ -68,9 +71,5 @@ public class GDALTest {
         Dataset ds = gdal.Open(data.getAbsolutePath());
 
         ds.ReadRaster_Direct(0, 0, 1, 1, 1, 1, gdalconst.GDT_Float32, buf, null);
-        //buf.flip();
-        System.out.println(buf.asFloatBuffer().get());
-
-        //System.out.println(out[0]);
     }
 }

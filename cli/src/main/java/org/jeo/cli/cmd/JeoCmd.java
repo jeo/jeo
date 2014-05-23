@@ -58,7 +58,13 @@ public abstract class JeoCmd {
                 print(e, cli);
             }
             else {
-                cli.getConsole().println(e.getMessage());
+                Throwable t = e;
+                while (t != null) {
+                    if (t.getMessage() != null) {
+                        cli.getConsole().println(t.getMessage());
+                    }
+                    t = t.getCause();
+                }
             }
         }
         finally {

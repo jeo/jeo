@@ -85,6 +85,12 @@ public class Comparison<T> extends Filter<T> {
             }
         }
 
+        // if either is NaN, shortcut here as Double.compareTo has different
+        // behavior than expected (adheres to Object.equals ordering)
+        if (isNaN(o1) || isNaN(o2)) {
+            return false;
+        }
+
         if (type == Type.EQUAL) {
             return o1 != null ? o1.equals(o2) : o2 == null;
         }
@@ -93,7 +99,7 @@ public class Comparison<T> extends Filter<T> {
         }
 
         if (o1 == null || o2 == null) {
-            throw new IllegalArgumentException("Unable to perform comparison on null operand(s)");
+            return false;
         }
 
         Comparable<Object> c1 = toComparable(o1);
@@ -112,6 +118,10 @@ public class Comparison<T> extends Filter<T> {
         default:
             throw new IllegalStateException();
         }
+    }
+
+    static boolean isNaN(Object o) {
+        return o instanceof Number && Double.isNaN(((Number)o).doubleValue());
     }
 
     @SuppressWarnings("unchecked")

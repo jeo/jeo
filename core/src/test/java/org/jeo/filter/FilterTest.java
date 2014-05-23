@@ -24,6 +24,7 @@ import java.util.Map;
 
 import org.jeo.feature.BasicFeature;
 import org.jeo.feature.Feature;
+import org.jeo.filter.cql.CQL;
 import org.junit.Test;
 
 public class FilterTest {
@@ -147,5 +148,36 @@ public class FilterTest {
         // missing properties always short-cut to false
         assertFalse(new Null("z", false).apply(f));
         assertFalse(new Null("z", true).apply(f));
+    }
+
+    @Test
+    public void testMissingProperty() throws Exception {
+        // verify the short-cut-false behavior for filters that reference a
+        // missing property: 'y' in this case
+        Map<String,Object> map = new HashMap<String, Object>();
+        map.put("x", 5);
+
+        Feature f = new BasicFeature(null, map);
+
+        // comparison
+        assertFalse(CQL.parse("y < 5").apply(f));
+        assertFalse(CQL.parse("y = 5").apply(f));
+        assertFalse(CQL.parse("5 > y").apply(f));
+        assertFalse(CQL.parse("5 = y").apply(f));
+
+        // others
+        assertFalse(CQL.parse("y in (5)").apply(f));
+        assertFalse(CQL.parse("y like '5'").apply(f));
+        assertFalse(CQL.parse("contains(y, POINT(0 0))").apply(f));
+        assertFalse(CQL.parse("y is null").apply(f));
+        assertFalse(CQL.parse("in (5)").apply(f));
+
+        // math
+        assertFalse(CQL.parse("y < x + 5").apply(f));
+        assertFalse(CQL.parse("y + 5 < x").apply(f));
+
+        // logic
+        assertTrue(CQL.parse("y > 5 or x = 5").apply(f));
+        assertTrue(CQL.parse("x = 5 or y > 5").apply(f));
     }
 }

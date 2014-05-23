@@ -177,8 +177,15 @@ public abstract class VectorApiTestBase {
         assertCovered(data.cursor(new Query().filter("STATE_NAME LIKE 'Calif%'")), "CA");
 
         // null
-        assertEquals(49, Cursors.size(data.cursor(new Query().filter("P_MALE IS NOT NULL"))));
-        assertEquals(0, Cursors.size(data.cursor(new Query().filter("P_MALE IS NULL"))));
+        assertCount(49, data, "P_MALE IS NOT NULL");
+        assertCount(0, data, "P_MALE IS NULL");
+
+        // missing properties
+        assertCount(0, data, "MISSING IS NULL");
+        assertCount(0, data, "MISSING > 5");
+        assertCount(0, data, "MISSING + 5 > 5");
+        assertCount(0, data, "EQUALS(MISSING, POINT(0 0))");
+        assertCount(49, data, "MISSING > 5 OR P_MALE IS NOT NULL");
     }
 
     @Test
@@ -219,6 +226,12 @@ public abstract class VectorApiTestBase {
         }
         assertTrue("expected empty set, found " + set, set.isEmpty());
         assertEquals(abbrs.length, count);
+    }
+
+    void assertCount(int expected, VectorDataset dataSet, String filter) throws IOException {
+        Query q = new Query().filter(filter);
+        assertEquals(expected, dataSet.count(q));
+        assertEquals(expected, Cursors.size(dataSet.cursor(q)));
     }
 
     String fidFor(VectorDataset dataset, String filter) throws IOException {

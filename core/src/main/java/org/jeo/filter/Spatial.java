@@ -78,7 +78,7 @@ public class Spatial<T> extends Filter<T> {
 
     protected boolean compare(Object o1, Object o2, Number d) {
         if (o1 == null || o2 == null) {
-            throw new IllegalArgumentException("Unable to perform comparison on null operand(s)");
+            return false;
         }
 
         if (type == Type.BBOX) {

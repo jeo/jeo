@@ -16,9 +16,12 @@ package org.jeo.data;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
-
+import java.util.Set;
 import org.jeo.feature.Feature;
+import org.jeo.feature.Field;
+import org.jeo.feature.Schema;
 import org.jeo.filter.Filter;
 import org.jeo.filter.Filters;
 import org.jeo.filter.cql.CQL;
@@ -381,6 +384,16 @@ public class Query {
         }
 
         return count;
+    }
+
+    public Set<String> missingProperties(Schema schema) {
+        Set<String> queryProperties = (Set<String>) (filter == null ?
+                Collections.emptySet() : Filters.properties(filter));
+        List<Field> f = schema.getFields();
+        for (int i = 0, ii = f.size(); i < ii && !queryProperties.isEmpty(); i++) {
+            queryProperties.remove(f.get(i).getName());
+        }
+        return queryProperties;
     }
 
     @Override

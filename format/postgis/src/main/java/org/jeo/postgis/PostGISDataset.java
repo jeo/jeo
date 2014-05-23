@@ -57,6 +57,7 @@ import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Polygon;
 import com.vividsolutions.jts.io.WKBReader;
 import com.vividsolutions.jts.io.WKTWriter;
+import java.util.Set;
 
 public class PostGISDataset implements VectorDataset {
 
@@ -140,7 +141,10 @@ public class PostGISDataset implements VectorDataset {
         final SQL sql = new SQL("SELECT count(*) FROM ").name(schema().getName());
         final List<Pair<Object,Integer>> args = new ArrayList<Pair<Object,Integer>>();
 
-        encodeQuery(sql, q, qp, args);
+        // if filter refers to properties not in the schema, defer to CQL filter
+        if (!missingProperties(q)) {
+            encodeQuery(sql, q, qp, args);
+        }
         if (!Filters.isTrueOrNull(q.getFilter()) && qp.isFiltered()) {
             return pg.run(new DbOP<Long>() {
                 @Override
@@ -210,7 +214,10 @@ public class PostGISDataset implements VectorDataset {
             sql.add(" FROM ").name(schema.getName());
 
             List<Pair<Object,Integer>> args = new ArrayList<Pair<Object,Integer>>();
-            encodeQuery(sql, q, qp, args);
+            // if filter refers to properties not in the schema, defer to CQL filter
+            if (!missingProperties(q)) {
+                encodeQuery(sql, q, qp, args);
+            }
 
             pg.logQuery(sql, args);
 
@@ -437,5 +444,15 @@ public class PostGISDataset implements VectorDataset {
         }
     }
 
-    
+    boolean missingProperties(Query q) throws IOException {
+        boolean hasMissing = false;
+        if (q.getFilter() != null) {
+            Set<String> properties = Filters.properties(q.getFilter());
+            // try to defer resolving the schema unless needed
+            if (!properties.isEmpty()) {
+                hasMissing = !q.missingProperties(schema()).isEmpty();
+            }
+        }
+        return hasMissing;
+    }
 }

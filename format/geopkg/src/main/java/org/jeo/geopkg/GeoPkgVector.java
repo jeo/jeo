@@ -15,68 +15,25 @@
 package org.jeo.geopkg;
 
 import java.io.IOException;
-import java.util.Map;
 
+import java.util.Map;
 import org.jeo.data.Cursor;
 import org.jeo.data.Query;
+import org.jeo.data.Transaction;
+import org.jeo.data.Transactional;
 import org.jeo.data.VectorDataset;
 import org.jeo.feature.Feature;
 import org.jeo.feature.Schema;
-import org.jeo.proj.Proj;
-import org.jeo.util.Key;
-import org.osgeo.proj4j.CoordinateReferenceSystem;
 
-import com.vividsolutions.jts.geom.Envelope;
+public class GeoPkgVector extends GeoPkgDataset<FeatureEntry> implements VectorDataset, Transactional {
 
-public class GeoPkgVector implements VectorDataset {
-
-    FeatureEntry entry;
-    GeoPkgWorkspace geopkg;
-
-    GeoPkgVector(FeatureEntry entry, GeoPkgWorkspace geopkg) {
-        this.entry = entry;
-        this.geopkg = geopkg;
-    }
-
-    @Override
-    public GeoPackage getDriver() {
-        return geopkg.getDriver();
-    }
-
-    @Override
-    public Map<Key<?>, Object> getDriverOptions() {
-        return geopkg.getDriverOptions();
-    }
-
-    @Override
-    public String getName() {
-        return entry.getTableName();
-    }
-
-    @Override
-    public String getTitle() {
-        return entry.getIdentifier();
-    }
-
-    @Override
-    public String getDescription() {
-        return entry.getDescription();
+    public GeoPkgVector(FeatureEntry entry, GeoPkgWorkspace geopkg) {
+        super(entry, geopkg);
     }
 
     @Override
     public Schema schema() throws IOException {
-        return geopkg.schema(entry, null);
-    }
-
-    @Override
-    public CoordinateReferenceSystem crs() {
-        int srid = entry.getSrid();
-        return srid != -1 ? Proj.crs(srid) : null;
-    }
-
-    @Override
-    public Envelope bounds() throws IOException {
-        return entry.getBounds();
+        return geopkg.schema(entry);
     }
 
     @Override
@@ -90,6 +47,9 @@ public class GeoPkgVector implements VectorDataset {
     }
 
     @Override
-    public void close() {
+    public Transaction transaction(Map<String, Object> options) throws IOException {
+        return new GeoPkgTransaction(geopkg.backend.session());
     }
+
 }
+

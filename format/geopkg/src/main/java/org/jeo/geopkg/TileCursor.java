@@ -14,30 +14,26 @@
  */
 package org.jeo.geopkg;
 
-import static org.jeo.geopkg.GeoPkgWorkspace.LOG;
 import java.io.IOException;
-import java.sql.Connection;
-import java.sql.ResultSet;
 
 import org.jeo.data.Cursor;
+import org.jeo.geopkg.Backend.Results;
 import org.jeo.tile.Tile;
 
 public class TileCursor extends Cursor<Tile> {
 
-    ResultSet results;
-    Connection cx;
+    final Results rs;
     Boolean next;
 
-    public TileCursor(ResultSet results, Connection cx) {
-        this.results = results;
-        this.cx = cx;
+    public TileCursor(Results rs) {
+        this.rs = rs;
     }
 
     @Override
     public boolean hasNext() throws IOException {
         if (next == null) {
             try {
-                next = results.next();
+                next = rs.next();
             } catch (Exception e) {
                 throw new IOException(e);
             }
@@ -53,10 +49,10 @@ public class TileCursor extends Cursor<Tile> {
         Tile t = new Tile();
 
         try {
-            t.setZ(results.getInt(1));
-            t.setX(results.getInt(2));
-            t.setY(results.getInt(3));
-            t.setData(results.getBytes(4)); 
+            t.setZ(rs.getInt(0));
+            t.setX(rs.getInt(1));
+            t.setY(rs.getInt(2));
+            t.setData(rs.getBytes(3));
         }
         catch(Exception e) {
             throw new IOException(e);
@@ -68,22 +64,6 @@ public class TileCursor extends Cursor<Tile> {
 
     @Override
     public void close() throws IOException {
-        try {
-            if (results != null) {
-                results.close();
-            }
-            results = null;
-        } catch (Exception e) {
-            LOG.debug("error closing result set", e);
-        }
-
-        try {
-            if (cx != null) {
-                cx.close();
-            }
-        }
-        catch(Exception e) {
-            LOG.debug("error closing Connection", e);
-        }
+        rs.close();
     }
 }

@@ -22,13 +22,10 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
-import java.sql.Connection;
-import java.sql.ResultSet;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 import org.jeo.data.Cursor;
-import org.jeo.data.Cursors;
 import org.jeo.data.Query;
 import org.jeo.data.VectorDataset;
 import org.jeo.feature.BasicFeature;
@@ -38,7 +35,6 @@ import org.jeo.feature.Schema;
 import org.jeo.feature.SchemaBuilder;
 import org.jeo.geom.Geom;
 import org.jeo.geopkg.Entry.DataType;
-import org.jeo.sql.DbOP;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -47,6 +43,9 @@ import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.MultiPolygon;
 import com.vividsolutions.jts.geom.Point;
+import java.io.IOException;
+import org.jeo.data.Transaction;
+import org.jeo.data.Transactional;
 
 public class GeoPkgFeatureTest extends GeoPkgTestSupport {
 
@@ -78,7 +77,7 @@ public class GeoPkgFeatureTest extends GeoPkgTestSupport {
         FeatureEntry entry = geopkg.feature("states");
         assertNotNull(entry);
 
-        Schema schema = geopkg.createSchema(entry, null);
+        Schema schema = geopkg.createSchema(entry);
         assertEquals("states", schema.getName());
 
         assertNotNull(schema.geometry());
@@ -129,13 +128,15 @@ public class GeoPkgFeatureTest extends GeoPkgTestSupport {
     @Test
     public void testAdd() throws Exception {
         FeatureEntry entry = geopkg.feature("states");
-        Schema schema = geopkg.schema(entry, null);
+        Schema schema = geopkg.schema(entry);
 
+        Cursor<Feature> cursor = geopkg.cursor(entry, new Query().append());
+        assertTrue(cursor.hasNext());
         Geometry g = Geom.point(0,0).buffer(1);
-        Feature f = new BasicFeature(null, schema);
+        Feature f = cursor.next();
         f.put(schema.geometry().getName(), g);
         f.put("STATE_NAME", "JEOLAND");
-        geopkg.insert(entry, f, null);
+        cursor.write().close();
 
         assertEquals(50, geopkg.count(entry, new Query()));
 
@@ -209,16 +210,48 @@ public class GeoPkgFeatureTest extends GeoPkgTestSupport {
 
         assertEquals(Geom.Type.POINT, entry.getGeometryType());
 
-        geopkg.run(new DbOP<Object>() {
-            @Override
-            protected Object doRun(Connection cx) throws Exception {
-                ResultSet rs = open(open(cx.createStatement()).executeQuery(
-                    "SELECT data_type FROM gpkg_contents WHERE table_name = 'widgets'"));
-                
-                assertTrue(rs.next());
-                assertEquals(DataType.Feature.value(), rs.getString(1));
-                return null;
-            }
-        });
+        Backend.Results rs = geopkg.rawQuery("SELECT data_type FROM gpkg_contents WHERE table_name = 'widgets'");
+        try {
+            assertTrue(rs.next());
+            assertEquals(DataType.Feature.value(), rs.getString(0));
+        } finally {
+            rs.close();
+        }
+    }
+    
+    private void assertCleanState(VectorDataset states) throws IOException {
+        assertEquals(1, states.count(new Query().filter("STATE_ABBR = 'TX'")));
+        assertEquals(49, states.count(new Query()));
+    }
+
+    @Test
+    public void testTransaction() throws Exception {
+        // ensure a transaction works across mutiple operations
+        VectorDataset states = (VectorDataset) geopkg.get("states");
+        assertCleanState(states);
+        Transaction tx = ((Transactional) states).transaction(null);
+
+        // update one
+        Cursor<Feature> c = states.cursor(new Query().filter("STATE_NAME = 'Texas'").update().transaction(tx));
+        assertTrue(c.hasNext());
+        Feature f = c.next();
+        f.put("STATE_ABBR", "XT");
+        c.write().close();
+
+        // remove one
+        c = states.cursor(new Query().filter("STATE_ABBR = 'WV'").update().transaction(tx));
+        assertTrue(c.hasNext());
+        c.next();
+        c.remove().close();
+
+        // add one
+        c = states.cursor(new Query().append().transaction(tx));
+        assertTrue(c.hasNext());
+        f = c.next();
+        f.put("STATE_ABBR", "XX");
+        c.write().close();
+
+        tx.rollback();
+        assertCleanState(states);
     }
 }

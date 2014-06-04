@@ -14,24 +14,33 @@
  */
 package org.jeo.geopkg;
 
-import java.io.File;
 import java.io.IOException;
-import java.util.*;
+import org.jeo.data.Transaction;
+import org.jeo.geopkg.Backend.Session;
 
 /**
- * GeoPackage driver that uses the JDBCBackend.
- *
+ * A wrapper around a {@link Backend.Session}.
+ * 
  * @author Ian Schneider <ischneider@boundlessgeo.com>
  */
-public class GeoPackage extends GeoPkgBaseDriver {
+public class GeoPkgTransaction implements Transaction {
+    final Session session;
 
-    public static GeoPkgWorkspace open(File file) throws IOException {
-        return new GeoPackage().open(file, (Map) Collections.singletonMap(FILE, file));
+    GeoPkgTransaction(Session session) throws IOException {
+        this.session = session;
+        session.beginTransaction();
     }
 
     @Override
-    protected Backend backend(GeoPkgOpts gpkgOpts) throws IOException {
-        return new JDBCBackend(gpkgOpts);
+    public void commit() throws IOException {
+        session.endTransaction(true);
+        session.close();
+    }
+
+    @Override
+    public void rollback() throws IOException {
+        session.endTransaction(false);
+        session.close();
     }
 
 }

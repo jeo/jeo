@@ -14,32 +14,38 @@
  */
 package org.jeo.geopkg;
 
-import static org.jeo.geopkg.GeoPkgWorkspace.LOG;
 
 import java.io.IOException;
-import java.sql.Connection;
-import java.sql.SQLException;
 
 import org.jeo.data.Cursor;
 import org.jeo.feature.BasicFeature;
 import org.jeo.feature.Feature;
+import org.jeo.feature.Schema;
+import org.jeo.geopkg.Backend.Session;
 
 public class FeatureAppendCursor extends Cursor<Feature> {
 
-    Connection cx;
-
-    FeatureEntry entry;
-    GeoPkgWorkspace ws;
+    final Session session;
+    final FeatureEntry entry;
+    final GeoPkgWorkspace ws;
+    final Schema schema;
+    // whether an 'outer' Transaction is in use
+    final boolean transaction;
 
     Feature next;
 
-    public FeatureAppendCursor(Connection cx, FeatureEntry entry, GeoPkgWorkspace ws) throws SQLException {
+    FeatureAppendCursor(Session session, FeatureEntry entry, GeoPkgWorkspace ws, 
+            Schema schema, boolean usingTransaction) throws IOException {
         super(Mode.APPEND);
-        this.cx = cx;
+        this.session = session;
         this.entry = entry;
         this.ws = ws;
-
-        cx.setAutoCommit(false);
+        this.schema = schema;
+        this.transaction = usingTransaction;
+        // without a transaction, performance is miserable
+        if (! usingTransaction) {
+            session.beginTransaction();
+        }
     }
 
     @Override
@@ -49,29 +55,20 @@ public class FeatureAppendCursor extends Cursor<Feature> {
 
     @Override
     public Feature next() throws IOException {
-        return next = new BasicFeature(null, ws.schema(entry, cx));
+        return next = new BasicFeature(null, schema);
     }
 
     @Override
     protected void doWrite() throws IOException {
-        ws.insert(entry, next, cx);
+        ws.insert(entry, next, session);
     }
 
     @Override
     public void close() throws IOException {
-        if (cx != null) {
-            try {
-                cx.commit();
-            } catch (SQLException ex) {
-                throw new IOException("error committing", ex);
-            } finally {
-                try {
-                    cx.close();
-                }
-                catch(Exception e) {
-                    LOG.debug("error closing Connection", e);
-                }
-            }
+        // if not using an 'outer' Transaction, commit and close
+        if (!transaction) {
+            session.endTransaction(true);
+            session.close();
         }
     }
 }

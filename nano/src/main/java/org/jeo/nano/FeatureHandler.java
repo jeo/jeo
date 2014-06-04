@@ -222,7 +222,7 @@ public class FeatureHandler extends Handler {
         return q;
     }
 
-    Transaction buildTransaction(VectorDataset layer, Request request) {
+    Transaction buildTransaction(VectorDataset layer, Request request) throws IOException {
         // create a transaction object
         Properties q  = request.getParms();
         Map<String,Object> opts = 

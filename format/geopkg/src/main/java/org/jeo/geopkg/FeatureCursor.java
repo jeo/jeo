@@ -14,11 +14,7 @@
  */
 package org.jeo.geopkg;
 
-import static org.jeo.geopkg.GeoPkgWorkspace.LOG;
-
 import java.io.IOException;
-import java.sql.Connection;
-import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,32 +28,40 @@ import org.jeo.sql.PrimaryKey;
 import org.jeo.sql.PrimaryKeyColumn;
 
 import com.vividsolutions.jts.geom.Geometry;
+import org.jeo.geopkg.Backend.Session;
+import org.jeo.geopkg.Backend.Results;
 
 public class FeatureCursor extends Cursor<Feature> {
 
-    ResultSet results;
-    Connection cx;
-
-    FeatureEntry entry;
-    GeoPkgWorkspace workspace;
-    Schema schema;
-    PrimaryKey primaryKey;
-    GeoPkgGeomReader geomReader;
+    final FeatureEntry entry;
+    final GeoPkgWorkspace workspace;
+    final Schema schema;
+    final PrimaryKey primaryKey;
+    final GeoPkgGeomReader geomReader;
+    final Session session;
+    final Results results;
+    // whether an 'outer' Transaction is in use
+    final boolean transaction;
 
     Boolean next;
     Feature feature;
 
-    FeatureCursor(Mode mode, ResultSet stmt, Connection cx, FeatureEntry entry, GeoPkgWorkspace workspace) 
+    FeatureCursor(Session session, Results results, Mode mode, FeatureEntry entry, GeoPkgWorkspace workspace,
+            Schema schema, PrimaryKey primaryKey, boolean usingTransaction)
         throws IOException {
         super(mode);
 
-        this.results = stmt;
-        this.cx = cx;
+        this.session = session;
+        this.results = results;
         this.entry = entry;
         this.workspace = workspace;
-
-        this.schema = workspace.schema(entry, cx);
-        this.primaryKey = workspace.primaryKey(entry, cx);
+        this.schema = schema;
+        this.primaryKey = primaryKey;
+        this.transaction = usingTransaction;
+        // without a transaction, performance is miserable
+        if (!transaction && mode != READ) {
+            session.beginTransaction();
+        }
 
         this.geomReader = new GeoPkgGeomReader();
     }
@@ -83,73 +87,62 @@ public class FeatureCursor extends Cursor<Feature> {
 
                     List<Field> fields = schema.getFields();
                     List<Object> values = new ArrayList<Object>();
-
                     for (int i = 0; i < fields.size(); i++) {
-                        if (Geometry.class.isAssignableFrom(fields.get(i).getType())) {
-                            byte[] bytes = results.getBytes(i+1);
+                        Class type = fields.get(i).getType();
+                        if (Geometry.class.isAssignableFrom(type)) {
+                            byte[] bytes = results.getBytes(i);
                             values.add(bytes != null ? geomReader.read(bytes) : null);
                         }
                         else {
-                            values.add(results.getObject(i+1));
+                            values.add(results.getObject(i,type));
                         }
                     }
-    
+
                     String fid = null;
                     if (primaryKey != null) {
                         StringBuilder buf = new StringBuilder();
                         for (PrimaryKeyColumn pkcol : primaryKey.getColumns()) {
-                            Object obj = results.getObject(pkcol.getName());
+                            String obj = results.getString(pkcol.getName());
                             if (obj != null) {
                                 buf.append(obj);
                             }
                             buf.append(".");
                         }
 
-                        buf.setLength(buf.length()-1);
+                        buf.setLength(buf.length() - 1);
                         fid = buf.toString();
                     }
 
                     return feature = new BasicFeature(fid, values, schema);
-                }
-                finally {
+                } finally {
                     next = null;
                 }
             }
             return null;
-        }
-        catch(Exception e) {
+        } catch (Exception e) {
             throw new IOException(e);
         }
     }
 
     @Override
     protected void doWrite() throws IOException {
-        workspace.update(entry, feature, cx);
+        workspace.update(entry, feature, session);
     }
 
     @Override
     protected void doRemove() throws IOException {
-        workspace.delete(entry, feature, cx);
+        workspace.delete(entry, feature, session);
     }
 
     @Override
     public void close() throws IOException {
-        try {
-            if (results != null) {
-                results.close();
+        results.close();
+        if (!transaction) {
+            // if not using an 'outer' Transaction, commit and close
+            if (mode != Mode.READ) {
+                session.endTransaction(true);
             }
-            results = null;
-        } catch (Exception e) {
-            LOG.debug("error closing result set", e);
-        }
-
-        try {
-            if (cx != null) {
-                cx.close();
-            }
-        }
-        catch(Exception e) {
-            LOG.debug("error closing Connection", e);
+            session.close();
         }
     }
 }

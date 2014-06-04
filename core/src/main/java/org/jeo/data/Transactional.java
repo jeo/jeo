@@ -14,6 +14,7 @@
  */
 package org.jeo.data;
 
+import java.io.IOException;
 import java.util.Map;
 
 /**
@@ -31,5 +32,5 @@ public interface Transactional {
      * 
      * @return A new transaction instance.
      */
-    Transaction transaction(Map<String,Object> options);
+    Transaction transaction(Map<String,Object> options) throws IOException;
 }

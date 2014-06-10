@@ -117,7 +117,15 @@ public interface Feature {
     void put(Geometry g);
 
     /**
-     * The created schema for the feature. 
+     * If this Feature has no fixed schema. The Schema returned from {@link #schema}
+     * is generated.
+     */
+    boolean isSchemaless();
+
+    /**
+     * Get a Schema for this Feature. May be generated from the attributes if
+     * this Feature is schema-less.
+     * @return non-null Schema of this Feature
      */
     Schema schema();
 

@@ -166,6 +166,12 @@ public abstract class BaseRenderer implements Renderer {
             q.filter(filter);
         }
 
+        // compute query fields to reduce overhead
+        // always want the geometry
+        q.fields(data.schema() == null ? "geometry" : data.schema().geometry().getName());
+        // and whatever the styling rules and query need
+        q.computeFields(rules);
+
         for (Feature f : data.cursor(q)) {
             RuleList rs = rules.match(f);
             if (rs.isEmpty()) {

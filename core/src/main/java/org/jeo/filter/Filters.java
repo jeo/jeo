@@ -51,20 +51,44 @@ public class Filters {
         return new None<T>();
     }
 
+    static FilterVisitor propertyCollector = new FilterVisitor() {
+
+        @Override
+        public Object visit(Property property, Object obj) {
+            ((Set) obj).add(property.getProperty());
+            return obj;
+        }
+
+    };
+
+    /**
+     * Add all property references in the provided Filter to the provided
+     * Set.
+     * @param f non-null Filter to scan
+     * @param all non-null Set to add property names to
+     * @return the provided set
+     */
+    public static Set<String> properties(Filter<?> f, Set<String> all) {
+        return (Set<String>) f.accept(propertyCollector, all);
+    }
+
+    /**
+     * Add all property references in the provided Expression to the provided
+     * Set.
+     * @param f non-null Filter to scan
+     * @param all non-null Set to add property names to
+     * @return the provided set
+     */
+    public static Set<String> properties(Expression e, Set<String> all) {
+        return (Set<String>) e.accept(propertyCollector, all);
+    }
+
     /**
      * Return a Set of all property references in the provided Filter.
      * @param f non-null Filter to scan
      * @return non-null Set of any property references in the Filter
      */
     public static Set<String> properties(Filter<?> f) {
-        return (Set<String>) f.accept(new FilterVisitor() {
-
-            @Override
-            public Object visit(Property property, Object obj) {
-                ((HashSet) obj).add(property.getProperty());
-                return obj;
-            }
-
-        }, new HashSet());
+        return properties(f, new HashSet<String>());
     }
 }

@@ -94,6 +94,11 @@ public class FeatureWrapper implements Feature {
     }
 
     @Override
+    public boolean isSchemaless() {
+        return delegate.isSchemaless();
+    }
+
+    @Override
     public Schema schema() {
         return delegate.schema();
     }
@@ -108,5 +113,4 @@ public class FeatureWrapper implements Feature {
         return delegate.map();
     }
 
-    
 }

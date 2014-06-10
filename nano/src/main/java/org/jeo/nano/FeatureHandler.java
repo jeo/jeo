@@ -16,7 +16,6 @@ package org.jeo.nano;
 
 import static org.jeo.nano.NanoHTTPD.HTTP_BADREQUEST;
 import static org.jeo.nano.NanoHTTPD.HTTP_CREATED;
-import static org.jeo.nano.NanoHTTPD.HTTP_FORBIDDEN;
 import static org.jeo.nano.NanoHTTPD.HTTP_METHOD_NOT_ALLOWED;
 import static org.jeo.nano.NanoHTTPD.HTTP_NOTFOUND;
 import static org.jeo.nano.NanoHTTPD.HTTP_OK;
@@ -64,7 +63,6 @@ import org.jeo.geom.Envelopes;
 import org.jeo.geom.Geom;
 import org.jeo.json.JSONObject;
 import org.jeo.json.JSONValue;
-import org.jeo.map.CartoCSS;
 import org.jeo.map.MapBuilder;
 import org.jeo.map.Style;
 import org.jeo.map.View;
@@ -143,6 +141,12 @@ public class FeatureHandler extends Handler {
         throws IOException {
 
         Query q = buildQuery(layer, request);
+
+        String fieldSpec = request.parms.getProperty("fields");
+        if (fieldSpec != null) {
+            q.fields(fieldSpec.split(","));
+        }
+        q.computeFields(null);
         
         final Cursor<Feature> c = layer.cursor(q);
 

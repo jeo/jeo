@@ -20,6 +20,7 @@ import org.jeo.proj.Proj;
 import org.junit.Test;
 
 import com.vividsolutions.jts.geom.Point;
+import java.util.Arrays;
 
 public class SchemaBuilderTest {
 
@@ -33,5 +34,19 @@ public class SchemaBuilderTest {
         assertEquals(Integer.class, schema.field("ip").getType());
         assertEquals(Point.class, schema.field("pp").getType());
         assertEquals(Proj.EPSG_4326, schema.field("pp").getCRS());
+    }
+
+    @Test
+    public void testSelectFields() {
+        Schema schema = new SchemaBuilder("widgets")
+            .fields("sp:String,ip:Integer,pp:Point:srid=4326").schema();
+
+        Schema selected = SchemaBuilder.selectFields(schema, Arrays.asList("sp","pp","blah"));
+        assertEquals(2, selected.getFields().size());
+        assertEquals(schema.field("sp"), selected.field("sp"));
+        assertEquals(schema.field("pp"), selected.field("pp"));
+        // ordering
+        assertEquals(schema.field("sp"), selected.fields.get(0));
+        assertEquals(schema.field("pp"), selected.fields.get(1));
     }
 }

@@ -30,6 +30,7 @@ import org.jeo.sql.PrimaryKeyColumn;
 import com.vividsolutions.jts.geom.Geometry;
 import org.jeo.geopkg.Backend.Session;
 import org.jeo.geopkg.Backend.Results;
+import org.jeo.feature.SchemaBuilder;
 
 public class FeatureCursor extends Cursor<Feature> {
 
@@ -40,14 +41,21 @@ public class FeatureCursor extends Cursor<Feature> {
     final GeoPkgGeomReader geomReader;
     final Session session;
     final Results results;
+    final List<Field> fields;
     // whether an 'outer' Transaction is in use
     final boolean transaction;
+    // index of primary key columns in result set
+    final List<Integer> pkColumns;
+    // reusable holder for values as BasicFeature will copy these out
+    final List<Object> values;
+    // reusable buffer for generating fid
+    final StringBuilder buf = new StringBuilder();
 
     Boolean next;
     Feature feature;
 
     FeatureCursor(Session session, Results results, Mode mode, FeatureEntry entry, GeoPkgWorkspace workspace,
-            Schema schema, PrimaryKey primaryKey, boolean usingTransaction)
+            Schema schema, PrimaryKey primaryKey, boolean usingTransaction, List<String> fields)
         throws IOException {
         super(mode);
 
@@ -55,15 +63,36 @@ public class FeatureCursor extends Cursor<Feature> {
         this.results = results;
         this.entry = entry;
         this.workspace = workspace;
-        this.schema = schema;
         this.primaryKey = primaryKey;
         this.transaction = usingTransaction;
+        geomReader = new GeoPkgGeomReader();
+
         // without a transaction, performance is miserable
         if (!transaction && mode != READ) {
             session.beginTransaction();
         }
 
-        this.geomReader = new GeoPkgGeomReader();
+        if (!fields.isEmpty()) {
+            // requested fields in schema require rebuilding schema
+            this.schema = SchemaBuilder.selectFields(schema, fields);
+        } else {
+            this.schema = schema;
+        }
+        this.fields = this.schema.getFields();
+
+        values = new ArrayList<Object>(schema.getFields().size());
+
+        pkColumns = new ArrayList<Integer>(primaryKey.getColumns().size());
+        int end = fields.size();
+        for (PrimaryKeyColumn pkcol : primaryKey.getColumns()) {
+            // if schema has reduced fields, they will be present in the end
+            int idx = this.schema.indexOf(pkcol.getName());
+            if (idx >= 0) {
+                pkColumns.add(idx);
+            } else {
+                pkColumns.add(end++);
+            }
+        }
     }
 
     @Override
@@ -84,9 +113,8 @@ public class FeatureCursor extends Cursor<Feature> {
         try {
             if (next != null && next) {
                 try {
+                    values.clear();
 
-                    List<Field> fields = schema.getFields();
-                    List<Object> values = new ArrayList<Object>();
                     for (int i = 0; i < fields.size(); i++) {
                         Class type = fields.get(i).getType();
                         if (Geometry.class.isAssignableFrom(type)) {
@@ -99,17 +127,20 @@ public class FeatureCursor extends Cursor<Feature> {
                     }
 
                     String fid = null;
-                    if (primaryKey != null) {
-                        StringBuilder buf = new StringBuilder();
-                        for (PrimaryKeyColumn pkcol : primaryKey.getColumns()) {
-                            String obj = results.getString(pkcol.getName());
+
+                    if (!pkColumns.isEmpty()) {
+                        buf.delete(0, buf.length());
+                        for (int i = 0; i < pkColumns.size(); i++) {
+                            Object obj = results.getString(pkColumns.get(i));
                             if (obj != null) {
                                 buf.append(obj);
                             }
                             buf.append(".");
                         }
 
-                        buf.setLength(buf.length() - 1);
+                        if (buf.length() > 0) {
+                            buf.setLength(buf.length() - 1);
+                        }
                         fid = buf.toString();
                     }
 

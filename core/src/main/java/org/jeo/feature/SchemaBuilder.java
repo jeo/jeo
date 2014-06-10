@@ -24,6 +24,7 @@ import org.jeo.proj.Proj;
 import org.osgeo.proj4j.CoordinateReferenceSystem;
 
 import com.vividsolutions.jts.geom.Geometry;
+import java.util.Collection;
 
 /**
  * Builder for {@link Schema} objects.
@@ -202,5 +203,25 @@ public class SchemaBuilder {
      */
     public Schema schema() {
         return new Schema(name, uri, fields);
+    }
+
+    /**
+     * Create a new Schema with only the specified fields. Fields not present
+     * in the original with be ignored. The order of the fields will be retained
+     * except those that are removed.
+     * 
+     * @param original The original Schema
+     * @param retain The fields to retain
+     * @return a new Schema with only the specified fields
+     */
+    public static Schema selectFields(Schema original, Collection<String> retain) {
+        List<Field> fields = new ArrayList<Field>(retain.size());
+        for (int i = 0; i < original.fields.size(); i++) {
+            Field f = original.fields.get(i);
+            if (retain.contains(f.getName())) {
+                fields.add(f);
+            }
+        }
+        return new Schema(original.name, original.uri, fields);
     }
 }

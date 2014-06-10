@@ -256,10 +256,38 @@ public class GeoPkgWorkspace implements Workspace, FileData {
 
         QueryPlan qp = new QueryPlan(q);
         PrimaryKey pk = primaryKey(entry, session);
-        //TODO: handle selective fields
-        SQL sqlb = new SQL("SELECT * FROM ").name(entry.getTableName());
-        List<Object> args = missingProperties(entry, q, session) ?
+        SQL sqlb = new SQL("SELECT ");
+
+        List<String> queryFields = q.getFields(schema);
+        // working set of fields in query
+        if (q.getFields().isEmpty()) {
+            sqlb.add(" * ");
+        } else {
+            ArrayList<String> fields = new ArrayList<String>(queryFields);
+            // add any primary key columns if not already there
+            // these will get added to the end and the cursor will know to find
+            // them there
+            for (PrimaryKeyColumn pkc : pk.getColumns()) {
+                if (!fields.contains(pkc.getName())) {
+                    fields.add(pkc.getName());
+                }
+            }
+            for (String f : fields) {
+                sqlb.name(f).add(", ");
+            }
+            sqlb.trim(2);
+        }
+        sqlb.add(" FROM ").name(entry.getTableName());
+
+        // @todo if the generated SQL would reference any missing properties then
+        // we cannot do a native query (until we filter them out)
+        boolean missingProperties = missingProperties(entry, q, session);
+        List<Object> args =  missingProperties ?
             Collections.EMPTY_LIST : encodeQuery(sqlb, q, qp, pk);
+        // if no missing properties, tell the query plan we can do the fields
+        if (!missingProperties) {
+            qp.fields();
+        }
 
         Results rs = transaction.queryPrepared(sqlb.toString(), args.toArray());
         // if under a transaction, close the session since we're done with it
@@ -269,7 +297,7 @@ public class GeoPkgWorkspace implements Workspace, FileData {
 
         // if session != transaction, tell the cursor not to close the session
         Cursor<Feature> c = new FeatureCursor(transaction, rs, q.getMode(), entry, this,
-            schema, pk, usingTransaction);
+            schema, pk, usingTransaction, queryFields);
 
         if (!Envelopes.isNull(q.getBounds())) {
             c = Cursors.intersects(c, q.getBounds());

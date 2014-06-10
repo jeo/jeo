@@ -203,6 +203,39 @@ public abstract class VectorApiTestBase {
         assertFalse(next.has("NOT THERE AT ALL"));
     }
 
+    @Test
+    public void testFeatureFields() throws Exception {
+        // reverse the order as they appear in gpkg/postgis schema
+        Cursor<Feature> cursor = data.cursor(new Query().fields("STATE_NAME", "SAMP_POP"));
+        Feature next;
+        try {
+            assertTrue(cursor.hasNext());
+            next = cursor.next();
+        } finally {
+            cursor.close();
+        }
+        assertTrue(next.map().size() == 2);
+        // make sure query reduction doesn't result in missing id but hard to
+        // test specifics across drivers as they return differing values now
+        assertTrue(next.getId() != null && next.getId().length() > 0);
+        // this should be here but hard to test specific value as order varies
+        assertTrue(next.get("STATE_NAME") != null);
+        assertTrue(next.get("SAMP_POP") != null);
+
+
+        // reduced fields but filter referencing other field
+        cursor = data.cursor(new Query().fields("STATE_NAME", "SAMP_POP").filter("STATE_ABBR = 'CA'"));
+        try {
+            assertTrue(cursor.hasNext());
+            next = cursor.next();
+        } finally {
+            cursor.close();
+        }
+        assertTrue(next.map().size() == 2);
+        assertEquals("California", next.get("STATE_NAME"));
+        assertEquals(3792553, ((Number)next.get("SAMP_POP")).intValue());
+    }
+
     void assertNotCovered(Cursor<Feature> cursor, String... abbrs) throws IOException {
         final Set<String> set = Sets.newHashSet(abbrs);
         try {

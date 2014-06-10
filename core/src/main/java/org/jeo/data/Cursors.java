@@ -34,6 +34,12 @@ import org.osgeo.proj4j.CoordinateTransform;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+import org.jeo.feature.BasicFeature;
+import org.jeo.feature.Schema;
+import org.jeo.feature.SchemaBuilder;
 
 /**
  * Utility class for {@link Cursor} objects.
@@ -620,6 +626,61 @@ public class Cursors {
         Envelope e = new Envelope();
         e.setToNull();
         return e;
+    }
+
+    static class SelectFieldsCursor extends CursorWrapper<Feature> {
+        private final String[] fields;
+        private final Map<String, Object> values;
+        private Schema schema;
+
+        public SelectFieldsCursor(Cursor<Feature> delegate, Set<String> fields) {
+            super(delegate);
+            this.fields = fields.toArray(new String[0]);
+            this.values = new HashMap<String, Object>(fields.size());
+        }
+
+        @Override
+        public Feature next() throws IOException {
+            Feature next = super.next();
+            if (next != null) {
+                if (schema == null ) {
+                    schema = schema(next);
+                }
+
+                // values is copied by BasicFeature, so we reuse it
+                for (int i = 0; i < fields.length; i++) {
+                    values.put(fields[i], next.get(fields[i]));
+                }
+                // this may not be the most efficient approach compared
+                // to wrapping the feature
+                next = new BasicFeature(next.getId(), values, schema);
+            }
+            return next;
+        }
+
+        public Schema schema(Feature original) {
+            Schema s = null;
+            // if schemaless, don't use any existing derived schema as it will
+            // now look invalid due to removed features
+            // otherwise, derive a new one
+            if (!original.isSchemaless()) {
+                s = SchemaBuilder.selectFields(original.schema(), Arrays.asList(fields));
+            }
+            return s;
+        }
+    }
+
+    /**
+     * Wraps a cursor returning Features that contain only the specified fields.
+     * @see Features.selectFields
+     *
+     * @param cursor The original cursor.
+     * @param fields The fields to include.
+     * 
+     * @return The wrapped cursor.
+     */
+    public static Cursor<Feature> selectFields(Cursor<Feature> cursor, Collection<String> fields) {
+        return new SelectFieldsCursor(cursor, new HashSet<String>(fields));
     }
 }
 

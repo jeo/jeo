@@ -190,6 +190,11 @@ public class BasicFeature implements Feature {
     }
 
     @Override
+    public boolean isSchemaless() {
+        return storage.isSchemaless;
+    }
+
+    @Override
     public Schema schema() {
         return storage.schema();
     }
@@ -246,10 +251,12 @@ public class BasicFeature implements Feature {
     }
 
     protected static abstract class Storage {
+        final boolean isSchemaless;
 
         Schema schema;
 
         protected Storage(Schema schema) {
+            this.isSchemaless = schema == null;
             this.schema = schema;
         }
 

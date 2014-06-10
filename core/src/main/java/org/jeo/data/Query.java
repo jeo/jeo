@@ -34,6 +34,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.vividsolutions.jts.geom.Envelope;
+import java.util.HashSet;
+import org.jeo.filter.Expression;
+import org.jeo.map.Rule;
+import org.jeo.map.RuleList;
+import org.jeo.map.Selector;
 
 /**
  * Describes a query against a {@link VectorDataset} dataset. 
@@ -48,7 +53,7 @@ public class Query {
     /**
      * Fields to include in query.
      */
-    List<String> fields = new ArrayList<String>();
+    Set<String> fields = new HashSet<String>(3);
 
     /**
      * Spatial bounds of the query.
@@ -97,11 +102,34 @@ public class Query {
     }
 
     /**
-     * List of Feature properties to query, an empty list means all properties.
+     * Set of Feature properties to query, an empty set means all properties.
      *
      */
-    public List<String> getFields() {
+    public Set<String> getFields() {
         return fields;
+    }
+
+    /**
+     * Get the fields in order of appearance in the Schema. An empty set implies
+     * all properties.
+     * 
+     * @param schema the schema to evaluate ordering against
+     * @return list of fields in schema ordering or empty list
+     */
+    public List<String> getFields(Schema schema) {
+        List<String> ordered = new ArrayList<String>(fields.size());
+        if (fields.size() > 0) {
+            List<Field> schemaFields = schema.getFields();
+            for (Field f: schemaFields) {
+                for (String s: fields) {
+                    if (f.getName().equals(s)) {
+                        ordered.add(s);
+                        break;
+                    }
+                }
+            }
+        }
+        return ordered;
     }
 
     /**
@@ -192,6 +220,38 @@ public class Query {
         this.fields.clear();
         this.fields.addAll(fields);
         return this;
+    }
+
+    /**
+     * Compute and add any additional fields required to satisfy this query and
+     * optional style rules.
+     * 
+     * @param rules optional RuleList of styles
+     */
+    public void computeFields(RuleList rules) {
+        Set<String> properties = filter == null ? new HashSet<String>() : Filters.properties(filter);
+        if (rules != null) {
+            for (Rule r: rules) {
+                computeFields(r, properties);
+            }
+        }
+        fields.addAll(properties);
+    }
+
+    private void computeFields(Rule r, Set<String> properties) {
+        for (Selector s : r.getSelectors()) {
+            if (s.getFilter() != null) {
+                Filters.properties(s.getFilter(), properties);
+            }
+        }
+        for (Object val : r.properties().values()) {
+            if (val instanceof Expression) {
+                Filters.properties((Expression) val, properties);
+            }
+        }
+        for (Rule n : r.nested()) {
+            computeFields(n, properties);
+        }
     }
 
     /**

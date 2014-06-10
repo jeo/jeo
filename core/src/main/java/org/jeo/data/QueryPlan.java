@@ -22,6 +22,7 @@ import org.jeo.util.Pair;
 import org.osgeo.proj4j.CoordinateReferenceSystem;
 
 import com.vividsolutions.jts.geom.Envelope;
+import java.util.Set;
 
 /**
  * Explains how a query is handled by a format driver.
@@ -44,6 +45,7 @@ public class QueryPlan {
     boolean reprojected;
     boolean simplified;
     boolean sorted;
+    boolean fieldsSelected;
 
     public QueryPlan(Query q) {
         this.q = q;
@@ -148,6 +150,20 @@ public class QueryPlan {
     }
 
     /**
+     * Whether {@link Query#getFields()} was handled natively.
+     */
+    public boolean isFields() {
+        return fieldsSelected;
+    }
+
+    /**
+     * Marks {@link Query#getFields()} as being handled natively.
+     */
+    public void fields() {
+        this.fieldsSelected = true;
+    }
+
+    /**
      * Augments the specified cursor with wrappers that handle the parts of the query that could
      * not be processed natively.
      * <p>
@@ -184,6 +200,11 @@ public class QueryPlan {
         Pair<CoordinateReferenceSystem,CoordinateReferenceSystem> reproj = q.getReproject();
         if (!isReprojected() && reproj != null) {
             cursor = Cursors.reproject(cursor, reproj.first(), reproj.second());
+        }
+
+        Set<String> fields = q.getFields();
+        if (!isFields() && !fields.isEmpty()) {
+            cursor = Cursors.selectFields(cursor, fields);
         }
 
         //TODO: sorting

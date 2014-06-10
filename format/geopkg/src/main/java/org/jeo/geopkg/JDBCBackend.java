@@ -271,7 +271,7 @@ class JDBCBackend extends Backend {
 
         @Override
         public String getString(int idx) throws IOException {
-            return (String) getObject(idx);
+            return getObject(idx).toString();
         }
 
         @Override

@@ -260,7 +260,7 @@ public class GeoPkgWorkspace implements Workspace, FileData {
 
         List<String> queryFields = q.getFields(schema);
         // working set of fields in query
-        if (q.getFields().isEmpty()) {
+        if (queryFields.isEmpty()) {
             sqlb.add(" * ");
         } else {
             ArrayList<String> fields = new ArrayList<String>(queryFields);

@@ -80,9 +80,7 @@ public class WMSHandler extends OWSHandler {
             Filter filter = i < filters.size() ? filters.get(i) : null;
             mb.layer(dataSet.get(i), filter);
         }
-        for (Style s : styles) {
-            mb.style(s);
-        }
+        mb.style(Style.combine(styles));
         View view = mb.view();
         Renderer renderer = factory.create(view, null);
         renderer.init(view, null);

@@ -14,11 +14,15 @@
  */
 package org.jeo.nano;
 
+import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
+import java.io.InputStreamReader;
 import java.util.regex.Pattern;
-import static org.easymock.classextension.EasyMock.createMock;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import org.jeo.data.Cursor;
@@ -28,6 +32,9 @@ import org.jeo.feature.Feature;
 import org.jeo.feature.Schema;
 import org.jeo.feature.SchemaBuilder;
 import org.jeo.geojson.GeoJSONReader;
+import org.jeo.json.JSONArray;
+import org.jeo.json.JSONObject;
+import org.jeo.json.parser.JSONParser;
 import org.jeo.nano.NanoHTTPD.Response;
 import org.junit.Before;
 import org.junit.Test;
@@ -67,6 +74,54 @@ public class FeatureHandlerTest extends HandlerTestSupport {
         Cursor<Feature> features = (Cursor<Feature>) new GeoJSONReader().read(res.stream());
         assertFalse(features.hasNext());
 
+        mock.verify();
+    }
+
+    @Test
+    public void testGetWorkspaceDatasetJSONAllFieldsWithQuery() throws Exception {
+        // make sure all fields come back when using a filter
+        GeometryFactory f = new GeometryFactory();
+        mock = MockServer.create()
+                .withVectorLayer()
+                    .withFeature("22", "name","foo","value","bar","geom", f.createPoint(new Coordinate(0,0)))
+                .replay();
+        Response res = makeRequest(
+                new Request("/features/foo/bar", "GET", null, q("filter","name=foo"), null),
+                NanoHTTPD.HTTP_OK,
+                NanoHTTPD.MIME_JSON
+        );
+        JSONObject parse = (JSONObject) new JSONParser().parse(new InputStreamReader(res.stream()));
+        JSONArray features = (JSONArray) parse.get("features");
+        JSONObject feature = (JSONObject) features.get(0);
+        assertNotNull(feature.get("geometry"));
+        assertEquals("22", feature.get("id"));
+        JSONObject props = (JSONObject) feature.get("properties");
+        assertEquals("foo", props.get("name"));
+        assertEquals("bar", props.get("value"));
+        mock.verify();
+    }
+
+    @Test
+    public void testGetWorkspaceDatasetJSONSelectFieldsWithQuery() throws Exception {
+        // make sure only specified fields come back when using a filter
+        GeometryFactory f = new GeometryFactory();
+        mock = MockServer.create()
+                .withVectorLayer()
+                    .withFeature("22", "name","foo","value","bar","geom", f.createPoint(new Coordinate(0,0)))
+                .replay();
+        Response res = makeRequest(
+                new Request("/features/foo/bar", "GET", null, q("filter","name=foo","fields","value"), null),
+                NanoHTTPD.HTTP_OK,
+                NanoHTTPD.MIME_JSON
+        );
+        JSONObject parse = (JSONObject) new JSONParser().parse(new InputStreamReader(res.stream()));
+        JSONArray features = (JSONArray) parse.get("features");
+        JSONObject feature = (JSONObject) features.get(0);
+        assertNull(feature.get("geometry"));
+        assertEquals("22", feature.get("id"));
+        JSONObject props = (JSONObject) feature.get("properties");
+        assertEquals(1, props.keySet().size());
+        assertEquals("bar", props.get("value"));
         mock.verify();
     }
 

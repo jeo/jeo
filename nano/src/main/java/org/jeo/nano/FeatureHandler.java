@@ -34,6 +34,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -44,6 +45,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.jeo.data.Cursor;
+import org.jeo.data.Cursors;
 import org.jeo.data.Dataset;
 import org.jeo.data.Query;
 import org.jeo.data.Transaction;
@@ -143,12 +145,25 @@ public class FeatureHandler extends Handler {
         Query q = buildQuery(layer, request);
 
         String fieldSpec = request.parms.getProperty("fields");
-        if (fieldSpec != null) {
-            q.fields(fieldSpec.split(","));
+        String[] fields = null;
+        if (fieldSpec != null && fieldSpec.length() > 0) {
+            fields = fieldSpec.split(",");
+            if (fields.length > 0) {
+                // reduce the query response to any fields specified
+                q.fields(fields);
+                // and ensure the filter fields are included
+                q.computeFields(null);
+            }
         }
-        q.computeFields(null);
-        
-        final Cursor<Feature> c = layer.cursor(q);
+
+        final Cursor<Feature> c;
+        if (fields == null) {
+            c = layer.cursor(q);
+        } else {
+            // if the request specifies fields, wrap the cursor to prevent
+            // any fields referenced in the query from getting into the response
+            c = Cursors.selectFields(layer.cursor(q), Arrays.asList(fields));
+        }
 
         // if requesting a specific feature, fail if not found
         String fid = parseFeatureId(request);

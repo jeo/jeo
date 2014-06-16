@@ -98,6 +98,19 @@ public class MockServer {
         return mock;
     }
 
+    MockServer withFeature(String id, Object... kv) throws Exception {
+        Map<String,Object> vals = new HashMap<String,Object>();
+        for (int i = 0; i < kv.length; i+=2) {
+            vals.put(kv[i].toString(), kv[i+1]);
+        }
+        Feature f = new BasicFeature(id, vals);
+        MemVector v = new MemVector(null);
+        v.add(f);
+        expect(vectorLayer.cursor((Query) anyObject())).andReturn(v.cursor(new Query())).once();
+        
+        return this;
+    }
+
     MockServer withVectorLayer() throws Exception {
         withWorkspace();
 

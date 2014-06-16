@@ -35,6 +35,7 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Point;
+import org.jeo.feature.Field;
 
 /**
  * Abstract test case that exercises all aspects of the {@link VectorDataset} interface.
@@ -201,6 +202,16 @@ public abstract class VectorApiTestBase {
         assertTrue(next.has(next.schema().geometry().getName()));
         assertTrue(next.has("STATE_NAME"));
         assertFalse(next.has("NOT THERE AT ALL"));
+
+        // add a query and check all fields returned.
+        // ensures attribute filtering operations don't remove erroneously
+        cursor = data.cursor(new Query().filter("STATE_ABBR = 'CA'"));
+        assertTrue(cursor.hasNext());
+        Feature feature = cursor.next();
+        assertEquals(data.schema().getFields().size(), feature.schema().size());
+        for (Field f: data.schema().getFields()) {
+            assertNotNull(feature.schema().field(f.getName()));
+        }
     }
 
     @Test

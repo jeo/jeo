@@ -14,6 +14,8 @@
  */
 package org.jeo.map;
 
+import java.util.Collection;
+
 /**
  * Defines the rules used to symbolize a map.
  * <p>
@@ -27,6 +29,20 @@ public class Style {
      */
     public static StyleBuilder build() {
         return new StyleBuilder();
+    }
+
+    /**
+     * Create a new combined style from the provided styles.
+     *
+     * @param styles non-null collection of styles
+     * @return a new Style representing the combination of the provided styles
+     */
+    public static Style combine(Collection<Style> styles) {
+        Style combined = new Style();
+        for (Style s: styles) {
+            combined.rules.addAll(s.rules);
+        }
+        return combined;
     }
 
     RuleList rules = new RuleList();

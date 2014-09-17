@@ -12,6 +12,14 @@
   <name>GeoTools Bridge</name>
   <packaging>jar</packaging>
 
+  <repositories>
+   <repository>
+     <id>osgeo</id>
+     <name>OSGeo Maven Repository</name>
+     <url>http://download.osgeo.org/webdav/geotools/</url>
+   </repository>
+  </repositories>
+
   <dependencies>
     <dependency>
       <groupId>org.jeo</groupId>

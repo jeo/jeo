@@ -762,24 +762,20 @@ public class GeoPkgWorkspace implements Workspace, FileData {
 
         TilePyramidBuilder tpb = TilePyramid.build();
 
+        Results grids = rs.session().queryPrepared(sql, e.getTableName());
         try {
-            Results grids = rs.session().queryPrepared(sql, e.getTableName());
-            try {
-                //TODO: bounds
-                if (grids.next()) {
-                    tpb.tileSize(grids.getInt(3), grids.getInt(4));
-                    do {
-                        tpb.grid(grids.getInt(0), grids.getInt(1), grids.getInt(2));
-                    } while (grids.next());
-                }
+            //TODO: bounds
+            if (grids.next()) {
+                tpb.tileSize(grids.getInt(3), grids.getInt(4));
+                do {
+                    tpb.grid(grids.getInt(0), grids.getInt(1), grids.getInt(2));
+                } while (grids.next());
             }
-            finally {
-                grids.close();
-            }
-            e.setTilePyramid(tpb.pyramid());
-        } finally {
-            rs.close();
         }
+        finally {
+            grids.close();
+        }
+        e.setTilePyramid(tpb.pyramid());
 
         return e;
     }

@@ -15,7 +15,7 @@
       <url>http://repo.boundlessgeo.com/main</url>
     </repository>
   </repositories>
-  
+
   <distributionManagement>
     <repository>
       <id>boundless</id>
@@ -112,8 +112,8 @@
        <artifactId>maven-compiler-plugin</artifactId>
        <version>3.1</version>
        <configuration>
-         <source>1.6</source>
-         <target>1.6</target>
+         <source>1.7</source>
+         <target>1.7</target>
          <debug>true</debug>
          <encoding>UTF-8</encoding>
        </configuration>
@@ -257,7 +257,6 @@
               <finalName>jeo-${project.version}</finalName>
               <descriptors>
                 <descriptor>assembly/lib.xml</descriptor>
-                <descriptor>assembly/cli.xml</descriptor>
                 <descriptor>assembly/doc.xml</descriptor>
                 <descriptor>assembly/geogit.xml</descriptor>
               </descriptors>
@@ -279,11 +278,9 @@
 
   <modules>
     <module>core</module>
+    <module>render</module>
     <module>format</module>
-    <module>carto</module>
     <module>util</module>
-    <module>cli</module>
-    <module>nano</module>
   </modules>
 
   <properties>

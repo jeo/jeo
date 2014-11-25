@@ -23,7 +23,7 @@
   <dependencies>
     <dependency>
       <groupId>org.jeo</groupId>
-      <artifactId>jeo</artifactId>
+      <artifactId>jeo-render</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>

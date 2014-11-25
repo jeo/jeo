@@ -22,12 +22,12 @@ import com.vividsolutions.jts.geom.Envelope;
 
 /**
  * Reference to a data object.
- * <p> 
- * A handle is a lightweight proxy to a data object meant to convey information about the object 
- * without necessarily having to load it. The {@link #resolve()} method is used to obtain the 
+ * <p>
+ * A handle is a lightweight proxy to a data object meant to convey information about the object
+ * without necessarily having to load it. The {@link #resolve()} method is used to obtain the
  * underlying data object from the handle.
  * </p>
- * 
+ *
  * @author Justin Deoliveira, Boundless
  *
  * @param <T>
@@ -76,7 +76,7 @@ public abstract class Handle<T> implements Disposable {
 
     /**
      * Creates a new handle.
-     * 
+     *
      * @param name Name of the object.
      * @param type The type of the data object.
      * @param driver The format driver for the data type.
@@ -117,7 +117,7 @@ public abstract class Handle<T> implements Disposable {
      * Title of the data object.
      * <p>
      * This value may be <code>null</code>. Application code should use {@link #title()} to return
-     * a value that may require resolving the underlying data object. 
+     * a value that may require resolving the underlying data object.
      * </p>
      */
     public String getTitle() {
@@ -135,7 +135,7 @@ public abstract class Handle<T> implements Disposable {
      * Returns the title of the data object resolving the handle if necessary.
      *
      * @return The title, or <code>null</code>.
-     * 
+     *
      * @throws IOException I/O errors that occur interacting with the underlying data object.
      */
     public String title() throws IOException {
@@ -151,8 +151,8 @@ public abstract class Handle<T> implements Disposable {
     /**
      * Description of the data object.
      * <p>
-     * This value may be <code>null</code>. Application code should use {@link #description()()} to 
-     * return a value that may require resolving the underlying data object. 
+     * This value may be <code>null</code>. Application code should use {@link #description()()} to
+     * return a value that may require resolving the underlying data object.
      * </p>
      */
     public String getDescription() {
@@ -170,8 +170,8 @@ public abstract class Handle<T> implements Disposable {
      * Returns the description of the data object resolving the handle if necessary.
      *
      * @return The description, or <code>null</code>.
-     * 
-     * @throws IOException I/O errors that occur interacting with the underlying data object. 
+     *
+     * @throws IOException I/O errors that occur interacting with the underlying data object.
      */
     public String description() throws IOException {
         if (description == null) {
@@ -216,9 +216,9 @@ public abstract class Handle<T> implements Disposable {
 
     /**
      * Resolves the handle returning the underlying data object.
-     * 
+     *
      * @return The data object.
-     * 
+     *
      * @throws IOException I/O errors that occur resolving the data object.
      */
     public T resolve() throws IOException {
@@ -231,27 +231,6 @@ public abstract class Handle<T> implements Disposable {
             }
         }
         return obj;
-    }
-
-    /**
-     * Create a Handle that resolves by calling {@link DataRepository#get(String, Class)}.
-     */
-    public static <T> Handle<T> to(String name, Driver<?> driver, final DataRepository repo) {
-        return (Handle<T>) to(name, driver.getType(), driver, repo);
-    }
-
-    /**
-     * Create a Handle that resolves by calling {@link DataRepository#get(String, Class)} 
-     * specifying explicitly the type of object.
-     */
-    public static <T> Handle<T> to(String name, Class<T> type, Driver<?> driver, 
-        final DataRepository repo) {
-        return new Handle<T>(name, type, driver) {
-            @Override
-            protected T doResolve() throws IOException {
-                return repo.get(name, type);
-            }
-        };
     }
 
     /**
@@ -277,7 +256,7 @@ public abstract class Handle<T> implements Disposable {
 
     /**
      * Subclass hook to perform the resolving of the data object.
-     * 
+     *
      * @return The resolved object.
      */
     protected abstract T doResolve() throws IOException;

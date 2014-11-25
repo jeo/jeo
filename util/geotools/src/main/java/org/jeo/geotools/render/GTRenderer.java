@@ -7,7 +7,6 @@ import java.awt.*;
 import java.awt.color.ColorSpace;
 import java.awt.geom.AffineTransform;
 import java.awt.image.*;
-import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.HashMap;
@@ -40,7 +39,7 @@ import org.jeo.map.Map;
 import org.jeo.map.RGB;
 import org.jeo.map.Rule;
 import org.jeo.map.View;
-import org.jeo.map.render.BaseRenderer;
+import org.jeo.render.BaseRenderer;
 import org.jeo.util.Rect;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.filter.FilterFactory;
@@ -48,7 +47,6 @@ import org.opengis.style.Font;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 
 public class GTRenderer extends BaseRenderer {

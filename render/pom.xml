@@ -8,15 +8,15 @@
     <version>0-SNAPSHOT</version>
   </parent>
 
-  <groupId>org.jeo</groupId>
-  <artifactId>util</artifactId>
-  <packaging>pom</packaging>
-  <name>Util Modules</name>
+  <artifactId>jeo-render</artifactId>
+  <name>Render Module</name>
+  <packaging>jar</packaging>
 
-  <modules>
-    <module>geotools</module>
-    <module>sql</module>
-
-  </modules>
-
+  <dependencies>
+    <dependency>
+      <groupId>org.jeo</groupId>
+      <artifactId>jeo</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+  </dependencies>
 </project>

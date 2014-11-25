@@ -29,11 +29,6 @@
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>org.jeo</groupId>
-      <artifactId>jeo-guava</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>
     </dependency>

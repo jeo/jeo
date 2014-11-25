@@ -16,6 +16,7 @@ package org.jeo.data;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -35,10 +36,6 @@ import org.slf4j.LoggerFactory;
 
 import com.vividsolutions.jts.geom.Envelope;
 import java.util.HashSet;
-import org.jeo.filter.Expression;
-import org.jeo.map.Rule;
-import org.jeo.map.RuleList;
-import org.jeo.map.Selector;
 
 /**
  * Describes a query against a {@link VectorDataset} dataset. 
@@ -216,42 +213,19 @@ public class Query {
      * 
      * @return This object.
      */
-    public Query fields(List<String> fields) {
+    public Query fields(Collection<String> fields) {
         this.fields.clear();
-        this.fields.addAll(fields);
-        return this;
+        return appendFields(fields);
     }
 
     /**
-     * Compute and add any additional fields required to satisfy this query and
-     * optional style rules.
-     * 
-     * @param rules optional RuleList of styles
+     * Appends to the field list of this query.
+     *
+     * @return This object.
      */
-    public void computeFields(RuleList rules) {
-        Set<String> properties = filter == null ? new HashSet<String>() : Filters.properties(filter);
-        if (rules != null) {
-            for (Rule r: rules) {
-                computeFields(r, properties);
-            }
-        }
-        fields.addAll(properties);
-    }
-
-    private void computeFields(Rule r, Set<String> properties) {
-        for (Selector s : r.getSelectors()) {
-            if (s.getFilter() != null) {
-                Filters.properties(s.getFilter(), properties);
-            }
-        }
-        for (Object val : r.properties().values()) {
-            if (val instanceof Expression) {
-                Filters.properties((Expression) val, properties);
-            }
-        }
-        for (Rule n : r.nested()) {
-            computeFields(n, properties);
-        }
+    public Query appendFields(Collection<String> fields) {
+        this.fields.addAll(fields);
+        return this;
     }
 
     /**

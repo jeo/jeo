@@ -34,7 +34,23 @@ import com.google.common.io.InputSupplier;
 public class Tests {
 
     /**
-     * Creates a new temp directory under the "target" directory of the calling module.
+     * The root temp directory.
+     * <p>
+     * Will resolve to "target" under the current working directory if it exists (i.e is
+     *  being run as part of a maven build). Otherwise it will resolve to "java.io.tmpdir".
+     * </p>
+     */
+    public static File tmpRoot() {
+        File target = new File("target");
+        if (target.exists() && target.isDirectory()) {
+            return target;
+        }
+
+        return new File(System.getProperty("java.io.tmpdir"));
+    }
+
+    /**
+     * Creates a new temp directory under the {@link #tmpRoot()}  directory of the calling module.
      * 
      * @return The handle to the directory.
      */
@@ -71,7 +87,7 @@ public class Tests {
      * @return The handle to the directory.
      */
     public static File newTmpDir(String prefix, String suffix) throws IOException {
-        File dir = File.createTempFile(prefix, suffix, new File("target"));
+        File dir = File.createTempFile(prefix, suffix, tmpRoot());
         dir.delete();
         dir.mkdirs();
         return dir;
@@ -85,7 +101,7 @@ public class Tests {
      */
     public static File newTmpFile(String prefix, String suffix, final InputStream contents) 
         throws IOException {
-        File file = File.createTempFile(prefix, suffix, new File("target"));
+        File file = File.createTempFile(prefix, suffix, tmpRoot());
         if (contents != null) {
             Files.copy(new InputSupplier<InputStream>() {
                 @Override

@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.jeo.map.View;
-import org.jeo.map.render.RendererFactory;
+import org.jeo.render.RendererFactory;
 import org.jeo.util.Key;
 
 public class GTRendererFactory implements RendererFactory<GTRenderer> {

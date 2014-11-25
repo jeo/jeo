@@ -14,12 +14,14 @@
   <name>Format Modules</name>
 
   <modules>
+    <module>carto</module>
     <module>csv</module>
+    <module>gdal</module>
     <module>geogit</module>
     <module>geopkg</module>
     <module>mongo</module>
     <module>postgis</module>
-    <module>gdal</module>
+    <module>svg</module>
   </modules>
 
 </project>

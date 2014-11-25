@@ -24,14 +24,14 @@ import java.util.Set;
  */
 public class Filters {
     /**
-     * Returns true if the filter is <tt>null</tt> or equal to {@link #TRUE}.
+     * Returns true if the filter is <tt>null</tt> or instance of {@link All}.
      */
     public static boolean isTrueOrNull(Filter<?> f) {
         return f instanceof All || f == null;
     }
 
     /**
-     * Returns true if the filter is <tt>null</tt> or equal to {@link #FALSE}.
+     * Returns true if the filter is <tt>null</tt> or instance of {@link None}.
      */
     public static boolean isFalseOrNull(Filter<?> f) {
         return f instanceof None || f == null;
@@ -75,7 +75,7 @@ public class Filters {
     /**
      * Add all property references in the provided Expression to the provided
      * Set.
-     * @param f non-null Filter to scan
+     * @param e non-null Expression to scan
      * @param all non-null Set to add property names to
      * @return the provided set
      */

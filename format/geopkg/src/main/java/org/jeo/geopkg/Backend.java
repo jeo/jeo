@@ -356,6 +356,16 @@ public abstract class Backend implements Closeable {
         private Session session;
 
         /**
+         * Returns the current exception, throwing an exception if none set.
+         */
+        Session session() {
+            if (session == null) {
+                throw new IllegalStateException("No session set");
+            }
+            return session;
+        }
+
+        /**
          * Attach the parent Session to be closed along with this Results.
          * @param session the session to close
          * @return this Results

@@ -112,7 +112,19 @@ public class Envelopes {
      * Encodes an envelope as a string of the form <tt>&lt;x1>,&lt;y1>,&lt;x2,&lt;y2></tt>.
      */
     public static String toString(Envelope e) {
-        return String.format("%f,%f,%f,%f", e.getMinX(),e.getMinY(),e.getMaxX(),e.getMaxY());
+        return toString(e, ",", true);
+    }
+
+    /**
+     * Encodes an envelope as a string with the specified delimiter and flag controlling order.
+     * <p>
+     *     When <tt>xyxy</tt> is true the order is <tt>&lt;x1>,&lt;y1>,&lt;x2,&lt;y2></tt>, when false
+     *     the order is <tt>&lt;x1>,&lt;x2>,&lt;y1,&lt;y2></tt>
+     * </p>
+     */
+    public static String toString(Envelope e, String delim, boolean xyxy) {
+        return String.format("%f%s%f%s%f%s%f", e.getMinX(), delim, xyxy?e.getMinY():e.getMaxX(), delim,
+            xyxy?e.getMaxX():e.getMinY(), delim, e.getMaxY());
     }
 
     /**

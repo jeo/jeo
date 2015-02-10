@@ -54,4 +54,11 @@ public class EnvelopesTest {
         assertEquals(0.5f, r.getWidth() / e.getWidth(), 0.1);
         assertEquals(0.5f, r.getHeight() / e.getHeight(), 0.1);
     }
+
+    @Test
+    public void testToString() {
+        Envelope e = new Envelope(1,2,3,4);
+        assertTrue(Envelopes.toString(e).matches("1\\.0+,3\\.0+,2\\.0+,4\\.0+"));
+        assertTrue(Envelopes.toString(e, " ", false).matches("1\\.0+ 2\\.0+ 3\\.0+ 4\\.0+"));
+    }
 }

@@ -36,6 +36,7 @@
    <module>geotools</module>
    <module>guava</module>
    <module>nano</module>
+   <module>protobuf</module>
    <module>render</module>
    <module>repo</module>
    <module>svg</module>

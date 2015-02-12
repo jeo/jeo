@@ -23,7 +23,7 @@ import java.io.PipedOutputStream;
 import jline.console.ConsoleReader;
 
 import org.jeo.data.Cursor;
-import org.jeo.vector.Query;
+import org.jeo.vector.VectorQuery;
 import org.jeo.data.mem.MemVector;
 import org.jeo.data.mem.MemWorkspace;
 import org.jeo.data.mem.Memory;
@@ -62,7 +62,7 @@ public class CLITestSupport {
         MemVector widgets = mem.create(Schema.build("cities")
             .field("geometry", Point.class).field("name", String.class).schema());
 
-        Cursor<Feature> c = widgets.cursor(new Query().append());
+        Cursor<Feature> c = widgets.cursor(new VectorQuery().append());
 
         Feature f = c.next();
         f.put(Geom.point(-114, 51));

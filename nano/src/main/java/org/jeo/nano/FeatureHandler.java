@@ -47,7 +47,7 @@ import java.util.regex.Pattern;
 import org.jeo.data.Cursor;
 import org.jeo.data.Cursors;
 import org.jeo.data.Dataset;
-import org.jeo.vector.Query;
+import org.jeo.vector.VectorQuery;
 import org.jeo.data.Transaction;
 import org.jeo.data.Transactional;
 import org.jeo.vector.VectorDataset;
@@ -143,7 +143,7 @@ public class FeatureHandler extends Handler {
     Response getAsJSON(VectorDataset layer, Request request, NanoServer server) 
         throws IOException {
 
-        Query q = buildQuery(layer, request);
+        VectorQuery q = buildQuery(layer, request);
 
         String fieldSpec = request.parms.getProperty("fields");
         String[] fields = null;
@@ -192,7 +192,7 @@ public class FeatureHandler extends Handler {
         });
     }
 
-    Query buildQuery(VectorDataset layer, Request request) throws IOException {
+    VectorQuery buildQuery(VectorDataset layer, Request request) throws IOException {
         Properties p = request.getParms();
 
         //parse the bbox
@@ -202,7 +202,7 @@ public class FeatureHandler extends Handler {
             bbox = parseBBOX(p.getProperty("bbox"));
         }
 
-        Query q = new Query();
+        VectorQuery q = new VectorQuery();
 
         String fid = parseFeatureId(request);
 
@@ -403,7 +403,7 @@ public class FeatureHandler extends Handler {
     }
 
     Response handlePutEditFeature(String fid, Request request, NanoServer server) throws IOException {
-        Query query = new Query().update().filter(new Id(new Literal(fid)));
+        VectorQuery query = new VectorQuery().update().filter(new Id(new Literal(fid)));
         handleWrite(request, server, query, true);
 
         return new Response(HTTP_OK, MIME_PLAINTEXT, "");
@@ -432,13 +432,13 @@ public class FeatureHandler extends Handler {
     }
 
     Response handlePostAddFeatures(Request request, NanoServer server) throws IOException {
-        Query query = new Query().append();
+        VectorQuery query = new VectorQuery().append();
         handleWrite(request, server, query, false);
         //TODO: set Location header
         return new Response(HTTP_CREATED, MIME_PLAINTEXT, "");
     }
 
-    void handleWrite(Request request, NanoServer server, Query query, boolean shouldExist) throws IOException {
+    void handleWrite(Request request, NanoServer server, VectorQuery query, boolean shouldExist) throws IOException {
         Pair<Workspace, VectorDataset> p = findVectorLayer(request, server);
 
         Object obj = new GeoJSONReader().read(getInput(request));
@@ -497,7 +497,7 @@ public class FeatureHandler extends Handler {
         VectorDataset layer = p.second();
         Transaction tx = buildTransaction(layer, request);
 
-        Query query = new Query().update().filter(new Id(new Literal(fid))).transaction(tx);
+        VectorQuery query = new VectorQuery().update().filter(new Id(new Literal(fid))).transaction(tx);
         Cursor<Feature> c = layer.cursor(query);
         try {
             if (! c.hasNext()) {

@@ -34,7 +34,7 @@ import org.jeo.proj.Proj;
 import org.jeo.raster.*;
 import org.jeo.util.Function;
 import org.jeo.util.Rect;
-import org.jeo.vector.Query;
+import org.jeo.vector.VectorQuery;
 import org.jeo.vector.VectorDataset;
 import org.osgeo.proj4j.CoordinateReferenceSystem;
 import org.slf4j.Logger;
@@ -135,7 +135,7 @@ public abstract class BaseRenderer implements Renderer {
         }
     }
 
-    protected Envelope reproject(Query q, Envelope bbox, Dataset data) throws IOException {
+    protected Envelope reproject(VectorQuery q, Envelope bbox, Dataset data) throws IOException {
         CoordinateReferenceSystem crs = data.crs();
 
         // reproject
@@ -161,7 +161,7 @@ public abstract class BaseRenderer implements Renderer {
         }
 
         // build up the data query
-        Query q = new Query();
+        VectorQuery q = new VectorQuery();
 
         // bounds, we may have to reproject it
         Envelope bbox = reproject(q, view.getBounds(), data);

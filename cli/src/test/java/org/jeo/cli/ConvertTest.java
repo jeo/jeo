@@ -23,7 +23,7 @@ import java.io.ByteArrayOutputStream;
 
 import org.jeo.data.Cursor;
 import org.jeo.data.Cursors;
-import org.jeo.vector.Query;
+import org.jeo.vector.VectorQuery;
 import org.jeo.vector.VectorDataset;
 import org.jeo.data.mem.Memory;
 import org.jeo.vector.Feature;
@@ -48,12 +48,12 @@ public class ConvertTest extends CLITestSupport {
         VectorDataset repr = (VectorDataset) Memory.open().get("reprojected");
         assertNotNull(repr);
 
-        assertEquals(orig.count(new Query()), repr.count(new Query()));
+        assertEquals(orig.count(new VectorQuery()), repr.count(new VectorQuery()));
 
         CoordinateTransform tx = Proj.transform(Proj.crs("epsg:4326"), Proj.crs("epsg:900913"));
 
-        Cursor<Feature> c = repr.cursor(new Query());
-        for (Feature f : orig.cursor(new Query())) {
+        Cursor<Feature> c = repr.cursor(new VectorQuery());
+        for (Feature f : orig.cursor(new VectorQuery())) {
             assertTrue(c.hasNext());
             Geometry g = f.geometry();
             Geometry h = c.next().geometry();
@@ -71,10 +71,10 @@ public class ConvertTest extends CLITestSupport {
 
         VectorDataset orig =  (VectorDataset)Memory.open().get("cities");
         
-        assertEquals(orig.count(new Query()), mult.count(new Query()));
+        assertEquals(orig.count(new VectorQuery()), mult.count(new VectorQuery()));
 
-        Cursor<Feature> c = mult.cursor(new Query());
-        for (Feature f : orig.cursor(new Query())) {
+        Cursor<Feature> c = mult.cursor(new VectorQuery());
+        for (Feature f : orig.cursor(new VectorQuery())) {
             assertTrue(c.hasNext());
             Point g = (Point) f.geometry();
             MultiPoint h = (MultiPoint) c.next().geometry();
@@ -89,9 +89,9 @@ public class ConvertTest extends CLITestSupport {
         cli.handle("convert", "-f", "name = 'Calgary'", "mem://#cities", "mem://#filtered");
 
         VectorDataset filt = (VectorDataset) Memory.open().get("filtered");
-        assertEquals(1, filt.count(new Query()));
+        assertEquals(1, filt.count(new VectorQuery()));
 
-        Feature f = Cursors.first(filt.cursor(new Query()));
+        Feature f = Cursors.first(filt.cursor(new VectorQuery()));
         assertNotNull(f);
         assertEquals("Calgary", f.get("name"));
     }
@@ -101,9 +101,9 @@ public class ConvertTest extends CLITestSupport {
         cli.handle("convert", "-b", "-123.5,47.5,122.5,48.5", "mem://#cities", "mem://#filtered");
 
         VectorDataset filt = (VectorDataset) Memory.open().get("filtered");
-        assertEquals(1, filt.count(new Query()));
+        assertEquals(1, filt.count(new VectorQuery()));
 
-        Feature f = Cursors.first(filt.cursor(new Query()));
+        Feature f = Cursors.first(filt.cursor(new VectorQuery()));
         assertNotNull(f);
         assertEquals("Vancouver", f.get("name"));
     }
@@ -118,7 +118,7 @@ public class ConvertTest extends CLITestSupport {
         GeoJSONReader r = new GeoJSONReader();
         Cursor<Feature> c = 
             (Cursor<Feature>) r.read(new ByteArrayInputStream(bout.toByteArray()));
-        assertEquals(((VectorDataset)Memory.open().get("cities")).count(new Query()), 
+        assertEquals(((VectorDataset)Memory.open().get("cities")).count(new VectorQuery()),
             Cursors.size(c));
     }
 }

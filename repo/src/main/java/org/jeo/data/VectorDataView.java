@@ -21,7 +21,7 @@ import org.jeo.vector.Feature;
 import org.jeo.filter.Filter;
 import org.jeo.filter.cql.CQL;
 import org.jeo.filter.cql.ParseException;
-import org.jeo.vector.Query;
+import org.jeo.vector.VectorQuery;
 import org.jeo.vector.VectorDataset;
 
 @Pending
@@ -34,11 +34,11 @@ public class VectorDataView {
     }
 
     public long count() throws IOException {
-        return data.count(new Query());
+        return data.count(new VectorQuery());
     }
 
     public Feature first() throws IOException {
-        return find(new Query());
+        return find(new VectorQuery());
     }
 
     public Feature find(String cql) throws IOException, ParseException {
@@ -46,10 +46,10 @@ public class VectorDataView {
     }
 
     public Feature find(Filter filter) throws IOException {
-        return find(new Query().filter(filter));
+        return find(new VectorQuery().filter(filter));
     }
 
-    public Feature find(Query query) throws IOException {
+    public Feature find(VectorQuery query) throws IOException {
         Cursor<Feature> c = data.cursor(query.limit(1));
         try {
             if (c.hasNext()) {

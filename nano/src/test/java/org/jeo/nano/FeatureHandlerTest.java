@@ -26,7 +26,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import org.jeo.data.Cursor;
-import org.jeo.vector.Query;
+import org.jeo.vector.VectorQuery;
 import org.jeo.vector.BasicFeature;
 import org.jeo.vector.Feature;
 import org.jeo.vector.Schema;
@@ -229,7 +229,7 @@ public class FeatureHandlerTest extends HandlerTestSupport {
         );
 
         mock.verify();
-        assertTrue(mock.memoryLayer.count(new Query()) == 0);
+        assertTrue(mock.memoryLayer.count(new VectorQuery()) == 0);
 
         mock = MockServer.create()
                 .withMemoryVectorLayer()

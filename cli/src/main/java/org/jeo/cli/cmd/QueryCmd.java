@@ -22,7 +22,7 @@ import org.jeo.data.Cursor;
 import org.jeo.data.Cursors;
 import org.jeo.data.Dataset;
 import org.jeo.data.Drivers;
-import org.jeo.vector.Query;
+import org.jeo.vector.VectorQuery;
 import org.jeo.tile.TileDataset;
 import org.jeo.data.TileDataView;
 import org.jeo.vector.VectorDataset;
@@ -82,7 +82,7 @@ public class QueryCmd extends JeoCmd {
     void query(VectorDataset dataset, JeoCLI cli) throws Exception {
         GeoJSONWriter w = cli.newJSONWriter();
 
-        Query q = new Query();
+        VectorQuery q = new VectorQuery();
         if (bbox != null) {
             q.bounds(bbox);
         }

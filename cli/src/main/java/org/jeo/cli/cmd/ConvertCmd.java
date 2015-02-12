@@ -25,7 +25,7 @@ import org.jeo.data.Cursors;
 import org.jeo.data.Dataset;
 import org.jeo.data.Disposable;
 import org.jeo.data.Drivers;
-import org.jeo.vector.Query;
+import org.jeo.vector.VectorQuery;
 import org.jeo.data.Transaction;
 import org.jeo.data.Transactional;
 import org.jeo.vector.VectorDataset;
@@ -123,7 +123,7 @@ public class ConvertCmd extends JeoCmd {
         }
 
         // create query for source
-        Query q = new Query();
+        VectorQuery q = new VectorQuery();
 
         if (bbox != null) {
             //TODO: make it clear that bbox is in source data coordinates
@@ -198,13 +198,13 @@ public class ConvertCmd extends JeoCmd {
 
         @Override
         public void start(VectorDataset data, JeoCLI cli) throws IOException {
-            progress = new ConsoleProgress(cli.getConsole(), (int) data.count(new Query()));
+            progress = new ConsoleProgress(cli.getConsole(), (int) data.count(new VectorQuery()));
 
             if (to instanceof Transactional) {
                 tx = ((Transactional) to).transaction(null);
             }
 
-            d = to.cursor(new Query().append().transaction(tx));
+            d = to.cursor(new VectorQuery().append().transaction(tx));
         }
 
         @Override

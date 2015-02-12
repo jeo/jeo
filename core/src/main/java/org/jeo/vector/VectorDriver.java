@@ -23,7 +23,7 @@ import org.jeo.util.Messages;
 /**
  * Base interface for vector drivers.
  */
-public interface    VectorDriver<T> extends Driver<T> {
+public interface VectorDriver<T> extends Driver<T> {
 
     /**
      * Vector driver capability enumeration.

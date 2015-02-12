@@ -33,8 +33,6 @@ import org.geogit.repository.WorkingTree;
 import org.jeo.data.Cursor;
 import org.jeo.data.Cursor.Mode;
 import org.jeo.data.Cursors;
-import org.jeo.vector.Query;
-import org.jeo.vector.QueryPlan;
 import org.jeo.data.Transaction;
 import org.jeo.data.Transactional;
 import org.jeo.vector.VectorDataset;
@@ -43,6 +41,8 @@ import org.jeo.vector.Schema;
 import org.jeo.geom.Envelopes;
 import org.jeo.util.Key;
 import org.jeo.util.Pair;
+import org.jeo.vector.VectorQuery;
+import org.jeo.vector.VectorQueryPlan;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.osgeo.proj4j.CoordinateReferenceSystem;
@@ -102,7 +102,7 @@ public class GeoGitDataset implements VectorDataset, Transactional {
     }
 
     @Override
-    public long count(Query q) throws IOException {
+    public long count(VectorQuery q) throws IOException {
         if (q.isAll()) {
             return q.adjustCount(countAll());
         }
@@ -122,7 +122,7 @@ public class GeoGitDataset implements VectorDataset, Transactional {
     }
 
     @Override
-    public Cursor<Feature> cursor(Query q) throws IOException {
+    public Cursor<Feature> cursor(VectorQuery q) throws IOException {
         //require a transaction for non read only 
         if (q.getMode() != Mode.READ && q.getTransaction() == null) {
             throw new IllegalArgumentException("Writable cursor requires a transaction");
@@ -137,7 +137,7 @@ public class GeoGitDataset implements VectorDataset, Transactional {
         LsTreeOp ls = geogit.getGeoGIT().command(LsTreeOp.class)
             .setStrategy(Strategy.FEATURES_ONLY).setReference(getRef().path());
 
-        QueryPlan qp = new QueryPlan(q);
+        VectorQueryPlan qp = new VectorQueryPlan(q);
         
         final Envelope bbox = q.getBounds();
         if (!Envelopes.isNull(bbox)) {

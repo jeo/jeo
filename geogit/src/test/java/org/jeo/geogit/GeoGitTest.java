@@ -43,7 +43,7 @@ import org.jeo.Tests;
 import org.jeo.data.Cursor;
 import org.jeo.data.Dataset;
 import org.jeo.data.Handle;
-import org.jeo.vector.Query;
+import org.jeo.vector.VectorQuery;
 import org.jeo.data.Transaction;
 import org.jeo.vector.VectorDataset;
 import org.jeo.vector.Feature;
@@ -100,7 +100,7 @@ public class GeoGitTest {
 
     void addShp(VectorDataset data, Repository repo) throws IOException {
         String name = data.getName();
-        repo.getWorkingTree().insert(name, GT.iterator(data.cursor(new Query())), 
+        repo.getWorkingTree().insert(name, GT.iterator(data.cursor(new VectorQuery())),
             new NullProgressListener(), null, null);
         data.close();
 
@@ -169,23 +169,23 @@ public class GeoGitTest {
 
     @Test
     public void testCount() throws Exception {
-        assertEquals(49, ws.get("states").count(new Query()));
+        assertEquals(49, ws.get("states").count(new VectorQuery()));
     }
 
     @Test
     public void testCountAtRevision() throws Exception {
         GeoGitDataset data = ws.get("point");
         
-        long prevCount = data.count(new Query());
+        long prevCount = data.count(new VectorQuery());
         String prev = data.getRevision().getId().toString();
 
         doAddPoints();
 
         data = ws.get("point");
-        assertEquals(prevCount + 2, data.count(new Query()));
+        assertEquals(prevCount + 2, data.count(new VectorQuery()));
 
         data = ws.get("point@" + prev);
-        assertEquals(prevCount, data.count(new Query()));
+        assertEquals(prevCount, data.count(new VectorQuery()));
     }
 
     @Test
@@ -207,7 +207,7 @@ public class GeoGitTest {
 
     @Test
     public void testReadAll() throws Exception {
-        Set<String> names = Sets.newHashSet(Iterables.transform(TestData.states().cursor(new Query()), 
+        Set<String> names = Sets.newHashSet(Iterables.transform(TestData.states().cursor(new VectorQuery()),
             new Function<Feature, String>() {
                 @Override
                 public String apply(Feature input) {
@@ -216,7 +216,7 @@ public class GeoGitTest {
             }));
 
         assertEquals(49, names.size());
-        for (Feature f : ws.get("states").cursor(new Query())) {
+        for (Feature f : ws.get("states").cursor(new VectorQuery())) {
             names.remove(f.get("STATE_NAME"));
         }
 
@@ -226,7 +226,7 @@ public class GeoGitTest {
     @Test
     public void testUpdate() throws Exception {
         GeoGitDataset states = ws.get("states");
-        Set<String> abbrs = Sets.newHashSet(Iterables.transform(states.cursor(new Query()),
+        Set<String> abbrs = Sets.newHashSet(Iterables.transform(states.cursor(new VectorQuery()),
             new Function<Feature, String>() {
                 @Override
                 public String apply(Feature input) {
@@ -239,7 +239,7 @@ public class GeoGitTest {
             }));
 
         Transaction tx = states.transaction(null);
-        Cursor<Feature> c = states.cursor(new Query().update().transaction(tx));
+        Cursor<Feature> c = states.cursor(new VectorQuery().update().transaction(tx));
         for (Feature f : c) {
             f.put("STATE_ABBR", ((String)f.get("STATE_ABBR")).toLowerCase());
             c.write();
@@ -247,7 +247,7 @@ public class GeoGitTest {
         tx.commit();
 
         assertEquals(49, abbrs.size());
-        for (Feature f : ws.get("states").cursor(new Query())) {
+        for (Feature f : ws.get("states").cursor(new VectorQuery())) {
             abbrs.remove(f.get("STATE_ABBR"));
         }
 
@@ -258,22 +258,22 @@ public class GeoGitTest {
     public void testAppend() throws Exception {
         GeoGitDataset points = ws.get("point");
         
-        long count = points.count(new Query());
+        long count = points.count(new VectorQuery());
 
         doAddPoints();
 
         points = ws.get("point");
-        assertEquals(count+2, points.count(new Query()));
+        assertEquals(count+2, points.count(new VectorQuery()));
 
-        assertEquals(1, points.count(new Query().filter("name = 'Calgary'")));
-        assertEquals(1, points.count(new Query().filter("name = 'Vancouver'")));
+        assertEquals(1, points.count(new VectorQuery().filter("name = 'Calgary'")));
+        assertEquals(1, points.count(new VectorQuery().filter("name = 'Vancouver'")));
     }
 
     void doAddPoints() throws Exception {
         GeoGitDataset points = ws.get("point");
 
         Transaction tx = points.transaction(null);
-        Cursor<Feature> c = points.cursor(new Query().append().transaction(tx));
+        Cursor<Feature> c = points.cursor(new VectorQuery().append().transaction(tx));
 
         Feature f = c.next();
         f.put("geometry", new GeomBuilder().point(-114, 51).toPoint());
@@ -296,12 +296,12 @@ public class GeoGitTest {
             .field("name", String.class).field("cost", Double.class).schema();
 
         GeoGitDataset data = ws.create(widgets);
-        assertEquals(0, data.count(new Query()));
+        assertEquals(0, data.count(new VectorQuery()));
 
         GeomBuilder gb = new GeomBuilder();
 
         Transaction tx = data.transaction(null);
-        Cursor<Feature> c = data.cursor(new Query().append().transaction(tx));
+        Cursor<Feature> c = data.cursor(new VectorQuery().append().transaction(tx));
 
         Feature f = c.next();
         f.put("shape", gb.point(0,0).toPoint().buffer(10));
@@ -324,9 +324,9 @@ public class GeoGitTest {
         tx.commit();
 
         data = ws.get("widgets");
-        assertEquals(3, data.count(new Query()));
+        assertEquals(3, data.count(new VectorQuery()));
 
-        c = data.cursor(new Query().filter("name = 'bomb'"));
+        c = data.cursor(new VectorQuery().filter("name = 'bomb'"));
         assertTrue(c.hasNext());
         assertEquals(1.99, c.next().get("cost"));
         

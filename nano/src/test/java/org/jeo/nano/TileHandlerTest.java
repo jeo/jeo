@@ -16,7 +16,7 @@ package org.jeo.nano;
 
 import java.io.IOException;
 import org.jeo.tile.Tile;
-import org.jeo.data.TileDataset;
+import org.jeo.tile.TileDataset;
 import org.jeo.nano.NanoHTTPD.Response;
 import org.junit.Before;
 import org.junit.Test;

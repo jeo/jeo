@@ -26,11 +26,11 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import org.jeo.data.Cursor;
-import org.jeo.data.Query;
-import org.jeo.feature.BasicFeature;
-import org.jeo.feature.Feature;
-import org.jeo.feature.Schema;
-import org.jeo.feature.SchemaBuilder;
+import org.jeo.vector.Query;
+import org.jeo.vector.BasicFeature;
+import org.jeo.vector.Feature;
+import org.jeo.vector.Schema;
+import org.jeo.vector.SchemaBuilder;
 import org.jeo.geojson.GeoJSONReader;
 import org.jeo.json.JSONArray;
 import org.jeo.json.JSONObject;

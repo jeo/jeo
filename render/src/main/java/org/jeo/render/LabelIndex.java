@@ -19,11 +19,11 @@ import static org.jeo.map.CartoCSS.*;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.jeo.data.VectorDataset;
+import org.jeo.vector.VectorDataset;
 import org.jeo.data.mem.MemVector;
-import org.jeo.feature.BasicFeature;
-import org.jeo.feature.Feature;
-import org.jeo.feature.Schema;
+import org.jeo.vector.BasicFeature;
+import org.jeo.vector.Feature;
+import org.jeo.vector.Schema;
 
 import com.vividsolutions.jts.geom.Polygon;
 import com.vividsolutions.jts.index.quadtree.Quadtree;

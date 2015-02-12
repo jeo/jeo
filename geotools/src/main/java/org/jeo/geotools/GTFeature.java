@@ -18,8 +18,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.jeo.feature.BasicFeature;
-import org.jeo.feature.Schema;
+import org.jeo.vector.BasicFeature;
+import org.jeo.vector.Schema;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.type.AttributeDescriptor;
 

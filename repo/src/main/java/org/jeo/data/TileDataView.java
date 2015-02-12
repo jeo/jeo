@@ -21,6 +21,7 @@ import org.jeo.Pending;
 
 import com.vividsolutions.jts.geom.Envelope;
 import org.jeo.tile.Tile;
+import org.jeo.tile.TileDataset;
 import org.jeo.tile.TileGrid;
 
 @Pending

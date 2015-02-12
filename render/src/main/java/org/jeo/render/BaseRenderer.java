@@ -23,7 +23,8 @@ import java.util.Collections;
 import java.util.List;
 
 import org.jeo.data.*;
-import org.jeo.feature.Feature;
+import org.jeo.tile.TileDataset;
+import org.jeo.vector.Feature;
 import org.jeo.filter.Filter;
 import org.jeo.filter.Filters;
 import org.jeo.geom.Envelopes;
@@ -33,6 +34,8 @@ import org.jeo.proj.Proj;
 import org.jeo.raster.*;
 import org.jeo.util.Function;
 import org.jeo.util.Rect;
+import org.jeo.vector.Query;
+import org.jeo.vector.VectorDataset;
 import org.osgeo.proj4j.CoordinateReferenceSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

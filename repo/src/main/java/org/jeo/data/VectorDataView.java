@@ -17,10 +17,12 @@ package org.jeo.data;
 import java.io.IOException;
 
 import org.jeo.Pending;
-import org.jeo.feature.Feature;
+import org.jeo.vector.Feature;
 import org.jeo.filter.Filter;
 import org.jeo.filter.cql.CQL;
 import org.jeo.filter.cql.ParseException;
+import org.jeo.vector.Query;
+import org.jeo.vector.VectorDataset;
 
 @Pending
 public class VectorDataView {

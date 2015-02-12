@@ -15,17 +15,14 @@
 package org.jeo.map;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.jeo.data.Query;
-import org.jeo.feature.Feature;
+import org.jeo.vector.Feature;
 import org.jeo.filter.Expression;
-import org.jeo.filter.Filter;
 import org.jeo.filter.Filters;
 
 /**

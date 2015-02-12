@@ -19,7 +19,10 @@ import org.jeo.geojson.GeoJSONWriter;
 import org.jeo.json.JeoJSONWriter;
 import org.jeo.map.Style;
 import org.jeo.nano.NanoHTTPD.Response;
+import org.jeo.raster.RasterDataset;
+import org.jeo.tile.TileDataset;
 import org.jeo.util.Pair;
+import org.jeo.vector.VectorDataset;
 
 import java.io.IOException;
 import java.io.StringWriter;
@@ -111,10 +114,10 @@ public class DataHandler extends Handler {
          if (ds instanceof VectorDataset) {
              handleVectorDataset((VectorDataset)ds, w, req);
          }
-         else if (ds instanceof TileDataset ){
+         else if (ds instanceof TileDataset){
              handleTileDataset((TileDataset)ds, w, req);
          }
-         else if (ds instanceof RasterDataset ){
+         else if (ds instanceof RasterDataset){
              handleRasterDataset((RasterDataset) ds, w, req);
          }
     }

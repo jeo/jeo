@@ -23,12 +23,12 @@ import java.io.PipedOutputStream;
 import jline.console.ConsoleReader;
 
 import org.jeo.data.Cursor;
-import org.jeo.data.Query;
+import org.jeo.vector.Query;
 import org.jeo.data.mem.MemVector;
 import org.jeo.data.mem.MemWorkspace;
 import org.jeo.data.mem.Memory;
-import org.jeo.feature.Feature;
-import org.jeo.feature.Schema;
+import org.jeo.vector.Feature;
+import org.jeo.vector.Schema;
 import org.jeo.geom.Geom;
 import org.junit.After;
 import org.junit.Before;

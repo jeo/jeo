@@ -20,7 +20,7 @@ import java.io.IOException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.jeo.feature.Feature;
+import org.jeo.vector.Feature;
 import org.jeo.geom.CoordinatePath;
 import org.jeo.geom.Envelopes;
 import org.jeo.map.RGB;

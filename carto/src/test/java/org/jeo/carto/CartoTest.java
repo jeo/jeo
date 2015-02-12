@@ -21,7 +21,7 @@ import static org.junit.Assert.assertTrue;
 import java.util.List;
 import java.util.Map;
 
-import org.jeo.feature.BasicFeature;
+import org.jeo.vector.BasicFeature;
 import org.jeo.filter.Expression;
 import org.jeo.filter.Function;
 import org.jeo.filter.Mixed;

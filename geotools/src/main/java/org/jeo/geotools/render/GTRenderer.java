@@ -30,7 +30,7 @@ import org.geotools.styling.LabelPlacement;
 import org.geotools.styling.StyleBuilder;
 import org.geotools.styling.TextSymbolizer;
 import org.geotools.util.NumberRange;
-import org.jeo.feature.Feature;
+import org.jeo.vector.Feature;
 import org.jeo.filter.Expression;
 import org.jeo.filter.Literal;
 import org.jeo.geotools.GT;

@@ -23,10 +23,10 @@ import java.io.ByteArrayOutputStream;
 
 import org.jeo.data.Cursor;
 import org.jeo.data.Cursors;
-import org.jeo.data.Query;
-import org.jeo.data.VectorDataset;
+import org.jeo.vector.Query;
+import org.jeo.vector.VectorDataset;
 import org.jeo.data.mem.Memory;
-import org.jeo.feature.Feature;
+import org.jeo.vector.Feature;
 import org.jeo.geojson.GeoJSONReader;
 import org.jeo.proj.Proj;
 import org.junit.Test;

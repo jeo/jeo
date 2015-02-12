@@ -14,12 +14,10 @@
  */
 package org.jeo.nano;
 
-import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
 import com.vividsolutions.jts.geom.Envelope;
-import com.vividsolutions.jts.geom.Point;
 
 import java.io.OutputStream;
 import java.util.*;
@@ -41,7 +39,7 @@ import org.jeo.data.DataRepositoryView;
 import org.jeo.data.Dataset;
 import org.jeo.data.Driver;
 import org.jeo.data.Handle;
-import org.jeo.data.Query;
+import org.jeo.vector.Query;
 import org.jeo.filter.*;
 import org.jeo.map.Style;
 import org.jeo.map.View;
@@ -49,17 +47,17 @@ import org.jeo.render.Renderer;
 import org.jeo.render.RendererFactory;
 import org.jeo.render.RendererRegistry;
 import org.jeo.tile.Tile;
-import org.jeo.data.TileDataset;
+import org.jeo.tile.TileDataset;
 import org.jeo.tile.TilePyramid;
-import org.jeo.data.VectorDataset;
+import org.jeo.vector.VectorDataset;
 import org.jeo.data.Workspace;
 import org.jeo.data.mem.MemVector;
-import org.jeo.feature.BasicFeature;
-import org.jeo.feature.Feature;
-import org.jeo.feature.Features;
-import org.jeo.feature.Field;
-import org.jeo.feature.Schema;
-import org.jeo.feature.SchemaBuilder;
+import org.jeo.vector.BasicFeature;
+import org.jeo.vector.Feature;
+import org.jeo.vector.Features;
+import org.jeo.vector.Field;
+import org.jeo.vector.Schema;
+import org.jeo.vector.SchemaBuilder;
 import org.jeo.proj.Proj;
 import org.osgeo.proj4j.CoordinateReferenceSystem;
 

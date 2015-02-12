@@ -24,7 +24,7 @@ import java.util.List;
 
 import org.jeo.cli.JeoCLI;
 import org.jeo.data.Drivers;
-import org.jeo.data.VectorDataset;
+import org.jeo.vector.VectorDataset;
 import org.jeo.geojson.GeoJSONWriter;
 import org.jeo.map.Map;
 import org.jeo.map.MapBuilder;

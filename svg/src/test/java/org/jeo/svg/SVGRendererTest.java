@@ -6,17 +6,13 @@ import java.io.File;
 import java.io.IOException;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
 import org.jeo.TestData;
-import org.jeo.Tests;
-import org.jeo.data.Query;
 import org.jeo.filter.Property;
 import org.jeo.geom.Envelopes;
 import org.jeo.map.Map;
 import org.jeo.map.RGB;
 import org.jeo.map.Style;
 import org.jeo.map.View;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;

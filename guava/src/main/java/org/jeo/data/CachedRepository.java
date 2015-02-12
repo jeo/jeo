@@ -18,9 +18,10 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
-import org.jeo.feature.Schema;
+import org.jeo.vector.Schema;
 import org.jeo.filter.Filter;
 import org.jeo.util.Key;
+import org.jeo.vector.VectorDataset;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

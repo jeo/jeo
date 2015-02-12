@@ -14,24 +14,6 @@
  */
 package org.jeo.nano;
 
-import com.vividsolutions.jts.geom.Envelope;
-import com.vividsolutions.jts.geom.LineString;
-import com.vividsolutions.jts.geom.Point;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.List;
-import java.util.Properties;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathFactory;
-import org.jeo.data.Dataset;
-import org.jeo.data.Handle;
-import org.jeo.feature.Schema;
-import org.jeo.feature.SchemaBuilder;
-import org.jeo.map.Style;
 import org.jeo.proj.Proj;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -41,8 +23,6 @@ import static org.junit.Assert.fail;
 import org.junit.Before;
 import org.junit.Test;
 import org.osgeo.proj4j.CoordinateReferenceSystem;
-import org.w3c.dom.Document;
-import org.w3c.dom.Node;
 
 
 public class WMTSHandlerTest extends HandlerTestSupport {

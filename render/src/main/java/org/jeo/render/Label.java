@@ -17,7 +17,7 @@ package org.jeo.render;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.jeo.feature.Feature;
+import org.jeo.vector.Feature;
 import org.jeo.geom.Envelopes;
 import org.jeo.map.Rule;
 

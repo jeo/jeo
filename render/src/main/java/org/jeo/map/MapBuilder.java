@@ -22,7 +22,7 @@ import org.jeo.data.Dataset;
 import org.jeo.data.Drivers;
 import org.jeo.data.Workspace;
 import org.jeo.data.mem.MemVector;
-import org.jeo.feature.Feature;
+import org.jeo.vector.Feature;
 import org.jeo.filter.Filter;
 import org.osgeo.proj4j.CoordinateReferenceSystem;
 import org.slf4j.Logger;

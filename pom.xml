@@ -258,7 +258,6 @@
               <descriptors>
                 <descriptor>assembly/lib.xml</descriptor>
                 <descriptor>assembly/doc.xml</descriptor>
-                <descriptor>assembly/geogit.xml</descriptor>
               </descriptors>
             </configuration>
           </plugin>

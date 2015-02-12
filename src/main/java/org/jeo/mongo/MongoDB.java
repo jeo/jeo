@@ -20,8 +20,8 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
 
-import org.jeo.data.VectorDriver;
-import org.jeo.feature.Schema;
+import org.jeo.vector.VectorDriver;
+import org.jeo.vector.Schema;
 import org.jeo.util.Key;
 import org.jeo.util.Messages;
 import org.jeo.util.Password;

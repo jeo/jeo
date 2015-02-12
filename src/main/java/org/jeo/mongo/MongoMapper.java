@@ -14,7 +14,7 @@
  */
 package org.jeo.mongo;
 
-import org.jeo.feature.Feature;
+import org.jeo.vector.Feature;
 
 import com.mongodb.DBCollection;
 import com.mongodb.DBObject;

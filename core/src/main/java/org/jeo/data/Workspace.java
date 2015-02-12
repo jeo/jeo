@@ -17,8 +17,9 @@ package org.jeo.data;
 import java.io.IOException;
 import java.util.Map;
 
-import org.jeo.feature.Schema;
+import org.jeo.vector.Schema;
 import org.jeo.util.Key;
+import org.jeo.vector.VectorDataset;
 
 /**
  * A container of {@link Dataset} objects.

@@ -16,14 +16,17 @@ package org.jeo.json;
 
 import com.vividsolutions.jts.geom.Envelope;
 import org.jeo.data.*;
-import org.jeo.feature.Field;
+import org.jeo.raster.RasterDataset;
+import org.jeo.tile.TileDataset;
+import org.jeo.vector.Field;
 import org.jeo.geojson.GeoJSONWriter;
 import org.jeo.geom.Envelopes;
-import org.jeo.json.encoder.JSONEncoder;
 import org.jeo.raster.Band;
 import org.jeo.tile.TileGrid;
 import org.jeo.tile.TilePyramid;
 import org.jeo.util.Dimension;
+import org.jeo.vector.Query;
+import org.jeo.vector.VectorDataset;
 import org.osgeo.proj4j.CoordinateReferenceSystem;
 
 import java.io.IOException;

@@ -33,8 +33,8 @@ import com.vividsolutions.jts.geom.Envelope;
  * </p>
  * @author Justin Deoliveira, OpenGeo
  *
- * @see VectorDataset
- * @see TileDataset
+ * @see org.jeo.vector.VectorDataset
+ * @see org.jeo.tile.TileDataset
  */
 public interface Dataset extends Disposable {
 

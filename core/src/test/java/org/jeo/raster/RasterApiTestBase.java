@@ -12,19 +12,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jeo.data;
+package org.jeo.raster;
 
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Point;
 import org.jeo.TestData;
 import org.jeo.geom.Geom;
 import org.jeo.proj.Proj;
-import org.jeo.raster.Band;
 
-import org.jeo.raster.DataType;
-import org.jeo.raster.Raster;
-import org.jeo.raster.Stats;
 import org.jeo.util.Dimension;
+import org.junit.Assert;
 import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Test;
@@ -41,7 +38,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 
 /**
- * Abstract test case that exercises all aspects of the {@link org.jeo.data.RasterDataset} interface.
+ * Abstract test case that exercises all aspects of the {@link RasterDataset} interface.
  * <p>
  * This test uses the {@link TestData#dem()} and {@link TestData#rgb()} datasets as a basis for testing.
  * Test implementers must override {@link #createRasterDataDEM()} and {@link #createRasterDataRGB()} and
@@ -70,7 +67,7 @@ public abstract class RasterApiTestBase {
 
     @Test
     public void testGetName() {
-        assertEquals("dem", dem.getName());
+        Assert.assertEquals("dem", dem.getName());
     }
 
     @Test

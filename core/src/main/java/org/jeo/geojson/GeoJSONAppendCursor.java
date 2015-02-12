@@ -19,8 +19,8 @@ import java.io.Writer;
 import java.util.HashMap;
 
 import org.jeo.data.Cursor;
-import org.jeo.feature.BasicFeature;
-import org.jeo.feature.Feature;
+import org.jeo.vector.BasicFeature;
+import org.jeo.vector.Feature;
 
 import com.vividsolutions.jts.geom.Geometry;
 

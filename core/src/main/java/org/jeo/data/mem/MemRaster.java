@@ -16,8 +16,8 @@ package org.jeo.data.mem;
 
 import com.vividsolutions.jts.geom.Envelope;
 import org.jeo.data.Driver;
-import org.jeo.data.RasterDataset;
-import org.jeo.data.RasterQuery;
+import org.jeo.raster.RasterDataset;
+import org.jeo.raster.RasterQuery;
 import org.jeo.raster.*;
 import org.jeo.util.Dimension;
 import org.jeo.util.Key;
@@ -26,7 +26,6 @@ import org.osgeo.proj4j.CoordinateReferenceSystem;
 
 import java.io.IOException;
 import java.lang.reflect.Array;
-import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.Collections;

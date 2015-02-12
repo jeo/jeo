@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jeo.data;
+package org.jeo.vector;
 
 import static org.junit.Assert.*;
 
@@ -21,11 +21,12 @@ import java.util.NoSuchElementException;
 import java.util.Set;
 
 import org.jeo.TestData;
-import org.jeo.feature.Feature;
-import org.jeo.feature.Schema;
+import org.jeo.data.Cursor;
+import org.jeo.data.Cursors;
 import org.jeo.geom.Envelopes;
 import org.jeo.geom.Geom;
 import org.jeo.proj.Proj;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.osgeo.proj4j.CoordinateReferenceSystem;
@@ -35,10 +36,9 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Point;
-import org.jeo.feature.Field;
 
 /**
- * Abstract test case that exercises all aspects of the {@link VectorDataset} interface.
+ * Abstract test case that exercises all aspects of the {@link org.jeo.vector.VectorDataset} interface.
  * <p>
  * This test uses the {@link TestData#states()} dataset as a basis for testing and test implementors
  * must override {@link #createVectorData()} and return an instance backed by the states data.
@@ -130,7 +130,7 @@ public abstract class VectorApiTestBase {
     @Test
     public void testCursorRead() throws Exception {
         // all
-        assertEquals(49, Cursors.size(data.cursor(new Query())));
+        Assert.assertEquals(49, Cursors.size(data.cursor(new Query())));
 
         // limit offset
         assertEquals(39, Cursors.size(data.cursor(new Query().offset(10))));

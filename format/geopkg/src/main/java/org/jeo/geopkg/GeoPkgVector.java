@@ -18,12 +18,12 @@ import java.io.IOException;
 
 import java.util.Map;
 import org.jeo.data.Cursor;
-import org.jeo.data.Query;
+import org.jeo.vector.Query;
 import org.jeo.data.Transaction;
 import org.jeo.data.Transactional;
-import org.jeo.data.VectorDataset;
-import org.jeo.feature.Feature;
-import org.jeo.feature.Schema;
+import org.jeo.vector.VectorDataset;
+import org.jeo.vector.Feature;
+import org.jeo.vector.Schema;
 
 public class GeoPkgVector extends GeoPkgDataset<FeatureEntry> implements VectorDataset, Transactional {
 

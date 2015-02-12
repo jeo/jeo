@@ -15,8 +15,8 @@
 package org.jeo.data.mem;
 
 import org.jeo.TestData;
-import org.jeo.data.RasterApiTestBase;
-import org.jeo.data.RasterDataset;
+import org.jeo.raster.RasterApiTestBase;
+import org.jeo.raster.RasterDataset;
 
 public class MemRasterApiTest extends RasterApiTestBase {
     @Override

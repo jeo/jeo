@@ -15,7 +15,7 @@
 package org.jeo.filter;
 
 import java.util.regex.Pattern;
-import org.jeo.feature.Feature;
+import org.jeo.vector.Feature;
 
 /**
  * 'Like' predicate filter. Returns true if the String value of the property

@@ -20,9 +20,9 @@ import java.util.List;
 import java.util.Map;
 
 import org.bson.types.ObjectId;
-import org.jeo.feature.BasicFeature;
-import org.jeo.feature.Schema;
-import org.jeo.feature.SchemaBuilder;
+import org.jeo.vector.BasicFeature;
+import org.jeo.vector.Schema;
+import org.jeo.vector.SchemaBuilder;
 import org.jeo.geom.Geom;
 import org.jeo.proj.Proj;
 import org.jeo.util.Util;

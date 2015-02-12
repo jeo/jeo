@@ -15,7 +15,7 @@
 package org.jeo.gdal;
 
 import org.jeo.Tests;
-import org.jeo.data.RasterDataset;
+import org.jeo.raster.RasterDataset;
 
 import java.io.File;
 

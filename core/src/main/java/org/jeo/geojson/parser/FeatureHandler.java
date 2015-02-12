@@ -18,8 +18,8 @@ import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import org.jeo.feature.BasicFeature;
-import org.jeo.feature.Feature;
+import org.jeo.vector.BasicFeature;
+import org.jeo.vector.Feature;
 import org.jeo.json.parser.ParseException;
 import org.osgeo.proj4j.CoordinateReferenceSystem;
 

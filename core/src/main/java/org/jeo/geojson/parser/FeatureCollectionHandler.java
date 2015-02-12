@@ -18,11 +18,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.jeo.feature.Feature;
+import org.jeo.vector.Feature;
 import org.jeo.json.parser.ParseException;
 import org.osgeo.proj4j.CoordinateReferenceSystem;
-
-import com.vividsolutions.jts.geom.Envelope;
 
 public class FeatureCollectionHandler extends BaseHandler {
 

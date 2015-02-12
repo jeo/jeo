@@ -15,8 +15,8 @@
 package org.jeo.data.mem;
 
 import org.jeo.TestData;
-import org.jeo.data.TileApiTestBase;
-import org.jeo.data.TileDataset;
+import org.jeo.tile.TileApiTestBase;
+import org.jeo.tile.TileDataset;
 
 public class MemTileApiTest extends TileApiTestBase {
 

@@ -18,8 +18,9 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Map;
 
-import org.jeo.feature.Schema;
+import org.jeo.vector.Schema;
 import org.jeo.util.Key;
+import org.jeo.vector.VectorDataset;
 
 /**
  * Workspace implementation that contains a single dataset instance.

@@ -17,7 +17,7 @@ package org.jeo.mongo;
 import java.io.IOException;
 
 import org.jeo.data.Cursor;
-import org.jeo.feature.Feature;
+import org.jeo.vector.Feature;
 
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBCursor;

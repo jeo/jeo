@@ -18,21 +18,21 @@ import java.io.IOException;
 import java.util.Arrays;
 
 import com.vividsolutions.jts.geom.*;
-import org.jeo.data.RasterDataset;
+import org.jeo.raster.RasterDataset;
 import org.jeo.data.mem.MemRaster;
 import org.jeo.proj.Proj;
 import org.jeo.raster.Band;
 import org.jeo.raster.DataType;
 import org.jeo.tile.Tile;
-import org.jeo.data.TileDataset;
+import org.jeo.tile.TileDataset;
 import org.jeo.tile.TilePyramid;
-import org.jeo.data.VectorDataset;
+import org.jeo.vector.VectorDataset;
 import org.jeo.data.mem.MemTileDataset;
 import org.jeo.data.mem.MemVector;
-import org.jeo.feature.BasicFeature;
-import org.jeo.feature.Feature;
-import org.jeo.feature.Schema;
-import org.jeo.feature.SchemaBuilder;
+import org.jeo.vector.BasicFeature;
+import org.jeo.vector.Feature;
+import org.jeo.vector.Schema;
+import org.jeo.vector.SchemaBuilder;
 
 import com.vividsolutions.jts.io.ParseException;
 import com.vividsolutions.jts.io.WKTReader;

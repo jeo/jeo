@@ -20,10 +20,10 @@ import java.io.File;
 import java.io.IOException;
 
 import org.jeo.data.Cursor;
-import org.jeo.data.Query;
-import org.jeo.data.VectorDataset;
-import org.jeo.feature.Feature;
-import org.jeo.feature.Schema;
+import org.jeo.vector.Query;
+import org.jeo.vector.VectorDataset;
+import org.jeo.vector.Feature;
+import org.jeo.vector.Schema;
 import org.jeo.geom.Geom;
 import org.junit.Before;
 import org.junit.Test;

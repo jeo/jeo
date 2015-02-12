@@ -27,9 +27,9 @@ import org.geogit.api.porcelain.ConfigOp.ConfigAction;
 import org.geogit.di.GeogitModule;
 import org.geogit.repository.Repository;
 import org.geogit.storage.bdbje.JEStorageModule;
-import org.jeo.data.FileVectorDriver;
-import org.jeo.data.VectorDriver;
-import org.jeo.feature.Schema;
+import org.jeo.vector.FileVectorDriver;
+import org.jeo.vector.VectorDriver;
+import org.jeo.vector.Schema;
 import org.jeo.util.Key;
 import org.jeo.util.Messages;
 

@@ -19,8 +19,8 @@ import static org.jeo.Tests.unzip;
 import java.io.File;
 
 import org.jeo.Tests;
-import org.jeo.data.TileApiTestBase;
-import org.jeo.data.TileDataset;
+import org.jeo.tile.TileApiTestBase;
+import org.jeo.tile.TileDataset;
 import org.junit.After;
 
 public class GeoPkgTileApiTest extends TileApiTestBase {

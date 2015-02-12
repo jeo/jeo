@@ -22,9 +22,9 @@ import static org.junit.Assert.assertTrue;
 import java.util.Set;
 
 import org.jeo.data.Cursor;
-import org.jeo.data.Query;
-import org.jeo.feature.Feature;
-import org.jeo.feature.Schema;
+import org.jeo.vector.Query;
+import org.jeo.vector.Feature;
+import org.jeo.vector.Schema;
 import org.jeo.geom.GeomBuilder;
 import org.junit.After;
 import org.junit.Assume;

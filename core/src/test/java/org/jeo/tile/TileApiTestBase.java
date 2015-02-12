@@ -12,12 +12,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jeo.data;
+package org.jeo.tile;
 
 import static org.junit.Assert.*;
 
 import org.jeo.TestData;
-import org.jeo.tile.TilePyramid;
 import org.junit.Before;
 import org.junit.Test;
 

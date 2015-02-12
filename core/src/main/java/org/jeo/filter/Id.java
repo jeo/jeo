@@ -18,7 +18,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.jeo.feature.Feature;
+import org.jeo.vector.Feature;
 
 /**
  * Filter for matching {@link Feature} objects by id.

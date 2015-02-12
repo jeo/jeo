@@ -18,9 +18,9 @@ import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.jeo.data.RasterDriver;
-import org.jeo.data.VectorDriver;
-import org.jeo.feature.Schema;
+import org.jeo.raster.RasterDriver;
+import org.jeo.vector.VectorDriver;
+import org.jeo.vector.Schema;
 import org.jeo.util.Key;
 import org.jeo.util.Messages;
 

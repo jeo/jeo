@@ -22,8 +22,10 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import org.jeo.feature.Schema;
+import org.jeo.vector.Schema;
 import org.jeo.util.Util;
+import org.jeo.vector.VectorDataset;
+import org.jeo.vector.VectorDriver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -342,7 +344,7 @@ public class Drivers {
         return clazz.cast(data);
     }
 
-    public static <T extends VectorDataset> T create(Schema schema, URI uri, Class<T> clazz) 
+    public static <T extends VectorDataset> T create(Schema schema, URI uri, Class<T> clazz)
         throws IOException {
         return create(schema, uri, clazz, REGISTRY);
     }

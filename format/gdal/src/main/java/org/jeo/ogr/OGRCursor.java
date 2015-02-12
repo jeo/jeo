@@ -19,8 +19,8 @@ import java.io.IOException;
 import org.gdal.ogr.DataSource;
 import org.gdal.ogr.Layer;
 import org.jeo.data.Cursor;
-import org.jeo.feature.Feature;
-import org.jeo.feature.Schema;
+import org.jeo.vector.Feature;
+import org.jeo.vector.Schema;
 import org.jeo.util.Pair;
 
 public class OGRCursor extends Cursor<Feature> {

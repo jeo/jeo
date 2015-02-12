@@ -14,7 +14,7 @@
  */
 package org.jeo.sql;
 
-import org.jeo.feature.Schema;
+import org.jeo.vector.Schema;
 
 /**
  * Data structure represneting a database table.

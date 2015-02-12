@@ -19,10 +19,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.jeo.data.Cursor;
-import org.jeo.feature.BasicFeature;
-import org.jeo.feature.Feature;
-import org.jeo.feature.Field;
-import org.jeo.feature.Schema;
+import org.jeo.vector.BasicFeature;
+import org.jeo.vector.Feature;
+import org.jeo.vector.Field;
+import org.jeo.vector.Schema;
 import org.jeo.geopkg.geom.GeoPkgGeomReader;
 import org.jeo.sql.PrimaryKey;
 import org.jeo.sql.PrimaryKeyColumn;
@@ -30,7 +30,7 @@ import org.jeo.sql.PrimaryKeyColumn;
 import com.vividsolutions.jts.geom.Geometry;
 import org.jeo.geopkg.Backend.Session;
 import org.jeo.geopkg.Backend.Results;
-import org.jeo.feature.SchemaBuilder;
+import org.jeo.vector.SchemaBuilder;
 
 public class FeatureCursor extends Cursor<Feature> {
 

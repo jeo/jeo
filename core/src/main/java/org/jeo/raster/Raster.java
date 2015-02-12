@@ -21,7 +21,7 @@ import org.osgeo.proj4j.CoordinateReferenceSystem;
 import java.util.List;
 
 /**
- * Result of a query against a {@link org.jeo.data.RasterDataset}.
+ * Result of a query against a {@link RasterDataset}.
  * <p>
  *
  * </p>

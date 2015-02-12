@@ -14,7 +14,7 @@
  */
 package org.jeo.postgis;
 
-import org.jeo.feature.Field;
+import org.jeo.vector.Field;
 import org.jeo.sql.FilterSQLEncoder;
 
 import com.vividsolutions.jts.geom.Geometry;

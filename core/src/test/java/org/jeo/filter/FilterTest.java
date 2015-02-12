@@ -22,8 +22,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.jeo.feature.BasicFeature;
-import org.jeo.feature.Feature;
+import org.jeo.vector.BasicFeature;
+import org.jeo.vector.Feature;
 import org.jeo.filter.cql.CQL;
 import org.junit.Test;
 

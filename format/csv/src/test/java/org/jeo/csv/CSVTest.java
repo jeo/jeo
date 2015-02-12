@@ -22,7 +22,7 @@ import java.io.InputStream;
 
 import org.jeo.Tests;
 import org.jeo.data.Cursors;
-import org.jeo.data.Query;
+import org.jeo.vector.Query;
 import org.junit.Before;
 import org.junit.Test;
 

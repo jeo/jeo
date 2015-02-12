@@ -12,12 +12,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jeo.data;
+package org.jeo.vector;
 
 import java.io.IOException;
 
-import org.jeo.feature.Feature;
-import org.jeo.feature.Schema;
+import org.jeo.data.Cursor;
+import org.jeo.data.Dataset;
 
 /**
  * A layer consisting of vector geometry objects, or {@link Feature} objects. 
@@ -42,7 +42,7 @@ public interface VectorDataset extends Dataset {
      * Returns a feature cursor for the layer. 
      * <p>
      * {@link Query#getMode()} is used to control whether the cursor is read or write. All 
-     * implementations must support {@link Cursor.Mode#READ}.
+     * implementations must support {@link org.jeo.data.Cursor.Mode#READ}.
      * </p>
      * @param q A query used to constrain results, must not be <code>null</code>.
      */

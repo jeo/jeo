@@ -21,9 +21,9 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
 
-import org.jeo.data.FileVectorDriver;
-import org.jeo.data.VectorDriver;
-import org.jeo.feature.Schema;
+import org.jeo.vector.FileVectorDriver;
+import org.jeo.vector.VectorDriver;
+import org.jeo.vector.Schema;
 
 /**
  * GeoJSON format driver.

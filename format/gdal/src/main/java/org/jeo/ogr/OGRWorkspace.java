@@ -27,9 +27,9 @@ import org.jeo.data.Dataset;
 import org.jeo.data.Driver;
 import org.jeo.data.FileData;
 import org.jeo.data.Handle;
-import org.jeo.data.VectorDataset;
+import org.jeo.vector.VectorDataset;
 import org.jeo.data.Workspace;
-import org.jeo.feature.Schema;
+import org.jeo.vector.Schema;
 import org.jeo.util.Key;
 
 public class OGRWorkspace implements Workspace, FileData {

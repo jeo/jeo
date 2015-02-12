@@ -19,7 +19,7 @@ import java.io.IOException;
 import org.jeo.data.Cursor;
 import org.jeo.tile.Tile;
 import org.jeo.tile.TilePyramid;
-import org.jeo.data.TileDataset;
+import org.jeo.tile.TileDataset;
 
 public class GeoPkgTileSet extends GeoPkgDataset<TileEntry> implements TileDataset {
 

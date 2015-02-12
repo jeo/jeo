@@ -17,8 +17,8 @@ package org.jeo.ogr;
 import java.io.File;
 
 import org.jeo.Tests;
-import org.jeo.data.VectorApiTestBase;
-import org.jeo.data.VectorDataset;
+import org.jeo.vector.VectorApiTestBase;
+import org.jeo.vector.VectorDataset;
 import org.junit.BeforeClass;
 
 public class ShapefileApiTest extends VectorApiTestBase {

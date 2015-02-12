@@ -1,4 +1,4 @@
-/* Copyright 2014 The jeo project. All rights reserved.
+/* Copyright 2013 The jeo project. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,24 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jeo.data;
-
 /**
- * Interface implemented by drivers for raster data.
- *
- * Justin Deoliveira, Boundless
+ * Feature model.
  */
-public interface RasterDriver<T> extends Driver<T> {
-
-    /**
-     * Raster driver capability enumeration.
-     */
-    public enum Capability {
-        RESAMPLE, REPROJECT;
-    }
-
-    /**
-     * Determines if the driver natively supports the specified capability.
-     */
-    boolean supports(RasterDriver.Capability cap);
-}
+package org.jeo.vector;

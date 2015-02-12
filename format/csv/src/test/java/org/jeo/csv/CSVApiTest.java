@@ -18,8 +18,8 @@ import java.io.File;
 import java.io.IOException;
 
 import org.jeo.Tests;
-import org.jeo.data.VectorApiTestBase;
-import org.jeo.data.VectorDataset;
+import org.jeo.vector.VectorApiTestBase;
+import org.jeo.vector.VectorDataset;
 
 public class CSVApiTest extends VectorApiTestBase {
 

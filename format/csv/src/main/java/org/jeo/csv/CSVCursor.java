@@ -16,10 +16,9 @@ package org.jeo.csv;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.Scanner;
 
 import org.jeo.data.Cursor;
-import org.jeo.feature.Feature;
+import org.jeo.vector.Feature;
 
 import com.csvreader.CsvReader;
 

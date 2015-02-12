@@ -14,8 +14,8 @@
  */
 package org.jeo.postgis;
 
-import org.jeo.data.VectorApiTestBase;
-import org.jeo.data.VectorDataset;
+import org.jeo.vector.VectorApiTestBase;
+import org.jeo.vector.VectorDataset;
 import org.junit.After;
 import org.junit.Assume;
 import org.junit.BeforeClass;

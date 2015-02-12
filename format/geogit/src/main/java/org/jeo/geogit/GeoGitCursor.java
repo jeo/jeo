@@ -23,7 +23,7 @@ import org.geogit.api.RevFeature;
 import org.geogit.api.plumbing.RevObjectParse;
 import org.jeo.data.Cursor;
 import org.jeo.data.Transaction;
-import org.jeo.feature.Feature;
+import org.jeo.vector.Feature;
 import org.jeo.geotools.GT;
 import org.jeo.geotools.GTFeature;
 import org.opengis.feature.simple.SimpleFeature;

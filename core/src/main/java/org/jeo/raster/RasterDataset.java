@@ -12,14 +12,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jeo.data;
+package org.jeo.raster;
 
-import org.jeo.raster.Band;
-import org.jeo.raster.Raster;
+import org.jeo.data.Dataset;
 import org.jeo.util.Dimension;
 
 import java.io.IOException;
-import java.nio.ByteBuffer;
 import java.util.List;
 
 /**
@@ -46,8 +44,8 @@ public interface RasterDataset extends Dataset {
     /**
      * Reads data from the raster into a buffer.
      * <p>
-     * Implementations must handle data type conversion specified by {@link org.jeo.data.RasterQuery#getBands()}
-     * and image resampling specified by {@link org.jeo.data.RasterQuery#getSize()}.
+     * Implementations must handle data type conversion specified by {@link RasterQuery#getBands()}
+     * and image resampling specified by {@link RasterQuery#getSize()}.
      * </p>
      * <p>
      * The returned buffer should always be in read mode.

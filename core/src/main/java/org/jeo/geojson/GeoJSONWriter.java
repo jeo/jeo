@@ -20,7 +20,7 @@ import java.io.Writer;
 import java.util.Map;
 
 import org.jeo.data.Cursor;
-import org.jeo.feature.Feature;
+import org.jeo.vector.Feature;
 import org.jeo.geom.Geom;
 import org.jeo.json.encoder.JSONEncoder;
 import org.osgeo.proj4j.CoordinateReferenceSystem;

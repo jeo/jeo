@@ -23,9 +23,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.jeo.feature.Feature;
-import org.jeo.feature.FeatureWrapper;
-import org.jeo.feature.Features;
+import org.jeo.vector.Feature;
+import org.jeo.vector.FeatureWrapper;
+import org.jeo.vector.Features;
 import org.jeo.filter.Filter;
 import org.jeo.proj.Proj;
 import org.osgeo.proj4j.CoordinateReferenceSystem;
@@ -37,9 +37,9 @@ import com.vividsolutions.jts.geom.GeometryFactory;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
-import org.jeo.feature.BasicFeature;
-import org.jeo.feature.Schema;
-import org.jeo.feature.SchemaBuilder;
+import org.jeo.vector.BasicFeature;
+import org.jeo.vector.Schema;
+import org.jeo.vector.SchemaBuilder;
 
 /**
  * Utility class for {@link Cursor} objects.

@@ -18,7 +18,7 @@ import java.io.IOException;
 import java.io.Reader;
 
 import org.jeo.data.Cursor;
-import org.jeo.feature.Feature;
+import org.jeo.vector.Feature;
 import org.jeo.geojson.parser.FeatureCollectionHandler;
 import org.jeo.geojson.parser.RootHandler;
 import org.jeo.json.parser.JSONParser;

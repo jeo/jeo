@@ -14,7 +14,7 @@
  */
 package org.jeo.sql;
 
-import org.jeo.feature.Field;
+import org.jeo.vector.Field;
 
 /**
  * Represents a column of a primary key.

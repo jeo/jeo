@@ -21,7 +21,7 @@ import java.util.Map;
 import org.jeo.data.Cursor;
 import org.jeo.data.Driver;
 import org.jeo.tile.Tile;
-import org.jeo.data.TileDataset;
+import org.jeo.tile.TileDataset;
 import org.jeo.tile.TileGrid;
 import org.jeo.tile.TilePyramid;
 import org.jeo.util.Key;

@@ -17,8 +17,8 @@ package org.jeo.geojson;
 import java.io.File;
 
 import org.jeo.Tests;
-import org.jeo.data.VectorApiTestBase;
-import org.jeo.data.VectorDataset;
+import org.jeo.vector.VectorApiTestBase;
+import org.jeo.vector.VectorDataset;
 
 public class GeoJSONTest extends VectorApiTestBase {
 

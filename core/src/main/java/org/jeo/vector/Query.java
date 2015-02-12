@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jeo.data;
+package org.jeo.vector;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -20,9 +20,11 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
-import org.jeo.feature.Feature;
-import org.jeo.feature.Field;
-import org.jeo.feature.Schema;
+
+import org.jeo.data.Cursor;
+import org.jeo.data.Cursor.Mode;
+import org.jeo.data.Sort;
+import org.jeo.data.Transaction;
 import org.jeo.filter.Filter;
 import org.jeo.filter.Filters;
 import org.jeo.filter.cql.CQL;
@@ -38,7 +40,7 @@ import com.vividsolutions.jts.geom.Envelope;
 import java.util.HashSet;
 
 /**
- * Describes a query against a {@link VectorDataset} dataset. 
+ * Describes a query against a {@link org.jeo.vector.VectorDataset} dataset.
  *  
  * @author Justin Deoliveira, OpenGeo
  */
@@ -90,7 +92,7 @@ public class Query {
     /**
      * Cursor mode
      */
-    Cursor.Mode mode = Cursor.READ;
+    Mode mode = Cursor.READ;
 
     /**
      * New query instance.

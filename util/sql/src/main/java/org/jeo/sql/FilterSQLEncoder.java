@@ -19,8 +19,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import org.jeo.feature.Field;
-import org.jeo.feature.Schema;
+import org.jeo.vector.Field;
+import org.jeo.vector.Schema;
 import org.jeo.filter.All;
 import org.jeo.filter.Comparison;
 import org.jeo.filter.Expression;

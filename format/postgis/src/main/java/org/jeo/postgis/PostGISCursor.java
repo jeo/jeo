@@ -24,9 +24,9 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.jeo.data.Cursor;
-import org.jeo.feature.BasicFeature;
-import org.jeo.feature.DiffFeature;
-import org.jeo.feature.Feature;
+import org.jeo.vector.BasicFeature;
+import org.jeo.vector.DiffFeature;
+import org.jeo.vector.Feature;
 import org.jeo.sql.PrimaryKey;
 import org.jeo.sql.PrimaryKeyColumn;
 

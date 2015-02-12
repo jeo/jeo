@@ -33,9 +33,9 @@ import java.util.Map;
 import java.util.TimeZone;
 
 import org.gdal.ogr.Feature;
-import org.jeo.feature.BasicFeature;
-import org.jeo.feature.Field;
-import org.jeo.feature.Schema;
+import org.jeo.vector.BasicFeature;
+import org.jeo.vector.Field;
+import org.jeo.vector.Schema;
 
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.io.ParseException;

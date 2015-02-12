@@ -15,8 +15,8 @@
 package org.jeo.data.mem;
 
 import org.jeo.TestData;
-import org.jeo.data.VectorApiTestBase;
-import org.jeo.data.VectorDataset;
+import org.jeo.vector.VectorApiTestBase;
+import org.jeo.vector.VectorDataset;
 
 public class MemVectorApiTest extends VectorApiTestBase {
 

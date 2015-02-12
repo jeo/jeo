@@ -18,7 +18,7 @@ import org.gdal.gdal.Dataset;
 import org.gdal.gdal.Driver;
 import org.gdal.gdal.gdal;
 import org.jeo.data.FileDriver;
-import org.jeo.data.RasterDriver;
+import org.jeo.raster.RasterDriver;
 import org.jeo.util.Messages;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

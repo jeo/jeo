@@ -47,7 +47,7 @@ import org.jeo.data.Dataset;
 import org.jeo.data.FileData;
 import org.jeo.data.Handle;
 import org.jeo.data.Workspace;
-import org.jeo.feature.Schema;
+import org.jeo.vector.Schema;
 import org.jeo.geotools.GT;
 import org.jeo.util.Key;
 import org.jeo.util.Pair;

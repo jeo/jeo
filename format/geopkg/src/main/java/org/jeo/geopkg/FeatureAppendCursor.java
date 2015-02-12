@@ -18,9 +18,9 @@ package org.jeo.geopkg;
 import java.io.IOException;
 
 import org.jeo.data.Cursor;
-import org.jeo.feature.BasicFeature;
-import org.jeo.feature.Feature;
-import org.jeo.feature.Schema;
+import org.jeo.vector.BasicFeature;
+import org.jeo.vector.Feature;
+import org.jeo.vector.Schema;
 import org.jeo.geopkg.Backend.Session;
 
 public class FeatureAppendCursor extends Cursor<Feature> {

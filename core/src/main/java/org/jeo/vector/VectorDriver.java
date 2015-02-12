@@ -12,12 +12,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jeo.data;
+package org.jeo.vector;
 
 import java.io.IOException;
 import java.util.Map;
 
-import org.jeo.feature.Schema;
+import org.jeo.data.Driver;
 import org.jeo.util.Messages;
 
 /**

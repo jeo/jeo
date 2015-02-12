@@ -14,7 +14,7 @@
  */
 package org.jeo.geopkg;
 
-import org.jeo.feature.Schema;
+import org.jeo.vector.Schema;
 import org.jeo.geom.Geom;
 import org.jeo.sql.PrimaryKey;
 

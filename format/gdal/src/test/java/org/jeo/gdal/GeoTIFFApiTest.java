@@ -14,12 +14,9 @@
  */
 package org.jeo.gdal;
 
-import org.jeo.Tests;
-import org.jeo.data.RasterApiTestBase;
-import org.jeo.data.RasterDataset;
+import org.jeo.raster.RasterApiTestBase;
+import org.jeo.raster.RasterDataset;
 import org.junit.BeforeClass;
-
-import java.io.File;
 
 public class GeoTIFFApiTest extends RasterApiTestBase {
 

@@ -12,9 +12,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jeo.data;
+package org.jeo.vector;
 
-import org.jeo.feature.Feature;
+import org.jeo.data.Cursor;
+import org.jeo.data.Cursors;
 import org.jeo.filter.Filter;
 import org.jeo.filter.Filters;
 import org.jeo.geom.Envelopes;
@@ -29,7 +30,7 @@ import java.util.Set;
  * <p>
  * This class is typically only used by format implementors. As a {@link Query} object is processed
  * the query plan is updated at aspects of the query such as bounds, filtering, limit/offset, etc..
- * are handled natively. Finally {@link #apply(Cursor)} should be called to augment a cursor with 
+ * are handled natively. Finally {@link #apply(org.jeo.data.Cursor)} should be called to augment a cursor with
  * wrappers that handle the parts of the query that could not be handled natively.
  * </p>
  * @author Justin Deoliveira, OpenGeo
@@ -169,7 +170,7 @@ public class QueryPlan {
      * <p>
      * For example, if a format is unable to process {@link Query#getFilter()} objects natively 
      * then {@link #isFiltered()} should return <tt>false</tt> and this method should wrap the 
-     * cursor with {@link Cursors#filter(Cursor, Filter)}.
+     * cursor with {@link org.jeo.data.Cursors#filter(org.jeo.data.Cursor, Filter)}.
      * </p>
      * @param cursor Cursor to augment.
      * 

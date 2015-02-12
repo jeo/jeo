@@ -24,7 +24,7 @@ import java.util.Map;
 import org.jeo.data.Dataset;
 import org.jeo.data.Handle;
 import org.jeo.data.Workspace;
-import org.jeo.feature.Schema;
+import org.jeo.vector.Schema;
 import org.jeo.util.Key;
 
 /**

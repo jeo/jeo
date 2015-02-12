@@ -12,11 +12,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jeo.data;
+package org.jeo.vector;
 
 import java.util.List;
-import org.jeo.feature.Schema;
-import org.jeo.feature.SchemaBuilder;
+
 import org.junit.Test;
 import static org.junit.Assert.*;
 

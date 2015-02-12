@@ -19,7 +19,7 @@ import java.io.IOException;
 import org.geotools.feature.simple.SimpleFeatureBuilder;
 import org.jeo.data.Cursor;
 import org.jeo.data.Transaction;
-import org.jeo.feature.Feature;
+import org.jeo.vector.Feature;
 import org.jeo.geotools.GT;
 import org.jeo.geotools.GTFeature;
 

@@ -16,13 +16,12 @@ package org.jeo.ogr;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.EnumSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import org.jeo.data.FileVectorDriver;
-import org.jeo.data.VectorDriver;
-import org.jeo.feature.Schema;
+import org.jeo.vector.FileVectorDriver;
+import org.jeo.vector.VectorDriver;
+import org.jeo.vector.Schema;
 import org.jeo.util.Messages;
 
 public abstract class OGRDriver<T> extends FileVectorDriver<T> {

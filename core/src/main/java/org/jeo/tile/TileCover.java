@@ -15,7 +15,6 @@
 package org.jeo.tile;
 
 import org.jeo.data.Cursor;
-import org.jeo.data.TileDataset;
 
 import java.io.IOException;
 

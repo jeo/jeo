@@ -20,7 +20,7 @@ import java.util.Collection;
 
 import org.jeo.data.Cursor;
 import org.jeo.data.Cursors;
-import org.jeo.feature.Feature;
+import org.jeo.vector.Feature;
 import org.jeo.geojson.parser.BaseHandler;
 import org.jeo.geojson.parser.FeatureCollectionHandler;
 import org.jeo.geojson.parser.FeatureHandler;

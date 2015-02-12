@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.jeo.vector.BasicFeature;
 import org.jeo.vector.Feature;
 import org.jeo.json.parser.ParseException;
 import org.osgeo.proj4j.CoordinateReferenceSystem;
@@ -92,9 +93,9 @@ public class FeatureCollectionHandler extends BaseHandler {
                    super.endObject();
 
                    //consume the feature node
-                   Feature f = FeaturesHandler.this.node.consume("feature", Feature.class).get();
-                   if (f != null && f.getCRS() == null) {
-                       f.setCRS(crs);
+                   BasicFeature f = FeaturesHandler.this.node.consume("feature", BasicFeature.class).get();
+                   if (f != null && f.crs() == null) {
+                       f.crs(crs);
                    }
                    if (!streaming) {
                        features.add(f);

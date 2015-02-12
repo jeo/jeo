@@ -153,20 +153,20 @@ public class GeoJSONReadWriteTest {
         assertEquals(1.1, (Double) f.get("double"), 0.1);
         assertEquals("one", f.get("string"));
         assertEquals("feature.1", f.getId());
-        assertNotNull(f.getCRS());
+        assertNotNull(f.crs());
     }
 
     @Test
     public void testParseFeature2() throws Exception {
         Feature f = (Feature) reader.read(featureText(1));
         assertNotNull(f);
-        
+
         assertTrue(f.get("geometry") instanceof Point);
         assertEquals(1l, f.get("int"));
         assertEquals(1.1, (Double) f.get("double"), 0.1);
         assertEquals("one", f.get("string"));
         assertEquals("feature.1", f.getId());
-        assertNotNull(f.getCRS());
+        assertNotNull(f.crs());
     }
 
     @Test

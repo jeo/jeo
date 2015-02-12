@@ -659,11 +659,11 @@ public class Cursors {
         }
 
         public Schema schema(Feature original) {
-            Schema s = null;
             // if schemaless, don't use any existing derived schema as it will
             // now look invalid due to removed features
             // otherwise, derive a new one
-            if (!original.isSchemaless()) {
+            Schema s = original.schema(false);
+            if (s == null) {
                 s = SchemaBuilder.selectFields(original.schema(), Arrays.asList(fields));
             }
             return s;

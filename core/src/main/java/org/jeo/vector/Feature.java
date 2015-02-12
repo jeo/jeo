@@ -36,27 +36,11 @@ public interface Feature {
     String getId();
 
     /**
-     * Coordinate reference system for the feature.
+     * The coordinate reference system for the feature.
      * <p>
-     * Generally the method {@link #crs()} should be used.
+     *  If necessary implementations should dervice from {@link Schema#crs()}.
      * </p>
-     * @return The crs, or <code>null</code> if none been set.
-     */
-    CoordinateReferenceSystem getCRS();
-
-    /**
-     * Sets the coordinate reference system for the feature.
-     */
-    void setCRS(CoordinateReferenceSystem crs);
-
-    /**
-     * The derived coordinate reference system for the feature.
-     * <p>
-     * If {@link #getCRS()} returns a value it is returned, otherwise if the feature has a 
-     * schema object then {@link Schema#crs()} is returned. Otherwise this method returns 
-     * <code>null</code>.
-     * </p>
-     * @return The derived crs.
+     * @return The crs, or <code>null</code> if unknown.
      */
     CoordinateReferenceSystem crs();
 
@@ -99,35 +83,45 @@ public interface Feature {
      * Sets a named attribute of the feature.
      *
      * @param key The key or name of the attribute. 
-     * @param val The new value of the attribute. 
+     * @param val The new value of the attribute.
+     *
+     * @return This object.
      */
-    void put(String key, Object val);
+    Feature put(String key, Object val);
 
     /**
      * Sets a feature attribute by index.
      * 
      * @param index The attribute index.
      * @param val The new value.
+     *
+     * @return This object.
      */
-    void set(int index, Object val);
+    Feature set(int index, Object val);
 
     /**
      * Sets the geometry of the feature.
+     *
+     * @return This object.
      */
-    void put(Geometry g);
+    Feature put(Geometry g);
 
     /**
-     * If this Feature has no fixed schema. The Schema returned from {@link #schema}
-     * is generated.
-     */
-    boolean isSchemaless();
-
-    /**
-     * Get a Schema for this Feature. May be generated from the attributes if
-     * this Feature is schema-less.
-     * @return non-null Schema of this Feature
+     * Get the schema of the feature, deriving it if necessary.
+     * <p>
+     * Equivalent to <tt>schema(true)</tt>
+     * </p>
      */
     Schema schema();
+
+    /**
+     * Get a Schema for this Feature.
+     * <p>
+     *  The <tt>derive</tt> flag controls whether a schema for the feature should be
+     *  derived if the feature does not have a native schema.
+     * </p>
+     */
+    Schema schema(boolean derive);
 
     /**
      * Returns an immutable list view of the feature

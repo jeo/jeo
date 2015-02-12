@@ -129,14 +129,14 @@ public class BasicFeature implements Feature {
         return id;
     }
     
-    @Override
-    public CoordinateReferenceSystem getCRS() {
-        return crs;
-    }
-    
-    @Override
-    public void setCRS(CoordinateReferenceSystem crs) {
+//    @Override
+//    public CoordinateReferenceSystem getCRS() {
+//        return crs;
+//    }
+//
+    public BasicFeature crs(CoordinateReferenceSystem crs) {
         this.crs = crs;
+        return this;
     }
     
     @Override
@@ -159,19 +159,20 @@ public class BasicFeature implements Feature {
     }
     
     @Override
-    public void put(String key, Object val) {
+    public BasicFeature put(String key, Object val) {
         storage.put(key, val);
+        return this;
     }
 
     @Override
-    public void put(Geometry g) {
+    public BasicFeature put(Geometry g) {
         //TODO:optimize before triggering schema creation
         Field gf = schema().geometry();
         if (gf == null) {
             throw new IllegalArgumentException("Feature schema has no geometry");
         }
 
-        put(gf.getName(), g);
+        return put(gf.getName(), g);
     }
 
     @Override
@@ -180,8 +181,9 @@ public class BasicFeature implements Feature {
     }
     
     @Override
-    public void set(int index, Object val) {
+    public BasicFeature set(int index, Object val) {
         storage.set(index, val);
+        return this;
     }
 
     @Override
@@ -190,13 +192,13 @@ public class BasicFeature implements Feature {
     }
 
     @Override
-    public boolean isSchemaless() {
-        return storage.isSchemaless;
+    public Schema schema(boolean derive) {
+        return storage.schema(derive);
     }
 
     @Override
     public Schema schema() {
-        return storage.schema();
+        return schema(true);
     }
 
     @Override
@@ -251,17 +253,18 @@ public class BasicFeature implements Feature {
     }
 
     protected static abstract class Storage {
-        final boolean isSchemaless;
-
         Schema schema;
 
         protected Storage(Schema schema) {
-            this.isSchemaless = schema == null;
             this.schema = schema;
         }
 
         protected Schema schema() {
-            if (schema == null) {
+            return schema(true);
+        }
+
+        protected Schema schema(boolean derive) {
+            if (schema == null && derive) {
                 schema = buildSchema();
             }
             return schema;

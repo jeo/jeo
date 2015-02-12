@@ -44,16 +44,6 @@ public class FeatureWrapper implements Feature {
     }
 
     @Override
-    public CoordinateReferenceSystem getCRS() {
-        return delegate.getCRS();
-    }
-
-    @Override
-    public void setCRS(CoordinateReferenceSystem crs) {
-        delegate.setCRS(crs);
-    }
-
-    @Override
     public CoordinateReferenceSystem crs() {
         return delegate.crs();
     }
@@ -74,18 +64,18 @@ public class FeatureWrapper implements Feature {
     }
 
     @Override
-    public void put(String key, Object val) {
-        delegate.put(key, val);
+    public Feature put(String key, Object val) {
+        return delegate.put(key, val);
     }
 
     @Override
-    public void put(Geometry g) {
-        delegate.put(g);
+    public Feature put(Geometry g) {
+        return delegate.put(g);
     }
 
     @Override
-    public void set(int index, Object val) {
-        delegate.set(index, val);
+    public Feature set(int index, Object val) {
+        return delegate.set(index, val);
     }
 
     @Override
@@ -94,8 +84,8 @@ public class FeatureWrapper implements Feature {
     }
 
     @Override
-    public boolean isSchemaless() {
-        return delegate.isSchemaless();
+    public Schema schema(boolean derive) {
+        return delegate.schema(derive);
     }
 
     @Override

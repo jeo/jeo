@@ -56,7 +56,8 @@ public class DiffFeature extends FeatureWrapper {
         return delegate.get(key);
     }
 
-    public void put(String key, Object val) {
+    public Feature put(String key, Object val) {
         changed.put(key, val);
+        return this;
     }
 }

@@ -80,8 +80,8 @@ public class FeatureHandler extends BaseHandler {
 
         String fid = node.consume("id", String.class).or(id!=null?String.valueOf(id):null);
 
-        Feature f = new BasicFeature(fid, props);
-        f.setCRS(node.consume("crs", CoordinateReferenceSystem.class).or(null));
+        BasicFeature f = new BasicFeature(fid, props);
+        f.crs(node.consume("crs", CoordinateReferenceSystem.class).or(null));
 
         node.setValue(f);
 

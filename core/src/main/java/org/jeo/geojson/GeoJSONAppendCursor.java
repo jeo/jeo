@@ -44,9 +44,9 @@ public class GeoJSONAppendCursor extends Cursor<Feature> {
     public Feature next() throws IOException {
         return next = new BasicFeature(null, new HashMap<String, Object>()) {
             @Override
-            public void put(Geometry g) {
+            public BasicFeature put(Geometry g) {
                 //hack
-                put("geometry", g);
+                return put("geometry", g);
             }
         };
     }

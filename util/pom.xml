@@ -14,9 +14,7 @@
   <name>Util Modules</name>
 
   <modules>
-    <module>geotools</module>
     <module>sql</module>
-
   </modules>
 
 </project>

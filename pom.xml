@@ -278,7 +278,6 @@
 
   <modules>
     <module>core</module>
-    <module>render</module>
     <module>format</module>
     <module>util</module>
   </modules>

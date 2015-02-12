@@ -4,20 +4,18 @@
 
   <parent>
     <groupId>org.jeo</groupId>
-    <artifactId>jeo-parent</artifactId>
+    <artifactId>contrib</artifactId>
     <version>0-SNAPSHOT</version>
   </parent>
 
-  <groupId>org.jeo</groupId>
-  <artifactId>contrib</artifactId>
-  <name>Contrib Modules</name>
-  <version>0-SNAPSHOT</version>
-  <packaging>pom</packaging>
+  <artifactId>jeo-svg</artifactId>
+  <name>SVG Support</name>
+  <packaging>jar</packaging>
 
   <dependencies>
     <dependency>
       <groupId>org.jeo</groupId>
-      <artifactId>jeo</artifactId>
+      <artifactId>jeo-render</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
@@ -28,16 +26,5 @@
       <classifier>tests</classifier>
     </dependency>
   </dependencies>
-
-  <modules>
-   <module>carto</module>
-   <module>cli</module>
-   <module>geotools</module>
-   <module>guava</module>
-   <module>nano</module>
-   <module>render</module>
-   <module>repo</module>
-   <module>svg</module>
-  </modules>
 
 </project>

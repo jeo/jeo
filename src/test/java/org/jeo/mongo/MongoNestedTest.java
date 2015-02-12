@@ -20,7 +20,7 @@ import static org.junit.Assert.assertTrue;
 import java.io.IOException;
 
 import org.jeo.data.Cursor;
-import org.jeo.vector.Query;
+import org.jeo.vector.VectorQuery;
 import org.jeo.vector.VectorDataset;
 import org.jeo.vector.Feature;
 import org.junit.Test;
@@ -37,7 +37,7 @@ public class MongoNestedTest extends MongoTest {
     @Test
     public void testNestedProperties() throws IOException {
         VectorDataset data = mongo.get("states");
-        Cursor<Feature> c = data.cursor(new Query());
+        Cursor<Feature> c = data.cursor(new VectorQuery());
         assertTrue(c.hasNext());
 
         Feature f = c.next();

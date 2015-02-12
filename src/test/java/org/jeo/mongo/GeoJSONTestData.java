@@ -17,7 +17,7 @@ package org.jeo.mongo;
 import java.io.IOException;
 
 import org.jeo.TestData;
-import org.jeo.vector.Query;
+import org.jeo.vector.VectorQuery;
 import org.jeo.vector.VectorDataset;
 import org.jeo.vector.Feature;
 import org.jeo.geojson.GeoJSONWriter;
@@ -33,7 +33,7 @@ public class GeoJSONTestData extends MongoTestData {
 
     public void setUp(DBCollection dbcol, MongoWorkspace workspace) throws IOException {
         VectorDataset data = TestData.states();
-        for (Feature f : data.cursor(new Query())) {
+        for (Feature f : data.cursor(new VectorQuery())) {
             f.put("geometry", Geom.iterate((MultiPolygon) f.geometry()).iterator().next());
             dbcol.insert((DBObject) JSON.parse(GeoJSONWriter.toString(f)));
         }

@@ -21,8 +21,8 @@ import org.jeo.data.Cursor;
 import org.jeo.data.Cursor.Mode;
 import org.jeo.data.Cursors;
 import org.jeo.data.Driver;
-import org.jeo.vector.Query;
-import org.jeo.vector.QueryPlan;
+import org.jeo.vector.VectorQuery;
+import org.jeo.vector.VectorQueryPlan;
 import org.jeo.vector.VectorDataset;
 import org.jeo.vector.Feature;
 import org.jeo.vector.Schema;
@@ -109,12 +109,12 @@ public class MongoDataset implements VectorDataset {
     }
 
     @Override
-    public long count(Query q) throws IOException {
+    public long count(VectorQuery q) throws IOException {
         if (q.isAll()) {
             return q.adjustCount(dbcol.count());
         }
 
-        QueryPlan qp = new QueryPlan(q);
+        VectorQueryPlan qp = new VectorQueryPlan(q);
 
         if (!Filters.isTrueOrNull(q.getFilter())) {
             // TODO: transform natively to filter 
@@ -129,12 +129,12 @@ public class MongoDataset implements VectorDataset {
     }
 
     @Override
-    public Cursor<Feature> cursor(Query q) throws IOException {
+    public Cursor<Feature> cursor(VectorQuery q) throws IOException {
         if (q.getMode() == Mode.APPEND) {
             return new MongoCursor(q.getMode(), null, this);
         }
 
-        QueryPlan qp = new QueryPlan(q);
+        VectorQueryPlan qp = new VectorQueryPlan(q);
 
         //TODO: sorting
         DBCursor dbCursor = !Envelopes.isNull(q.getBounds()) ? 

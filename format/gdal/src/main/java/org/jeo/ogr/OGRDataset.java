@@ -28,8 +28,8 @@ import org.jeo.data.Cursor;
 import org.jeo.data.Cursors;
 import org.jeo.data.Driver;
 import org.jeo.data.FileData;
-import org.jeo.vector.Query;
-import org.jeo.vector.QueryPlan;
+import org.jeo.vector.VectorQuery;
+import org.jeo.vector.VectorQueryPlan;
 import org.jeo.vector.VectorDataset;
 import org.jeo.vector.Feature;
 import org.jeo.vector.Schema;
@@ -282,7 +282,7 @@ public class OGRDataset implements VectorDataset, FileData {
     }
 
     @Override
-    public long count(Query q) throws IOException {
+    public long count(VectorQuery q) throws IOException {
 
         Pair<Layer,DataSource> data = open();
         try {
@@ -310,12 +310,12 @@ public class OGRDataset implements VectorDataset, FileData {
     }
 
     @Override
-    public Cursor<Feature> cursor(Query q) throws IOException {
+    public Cursor<Feature> cursor(VectorQuery q) throws IOException {
         Pair<Layer,DataSource> data = open();
 
         Layer l = data.first();
 
-        QueryPlan qp = new QueryPlan(q);
+        VectorQueryPlan qp = new VectorQueryPlan(q);
         if (!Envelopes.isNull(q.getBounds())) {
             Envelope bb = q.getBounds();
             l.SetSpatialFilterRect(bb.getMinX(), bb.getMinY(), bb.getMaxX(), bb.getMaxY());

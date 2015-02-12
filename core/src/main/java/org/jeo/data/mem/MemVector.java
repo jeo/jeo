@@ -23,8 +23,8 @@ import java.util.Map;
 
 import org.jeo.data.Cursor;
 import org.jeo.data.Cursors;
-import org.jeo.vector.Query;
-import org.jeo.vector.QueryPlan;
+import org.jeo.vector.VectorQuery;
+import org.jeo.vector.VectorQueryPlan;
 import org.jeo.vector.VectorDataset;
 import org.jeo.vector.DiffFeature;
 import org.jeo.vector.Feature;
@@ -111,13 +111,13 @@ public class MemVector implements VectorDataset {
     }
     
     @Override
-    public long count(Query q) throws IOException {
+    public long count(VectorQuery q) throws IOException {
         return Cursors.size(cursor(q));
     }
 
     @Override
-    public Cursor<Feature> cursor(Query q) throws IOException {
-        QueryPlan qp = new QueryPlan(q);
+    public Cursor<Feature> cursor(VectorQuery q) throws IOException {
+        VectorQueryPlan qp = new VectorQueryPlan(q);
 
         List<Feature> features = this.features;
         if (!Envelopes.isNull(q.getBounds())) {

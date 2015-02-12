@@ -18,7 +18,7 @@ import java.io.IOException;
 
 import java.util.Map;
 import org.jeo.data.Cursor;
-import org.jeo.vector.Query;
+import org.jeo.vector.VectorQuery;
 import org.jeo.data.Transaction;
 import org.jeo.data.Transactional;
 import org.jeo.vector.VectorDataset;
@@ -37,12 +37,12 @@ public class GeoPkgVector extends GeoPkgDataset<FeatureEntry> implements VectorD
     }
 
     @Override
-    public long count(Query q) throws IOException {
+    public long count(VectorQuery q) throws IOException {
         return geopkg.count(entry, q);
     }
 
     @Override
-    public Cursor<Feature> cursor(Query q) throws IOException {
+    public Cursor<Feature> cursor(VectorQuery q) throws IOException {
         return geopkg.cursor(entry, q);
     }
 

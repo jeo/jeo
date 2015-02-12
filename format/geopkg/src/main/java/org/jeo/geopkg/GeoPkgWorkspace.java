@@ -30,8 +30,8 @@ import org.jeo.data.Cursors;
 import org.jeo.data.Dataset;
 import org.jeo.data.FileData;
 import org.jeo.data.Handle;
-import org.jeo.vector.Query;
-import org.jeo.vector.QueryPlan;
+import org.jeo.vector.VectorQuery;
+import org.jeo.vector.VectorQueryPlan;
 import org.jeo.tile.Tile;
 import org.jeo.tile.TilePyramid;
 import org.jeo.tile.TilePyramidBuilder;
@@ -203,8 +203,8 @@ public class GeoPkgWorkspace implements Workspace, FileData {
         return feature;
     }
 
-    public long count(final FeatureEntry entry, final Query q) throws IOException {
-        QueryPlan qp = new QueryPlan(q);
+    public long count(final FeatureEntry entry, final VectorQuery q) throws IOException {
+        VectorQueryPlan qp = new VectorQueryPlan(q);
 
         if (!Envelopes.isNull(q.getBounds())) {
             return Cursors.size(cursor(entry, q));
@@ -234,7 +234,7 @@ public class GeoPkgWorkspace implements Workspace, FileData {
         return count;
     }
 
-    public Cursor<Feature> cursor(FeatureEntry entry, Query q) throws IOException {
+    public Cursor<Feature> cursor(FeatureEntry entry, VectorQuery q) throws IOException {
         // session to use for read queries. db seems to lock things up when
         // using our transaction session for reads
         Session session = backend.session();
@@ -254,7 +254,7 @@ public class GeoPkgWorkspace implements Workspace, FileData {
             return new FeatureAppendCursor(transaction, entry, this, schema, usingTransaction);
         }
 
-        QueryPlan qp = new QueryPlan(q);
+        VectorQueryPlan qp = new VectorQueryPlan(q);
         PrimaryKey pk = primaryKey(entry, session);
         SQL sqlb = new SQL("SELECT ");
 
@@ -306,7 +306,7 @@ public class GeoPkgWorkspace implements Workspace, FileData {
         return qp.apply(c);
     }
 
-    List<Object> encodeQuery(SQL sql, Query q, QueryPlan qp, PrimaryKey pk) {
+    List<Object> encodeQuery(SQL sql, VectorQuery q, VectorQueryPlan qp, PrimaryKey pk) {
         GeoPkgFilterSQLEncoder sqlfe = new GeoPkgFilterSQLEncoder();
         sqlfe.setPrimaryKey(pk);
         sqlfe.setDbTypes(backend.dbTypes);
@@ -780,7 +780,7 @@ public class GeoPkgWorkspace implements Workspace, FileData {
         return e;
     }
 
-    boolean missingProperties(FeatureEntry entry, Query q, Session session) throws IOException {
+    boolean missingProperties(FeatureEntry entry, VectorQuery q, Session session) throws IOException {
         boolean hasMissing = false;
         if (q.getFilter() != null) {
             Set<String> properties = Filters.properties(q.getFilter());

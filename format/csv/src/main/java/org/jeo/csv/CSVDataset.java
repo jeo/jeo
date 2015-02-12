@@ -26,8 +26,8 @@ import java.util.Map;
 import org.jeo.data.Cursor;
 import org.jeo.data.Cursors;
 import org.jeo.data.FileData;
-import org.jeo.vector.Query;
-import org.jeo.vector.QueryPlan;
+import org.jeo.vector.VectorQuery;
+import org.jeo.vector.VectorQueryPlan;
 import org.jeo.vector.VectorDataset;
 import org.jeo.vector.BasicFeature;
 import org.jeo.vector.Feature;
@@ -133,16 +133,16 @@ public class CSVDataset implements VectorDataset, FileData {
 
     @Override
     public Envelope bounds() throws IOException {
-        return Cursors.extent(cursor(new Query()));
+        return Cursors.extent(cursor(new VectorQuery()));
     }
 
     @Override
-    public long count(Query q) throws IOException {
+    public long count(VectorQuery q) throws IOException {
         return Cursors.size(cursor(q));
     }
 
     @Override
-    public Cursor<Feature> cursor(Query q) throws IOException {
+    public Cursor<Feature> cursor(VectorQuery q) throws IOException {
         if (q.getMode() != Cursor.READ) {
             throw new IllegalArgumentException("write cursors not supported");
         }
@@ -152,7 +152,7 @@ public class CSVDataset implements VectorDataset, FileData {
             reader.readHeaders();
         }
 
-        return new QueryPlan(q).apply(new CSVCursor(reader, this));
+        return new VectorQueryPlan(q).apply(new CSVCursor(reader, this));
     }
 
     public void close() {

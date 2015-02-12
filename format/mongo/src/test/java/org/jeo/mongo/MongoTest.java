@@ -22,7 +22,7 @@ import static org.junit.Assert.assertTrue;
 import java.util.Set;
 
 import org.jeo.data.Cursor;
-import org.jeo.vector.Query;
+import org.jeo.vector.VectorQuery;
 import org.jeo.vector.Feature;
 import org.jeo.vector.Schema;
 import org.jeo.geom.GeomBuilder;
@@ -107,7 +107,7 @@ public class MongoTest {
     @Test
     public void testCount() throws Exception {
         MongoDataset states = mongo.get("states");
-        assertEquals(49, states.count(new Query()));
+        assertEquals(49, states.count(new VectorQuery()));
     }
 
     @Test
@@ -115,15 +115,15 @@ public class MongoTest {
         MongoDataset states = mongo.get("states");
         Envelope bbox = new Envelope(-73.44, -71.51, 42.73, 45.01);
 
-        int match = Iterables.size(filter(states.cursor(new Query()), bbox));
-        assertEquals(match, states.count(new Query().bounds(bbox)));
+        int match = Iterables.size(filter(states.cursor(new VectorQuery()), bbox));
+        assertEquals(match, states.count(new VectorQuery().bounds(bbox)));
     }
 
     @Test
     public void testReadAll() throws Exception {
         MongoDataset states = mongo.get("states");
         int count = 0;
-        for (Feature f : states.cursor(new Query())) {
+        for (Feature f : states.cursor(new VectorQuery())) {
             count++;
             assertNotNull(f.geometry());
             assertNotNull(f.get("STATE_NAME"));
@@ -141,7 +141,7 @@ public class MongoTest {
         Envelope bbox = new Envelope(-73.44, -71.51, 42.73, 45.01);
 
         Set<String> names = Sets.newHashSet(
-            Iterables.transform(filter(states.cursor(new Query()),bbox), 
+            Iterables.transform(filter(states.cursor(new VectorQuery()),bbox),
             new Function<Feature,String>() {
                 @Override
                 public String apply(Feature input) {
@@ -150,7 +150,7 @@ public class MongoTest {
             }));
         assertFalse(names.isEmpty());
 
-        for (Feature f : states.cursor(new Query())) {
+        for (Feature f : states.cursor(new VectorQuery())) {
             names.remove(f.get("STATE_NAME"));
         }
         assertTrue(names.isEmpty());
@@ -159,7 +159,7 @@ public class MongoTest {
     @Test
     public void testAppend() throws Exception {
         MongoDataset states = mongo.get("states");
-        Cursor<Feature> c = states.cursor(new Query().append());
+        Cursor<Feature> c = states.cursor(new VectorQuery().append());
 
         Geometry g = new GeomBuilder().point(0,0).toPoint().buffer(1);
         
@@ -169,9 +169,9 @@ public class MongoTest {
         f.put("STATE_NAME", "Nowhere");
         c.write();
 
-        assertEquals(50, states.count(new Query()));
+        assertEquals(50, states.count(new VectorQuery()));
 
-        c = states.cursor(new Query().bounds(g.getEnvelopeInternal()));
+        c = states.cursor(new VectorQuery().bounds(g.getEnvelopeInternal()));
         assertTrue(c.hasNext());
         f = c.next();
 
@@ -184,10 +184,10 @@ public class MongoTest {
         MongoDataset states = mongo.get("states");
         
         Geometry g = new GeomBuilder().point(0,0).toPoint().buffer(1);
-        assertEquals(0, states.count(new Query().bounds(g.getEnvelopeInternal())));
-        assertEquals(0, states.count(new Query().filter("STATE_NAME = 'foo'")));
+        assertEquals(0, states.count(new VectorQuery().bounds(g.getEnvelopeInternal())));
+        assertEquals(0, states.count(new VectorQuery().filter("STATE_NAME = 'foo'")));
 
-        Cursor<Feature> c = states.cursor(new Query().filter("STATE_ABBR = 'NY'").update());
+        Cursor<Feature> c = states.cursor(new VectorQuery().filter("STATE_ABBR = 'NY'").update());
         assertTrue(c.hasNext());
 
         Feature f = c.next();
@@ -196,18 +196,18 @@ public class MongoTest {
         c.write();
         c.close();
 
-        assertEquals(0, states.count(new Query().filter("STATE_NAME = 'New York'")));
-        assertEquals(1, states.count(new Query().bounds(g.getEnvelopeInternal())));
-        assertEquals(1, states.count(new Query().filter("STATE_NAME = 'foo'")));
+        assertEquals(0, states.count(new VectorQuery().filter("STATE_NAME = 'New York'")));
+        assertEquals(1, states.count(new VectorQuery().bounds(g.getEnvelopeInternal())));
+        assertEquals(1, states.count(new VectorQuery().filter("STATE_NAME = 'foo'")));
 
-        c = states.cursor(new Query().filter("STATE_NAME = 'foo'").update());
+        c = states.cursor(new VectorQuery().filter("STATE_NAME = 'foo'").update());
         assertTrue(c.hasNext());
         c.remove();
         c.close();
 
-        assertEquals(48, states.count(new Query()));
-        assertEquals(0, states.count(new Query().filter("STATE_NAME = 'New York'")));
-        assertEquals(0, states.count(new Query().filter("STATE_NAME = 'foo'")));
+        assertEquals(48, states.count(new VectorQuery()));
+        assertEquals(0, states.count(new VectorQuery().filter("STATE_NAME = 'New York'")));
+        assertEquals(0, states.count(new VectorQuery().filter("STATE_NAME = 'foo'")));
     }
 
     Iterable<Feature> filter(Cursor<Feature> features, final Envelope bbox) {

@@ -30,8 +30,8 @@ import org.jeo.data.Cursor.Mode;
 import org.jeo.data.Cursors;
 import org.jeo.data.Driver;
 import org.jeo.data.FileData;
-import org.jeo.vector.Query;
-import org.jeo.vector.QueryPlan;
+import org.jeo.vector.VectorQuery;
+import org.jeo.vector.VectorQueryPlan;
 import org.jeo.vector.VectorDataset;
 import org.jeo.vector.Feature;
 import org.jeo.vector.Field;
@@ -133,16 +133,16 @@ public class GeoJSONDataset implements VectorDataset, FileData {
 
     @Override
     public Envelope bounds() throws IOException {
-        return Cursors.extent(cursor(new Query()));
+        return Cursors.extent(cursor(new VectorQuery()));
     }
 
     @Override
-    public long count(Query q) throws IOException {
+    public long count(VectorQuery q) throws IOException {
         return Cursors.size(cursor(q));
     }
 
     @Override
-    public Cursor<Feature> cursor(Query q) throws IOException {
+    public Cursor<Feature> cursor(VectorQuery q) throws IOException {
         if (q.getMode() == Mode.UPDATE) {
             throw new IOException("Update cursor not supported");
         }
@@ -153,7 +153,7 @@ public class GeoJSONDataset implements VectorDataset, FileData {
             return new GeoJSONAppendCursor(writer());
         }
 
-        return new QueryPlan(q).apply(new GeoJSONCursor(reader()));
+        return new VectorQueryPlan(q).apply(new GeoJSONCursor(reader()));
     }
 
     @Override
@@ -161,7 +161,7 @@ public class GeoJSONDataset implements VectorDataset, FileData {
     }
 
     Optional<Feature> first() throws IOException {
-        Cursor<Feature> c = cursor(new Query());
+        Cursor<Feature> c = cursor(new VectorQuery());
         try {
             if (c.hasNext()) {
                 return Optional.of(c.next());

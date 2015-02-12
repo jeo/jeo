@@ -36,16 +36,16 @@ public interface VectorDataset extends Dataset {
      * 
      * @param q Query used to constrain results, must not be <code>null</code>
     */
-    long count(Query q) throws IOException ;
+    long count(VectorQuery q) throws IOException ;
 
     /**
      * Returns a feature cursor for the layer. 
      * <p>
-     * {@link Query#getMode()} is used to control whether the cursor is read or write. All 
+     * {@link VectorQuery#getMode()} is used to control whether the cursor is read or write. All
      * implementations must support {@link org.jeo.data.Cursor.Mode#READ}.
      * </p>
      * @param q A query used to constrain results, must not be <code>null</code>.
      */
-    Cursor<Feature> cursor(Query q) throws IOException;
+    Cursor<Feature> cursor(VectorQuery q) throws IOException;
 
 }

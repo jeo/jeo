@@ -25,7 +25,7 @@ import org.jeo.raster.Band;
 import org.jeo.tile.TileGrid;
 import org.jeo.tile.TilePyramid;
 import org.jeo.util.Dimension;
-import org.jeo.vector.Query;
+import org.jeo.vector.VectorQuery;
 import org.jeo.vector.VectorDataset;
 import org.osgeo.proj4j.CoordinateReferenceSystem;
 
@@ -125,7 +125,7 @@ public class JeoJSONWriter extends GeoJSONWriter {
         object();
         encode(vds);
 
-        key("count").value(vds.count(new Query()));
+        key("count").value(vds.count(new VectorQuery()));
 
         key("schema").object();
         for (Field fld : vds.schema()) {

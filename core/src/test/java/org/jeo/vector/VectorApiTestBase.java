@@ -99,83 +99,83 @@ public abstract class VectorApiTestBase {
     @Test
     public void testCount() throws IOException {
         // count all
-        assertEquals(49, data.count(new Query()));
+        assertEquals(49, data.count(new VectorQuery()));
 
         // count within bounds
         Set<String> abbrs = Sets.newHashSet("MO", "OK", "TX", "NM", "AR", "LA"); 
 
         Envelope bbox = new Envelope(-106.649513, -93.507217, 25.845198, 36.493877);
-        assertEquals(abbrs.size(), data.count(new Query().bounds(bbox)));
+        assertEquals(abbrs.size(), data.count(new VectorQuery().bounds(bbox)));
 
         // count with spatial filters
-        assertEquals(abbrs.size(), data.count(new Query().filter(String.format("INTERSECTS(%s, %s)", 
+        assertEquals(abbrs.size(), data.count(new VectorQuery().filter(String.format("INTERSECTS(%s, %s)",
             data.schema().geometry().getName(), Envelopes.toPolygon(bbox)))));
 
         // count with attribute filters
-        assertEquals(1, data.count(new Query().filter("STATE_NAME = 'Texas'")));
-        assertEquals(48, data.count(new Query().filter("STATE_NAME <> 'Texas'")));
-        assertEquals(2, data.count(new Query().filter("P_MALE > P_FEMALE")));
-        assertEquals(3, data.count(new Query().filter("P_MALE >= P_FEMALE")));
+        assertEquals(1, data.count(new VectorQuery().filter("STATE_NAME = 'Texas'")));
+        assertEquals(48, data.count(new VectorQuery().filter("STATE_NAME <> 'Texas'")));
+        assertEquals(2, data.count(new VectorQuery().filter("P_MALE > P_FEMALE")));
+        assertEquals(3, data.count(new VectorQuery().filter("P_MALE >= P_FEMALE")));
 
         // count with logical filters
-        assertEquals(1, data.count(new Query().filter("P_MALE > P_FEMALE AND SAMP_POP > 200000")));
-        assertEquals(5, data.count(new Query().filter("P_MALE > P_FEMALE OR SAMP_POP > 2000000")));
-        assertEquals(1, data.count(new Query().filter("P_MALE > P_FEMALE AND NOT SAMP_POP > 200000")));
+        assertEquals(1, data.count(new VectorQuery().filter("P_MALE > P_FEMALE AND SAMP_POP > 200000")));
+        assertEquals(5, data.count(new VectorQuery().filter("P_MALE > P_FEMALE OR SAMP_POP > 2000000")));
+        assertEquals(1, data.count(new VectorQuery().filter("P_MALE > P_FEMALE AND NOT SAMP_POP > 200000")));
 
         // count with id filters
         String fid = fidFor(data, "STATE_NAME = 'Texas'");
-        assertEquals(1, data.count(new Query().filter(String.format("IN ('%s')", fid))));
+        assertEquals(1, data.count(new VectorQuery().filter(String.format("IN ('%s')", fid))));
     }
 
     @Test
     public void testCursorRead() throws Exception {
         // all
-        Assert.assertEquals(49, Cursors.size(data.cursor(new Query())));
+        Assert.assertEquals(49, Cursors.size(data.cursor(new VectorQuery())));
 
         // limit offset
-        assertEquals(39, Cursors.size(data.cursor(new Query().offset(10))));
-        assertEquals(10, Cursors.size(data.cursor(new Query().limit(10))));
+        assertEquals(39, Cursors.size(data.cursor(new VectorQuery().offset(10))));
+        assertEquals(10, Cursors.size(data.cursor(new VectorQuery().limit(10))));
 
         // bounds
         Envelope bbox = new Envelope(-106.649513, -93.507217, 25.845198, 36.493877);
-        assertCovered(data.cursor(new Query().bounds(bbox)), "MO", "OK", "TX", "NM", "AR", "LA");
+        assertCovered(data.cursor(new VectorQuery().bounds(bbox)), "MO", "OK", "TX", "NM", "AR", "LA");
 
         // spatial filter
-        assertCovered(data.cursor(new Query().filter(String.format("INTERSECTS(%s, %s)", 
+        assertCovered(data.cursor(new VectorQuery().filter(String.format("INTERSECTS(%s, %s)",
             data.schema().geometry().getName(), Envelopes.toPolygon(bbox)))), 
             "MO", "OK", "TX", "NM", "AR", "LA");
 
         // comparison filter
-        assertCovered(data.cursor(new Query().filter("STATE_NAME = 'Texas'")), "TX");
-        assertNotCovered(data.cursor(new Query().filter("STATE_NAME <> 'Texas'")), "TX");
-        assertCovered(data.cursor(new Query().filter("P_MALE > P_FEMALE")), "NV", "CA");
-        assertCovered(data.cursor(new Query().filter("P_MALE >= P_FEMALE")), "NV", "CA", "WY");
+        assertCovered(data.cursor(new VectorQuery().filter("STATE_NAME = 'Texas'")), "TX");
+        assertNotCovered(data.cursor(new VectorQuery().filter("STATE_NAME <> 'Texas'")), "TX");
+        assertCovered(data.cursor(new VectorQuery().filter("P_MALE > P_FEMALE")), "NV", "CA");
+        assertCovered(data.cursor(new VectorQuery().filter("P_MALE >= P_FEMALE")), "NV", "CA", "WY");
 
         // logic filters
         assertCovered(
-            data.cursor(new Query().filter("P_MALE > P_FEMALE AND SAMP_POP > 200000")), "CA");
-        assertCovered(data.cursor(new Query().filter("P_MALE > P_FEMALE OR SAMP_POP > 2000000")), 
+            data.cursor(new VectorQuery().filter("P_MALE > P_FEMALE AND SAMP_POP > 200000")), "CA");
+        assertCovered(data.cursor(new VectorQuery().filter("P_MALE > P_FEMALE OR SAMP_POP > 2000000")),
             "TX", "NY", "PA", "NV", "CA");
         assertCovered(
-            data.cursor(new Query().filter("P_MALE > P_FEMALE AND NOT SAMP_POP > 200000")), "NV");
+            data.cursor(new VectorQuery().filter("P_MALE > P_FEMALE AND NOT SAMP_POP > 200000")), "NV");
 
         // id filter
         String fid = fidFor(data, "STATE_NAME = 'Texas'");
-        assertCovered(data.cursor(new Query().filter(String.format("IN ('%s')", fid))), "TX");
+        assertCovered(data.cursor(new VectorQuery().filter(String.format("IN ('%s')", fid))), "TX");
 
         // in filter
-        assertCovered(data.cursor(new Query().filter("STATE_NAME IN ('Texas','Iowa')")), "TX", "IA");
+        assertCovered(data.cursor(new VectorQuery().filter("STATE_NAME IN ('Texas','Iowa')")), "TX", "IA");
 
         // between
         assertCovered(
-             data.cursor(new Query().filter(String.format("SAMP_POP BETWEEN %s AND %s", 70000, 80000))), "DC");
+             data.cursor(new VectorQuery().filter(String.format("SAMP_POP BETWEEN %s AND %s", 70000, 80000))), "DC");
 
         // math
-        assertCovered(data.cursor(new Query().filter("SAMP_POP / 2 = 36348")), "DC");
-        assertCovered(data.cursor(new Query().filter("(P_FEMALE - P_MALE) > .05")), "DC");
+        assertCovered(data.cursor(new VectorQuery().filter("SAMP_POP / 2 = 36348")), "DC");
+        assertCovered(data.cursor(new VectorQuery().filter("(P_FEMALE - P_MALE) > .05")), "DC");
 
         // like
-        assertCovered(data.cursor(new Query().filter("STATE_NAME LIKE 'Calif%'")), "CA");
+        assertCovered(data.cursor(new VectorQuery().filter("STATE_NAME LIKE 'Calif%'")), "CA");
 
         // null
         assertCount(49, data, "P_MALE IS NOT NULL");
@@ -191,7 +191,7 @@ public abstract class VectorApiTestBase {
 
     @Test
     public void testFeature() throws Exception {
-        Cursor<Feature> cursor = data.cursor(new Query());
+        Cursor<Feature> cursor = data.cursor(new VectorQuery());
         Feature next;
         try {
             assertTrue(cursor.hasNext());
@@ -205,7 +205,7 @@ public abstract class VectorApiTestBase {
 
         // add a query and check all fields returned.
         // ensures attribute filtering operations don't remove erroneously
-        cursor = data.cursor(new Query().filter("STATE_ABBR = 'CA'"));
+        cursor = data.cursor(new VectorQuery().filter("STATE_ABBR = 'CA'"));
         assertTrue(cursor.hasNext());
         Feature feature = cursor.next();
         assertEquals(data.schema().getFields().size(), feature.schema().size());
@@ -217,7 +217,7 @@ public abstract class VectorApiTestBase {
     @Test
     public void testFeatureFields() throws Exception {
         // reverse the order as they appear in gpkg/postgis schema
-        Cursor<Feature> cursor = data.cursor(new Query().fields("STATE_NAME", "SAMP_POP"));
+        Cursor<Feature> cursor = data.cursor(new VectorQuery().fields("STATE_NAME", "SAMP_POP"));
         Feature next;
         try {
             assertTrue(cursor.hasNext());
@@ -235,7 +235,7 @@ public abstract class VectorApiTestBase {
 
 
         // reduced fields but filter referencing other field
-        cursor = data.cursor(new Query().fields("STATE_NAME", "SAMP_POP").filter("STATE_ABBR = 'CA'"));
+        cursor = data.cursor(new VectorQuery().fields("STATE_NAME", "SAMP_POP").filter("STATE_ABBR = 'CA'"));
         try {
             assertTrue(cursor.hasNext());
             next = cursor.next();
@@ -273,13 +273,13 @@ public abstract class VectorApiTestBase {
     }
 
     void assertCount(int expected, VectorDataset dataSet, String filter) throws IOException {
-        Query q = new Query().filter(filter);
+        VectorQuery q = new VectorQuery().filter(filter);
         assertEquals(expected, dataSet.count(q));
         assertEquals(expected, Cursors.size(dataSet.cursor(q)));
     }
 
     String fidFor(VectorDataset dataset, String filter) throws IOException {
-        Cursor<Feature> c = dataset.cursor(new Query().filter(filter));
+        Cursor<Feature> c = dataset.cursor(new VectorQuery().filter(filter));
         try {
             assertTrue(c.hasNext());
             return c.next().getId();

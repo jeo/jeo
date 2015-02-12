@@ -22,7 +22,7 @@ import java.io.InputStream;
 
 import org.jeo.Tests;
 import org.jeo.data.Cursors;
-import org.jeo.vector.Query;
+import org.jeo.vector.VectorQuery;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -39,7 +39,7 @@ public class CSVTest {
 
     @Test
     public void testCount() throws Exception {
-        assertEquals(4, csv.count(new Query()));
+        assertEquals(4, csv.count(new VectorQuery()));
     }
 
     @Test
@@ -49,7 +49,7 @@ public class CSVTest {
 
     @Test
     public void testChunks() throws Exception {
-        assertEquals(1, Cursors.size(csv.cursor(new Query().filter("name = 'fire,cracker'"))));
+        assertEquals(1, Cursors.size(csv.cursor(new VectorQuery().filter("name = 'fire,cracker'"))));
     }
 
     InputStream csv() {

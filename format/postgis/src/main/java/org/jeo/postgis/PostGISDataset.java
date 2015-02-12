@@ -32,8 +32,8 @@ import java.util.Map;
 import org.jeo.data.Cursor;
 import org.jeo.data.Cursors;
 import org.jeo.data.Driver;
-import org.jeo.vector.Query;
-import org.jeo.vector.QueryPlan;
+import org.jeo.vector.VectorQuery;
+import org.jeo.vector.VectorQueryPlan;
 import org.jeo.vector.VectorDataset;
 import org.jeo.vector.Feature;
 import org.jeo.vector.Field;
@@ -134,9 +134,9 @@ public class PostGISDataset implements VectorDataset {
     }
 
     @Override
-    public long count(final Query q) throws IOException {
+    public long count(final VectorQuery q) throws IOException {
         //save original query
-        QueryPlan qp = new QueryPlan(q);
+        VectorQueryPlan qp = new VectorQueryPlan(q);
 
         final SQL sql = new SQL("SELECT count(*) FROM ").name(schema().getName());
         final List<Pair<Object,Integer>> args = new ArrayList<Pair<Object,Integer>>();
@@ -165,9 +165,9 @@ public class PostGISDataset implements VectorDataset {
     }
 
     @Override
-    public Cursor<Feature> cursor(Query q) throws IOException {
+    public Cursor<Feature> cursor(VectorQuery q) throws IOException {
         try {
-            QueryPlan qp = new QueryPlan(q);
+            VectorQueryPlan qp = new VectorQueryPlan(q);
 
             Connection cx = pg.getDataSource().getConnection();
             
@@ -249,7 +249,7 @@ public class PostGISDataset implements VectorDataset {
         }
     }
 
-    void encodeQuery(SQL sql, Query q, QueryPlan qp, List<Pair<Object,Integer>> args) {
+    void encodeQuery(SQL sql, VectorQuery q, VectorQueryPlan qp, List<Pair<Object,Integer>> args) {
         Schema schema = schema();
 
         if (schema.geometry() != null && !Envelopes.isNull(q.getBounds())) {
@@ -444,7 +444,7 @@ public class PostGISDataset implements VectorDataset {
         }
     }
 
-    boolean missingProperties(Query q) throws IOException {
+    boolean missingProperties(VectorQuery q) throws IOException {
         boolean hasMissing = false;
         if (q.getFilter() != null) {
             Set<String> properties = Filters.properties(q.getFilter());

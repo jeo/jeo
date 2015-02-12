@@ -26,7 +26,7 @@ import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 import org.jeo.data.Cursor;
-import org.jeo.vector.Query;
+import org.jeo.vector.VectorQuery;
 import org.jeo.vector.VectorDataset;
 import org.jeo.vector.Feature;
 import org.jeo.vector.Features;
@@ -88,13 +88,13 @@ public class GeoPkgFeatureTest extends GeoPkgTestSupport {
     @Test
     public void testCount() throws Exception {
         FeatureEntry entry = geopkg.feature("states");
-        assertEquals(49, geopkg.count(entry, new Query()));
+        assertEquals(49, geopkg.count(entry, new VectorQuery()));
     }
 
     @Test
     public void testRead() throws Exception {
         FeatureEntry entry = geopkg.feature("states");
-        Cursor<Feature> c = geopkg.cursor(entry, new Query());
+        Cursor<Feature> c = geopkg.cursor(entry, new VectorQuery());
         
         assertNotNull(c);
         for (int i = 0; i < 49; i++) {
@@ -115,7 +115,7 @@ public class GeoPkgFeatureTest extends GeoPkgTestSupport {
     @Test
     public void testReadWithFilter() throws Exception {
         FeatureEntry entry = geopkg.feature("states");
-        Cursor<Feature> c = geopkg.cursor(entry, new Query().filter("STATE_NAME = 'Texas'"));
+        Cursor<Feature> c = geopkg.cursor(entry, new VectorQuery().filter("STATE_NAME = 'Texas'"));
         
         assertNotNull(c);
         assertTrue(c.hasNext());
@@ -129,7 +129,7 @@ public class GeoPkgFeatureTest extends GeoPkgTestSupport {
         FeatureEntry entry = geopkg.feature("states");
         Schema schema = geopkg.schema(entry);
 
-        Cursor<Feature> cursor = geopkg.cursor(entry, new Query().append());
+        Cursor<Feature> cursor = geopkg.cursor(entry, new VectorQuery().append());
         assertTrue(cursor.hasNext());
         Geometry g = Geom.point(0,0).buffer(1);
         Feature f = cursor.next();
@@ -137,9 +137,9 @@ public class GeoPkgFeatureTest extends GeoPkgTestSupport {
         f.put("STATE_NAME", "JEOLAND");
         cursor.write().close();
 
-        assertEquals(50, geopkg.count(entry, new Query()));
+        assertEquals(50, geopkg.count(entry, new VectorQuery()));
 
-        Cursor<Feature> c = geopkg.cursor(entry, new Query().bounds(g.getEnvelopeInternal()));
+        Cursor<Feature> c = geopkg.cursor(entry, new VectorQuery().bounds(g.getEnvelopeInternal()));
         assertTrue(c.hasNext());
 
         assertEquals("JEOLAND", c.next().get("STATE_NAME"));
@@ -149,32 +149,32 @@ public class GeoPkgFeatureTest extends GeoPkgTestSupport {
     @Test
     public void testUpdate() throws Exception {
         VectorDataset states = (VectorDataset) geopkg.get("states");
-        assertEquals(1, states.count(new Query().filter("STATE_ABBR = 'TX'")));
-        assertEquals(0, states.count(new Query().filter("STATE_ABBR = 'XT'")));
+        assertEquals(1, states.count(new VectorQuery().filter("STATE_ABBR = 'TX'")));
+        assertEquals(0, states.count(new VectorQuery().filter("STATE_ABBR = 'XT'")));
 
-        Cursor<Feature> c = states.cursor(new Query().filter("STATE_NAME = 'Texas'").update());
+        Cursor<Feature> c = states.cursor(new VectorQuery().filter("STATE_NAME = 'Texas'").update());
         assertTrue(c.hasNext());
 
         Feature f = c.next();
         f.put("STATE_ABBR", "XT");
         c.write().close();
         
-        assertEquals(0, states.count(new Query().filter("STATE_ABBR = 'TX'")));
-        assertEquals(1, states.count(new Query().filter("STATE_ABBR = 'XT'")));
+        assertEquals(0, states.count(new VectorQuery().filter("STATE_ABBR = 'TX'")));
+        assertEquals(1, states.count(new VectorQuery().filter("STATE_ABBR = 'XT'")));
     }
 
     @Test
     public void testDelete() throws Exception {
         VectorDataset states = (VectorDataset) geopkg.get("states");
-        assertEquals(49, states.count(new Query()));
+        assertEquals(49, states.count(new VectorQuery()));
 
-        Cursor<Feature> c = states.cursor(new Query().filter("STATE_ABBR = 'TX'").update());
+        Cursor<Feature> c = states.cursor(new VectorQuery().filter("STATE_ABBR = 'TX'").update());
         assertTrue(c.hasNext());
         c.next();
         c.remove().close();
 
-        assertEquals(48, states.count(new Query()));
-        assertEquals(0, states.count(new Query().filter("STATE_NAME = 'Texas'")));
+        assertEquals(48, states.count(new VectorQuery()));
+        assertEquals(0, states.count(new VectorQuery().filter("STATE_NAME = 'Texas'")));
     }
 
     @Test
@@ -189,7 +189,7 @@ public class GeoPkgFeatureTest extends GeoPkgTestSupport {
 
         geopkg.insert(entry, Features.create(null, schema, Geom.point(1,2), "anvil", 10.99), null);
 
-        Cursor<Feature> c = geopkg.cursor(entry, new Query());
+        Cursor<Feature> c = geopkg.cursor(entry, new VectorQuery());
         try {
             assertTrue(c.hasNext());
     
@@ -219,8 +219,8 @@ public class GeoPkgFeatureTest extends GeoPkgTestSupport {
     }
     
     private void assertCleanState(VectorDataset states) throws IOException {
-        assertEquals(1, states.count(new Query().filter("STATE_ABBR = 'TX'")));
-        assertEquals(49, states.count(new Query()));
+        assertEquals(1, states.count(new VectorQuery().filter("STATE_ABBR = 'TX'")));
+        assertEquals(49, states.count(new VectorQuery()));
     }
 
     @Test
@@ -231,20 +231,20 @@ public class GeoPkgFeatureTest extends GeoPkgTestSupport {
         Transaction tx = ((Transactional) states).transaction(null);
 
         // update one
-        Cursor<Feature> c = states.cursor(new Query().filter("STATE_NAME = 'Texas'").update().transaction(tx));
+        Cursor<Feature> c = states.cursor(new VectorQuery().filter("STATE_NAME = 'Texas'").update().transaction(tx));
         assertTrue(c.hasNext());
         Feature f = c.next();
         f.put("STATE_ABBR", "XT");
         c.write().close();
 
         // remove one
-        c = states.cursor(new Query().filter("STATE_ABBR = 'WV'").update().transaction(tx));
+        c = states.cursor(new VectorQuery().filter("STATE_ABBR = 'WV'").update().transaction(tx));
         assertTrue(c.hasNext());
         c.next();
         c.remove().close();
 
         // add one
-        c = states.cursor(new Query().append().transaction(tx));
+        c = states.cursor(new VectorQuery().append().transaction(tx));
         assertTrue(c.hasNext());
         f = c.next();
         f.put("STATE_ABBR", "XX");

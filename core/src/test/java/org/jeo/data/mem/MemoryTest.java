@@ -23,7 +23,7 @@ import java.util.Set;
 import org.jeo.data.Cursor;
 import org.jeo.data.Dataset;
 import org.jeo.data.Handle;
-import org.jeo.vector.Query;
+import org.jeo.vector.VectorQuery;
 import org.jeo.vector.Feature;
 import org.jeo.vector.Features;
 import org.jeo.vector.Schema;
@@ -73,21 +73,21 @@ public class MemoryTest {
     @Test
     public void testCount() throws IOException {
         MemVector widgets = (MemVector) mem.get("widgets"); 
-        assertEquals(3, widgets.count(new Query()));
-        assertEquals(2, widgets.count(new Query().limit(2)));
-        assertEquals(1, widgets.count(new Query().bounds(new Envelope(-1,1,-1,1))));
-        assertEquals(2, widgets.count(new Query().filter("cost < 12.0")));
-        assertEquals(1, widgets.count(new Query().filter("cost < 12.0").offset(1)));
+        assertEquals(3, widgets.count(new VectorQuery()));
+        assertEquals(2, widgets.count(new VectorQuery().limit(2)));
+        assertEquals(1, widgets.count(new VectorQuery().bounds(new Envelope(-1,1,-1,1))));
+        assertEquals(2, widgets.count(new VectorQuery().filter("cost < 12.0")));
+        assertEquals(1, widgets.count(new VectorQuery().filter("cost < 12.0").offset(1)));
     }
 
     @Test
     public void testCursorRead() throws IOException {
         MemVector widgets = (MemVector) mem.get("widgets");
-        assertCovered(widgets.cursor(new Query()), 1, 2, 3);
-        assertCovered(widgets.cursor(new Query().limit(2)), 1, 2);
-        assertCovered(widgets.cursor(new Query().bounds(new Envelope(-1,1,-1,1))), 1);
-        assertCovered(widgets.cursor(new Query().filter("cost < 12.0")), 1, 2);
-        assertCovered(widgets.cursor(new Query().filter("cost < 12.0").offset(1)), 2);
+        assertCovered(widgets.cursor(new VectorQuery()), 1, 2, 3);
+        assertCovered(widgets.cursor(new VectorQuery().limit(2)), 1, 2);
+        assertCovered(widgets.cursor(new VectorQuery().bounds(new Envelope(-1,1,-1,1))), 1);
+        assertCovered(widgets.cursor(new VectorQuery().filter("cost < 12.0")), 1, 2);
+        assertCovered(widgets.cursor(new VectorQuery().filter("cost < 12.0").offset(1)), 2);
     }
 
     void assertCovered(Cursor<Feature> c, Integer... ids) {
@@ -101,17 +101,17 @@ public class MemoryTest {
     @Test
     public void testCursorWrite() throws IOException {
         MemVector widgets = (MemVector) mem.get("widgets");
-        assertEquals(0, widgets.count(new Query().filter("cost  > 13.0")));
+        assertEquals(0, widgets.count(new VectorQuery().filter("cost  > 13.0")));
 
-        Cursor<Feature> c = widgets.cursor(new Query().update());
+        Cursor<Feature> c = widgets.cursor(new VectorQuery().update());
         for (Feature f : c) {
             f.put("cost", ((Double)f.get("cost"))*2);
             c.write();
         }
 
-        assertEquals(3, widgets.count(new Query().filter("cost  > 13.0")));
+        assertEquals(3, widgets.count(new VectorQuery().filter("cost  > 13.0")));
         
-        c = widgets.cursor(new Query().append());
+        c = widgets.cursor(new VectorQuery().append());
         assertTrue(c.hasNext());
 
         Feature f = c.next();
@@ -126,7 +126,7 @@ public class MemoryTest {
         f.put("name", "tack");
         c.write();
 
-        assertEquals(5, widgets.count(new Query()));
-        assertCovered(widgets.cursor(new Query().filter("cost < 3.0")), 4, 5);
+        assertEquals(5, widgets.count(new VectorQuery()));
+        assertCovered(widgets.cursor(new VectorQuery().filter("cost < 3.0")), 4, 5);
     }
 }

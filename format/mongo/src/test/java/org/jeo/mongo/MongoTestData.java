@@ -17,7 +17,7 @@ package org.jeo.mongo;
 import java.io.IOException;
 
 import org.jeo.TestData;
-import org.jeo.vector.Query;
+import org.jeo.vector.VectorQuery;
 import org.jeo.vector.VectorDataset;
 import org.jeo.vector.Feature;
 import org.jeo.vector.Schema;
@@ -38,7 +38,7 @@ public class MongoTestData {
         VectorDataset data = TestData.states();
         Schema schema = data.schema();
 
-        for (Feature f : data.cursor(new Query())) {
+        for (Feature f : data.cursor(new VectorQuery())) {
             Geometry g = f.geometry();
             g = Geom.iterate((MultiPolygon) f.geometry()).iterator().next();
 

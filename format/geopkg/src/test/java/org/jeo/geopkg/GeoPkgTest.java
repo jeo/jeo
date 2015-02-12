@@ -20,7 +20,7 @@ import java.io.File;
 import java.io.IOException;
 
 import org.jeo.data.Cursor;
-import org.jeo.vector.Query;
+import org.jeo.vector.VectorQuery;
 import org.jeo.vector.VectorDataset;
 import org.jeo.vector.Feature;
 import org.jeo.vector.Schema;
@@ -53,7 +53,7 @@ public class GeoPkgTest extends GeoPkgTestSupport {
         VectorDataset widgets = gpkg.create(schema);
         assertNotNull(widgets);
 
-        Cursor<Feature> c = widgets.cursor(new Query().append());
+        Cursor<Feature> c = widgets.cursor(new VectorQuery().append());
 
         Feature f = c.next();
         f.put(Geom.point(0, 0));
@@ -64,7 +64,7 @@ public class GeoPkgTest extends GeoPkgTestSupport {
         f.put("name", "one");
         c.write().close();
 
-        assertEquals(2, widgets.count(new Query()));
+        assertEquals(2, widgets.count(new VectorQuery()));
     }
 
     File newFile(String name) throws IOException {

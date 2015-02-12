@@ -28,16 +28,16 @@ import java.util.Set;
 /**
  * Explains how a query is handled by a format driver.
  * <p>
- * This class is typically only used by format implementors. As a {@link Query} object is processed
+ * This class is typically only used by format implementers. As a {@link VectorQuery} object is processed
  * the query plan is updated at aspects of the query such as bounds, filtering, limit/offset, etc..
  * are handled natively. Finally {@link #apply(org.jeo.data.Cursor)} should be called to augment a cursor with
  * wrappers that handle the parts of the query that could not be handled natively.
  * </p>
  * @author Justin Deoliveira, OpenGeo
  */
-public class QueryPlan {
+public class VectorQueryPlan {
 
-    Query q;
+    VectorQuery q;
 
     boolean bounded;
     boolean filtered;
@@ -48,117 +48,117 @@ public class QueryPlan {
     boolean sorted;
     boolean fieldsSelected;
 
-    public QueryPlan(Query q) {
+    public VectorQueryPlan(VectorQuery q) {
         this.q = q;
     }
 
     /**
-     * Whether {@link Query#getBounds()} was handled natively.
+     * Whether {@link VectorQuery#getBounds()} was handled natively.
      */
     public boolean isBounded() {
         return bounded;
     }
 
     /**
-     * Marks {@link Query#getBounds()} as being handled natively.
+     * Marks {@link VectorQuery#getBounds()} as being handled natively.
      */
     public void bounded() {
         this.bounded = true;
     }
 
     /**
-     * Whether {@link Query#getFilter()} was handled natively.
+     * Whether {@link VectorQuery#getFilter()} was handled natively.
      */
     public boolean isFiltered() {
         return filtered;
     }
 
     /**
-     * Marks {@link Query#getFilter()} as being handled natively.
+     * Marks {@link VectorQuery#getFilter()} as being handled natively.
      */
     public void filtered() {
         filtered = true;
     }
 
     /**
-     * Whether {@link Query#getSort()} was handled natively.
+     * Whether {@link VectorQuery#getSort()} was handled natively.
      */
     public boolean isSorted() {
         return sorted;
     }
 
     /**
-     * Marks {@link Query#getSort()} as being handled natively.
+     * Marks {@link VectorQuery#getSort()} as being handled natively.
      */
     public void sorted() {
         sorted = true;
     }
 
     /**
-     * Whether {@link Query#getOffset()} was handled natively.
+     * Whether {@link VectorQuery#getOffset()} was handled natively.
      */
     public boolean isOffsetted() {
         return offsetted;
     }
 
     /**
-     * Marks {@link Query#getOffset()} as being handled natively.
+     * Marks {@link VectorQuery#getOffset()} as being handled natively.
      */
     public void offsetted() {
         offsetted = true;
     }
 
     /**
-     * Whether {@link Query#getLimit()} was handled natively.
+     * Whether {@link VectorQuery#getLimit()} was handled natively.
      */
     public boolean isLimited() {
         return limited;
     }
 
     /**
-     * Marks {@link Query#getLimit()} as being handled natively.
+     * Marks {@link VectorQuery#getLimit()} as being handled natively.
      */
     public void limited() {
         limited = true;
     }
 
     /**
-     * Whether {@link Query#getReproject()} was handled natively.
+     * Whether {@link VectorQuery#getReproject()} was handled natively.
      */
     public boolean isReprojected() {
         return reprojected;
     }
 
     /**
-     * Marks {@link Query#getReproject()} as being handled natively.
+     * Marks {@link VectorQuery#getReproject()} as being handled natively.
      */
     public void reprojected() {
         reprojected = true;
     }
 
     /**
-     * Whether {@link Query#getSimplify()} was handled natively.
+     * Whether {@link VectorQuery#getSimplify()} was handled natively.
      */
     public boolean isSimplified() {
         return simplified;
     }
 
     /**
-     * Marks {@link Query#getSimplify()} as being handled natively.
+     * Marks {@link VectorQuery#getSimplify()} as being handled natively.
      */
     public void simplified() {
         simplified = true;
     }
 
     /**
-     * Whether {@link Query#getFields()} was handled natively.
+     * Whether {@link VectorQuery#getFields()} was handled natively.
      */
     public boolean isFields() {
         return fieldsSelected;
     }
 
     /**
-     * Marks {@link Query#getFields()} as being handled natively.
+     * Marks {@link VectorQuery#getFields()} as being handled natively.
      */
     public void fields() {
         this.fieldsSelected = true;
@@ -168,7 +168,7 @@ public class QueryPlan {
      * Augments the specified cursor with wrappers that handle the parts of the query that could
      * not be processed natively.
      * <p>
-     * For example, if a format is unable to process {@link Query#getFilter()} objects natively 
+     * For example, if a format is unable to process {@link VectorQuery#getFilter()} objects natively
      * then {@link #isFiltered()} should return <tt>false</tt> and this method should wrap the 
      * cursor with {@link org.jeo.data.Cursors#filter(org.jeo.data.Cursor, Filter)}.
      * </p>

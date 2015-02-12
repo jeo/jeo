@@ -30,7 +30,7 @@ import org.jeo.data.Cursor;
 import org.jeo.data.Cursors;
 import org.jeo.data.Dataset;
 import org.jeo.data.Handle;
-import org.jeo.vector.Query;
+import org.jeo.vector.VectorQuery;
 import org.jeo.vector.VectorDataset;
 import org.jeo.vector.Feature;
 import org.jeo.vector.Schema;
@@ -165,7 +165,7 @@ public class PostGISTest {
     @Test
     public void testCount() throws Exception {
         VectorDataset states = pg.get("states");
-        assertEquals(49, states.count(new Query()));
+        assertEquals(49, states.count(new VectorQuery()));
     }
     
     @Test
@@ -174,14 +174,14 @@ public class PostGISTest {
         Set<String> abbrs = Sets.newHashSet("MO", "OK", "TX", "NM", "AR", "LA"); 
 
         Envelope bbox = new Envelope(-106.649513, -93.507217, 25.845198, 36.493877);
-        assertEquals(abbrs.size(), states.count(new Query().bounds(bbox)));
+        assertEquals(abbrs.size(), states.count(new VectorQuery().bounds(bbox)));
     }
 
     @Test
     public void testCursorRead() throws Exception {
         VectorDataset states = pg.get("states");
 
-        Cursor<Feature> c = states.cursor(new Query());
+        Cursor<Feature> c = states.cursor(new VectorQuery());
         
         assertNotNull(c);
         for (int i = 0; i < 49; i++) {
@@ -203,14 +203,14 @@ public class PostGISTest {
     @Test
     public void testCursorFilter() throws Exception {
         VectorDataset states = pg.get("states");
-        assertEquals(1, Cursors.size(states.cursor(new Query().filter("STATE_NAME = 'Texas'"))));
+        assertEquals(1, Cursors.size(states.cursor(new VectorQuery().filter("STATE_NAME = 'Texas'"))));
     }
 
     @Test
     public void testCursorUpdate() throws Exception {
         VectorDataset states = pg.get("states");
         
-        Cursor<Feature> c = states.cursor(new Query().update());
+        Cursor<Feature> c = states.cursor(new VectorQuery().update());
         while(c.hasNext()) {
             Feature f = c.next();
 
@@ -222,7 +222,7 @@ public class PostGISTest {
         }
         c.close();
 
-        for (Feature f : states.cursor(new Query())) {
+        for (Feature f : states.cursor(new VectorQuery())) {
             String abbr = f.get("STATE_ABBR").toString();
 
             assertEquals(abbr, abbr.toLowerCase());
@@ -236,7 +236,7 @@ public class PostGISTest {
         VectorDataset states = pg.get("states");
         Schema schema = states.schema();
 
-        Cursor<Feature> c = states.cursor(new Query().append());
+        Cursor<Feature> c = states.cursor(new VectorQuery().append());
         Feature f = c.next();
 
         GeomBuilder gb = new GeomBuilder();
@@ -246,9 +246,9 @@ public class PostGISTest {
         c.write();
         c.close();
 
-        assertEquals(50, states.count(new Query()));
+        assertEquals(50, states.count(new VectorQuery()));
 
-        c = states.cursor(new Query().bounds(g.getEnvelopeInternal()));
+        c = states.cursor(new VectorQuery().bounds(g.getEnvelopeInternal()));
         assertTrue(c.hasNext());
 
         assertEquals("JEOLAND", c.next().get("STATE_NAME"));
@@ -261,10 +261,10 @@ public class PostGISTest {
             .field("name", String.class).field("cost", Double.class).schema();
 
         PostGISDataset data = pg.create(widgets);
-        assertEquals(0, data.count(new Query()));
+        assertEquals(0, data.count(new VectorQuery()));
 
         GeomBuilder gb = new GeomBuilder();
-        Cursor<Feature> c = data.cursor(new Query().append());
+        Cursor<Feature> c = data.cursor(new VectorQuery().append());
 
         Feature f = c.next();
         f.put("shape", gb.point(0,0).point().buffer(10).get());
@@ -286,9 +286,9 @@ public class PostGISTest {
         c.write();
 
         data = pg.get("widgets");
-        assertEquals(3, data.count(new Query()));
+        assertEquals(3, data.count(new VectorQuery()));
 
-        c = data.cursor(new Query().filter("name = 'bomb'"));
+        c = data.cursor(new VectorQuery().filter("name = 'bomb'"));
         assertTrue(c.hasNext());
         assertEquals(1.99, c.next().get("cost"));
     }

@@ -44,10 +44,10 @@ import java.util.HashSet;
  *  
  * @author Justin Deoliveira, OpenGeo
  */
-public class Query {
+public class VectorQuery {
 
     /** logger */
-    static Logger LOGGER = LoggerFactory.getLogger(Query.class);
+    static Logger LOGGER = LoggerFactory.getLogger(VectorQuery.class);
 
     /**
      * Fields to include in query.
@@ -97,7 +97,7 @@ public class Query {
     /**
      * New query instance.
      */
-    public Query() {
+    public VectorQuery() {
     }
 
     /**
@@ -206,7 +206,7 @@ public class Query {
      * 
      * @return This object.
      */
-    public Query fields(String... properties) {
+    public VectorQuery fields(String... properties) {
         return fields(Arrays.asList(properties));
     }
 
@@ -215,7 +215,7 @@ public class Query {
      * 
      * @return This object.
      */
-    public Query fields(Collection<String> fields) {
+    public VectorQuery fields(Collection<String> fields) {
         this.fields.clear();
         return appendFields(fields);
     }
@@ -225,7 +225,7 @@ public class Query {
      *
      * @return This object.
      */
-    public Query appendFields(Collection<String> fields) {
+    public VectorQuery appendFields(Collection<String> fields) {
         this.fields.addAll(fields);
         return this;
     }
@@ -235,7 +235,7 @@ public class Query {
      * 
      * @return This object.
      */
-    public Query filter(String cql) {
+    public VectorQuery filter(String cql) {
         try {
             return filter(CQL.parse(cql));
         } catch (ParseException e) {
@@ -248,7 +248,7 @@ public class Query {
      * 
      * @return This object.
      */
-    public Query filter(Filter<Feature> filter) {
+    public VectorQuery filter(Filter<Feature> filter) {
         this.filter = filter;
         return this;
     }
@@ -258,7 +258,7 @@ public class Query {
      * 
      * @return This object.
      */
-    public Query bounds(Envelope bounds) {
+    public VectorQuery bounds(Envelope bounds) {
         this.bounds = bounds;
         return this;
     }
@@ -268,7 +268,7 @@ public class Query {
      * 
      * @return This object.
      */
-    public Query limit(Integer limit) {
+    public VectorQuery limit(Integer limit) {
         this.limit = limit;
         return this;
     }
@@ -278,7 +278,7 @@ public class Query {
      * 
      * @return This object.
      */
-    public Query offset(Integer offset) {
+    public VectorQuery offset(Integer offset) {
         this.offset = offset;
         return this;
     }
@@ -288,7 +288,7 @@ public class Query {
      *
      * @return This object.
      */
-    public Query sort(String... sort) {
+    public VectorQuery sort(String... sort) {
         List<Sort> list = new ArrayList<Sort>();
         for (String s : sort) {
             list.add(new Sort(s));
@@ -302,7 +302,7 @@ public class Query {
      * 
      * @return This object.
      */
-    public Query reproject(String srs) {
+    public VectorQuery reproject(String srs) {
         return reproject(null, srs);
     }
 
@@ -311,7 +311,7 @@ public class Query {
      * 
      * @return This object.
      */
-    public Query reproject(String from, String to) {
+    public VectorQuery reproject(String from, String to) {
         CoordinateReferenceSystem src = from != null ? Proj.crs(from) : null;
         CoordinateReferenceSystem dst = to != null ? Proj.crs(to) : null;
          
@@ -329,7 +329,7 @@ public class Query {
      * 
      * @return This object.
      */
-    public Query reproject(CoordinateReferenceSystem crs) {
+    public VectorQuery reproject(CoordinateReferenceSystem crs) {
         return reproject(null, crs);
     }
 
@@ -338,7 +338,7 @@ public class Query {
      * 
      * @return This object.
      */
-    public Query reproject(CoordinateReferenceSystem from, CoordinateReferenceSystem to) {
+    public VectorQuery reproject(CoordinateReferenceSystem from, CoordinateReferenceSystem to) {
         reproject = new Pair<CoordinateReferenceSystem,CoordinateReferenceSystem>(from, to);
         return this;
     }
@@ -348,7 +348,7 @@ public class Query {
      * 
      * @return This object.
      */
-    public Query simplify(Double tolerance) {
+    public VectorQuery simplify(Double tolerance) {
         simplify = tolerance;
         return this;
     }
@@ -359,7 +359,7 @@ public class Query {
      * 
      * @return This object.
      */
-    public Query update() {
+    public VectorQuery update() {
         mode = Cursor.UPDATE;
         return this;
     }
@@ -370,7 +370,7 @@ public class Query {
      * 
      * @return This object.
      */
-    public Query append() {
+    public VectorQuery append() {
         mode = Cursor.APPEND;
         return this;
     }
@@ -380,7 +380,7 @@ public class Query {
      * 
      * @return This object.
      */
-    public Query transaction(Transaction tx) {
+    public VectorQuery transaction(Transaction tx) {
         this.transaction = tx;
         return this;
     }
@@ -468,7 +468,7 @@ public class Query {
             return false;
         if (getClass() != obj.getClass())
             return false;
-        Query other = (Query) obj;
+        VectorQuery other = (VectorQuery) obj;
         if (bounds == null) {
             if (other.bounds != null)
                 return false;

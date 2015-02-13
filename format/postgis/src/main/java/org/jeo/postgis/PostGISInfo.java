@@ -43,8 +43,8 @@ public class PostGISInfo {
             }
         });
 
-        postgis = p.first();
-        postgres = p.second();
+        postgis = p.first;
+        postgres = p.second;
     }
 
     public boolean hasGeography() {

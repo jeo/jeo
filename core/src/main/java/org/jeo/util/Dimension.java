@@ -26,10 +26,10 @@ public class Dimension extends Pair<Integer,Integer> {
     }
 
     public Integer width() {
-        return first();
+        return first;
     }
 
     public Integer height() {
-        return second();
+        return second;
     }
 }

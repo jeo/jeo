@@ -98,7 +98,7 @@ public class OGRDataset implements VectorDataset, FileData {
     public Schema schema() throws IOException {
         Pair<Layer,DataSource> data = open();
         try {
-            return toSchema(data.first());
+            return toSchema(data.first);
             
         }
         finally {
@@ -233,7 +233,7 @@ public class OGRDataset implements VectorDataset, FileData {
     public CoordinateReferenceSystem crs() throws IOException {
         Pair<Layer,DataSource> data = open();
         try {
-            SpatialReference sref = data.first().GetSpatialRef();
+            SpatialReference sref = data.first.GetSpatialRef();
             if (sref == null) {
                 return null;
             }
@@ -270,7 +270,7 @@ public class OGRDataset implements VectorDataset, FileData {
     public Envelope bounds() throws IOException {
         Pair<Layer,DataSource> data = open();
         try {
-            double[] d = data.first().GetExtent(true);
+            double[] d = data.first.GetExtent(true);
             return new Envelope(d[0], d[1], d[2], d[3]);
         }
         catch(Exception e) {
@@ -286,7 +286,7 @@ public class OGRDataset implements VectorDataset, FileData {
 
         Pair<Layer,DataSource> data = open();
         try {
-            Layer l = data.first();
+            Layer l = data.first;
 
             if (!Envelopes.isNull(q.getBounds())) {
                 Envelope bb = q.getBounds();
@@ -313,7 +313,7 @@ public class OGRDataset implements VectorDataset, FileData {
     public Cursor<Feature> cursor(VectorQuery q) throws IOException {
         Pair<Layer,DataSource> data = open();
 
-        Layer l = data.first();
+        Layer l = data.first;
 
         VectorQueryPlan qp = new VectorQueryPlan(q);
         if (!Envelopes.isNull(q.getBounds())) {
@@ -322,7 +322,7 @@ public class OGRDataset implements VectorDataset, FileData {
             qp.bounded();
         }
 
-        return qp.apply(new OGRCursor(l, data.second(), this));
+        return qp.apply(new OGRCursor(l, data.second, this));
     }
 
     Pair<Layer,DataSource> open() throws IOException {
@@ -331,8 +331,8 @@ public class OGRDataset implements VectorDataset, FileData {
     }
 
     void close(Pair<Layer,DataSource> data) {
-        data.first().delete();
-        data.second().delete();
+        data.first.delete();
+        data.second.delete();
     }
 
     @Override

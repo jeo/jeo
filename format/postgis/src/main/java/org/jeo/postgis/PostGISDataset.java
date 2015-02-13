@@ -335,7 +335,7 @@ public class PostGISDataset implements VectorDataset {
                 PreparedStatement ps = open(cx.prepareStatement(sql.toString()));
                 for (int i = 0; i < values.size(); i++) {
                     Pair<Object,Integer> p = values.get(i);
-                    ps.setObject(i+1, p.first(), p.second());
+                    ps.setObject(i+1, p.first, p.second);
                 }
 
                 return ps.execute();
@@ -399,13 +399,13 @@ public class PostGISDataset implements VectorDataset {
                 PreparedStatement ps = cx.prepareStatement(cols.toString());
                 for (int i = 0; i < values.size(); i++) {
                     Pair<Object,Integer> p = values.get(i);
-                    Object obj = p.first();
+                    Object obj = p.first;
                     if (obj == null) {
-                        ps.setNull(i+1, p.second());
+                        ps.setNull(i+1, p.second);
                     }
                     else {
                         //ps.setNull(i+1, p.second());
-                        ps.setObject(i+1, obj, p.second());
+                        ps.setObject(i+1, obj, p.second);
                     }
                 }
 

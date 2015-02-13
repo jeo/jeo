@@ -271,7 +271,7 @@ public class TilePyramid {
      */
     public TileCover cover(Envelope e, int width, int height) {
         Pair<Double,Double> res = res(e, width, height);
-        return cover(e, res.first(), res.second());
+        return cover(e, res.first, res.second);
     }
 
     /**

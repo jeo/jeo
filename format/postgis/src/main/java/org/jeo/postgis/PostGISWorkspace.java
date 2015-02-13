@@ -219,7 +219,7 @@ public class PostGISWorkspace implements Workspace {
 
                     //manually register geomtewry columns
                     for (Pair<Field,Integer> p : gcols) {
-                        Field fld = p.first();
+                        Field fld = p.first;
 
                         List<Pair<Object,Integer>> values = new ArrayList<Pair<Object,Integer>>();
                         values.add(new Pair("", Types.VARCHAR));
@@ -227,7 +227,7 @@ public class PostGISWorkspace implements Workspace {
                         values.add(new Pair(schema.getName(), Types.VARCHAR));
                         values.add(new Pair(fld.getName(), Types.VARCHAR));
                         values.add(new Pair(2, Types.INTEGER));
-                        values.add(new Pair(p.second(), Types.INTEGER));
+                        values.add(new Pair(p.second, Types.INTEGER));
                         values.add(new Pair(Geom.Type.from(fld.getType()).getName(), Types.VARCHAR));
 
                         logQuery(sql, values);
@@ -510,7 +510,7 @@ public class PostGISWorkspace implements Workspace {
         if (LOG.isDebugEnabled()) {
             StringBuilder msg = new StringBuilder(sql.toString()).append("; ");
             for (int i = 0; i < values.size(); i++) {
-                msg.append(String.format("%d=%s", i+1, values.get(i).first()))
+                msg.append(String.format("%d=%s", i+1, values.get(i).first))
                    .append(", ");
             }
             msg.setLength(msg.length()-2);
@@ -524,7 +524,7 @@ public class PostGISWorkspace implements Workspace {
         PreparedStatement ps = cx.prepareStatement(sql.toString());
         for (int i = 0; i < values.size(); i++) {
             Pair<Object,Integer> p = values.get(i);
-            ps.setObject(i+1, p.first(), p.second());
+            ps.setObject(i+1, p.first, p.second);
         }
         return ps;
 

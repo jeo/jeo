@@ -200,7 +200,7 @@ public class VectorQueryPlan {
 
         Pair<CoordinateReferenceSystem,CoordinateReferenceSystem> reproj = q.getReproject();
         if (!isReprojected() && reproj != null) {
-            cursor = Cursors.reproject(cursor, reproj.first(), reproj.second());
+            cursor = Cursors.reproject(cursor, reproj.first, reproj.second);
         }
 
         Set<String> fields = q.getFields();

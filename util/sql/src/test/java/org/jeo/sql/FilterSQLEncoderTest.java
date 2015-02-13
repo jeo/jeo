@@ -78,7 +78,7 @@ public class FilterSQLEncoderTest {
         assertEquals(sql, sqle.encode(f, null));
         assertEquals(args.length, sqle.getArgs().size());
         for (int i = 0; i < args.length; i++) {
-            assertEquals(args[i], sqle.getArgs().get(i).first());
+            assertEquals(args[i], sqle.getArgs().get(i).first);
         }
     }
 

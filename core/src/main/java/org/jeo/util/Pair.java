@@ -21,8 +21,8 @@ package org.jeo.util;
  */
 public class Pair<F,S> {
 
-    private final F first;
-    private final S second;
+    public final F first;
+    public final S second;
 
     /**
      * Creates a new pair.
@@ -34,14 +34,6 @@ public class Pair<F,S> {
     public Pair(F first, S second) {
         this.first = first;
         this.second = second;
-    }
-
-    public F first() {
-        return first;
-    }
-
-    public S second() {
-        return second;
     }
 
     @Override
@@ -78,6 +70,6 @@ public class Pair<F,S> {
     @Override
     public String toString() {
         return new StringBuilder().append("(")
-            .append(first()).append(",").append(second()).append(")").toString();
+            .append(first).append(",").append(second).append(")").toString();
     }
 }

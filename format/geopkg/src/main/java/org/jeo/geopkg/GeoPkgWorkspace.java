@@ -337,7 +337,7 @@ public class GeoPkgWorkspace implements Workspace, FileData {
 
         List<Object> args = new ArrayList<Object>(sqlfe.getArgs().size());
         for (Pair<Object, Integer> p : sqlfe.getArgs()) {
-            args.add(p.first());
+            args.add(p.first);
         }
         return args;
     }
@@ -627,13 +627,13 @@ public class GeoPkgWorkspace implements Workspace, FileData {
 
         for (int i = 0; i < columnInfo.size(); i++) {
             Pair<String, Class> col = columnInfo.get(i);
-            String name = col.first();
+            String name = col.first;
             if (name.equals(entry.getGeometryColumn())) {
                 CoordinateReferenceSystem crs = entry.getSrid() != null
                         ? Proj.crs(entry.getSrid()) : null;
                 sb.field(name, entry.getGeometryType().getType(), crs);
             } else {
-                sb.field(name, col.second());
+                sb.field(name, col.second);
             }
         }
 

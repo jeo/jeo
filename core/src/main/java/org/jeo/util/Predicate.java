@@ -1,4 +1,4 @@
-/* Copyright 2013 The jeo project. All rights reserved.
+/* Copyright 2015 The jeo project. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,21 +15,16 @@
 package org.jeo.util;
 
 /**
- * Interface for mapping one value (domain) to another (range).
+ * Evaluates a condition against a single value.
  * <p>
- * Inspired by Guava's / Java 8 function.
+ * Inspired by Guava / Java 8 predicate.
  * </p>
- * @param <D> Domain type.
- * @param <R> Range type.
+ * @param <T>
  */
-public interface Function<D,R> {
+public interface Predicate<T> {
 
     /**
-     * Executes the value on the given input.
-     *
-     * @param value The input value.
-     *
-     * @return The function value for the given input.
+     * Evalutes the predicate.
      */
-    R apply(D value);
+    boolean test(T val);
 }

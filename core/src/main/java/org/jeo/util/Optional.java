@@ -55,4 +55,24 @@ public class Optional<T> {
     public T or(T fallback) {
         return value != null ? value : fallback;
     }
+
+    public <R> Optional<R> map(Function<T,R> f) {
+        if (!has()) {
+            return (Optional<R>) this;
+        }
+
+        return Optional.of(f.apply(get()));
+    }
+
+    public Optional<T> filter(Predicate<T> filter) {
+        if (!has()) {
+            return this;
+        }
+
+        if (filter.test(get())) {
+            return this;
+        }
+
+        return nil();
+    }
 }

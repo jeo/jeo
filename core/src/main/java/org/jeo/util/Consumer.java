@@ -1,4 +1,4 @@
-/* Copyright 2013 The jeo project. All rights reserved.
+/* Copyright 2015 The jeo project. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,21 +15,15 @@
 package org.jeo.util;
 
 /**
- * Interface for mapping one value (domain) to another (range).
+ * Interface for consuming a value.
  * <p>
- * Inspired by Guava's / Java 8 function.
+ * Inspired by Consumer from Guava / Java 8.
  * </p>
- * @param <D> Domain type.
- * @param <R> Range type.
  */
-public interface Function<D,R> {
+public interface Consumer<T> {
 
     /**
-     * Executes the value on the given input.
-     *
-     * @param value The input value.
-     *
-     * @return The function value for the given input.
+     * Accepts the value.
      */
-    R apply(D value);
+    void accept(T val);
 }

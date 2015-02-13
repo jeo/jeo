@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Map;
 
+import org.jeo.data.Disposable;
 import org.jeo.geom.Geom;
 import org.jeo.proj.Proj;
 import org.jeo.protobuf.Feat.Feature;
@@ -24,8 +25,12 @@ import org.osgeo.proj4j.CoordinateReferenceSystem;
 import com.google.protobuf.ByteString;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.CoordinateSequence;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-public class ProtobufWriter {
+public class ProtobufWriter implements Disposable {
+
+    static Logger LOG = LoggerFactory.getLogger(ProtobufWriter.class);
 
     OutputStream out;
 
@@ -276,8 +281,13 @@ public class ProtobufWriter {
         return this;
     }
 
-    public void close() throws IOException {
-        out.flush();
-        out.close();
+    public void close() {
+        try {
+            out.flush();
+            out.close();
+        }
+        catch(IOException e) {
+            LOG.debug("Error closing protobuf writer", e);
+        }
     }
 }

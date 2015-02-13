@@ -73,14 +73,14 @@ public class Convert {
             return Optional.of(converted);
         }
 
-        return Optional.nil(clazz);
+        return Optional.nil();
     }
 
     public static Optional<String> toString(Object obj) {
         if (obj != null) {
             return Optional.of(obj.toString());
         }
-        return Optional.nil(String.class);
+        return Optional.nil();
     }
 
     public static Optional<Boolean> toBoolean(Object obj) {
@@ -110,7 +110,7 @@ public class Convert {
     public static <T extends Number> Optional<T> toNumber(Object obj, Class<T> clazz) {
         Optional<Number> n = toNumber(obj);
         if (!n.has()) {
-            return Optional.nil(clazz);
+            return Optional.nil();
         }
 
         if (clazz == Byte.class) {
@@ -132,7 +132,7 @@ public class Convert {
             return Optional.of(clazz.cast(new Double(n.get().doubleValue())));
         }
         
-        return Optional.nil(clazz);
+        return Optional.nil();
     }
 
     public static <T extends Number> Optional<List<T>> toNumbers(Object obj, Class<T> clazz) {
@@ -155,14 +155,14 @@ public class Convert {
             for (Object o : l) {
                 Optional<T> num = toNumber(o, clazz);
                 if (!num.has()) {
-                    return (Optional) Optional.nil(List.class);
+                    return (Optional) Optional.nil();
                 }
                 converted.add(num.get());
             }
             return Optional.of(converted);
         }
 
-        return (Optional) Optional.nil(List.class);
+        return (Optional) Optional.nil();
     }
 
     public static Optional<Number> toNumber(Object obj) {
@@ -182,7 +182,7 @@ public class Convert {
                 }
             }
         }
-        return Optional.nil(Number.class);
+        return Optional.nil();
     }
 
     public static Optional<Reader> toReader(Object obj) throws IOException {

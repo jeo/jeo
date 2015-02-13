@@ -27,7 +27,7 @@ public class Optional<T> {
         return new Optional<X>(value);
     }
 
-    public static <X> Optional<X> nil(Class<X> clazz) {
+    public static <X> Optional<X> nil() {
         return new Optional<X>(null);
     }
 

@@ -166,7 +166,7 @@ public class GeoJSONDataset implements VectorDataset, FileData {
             if (c.hasNext()) {
                 return Optional.of(c.next());
             }
-            return Optional.nil(Feature.class);
+            return Optional.nil();
         }
         finally {
             c.close();

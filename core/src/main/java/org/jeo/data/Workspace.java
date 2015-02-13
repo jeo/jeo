@@ -46,21 +46,21 @@ public interface Workspace extends Disposable {
     Iterable<Handle<Dataset>> list() throws IOException;
 
     /**
-     * Returns a layer object by name.
+     * Returns a dataset object by name.
      * 
-     * @param layer Name of the layer.
+     * @param name Name of the dataset.
      * 
-     * @return The Layer object, or <code>null</code> if no such layer exists.
+     * @return The Dataset object, or <code>null</code> if no such dataset exists.
      */
-    Dataset get(String layer) throws IOException;
+    Dataset get(String name) throws IOException;
 
     /**
-     * Creates a new vector layer in the workspace.
+     * Creates a new vector dataset in the workspace.
      * <p>
      * This method should throw {@link UnsupportedOperationException} if the workspace is not 
-     * capable of creating new vector layers.
+     * capable of creating new vector datasets.
      * </p>
-     * @param schema The schema of the vector layer.
+     * @param schema The schema of the vector dataset.
      * 
      */
     VectorDataset create(Schema schema) throws IOException;

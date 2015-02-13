@@ -30,12 +30,12 @@ import org.slf4j.LoggerFactory;
  * 
  * @author Justin Deoliveira, Boundless
  */
-public class JEO {
+public class Jeo {
 
     /**
      * logger
      */
-    public static Logger LOG = LoggerFactory.getLogger(JEO.class);
+    public static Logger LOG = LoggerFactory.getLogger(Jeo.class);
 
     /**
      * Returns the version of this build.
@@ -82,7 +82,7 @@ public class JEO {
     
     static String property(String key) {
         try {
-            InputStream in = JEO.class.getResourceAsStream("build.properties");
+            InputStream in = Jeo.class.getResourceAsStream("build.properties");
             try {
                 Properties props = new Properties();
                 props.load(in);

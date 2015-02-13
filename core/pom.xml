@@ -46,7 +46,7 @@
         <configuration>
           <archive>
             <manifest>
-              <mainClass>org.jeo.JEO</mainClass>
+              <mainClass>org.jeo.Jeo</mainClass>
               <addClasspath>true</addClasspath>
             </manifest>
           </archive>

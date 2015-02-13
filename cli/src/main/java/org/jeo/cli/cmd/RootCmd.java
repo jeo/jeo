@@ -14,7 +14,7 @@
  */
 package org.jeo.cli.cmd;
 
-import org.jeo.JEO;
+import org.jeo.Jeo;
 import org.jeo.cli.JeoCLI;
 
 import com.beust.jcommander.Parameter;
@@ -27,7 +27,7 @@ public class RootCmd extends JeoCmd {
     @Override
     protected void doCommand(JeoCLI cli) throws Exception {
         if (version) {
-            JEO.printVersionInfo(cli.stream());
+            Jeo.printVersionInfo(cli.stream());
         }
     }
 

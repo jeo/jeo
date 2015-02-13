@@ -13,7 +13,11 @@ public class ProtobufCursor extends Cursor<Feature> {
     Feature next;
 
     public ProtobufCursor(ProtobufDataset data) throws IOException {
-        pbr = data.reader();
+        this(data.reader());
+    }
+
+    public ProtobufCursor(ProtobufReader pbr) throws IOException {
+        this.pbr = pbr;
 
         // skip over the schema
         schema = pbr.schema();

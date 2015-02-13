@@ -425,8 +425,8 @@ public class SVGRenderer extends BaseRenderer implements Labeller {
         font.weight = fontWeight(rule.string(f, "text-weight", null));
 
         Pair<Float,Unit> size = size(rule.string(f, TEXT_SIZE, null));
-        font.size = size.first();
-        font.unit = size.second();
+        font.size = size.first;
+        font.unit = size.second;
 
         Text t = new Text(text);
         t.font = font;

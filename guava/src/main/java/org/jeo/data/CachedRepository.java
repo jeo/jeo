@@ -57,7 +57,7 @@ public class CachedRepository implements DataRepository {
             }).build(new CacheLoader<Pair<String, Class>, Object>() {
                 @Override
                 public Object load(Pair<String, Class> key) throws Exception {
-                    Object obj = CachedRepository.this.reg.get(key.first(), key.second());
+                    Object obj = CachedRepository.this.reg.get(key.first, key.second);
                     if (obj instanceof Workspace) {
                         return new CachedWorkspace((Workspace)obj, cacheSize);
                     }

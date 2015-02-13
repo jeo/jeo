@@ -117,7 +117,7 @@ public class DirectoryRepository implements DataRepository {
             if (grp.hasMeta()) {
                 Pair<Driver<?>,Map<String,Object>> meta = readMetaFile(grp);
                 if (meta != null) {
-                    drv = meta.first();
+                    drv = meta.first;
                 }
             }
 
@@ -231,7 +231,7 @@ public class DirectoryRepository implements DataRepository {
         if (grp.hasMeta()) {
             Pair<Driver<?>,Map<String,Object>> meta = readMetaFile(grp);
             if (meta != null) {
-                Object data = meta.first().open(meta.second());
+                Object data = meta.first.open(meta.second);
                 return objOrNull(data, grp, type);
             }
         }

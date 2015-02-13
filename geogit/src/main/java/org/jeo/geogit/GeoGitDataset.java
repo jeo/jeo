@@ -165,11 +165,11 @@ public class GeoGitDataset implements VectorDataset, Transactional {
     }
 
     NodeRef getRef() {
-        return ref.first();
+        return ref.first;
     }
 
     RevCommit getRevision() {
-        return ref.second();
+        return ref.second;
     }
 
     RevTree tree() {

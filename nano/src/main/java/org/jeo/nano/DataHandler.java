@@ -58,16 +58,16 @@ public class DataHandler extends Handler {
         }
         else {
             try {
-                if (p.second() != null) {
-                    handleDataset(p.second(), writer, request);
+                if (p.second != null) {
+                    handleDataset(p.second, writer, request);
                 }
                 else {
-                    handleWorkspace(p.first(), writer);
+                    handleWorkspace(p.first, writer);
                 }
             }
             finally {
-                close(p.first());
-                close(p.second());
+                close(p.first);
+                close(p.second);
             }
         }
 

@@ -143,7 +143,7 @@ public class GeoGitWorkspace implements Workspace, FileData {
             return null;
         }
 
-        RevCommit commit = ref.second();
+        RevCommit commit = ref.second;
 
         Iterator<DiffEntry> diff = gg.command(DiffOp.class)/*.setFilter(ref.first().path())*/ 
             .setOldVersion(commit.getParentIds().get(0).toString())
@@ -159,8 +159,8 @@ public class GeoGitWorkspace implements Workspace, FileData {
             return null;
         }
 
-        gg.command(CheckoutOp.class).setSource(ref.second().getId().toString()).call();
-        SimpleFeatureType featureType = featureType(ref.first());
+        gg.command(CheckoutOp.class).setSource(ref.second.getId().toString()).call();
+        SimpleFeatureType featureType = featureType(ref.first);
         if (featureType != null) {
             return new GeoGitDataset(ref, GT.schema(featureType), this);
         }

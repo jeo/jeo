@@ -314,8 +314,8 @@ public class Colorizer {
          * @param n The number of interpolation buckets, will product n+1 values.
          */
         public Builder interpolate(Pair<Double,RGB> low, Pair<Double,RGB> high, int n) {
-            List<Double> values = Interpolate.linear(low.first(), high.first(), n);
-            List<RGB> colors = low.second().interpolate(high.second(), n, Interpolate.Method.LINEAR);
+            List<Double> values = Interpolate.linear(low.first, high.first, n);
+            List<RGB> colors = low.second.interpolate(high.second, n, Interpolate.Method.LINEAR);
 
             for (int i = 0; i < values.size(); i++) {
                 stop(values.get(i), colors.get(i));

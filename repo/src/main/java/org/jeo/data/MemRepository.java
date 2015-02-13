@@ -58,7 +58,7 @@ public class MemRepository implements DataRepository {
             final Object obj = kv.getValue();
 
             //TODO: driver
-            Handle<Object> h = new Handle<Object>(kv.getKey().first(), obj.getClass(), null) {
+            Handle<Object> h = new Handle<Object>(kv.getKey().first, obj.getClass(), null) {
                 @Override
                 protected Object doResolve() throws IOException {
                     return obj;

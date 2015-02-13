@@ -124,7 +124,7 @@ public class FeatureHandler extends Handler {
         Pair<Workspace,VectorDataset> p = findVectorLayer(request, server);
         String format = parseFormat(request);
 
-        VectorDataset layer = p.second();
+        VectorDataset layer = p.second;
         Response resp;
         if (format == null || "json".equalsIgnoreCase(format)) {
             resp = getAsJSON(layer, request, server);
@@ -136,7 +136,7 @@ public class FeatureHandler extends Handler {
             resp = getAsRendered(layer, format, request, server);
         }
 
-        resp.toClose(layer, p.first());
+        resp.toClose(layer, p.first);
         return resp;
     }
 
@@ -443,7 +443,7 @@ public class FeatureHandler extends Handler {
 
         Object obj = new GeoJSONReader().read(getInput(request));
 
-        VectorDataset layer = p.second();
+        VectorDataset layer = p.second;
         try {
             Transaction tx = buildTransaction(layer, request);
             query.transaction(tx);
@@ -479,7 +479,7 @@ public class FeatureHandler extends Handler {
         }
         finally {
             layer.close();
-            Workspace ws = p.first();
+            Workspace ws = p.first;
             if (ws != null ) {
                 ws.close();
             }
@@ -494,7 +494,7 @@ public class FeatureHandler extends Handler {
 
         Pair<Workspace, VectorDataset> p = findVectorLayer(request, server);
 
-        VectorDataset layer = p.second();
+        VectorDataset layer = p.second;
         Transaction tx = buildTransaction(layer, request);
 
         VectorQuery query = new VectorQuery().update().filter(new Id(new Literal(fid))).transaction(tx);
@@ -512,14 +512,14 @@ public class FeatureHandler extends Handler {
         } finally {
             c.close();
             layer.close();
-            p.first().close();
+            p.first.close();
         }
         return new Response(HTTP_OK, MIME_PLAINTEXT, "");
     }
 
     Pair<Workspace, VectorDataset> findVectorLayer(Request request, NanoServer server) throws IOException {
         Pair<Workspace, ? extends Dataset> p = findWorkspaceOrDataset(request, server.getRegistry());
-        if (!(p.second() instanceof VectorDataset)) {
+        if (!(p.second instanceof VectorDataset)) {
             throw new HttpException(HTTP_BADREQUEST, request.getUri() + " is not a feature layer");
         }
         return (Pair<Workspace, VectorDataset>) p;

@@ -55,7 +55,7 @@ public class TileHandler extends Handler {
     public Response handle(Request request, NanoServer server) {
         try {
             Pair<Workspace, TileDataset> p = findTileLayer(request, server);
-            TileDataset layer = p.second();
+            TileDataset layer = p.second;
 
             try {
                 //get the tile index
@@ -94,7 +94,7 @@ public class TileHandler extends Handler {
             }
             finally {
                 layer.close();
-                Workspace ws = p.first();
+                Workspace ws = p.first;
                 if (ws != null) {
                     ws.close();
                 }
@@ -154,7 +154,7 @@ public class TileHandler extends Handler {
     Pair<Workspace, TileDataset> findTileLayer(Request request, NanoServer server) throws IOException {
         Pair<Workspace, ? extends Dataset> p = findWorkspaceOrDataset(request, server.getRegistry());
         
-        if (!(p.second() instanceof TileDataset)) {
+        if (!(p.second instanceof TileDataset)) {
             // not a tile set
             throw new HttpException(HTTP_NOTFOUND, "No such tile layer at: " + request.getUri());
         }

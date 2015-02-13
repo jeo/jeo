@@ -33,6 +33,7 @@ import org.jeo.data.Dataset;
 import org.jeo.data.Driver;
 import org.jeo.data.Handle;
 import org.jeo.data.Workspace;
+import org.jeo.util.Optional;
 import org.jeo.vector.Field;
 import org.jeo.vector.Schema;
 import org.jeo.vector.SchemaBuilder;
@@ -69,13 +70,13 @@ public class PostGISWorkspace implements Workspace {
 
     static PGPoolingDataSource createDataSource(PostGISOpts pgopts) {
         PGPoolingDataSource dataSource = new PGPoolingDataSource();
-        dataSource.setServerName(pgopts.getHost());
-        dataSource.setDatabaseName(pgopts.getDb());
-        dataSource.setPortNumber(pgopts.getPort());
-        dataSource.setUser(pgopts.getUser());
+        dataSource.setServerName(pgopts.host());
+        dataSource.setDatabaseName(pgopts.db());
+        dataSource.setPortNumber(pgopts.port());
+        dataSource.setUser(pgopts.user());
 
-        if (pgopts.getPasswd() != null) {
-            dataSource.setPassword(new String(pgopts.getPasswd().get()));
+        if (pgopts.passwd() != null) {
+            dataSource.setPassword(new String(pgopts.passwd().get()));
         }
 
         return dataSource;
@@ -99,6 +100,10 @@ public class PostGISWorkspace implements Workspace {
         return dbtypes;
     }
 
+    public Optional<String> schema() {
+        return Optional.of(opts.schema());
+    }
+
     @Override
     public Iterable<Handle<Dataset>> list() throws IOException {
         return run(new DbOP<List<Handle<Dataset>>>() {
@@ -106,7 +111,7 @@ public class PostGISWorkspace implements Workspace {
             protected List<Handle<Dataset>> doRun(Connection cx) throws Exception {
                 DatabaseMetaData md = cx.getMetaData();
                 ResultSet tables = 
-                    open(md.getTables(null, "", null, new String[]{"TABLE", "VIEW"}));
+                    open(md.getTables(null, schema().or(null), null, new String[]{"TABLE", "VIEW"}));
 
                 //TODO: avoid pulling all into list
                 List<Handle<Dataset>> l = new ArrayList<Handle<Dataset>>();
@@ -114,7 +119,7 @@ public class PostGISWorkspace implements Workspace {
                     String tbl = tables.getString("TABLE_NAME");
                     String schema = tables.getString("TABLE_SCHEM");
                     if (includeTable(tbl, schema)) {
-                        l.add(new Handle<Dataset>(tbl, Dataset.class, getDriver()) {
+                        l.add(new Handle<Dataset>(datasetName(tbl, schema), Dataset.class, getDriver()) {
                             @Override
                             protected Dataset doResolve() throws IOException {
                                 return get(name);
@@ -148,8 +153,8 @@ public class PostGISWorkspace implements Workspace {
     }
 
     @Override
-    public PostGISDataset get(String layer) throws IOException {
-        Table table = table(layer);
+    public PostGISDataset get(String dataset) throws IOException {
+        Table table = table(dataset);
         return table != null ? new PostGISDataset(table, this) : null;
     }
     
@@ -162,7 +167,7 @@ public class PostGISWorkspace implements Workspace {
 
                 List<Pair<Field, Integer>> gcols = new ArrayList<Pair<Field,Integer>>();
 
-                SQL sql = new SQL("CREATE TABLE ").name(schema.getName())
+                SQL sql = new SQL("CREATE TABLE ").name(schema().or(null), schema.getName())
                     .add(" (").name(findIdColumnName(schema)).add(" SERIAL PRIMARY KEY, ");
                 
                 for (Field fld : schema) {
@@ -218,7 +223,7 @@ public class PostGISWorkspace implements Workspace {
 
                         List<Pair<Object,Integer>> values = new ArrayList<Pair<Object,Integer>>();
                         values.add(new Pair("", Types.VARCHAR));
-                        values.add(new Pair("public", Types.VARCHAR));
+                        values.add(new Pair(schema().or("public"), Types.VARCHAR));
                         values.add(new Pair(schema.getName(), Types.VARCHAR));
                         values.add(new Pair(fld.getName(), Types.VARCHAR));
                         values.add(new Pair(2, Types.INTEGER));
@@ -275,11 +280,36 @@ public class PostGISWorkspace implements Workspace {
         db = null;
     }
 
-    Table table(final String layer) throws IOException {
+    String datasetName(String tbl, String schema) {
+        if (schema().has() && schema().get().equals(schema)) {
+            return tbl;
+        }
+
+        if (schema == null || "public".equalsIgnoreCase(schema)) {
+            return tbl;
+        }
+
+        return schema + "." + tbl;
+    }
+
+    Table table(String name) throws IOException {
+        final String tbl;
+        final String schema;
+
+        if (name.contains(".")) {
+            String[] split = name.split("\\.");
+            schema = split[0];
+            tbl = split[1];
+        }
+        else {
+            tbl = name;
+            schema = schema().or("public");
+        }
+
         return run(new DbOP<Table>() {
             @Override
             protected Table doRun(Connection cx) throws Exception {
-                String sql = new SQL("SELECT * FROM ").name(layer).add(" LIMIT 0").toString();
+                String sql = new SQL("SELECT * FROM ").name(schema, tbl).add(" LIMIT 0").toString();
                 LOG.debug(sql);
 
                 Statement st = open(cx.createStatement());
@@ -293,12 +323,12 @@ public class PostGISWorkspace implements Workspace {
                     return null;
                 }
 
-                //grab primary key info 
-                ResultSet pk = cx.getMetaData().getPrimaryKeys(null, "", layer);
+                //grab primary key info
+                ResultSet pk = cx.getMetaData().getPrimaryKeys(null, schema, tbl);
 
-                Table t = new Table(layer);
+                final Table t = new Table(tbl, schema);
 
-                SchemaBuilder sb  = new SchemaBuilder(layer);
+                SchemaBuilder sb  = new SchemaBuilder(datasetName(tbl, schema));
                 Integer srid = null;
 
                 ResultSetMetaData md = rs.getMetaData();
@@ -322,12 +352,12 @@ public class PostGISWorkspace implements Workspace {
                     sb.property("sqlType", sqlType);
                     if (Geometry.class.isAssignableFrom(binding)) {
                         // try to narrow geometry type by looking up in geometry/geography columns
-                        Class<? extends Geometry> type = lookupGeomType(layer, name, cx);
+                        Class<? extends Geometry> type = lookupGeomType(t, name, cx);
                         if (type == null) {
                             type = (Class<? extends Geometry>) binding;
                         }
 
-                        srid = lookupSRID(layer, name, cx);
+                        srid = lookupSRID(t, name, cx);
 
                         CoordinateReferenceSystem crs = null;
                         if (srid != null && srid > 0) {
@@ -337,7 +367,7 @@ public class PostGISWorkspace implements Workspace {
                         else {
                             sb.property("srid", -1);
                             LOG.debug(
-                                String.format("Unable to determine srid for %s (%s)", layer, name));
+                                String.format("Unable to determine srid for %s (%s)", t.qname(), name));
                         }
 
                         sb.field(name, type, crs);
@@ -347,19 +377,19 @@ public class PostGISWorkspace implements Workspace {
                     }
                 }
 
-                t.setSchema(sb.schema());
+                t.type(sb.schema());
 
                 //primary key
                 while(pk.next()) {
-                    final String name = pk.getString("COLUMN_NAME");
-                    if (name == null) {
+                    final String colName = pk.getString("COLUMN_NAME");
+                    if (colName == null) {
                         continue;
                     }
 
-                    int i = t.getSchema().indexOf(name);
-                    Field fld = t.getSchema().field(name);
+                    int i = t.type().indexOf(colName);
+                    Field fld = t.type().field(colName);
 
-                    PrimaryKeyColumn col = new PrimaryKeyColumn(name, fld);
+                    PrimaryKeyColumn col = new PrimaryKeyColumn(colName, fld);
 
                     // auto increment key?
                     if (rs.getMetaData().isAutoIncrement(i+1)) {
@@ -372,11 +402,11 @@ public class PostGISWorkspace implements Workspace {
                             protected String doRun(Connection cx) throws Exception {
                                 SQL sql = new SQL("SELECT pg_get_serial_sequence(?,?)");
                                 LOG.debug(
-                                    String.format("%s; 1=%s, 2=%s", sql.toString(), layer, name));
+                                    String.format("%s; 1=%s, 2=%s", sql.toString(), t.name(), colName));
                                 
                                 PreparedStatement ps = open(cx.prepareStatement(sql.toString()));
-                                ps.setString(1, layer);
-                                ps.setString(2, name);
+                                ps.setString(1, t.name());
+                                ps.setString(2, colName);
 
                                 ResultSet rs = open(ps.executeQuery());
                                 return rs.next() ? rs.getString(1) : null;
@@ -387,7 +417,7 @@ public class PostGISWorkspace implements Workspace {
                             col.setSequence(seq);
                         }
                     }
-                    t.getPrimaryKey().getColumns().add(col);
+                    t.primaryKey().getColumns().add(col);
                 }
                 return t;
             }
@@ -395,31 +425,39 @@ public class PostGISWorkspace implements Workspace {
     }
     
 
-    Class<? extends Geometry> lookupGeomType(final String tbl, final String col, Connection cx) 
+    Class<? extends Geometry> lookupGeomType(final Table tbl, final String col, Connection cx)
         throws IOException {
         return run(new DbOP<Class<? extends Geometry>>() {
             @Override
             protected Class<? extends Geometry> doRun(Connection cx) throws Exception {
-                String sql = "SELECT type FROM geometry_columns" +
-                    " WHERE f_table_name = ? and f_geometry_column = ?";
-                LOG.debug(String.format("%s; 1=%s, 2=%s", sql, tbl, col));
+                String sql = new SQL("SELECT type FROM geometry_columns")
+                     .add(" WHERE f_table_schema = ?")
+                     .add(" AND f_table_name = ?")
+                     .add(" AND f_geometry_column = ?").toString();
+
+                LOG.debug(String.format("%s; 1=%s, 2=%s, 3=%s", sql, tbl.schema(), tbl.name(), col));
 
                 PreparedStatement st = open(cx.prepareStatement(sql));
-                st.setString(1, tbl);
-                st.setString(2, col);
+                st.setString(1, tbl.schema());
+                st.setString(2, tbl.name());
+                st.setString(3, col);
 
                 ResultSet rs = open(st.executeQuery());
                 if (rs.next()) {
                     return (Class<? extends Geometry>) dbtypes.fromName(rs.getString(1));
                 }
                 else if (info.hasGeography()) {
-                    sql = "SELECT type FROM geography_columns" +
-                        " WHERE f_table_name = ? and f_geometry_column = ?";
-                    LOG.debug(String.format("%s; 1=%s, 2=%s", sql, tbl, col));
+                    sql = new SQL("SELECT type FROM geography_columns")
+                        .add(" WHERE f_table_schema = ?")
+                        .add(" AND f_table_name = ?")
+                        .add(" AND f_geography_column = ?").toString();
+
+                    LOG.debug(String.format("%s; 1=%s, 2=%s, 3=%s", sql, tbl.schema(), tbl.name(), col));
                     
-                    st = open(cx.prepareStatement(sql));
-                    st.setString(1, tbl);
-                    st.setString(2, col);
+                    st = open(cx.prepareStatement(sql.toString()));
+                    st.setString(1, tbl.schema());
+                    st.setString(2, tbl.name());
+                    st.setString(3, col);
 
                     rs = open(st.executeQuery());
                     return (Class<? extends Geometry>) dbtypes.fromName(rs.getString(1));
@@ -430,30 +468,32 @@ public class PostGISWorkspace implements Workspace {
         });
     }
 
-    Integer lookupSRID(final String tbl, final String col, Connection cx) throws IOException {
+    Integer lookupSRID(final Table tbl, final String col, Connection cx) throws IOException {
         return run(new DbOP<Integer>() {
             @Override
             protected Integer doRun(Connection cx) throws Exception {
                 //look up crs
-                SQL buf = new SQL("SELECT srid, f_table_name, f_geometry_column as column " +
+                SQL buf = new SQL("SELECT srid, f_table_schema, f_table_name, f_geometry_column as column " +
                     "FROM geometry_columns");
 
                 if (info.hasGeography()) {
-                    buf.add(" UNION ").add("SELECT srid, f_table_name, f_geography_column as column " +
+                    buf.add(" UNION ").add("SELECT srid, f_table_schema, f_table_name, f_geography_column as column " +
                         "FROM geography_columns");
                 }
 
                 String sql = new SQL("SELECT a.srid, b.proj4text FROM (")
                     .add(buf.toString()).add(") a")
                     .add(" LEFT OUTER JOIN spatial_ref_sys b ON a.srid = b.srid")
-                    .add(" WHERE a.f_table_name = ?")
+                    .add(" WHERE a.f_table_schema = ?")
+                    .add(" AND a.f_table_name = ?")
                     .add(" AND a.column = ?").toString();
 
-                LOG.debug(String.format("%s; 1=%s, 2=%s", sql, tbl, col));
+                LOG.debug(String.format("%s; 1=%s, 2=%s", sql, tbl.schema(), tbl.name(), col));
 
                 PreparedStatement ps = open(cx.prepareStatement(sql));
-                ps.setString(1, tbl);
-                ps.setString(2, col);
+                ps.setString(1, tbl.schema());
+                ps.setString(2, tbl.name());
+                ps.setString(3, col);
 
                 ResultSet rs = open(ps.executeQuery());
                 if (rs.next()) {

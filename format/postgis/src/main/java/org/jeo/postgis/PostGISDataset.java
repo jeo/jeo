@@ -85,7 +85,7 @@ public class PostGISDataset implements VectorDataset {
 
     @Override
     public String getName() {
-        return table.getName();
+        return table.name();
     }
 
     @Override
@@ -100,7 +100,7 @@ public class PostGISDataset implements VectorDataset {
 
     @Override
     public Schema schema() {
-        return table.getSchema();
+        return table.type();
     }
 
     @Override
@@ -121,7 +121,7 @@ public class PostGISDataset implements VectorDataset {
 
                 String sql = new SQL("SELECT st_asbinary(st_force_2d(st_extent(")
                     .name(schema.geometry().getName()).add(")))")
-                    .add(" FROM ").name(schema.getName()).toString();
+                    .add(" FROM ").name(table.schema(), table.name()).toString();
                 LOG.debug(sql);
 
                 ResultSet rs = open(open(cx.createStatement()).executeQuery(sql));
@@ -138,7 +138,7 @@ public class PostGISDataset implements VectorDataset {
         //save original query
         VectorQueryPlan qp = new VectorQueryPlan(q);
 
-        final SQL sql = new SQL("SELECT count(*) FROM ").name(schema().getName());
+        final SQL sql = new SQL("SELECT count(*) FROM ").name(table.schema(), table.name());
         final List<Pair<Object,Integer>> args = new ArrayList<Pair<Object,Integer>>();
 
         // if filter refers to properties not in the schema, defer to CQL filter
@@ -211,7 +211,7 @@ public class PostGISDataset implements VectorDataset {
                 }
             }
     
-            sql.add(" FROM ").name(schema.getName());
+            sql.add(" FROM ").name(table.schema(), table.name());
 
             List<Pair<Object,Integer>> args = new ArrayList<Pair<Object,Integer>>();
             // if filter refers to properties not in the schema, defer to CQL filter
@@ -310,7 +310,7 @@ public class PostGISDataset implements VectorDataset {
                 Schema schema = schema();
                 List<Pair<Object,Integer>> values = new ArrayList<Pair<Object,Integer>>();
 
-                SQL sql = new SQL("UPDATE ").name(schema.getName()).add(" SET ");
+                SQL sql = new SQL("UPDATE ").name(table.schema(), table.name()).add(" SET ");
                 for (String col : changed.keySet()) {
                     sql.name(col).add(" = ?,");
 
@@ -320,7 +320,7 @@ public class PostGISDataset implements VectorDataset {
                 sql.trim(1);
                 sql.add(" WHERE ");
 
-                List<PrimaryKeyColumn> pkcols = getTable().getPrimaryKey().getColumns(); 
+                List<PrimaryKeyColumn> pkcols = getTable().primaryKey().getColumns();
                 for (PrimaryKeyColumn pkcol : pkcols) {
                     String col = pkcol.getName();
                     sql.name(col).add(" = ?,");
@@ -350,9 +350,9 @@ public class PostGISDataset implements VectorDataset {
                 Schema schema = schema();
                 List<Pair<Object,Integer>> values = new ArrayList<Pair<Object,Integer>>();
 
-                PrimaryKey pkey = getTable().getPrimaryKey();
+                PrimaryKey pkey = getTable().primaryKey();
 
-                SQL cols = new SQL("INSERT INTO ").name(schema.getName()).add(" (");
+                SQL cols = new SQL("INSERT INTO ").name(table.schema(), table.name()).add(" (");
                 SQL vals = new SQL("VALUES (");
 
                 for (Field fld : schema) {
@@ -426,7 +426,7 @@ public class PostGISDataset implements VectorDataset {
                 @Override
                 protected Number doRun(Connection cx) throws Exception {
                     SQL sql = new SQL("SELECT max(").name(pkcol.getName()).add(")+1 FROM ")
-                        .name(schema().getName());
+                        .name(table.schema(), table.name());
 
                     Statement st = open(cx.createStatement());
                     ResultSet rs = open(st.executeQuery(sql.toString()));

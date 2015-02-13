@@ -63,14 +63,30 @@ public class SQL {
     }
 
     /**
+     * Appends a qualified column/table/etc... name to the buffer.
+     * <p>
+     * The name and prefix are escaped with double quotes.
+     * </p>
+     * <p>
+     * <tt>prefix</tt> may be null.
+     * </p>
+     */
+    public SQL name(String prefix, String name) {
+        if (prefix != null) {
+            buf.append("\"").append(prefix).append("\".");
+        }
+        buf.append("\"").append(name).append("\"");
+        return this;
+    }
+
+    /**
      * Appends a column/table/etc... name to the buffer. 
      * <p>
      * The name is escaped with double quotes.
      * </p>
      */
     public SQL name(String name) {
-        buf.append("\"").append(name).append("\"");
-        return this;
+        return name(null, name);
     }
 
     public SQL str(String str) {

@@ -14,6 +14,7 @@
  */
 package org.jeo.sql;
 
+import org.jeo.util.Optional;
 import org.jeo.vector.Schema;
 
 /**
@@ -25,50 +26,69 @@ import org.jeo.vector.Schema;
 public class Table {
 
     String name;
+    String schema;
+
     PrimaryKey primaryKey = new PrimaryKey();
-    Schema schema;
+    Schema type;
 
     /**
      * Creates a new table object.
      * 
      * @param name The table name.
      */
-    public Table(String name) {
+    public Table(String name, String schema) {
         this.name = name;
+        this.schema = schema;
     }
 
     /**
      * The table name.
      */
-    public String getName() {
+    public String name() {
         return name;
+    }
+
+    /**
+     * The optional schema.
+     */
+    public String schema() {
+        return schema;
+    }
+
+    /**
+     * The qualified name (schema + name) of the table.
+     */
+    public String qname() {
+        return schema + "." + name;
     }
 
     /**
      * The table primary key.
      */
-    public PrimaryKey getPrimaryKey() {
+    public PrimaryKey primaryKey() {
         return primaryKey;
     }
 
     /**
      * Sets the table primary key.
      */
-    public void setPrimaryKey(PrimaryKey primaryKey) {
+    public Table primaryKey(PrimaryKey primaryKey) {
         this.primaryKey = primaryKey;
+        return this;
     }
 
     /**
-     * The schema generated from the table.
+     * The dataset schema generated from the table.
      */
-    public Schema getSchema() {
-        return schema;
+    public Schema type() {
+        return type;
     }
 
     /**
      * Sets the schema generated from the table.
      */
-    public void setSchema(Schema schema) {
-        this.schema = schema;
+    public Table type(Schema type) {
+        this.type = type;
+        return this;
     }
 }

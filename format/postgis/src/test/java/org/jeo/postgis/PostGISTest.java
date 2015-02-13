@@ -292,4 +292,5 @@ public class PostGISTest {
         assertTrue(c.hasNext());
         assertEquals(1.99, c.next().get("cost"));
     }
+
 }

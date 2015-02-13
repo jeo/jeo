@@ -76,7 +76,7 @@ public class PostGISCursor extends Cursor<Feature> {
                     map.put(col, obj);
                 }
 
-                PrimaryKey key = dataset.getTable().getPrimaryKey();
+                PrimaryKey key = dataset.getTable().primaryKey();
                 StringBuilder sb = new StringBuilder();
                 for (PrimaryKeyColumn pkcol : key.getColumns()) {
                     sb.append(map.get(pkcol.getName())).append(".");

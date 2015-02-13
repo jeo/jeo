@@ -39,11 +39,15 @@ public class PostGISOpts {
     String host = HOST.getDefault();
     Integer port = PORT.getDefault();
     String user = USER.getDefault();
+    String schema;
     Password passwd;
 
     public static PostGISOpts fromMap(Map<?,Object> map) {
         PostGISOpts pgopts = new PostGISOpts(DB.get(map));
 
+        if (SCHEMA.has(map)) {
+            pgopts.schema(SCHEMA.get(map));
+        }
         if (HOST.has(map)) {
             pgopts.host(HOST.get(map));
         }
@@ -62,6 +66,11 @@ public class PostGISOpts {
 
     public PostGISOpts(String db) {
         this.db = db;
+    }
+
+    public PostGISOpts schema(String schema) {
+        this.schema = schema;
+        return this;
     }
 
     public PostGISOpts host(String host) {
@@ -84,23 +93,27 @@ public class PostGISOpts {
         return this;
     }
 
-    public String getDb() {
+    public String db() {
         return db;
     }
 
-    public String getHost() {
+    public String schema() {
+        return schema;
+    }
+
+    public String host() {
         return host;
     }
 
-    public Integer getPort() {
+    public Integer port() {
         return port;
     }
 
-    public String getUser() {
+    public String user() {
         return user;
     }
 
-    public Password getPasswd() {
+    public Password passwd() {
         return passwd;
     }
 
@@ -110,6 +123,9 @@ public class PostGISOpts {
         map.put(HOST, host);
         map.put(PORT, port);
         map.put(USER, user);
+        if (schema != null) {
+            map.put(SCHEMA, schema);
+        }
         if (passwd != null) {
             map.put(PASSWD, passwd);
         }

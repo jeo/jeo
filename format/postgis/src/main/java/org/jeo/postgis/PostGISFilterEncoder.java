@@ -24,7 +24,7 @@ public class PostGISFilterEncoder extends FilterSQLEncoder {
     PostGISDataset dataset;
 
     public PostGISFilterEncoder(PostGISDataset dataset) {
-        setPrimaryKey(dataset.getTable().getPrimaryKey());
+        setPrimaryKey(dataset.getTable().primaryKey());
         setDbTypes(dataset.pg.getDbTypes());
         setSchema(dataset.schema());
     }

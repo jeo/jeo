@@ -34,6 +34,11 @@ public class PostGIS implements VectorDriver<PostGISWorkspace>{
     public static final Key<String> DB = new Key<String>("db", String.class);
 
     /**
+     * Schema key.
+     */
+    public static final Key<String> SCHEMA = new Key<String>("schema", String.class);
+
+    /**
      * Host key, defaults to 'localhost'.
      */
     public static final Key<String> HOST = new Key<String>("host", String.class, "localhost");
@@ -75,7 +80,7 @@ public class PostGIS implements VectorDriver<PostGISWorkspace>{
 
     @Override
     public List<Key<? extends Object>> getKeys() {
-        return (List) Arrays.asList(DB, HOST, PORT, USER, PASSWD);
+        return (List) Arrays.asList(DB, SCHEMA, HOST, PORT, USER, PASSWD);
     }
 
     @Override

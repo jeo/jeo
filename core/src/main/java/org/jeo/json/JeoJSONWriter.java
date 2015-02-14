@@ -16,6 +16,7 @@ package org.jeo.json;
 
 import com.vividsolutions.jts.geom.Envelope;
 import org.jeo.data.*;
+import org.jeo.json.encoder.JSONEncoder;
 import org.jeo.raster.RasterDataset;
 import org.jeo.tile.TileDataset;
 import org.jeo.vector.Field;
@@ -315,6 +316,16 @@ public class JeoJSONWriter extends GeoJSONWriter {
 
     @Override
     public JeoJSONWriter value(String value) throws IOException {
+        return (JeoJSONWriter) super.value(value);
+    }
+
+    @Override
+    public JeoJSONWriter value(double value) throws IOException {
+        return (JeoJSONWriter) super.value(value);
+    }
+
+    @Override
+    public JeoJSONWriter value(long value) throws IOException {
         return (JeoJSONWriter) super.value(value);
     }
 

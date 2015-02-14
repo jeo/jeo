@@ -55,7 +55,7 @@ public abstract class FileDriver<T> implements Driver<T> {
      */
     @Override
     public boolean canOpen(Map<?, Object> opts, Messages msgs) {
-        if (!FILE.has(opts)) {
+        if (!FILE.in(opts)) {
             Messages.of(msgs).report("No " + FILE + " option specified");
             return false;
         }

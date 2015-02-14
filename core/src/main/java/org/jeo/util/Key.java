@@ -65,7 +65,7 @@ public class Key<T> {
      * </p>
      */
     public T get(Map<?,Object> map) {
-        if (!has(map)) {
+        if (!in(map)) {
             return def;
         }
 
@@ -91,7 +91,7 @@ public class Key<T> {
     /**
      * Determines if the key exists in a map.
      */
-    public boolean has(Map<?,Object> map) {
+    public boolean in(Map<?, Object> map) {
         return map != null && (map.containsKey(this) || map.containsKey(name));
     }
 

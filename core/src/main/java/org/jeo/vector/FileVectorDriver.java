@@ -33,7 +33,7 @@ public abstract class FileVectorDriver<T> extends FileDriver<T> implements Vecto
 
     @Override
     public final boolean canCreate(Map<?, Object> opts, Messages msgs) {
-        if (!FILE.has(opts)) {
+        if (!FILE.in(opts)) {
             Messages.of(msgs).report("No " + FILE + " option specified");
             return false;
         }

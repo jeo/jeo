@@ -72,7 +72,7 @@ public class Memory implements VectorDriver<MemWorkspace>, RasterDriver<MemWorks
 
     @Override
     public boolean canOpen(Map<?, Object> opts, Messages messages) {
-        return opts.isEmpty() || (opts.size() == 1 && NAME.has(opts));
+        return NAME.in(opts);
     }
 
     @Override

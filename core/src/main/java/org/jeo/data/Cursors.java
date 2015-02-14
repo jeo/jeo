@@ -88,7 +88,7 @@ public class Cursors {
      * Returns the first element of a cursor, returning <code>null</code> if the cursor has no 
      * more objects.
      * <p>
-     * This method closed the cursor after attempting to obtain a feature therefore intended to be 
+     * This method closes the cursor after attempting to obtain a feature therefore intended to be
      * be used only in cases where this method is the only code accessing the cursor.
      * </p>
      * 

@@ -152,7 +152,7 @@ public class JSONRepository implements DataRepository {
             for (Map.Entry<Object, Object> kv : opts.entrySet()) {
                 if ("file".equalsIgnoreCase(kv.getKey().toString())) {
                     Optional<File> file = Convert.toFile(kv.getValue());
-                    if (file.has()) {
+                    if (file.isPresent()) {
                         if (!file.get().isAbsolute()) {
                             File f = new File(this.file.getParentFile(), file.get().getPath());
                             kv.setValue(f);

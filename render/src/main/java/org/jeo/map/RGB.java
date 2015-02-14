@@ -484,7 +484,7 @@ public class RGB {
 
     public static Optional<RGB> convert(Object obj) {
         if (obj == null) {
-            return Optional.nil();
+            return Optional.empty();
         }
 
         if (obj instanceof RGB) {

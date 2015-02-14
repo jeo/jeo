@@ -16,30 +16,31 @@ package org.jeo.vector;
 
 import java.io.IOException;
 
+import com.vividsolutions.jts.geom.Envelope;
 import org.jeo.data.Cursor;
 import org.jeo.data.Dataset;
 
 /**
- * A layer consisting of vector geometry objects, or {@link Feature} objects. 
+ * A data set consisting of objects with a vector geometry, known as {@link Feature} objects.
  *
  * @author Justin Deoliveira, OpenGeo
  */
 public interface VectorDataset extends Dataset {
 
     /**
-     * The schema for the layer.
+     * The schema for the data set.
      */
     Schema schema() throws IOException;
 
     /**
-     * Counts features in the layer.
+     * Counts features in the data set.
      * 
      * @param q Query used to constrain results, must not be <code>null</code>
     */
     long count(VectorQuery q) throws IOException ;
 
     /**
-     * Returns a feature cursor for the layer. 
+     * Returns a feature cursor for the data set.
      * <p>
      * {@link VectorQuery#getMode()} is used to control whether the cursor is read or write. All
      * implementations must support {@link org.jeo.data.Cursor.Mode#READ}.

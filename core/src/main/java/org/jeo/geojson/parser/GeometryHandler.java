@@ -47,13 +47,13 @@ public class GeometryHandler extends BaseHandler {
     public boolean endObject() throws ParseException, IOException {
         Geometry g = null;
 
-        List geometries = node.consume("geometries", List.class).or(null);
+        List geometries = node.consume("geometries", List.class).orElse(null);
         if (geometries != null) {
             g = createGeometryCollection(geometries);
         }
         else {
-            String type = node.consume("type", String.class).or(null);
-            List coordinates = node.consume("coordinates", List.class).or(null);
+            String type = node.consume("type", String.class).orElse(null);
+            List coordinates = node.consume("coordinates", List.class).orElse(null);
             g = createGeometry(type, coordinates);
         }
         node.setValue(g);

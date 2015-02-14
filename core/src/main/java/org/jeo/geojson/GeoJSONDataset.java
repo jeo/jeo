@@ -91,7 +91,7 @@ public class GeoJSONDataset implements VectorDataset, FileData {
     @Override
     public Schema schema() throws IOException {
         Optional<Feature> f = first();
-        if (f.has()) {
+        if (f.isPresent()) {
             Schema schema = f.get().schema();
             SchemaBuilder sb = Schema.build(getName());
             for (Field fld : schema) {
@@ -166,7 +166,7 @@ public class GeoJSONDataset implements VectorDataset, FileData {
             if (c.hasNext()) {
                 return Optional.of(c.next());
             }
-            return Optional.nil();
+            return Optional.empty();
         }
         finally {
             c.close();

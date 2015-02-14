@@ -52,7 +52,7 @@ public class FeatureCollectionHandler extends BaseHandler {
                 public boolean endObject() throws ParseException, IOException {
                     super.endObject();
                     crs = FeatureCollectionHandler.this.node.consume(
-                        "crs", CoordinateReferenceSystem.class).or(null);
+                        "crs", CoordinateReferenceSystem.class).orElse(null);
                     return true;
                 }
             });

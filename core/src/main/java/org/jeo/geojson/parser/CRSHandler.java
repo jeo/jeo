@@ -31,7 +31,7 @@ public class CRSHandler extends BaseHandler {
     @Override
     public boolean endObject() throws ParseException, IOException {
         node.consume("type", String.class);
-        Map<String,Object> props = node.consume("properties", Map.class).or(Collections.emptyMap());
+        Map<String,Object> props = node.consume("properties", Map.class).orElse(Collections.emptyMap());
 
         if (props.containsKey("name")) {
             node.setValue(Proj.crs(props.get("name").toString()));

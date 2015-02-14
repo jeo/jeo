@@ -31,7 +31,7 @@ public class Messages {
      * </p>
      */
     public static Messages of(Messages m) {
-        return Optional.of(m).or(new Messages());
+        return Optional.of(m).orElse(new Messages());
     }
 
     List<Throwable> messages = new ArrayList<Throwable>();

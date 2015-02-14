@@ -80,7 +80,7 @@ public class Comparison<T> extends Filter<T> {
         if (o1 != null && !o1.getClass().isInstance(o2)) {
             //attempt to convert 
             Optional<?> converted = Convert.to(o2, o1.getClass());
-            if (converted.has()) {
+            if (converted.isPresent()) {
                 o2 = converted.get();
             }
         }

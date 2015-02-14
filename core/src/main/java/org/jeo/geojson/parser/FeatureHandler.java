@@ -19,7 +19,6 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.jeo.vector.BasicFeature;
-import org.jeo.vector.Feature;
 import org.jeo.json.parser.ParseException;
 import org.osgeo.proj4j.CoordinateReferenceSystem;
 
@@ -71,17 +70,17 @@ public class FeatureHandler extends BaseHandler {
 
     @Override
     public boolean endObject() throws ParseException, IOException {
-        Geometry geom = node.consume("geometry", Geometry.class).or(null);
+        Geometry geom = node.consume("geometry", Geometry.class).orElse(null);
 
         Map<String,Object> props = node.consume("properties", Map.class)
-            .or(new LinkedHashMap<String, Object>());
+            .orElse(new LinkedHashMap<String, Object>());
 
         props.put("geometry", geom);
 
-        String fid = node.consume("id", String.class).or(id!=null?String.valueOf(id):null);
+        String fid = node.consume("id", String.class).orElse(id != null ? String.valueOf(id) : null);
 
         BasicFeature f = new BasicFeature(fid, props);
-        f.crs(node.consume("crs", CoordinateReferenceSystem.class).or(null));
+        f.crs(node.consume("crs", CoordinateReferenceSystem.class).orElse(null));
 
         node.setValue(f);
 

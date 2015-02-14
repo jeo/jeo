@@ -14,6 +14,8 @@
  */
 package org.jeo.util;
 
+import java.util.NoSuchElementException;
+
 /**
  * Utility object for dealing with references that may be null.
  * <p>
@@ -23,49 +25,99 @@ package org.jeo.util;
  */
 public class Optional<T> {
 
+    /**
+     * Creates the new optional from the specified (possibly <code>null</code>) value.
+     */
     public static <X> Optional<X> of(X value) {
         return new Optional<X>(value);
     }
 
-    public static <X> Optional<X> nil() {
+    /**
+     * Creates a new empty optional.
+     */
+    public static <X> Optional<X> empty() {
         return new Optional<X>(null);
     }
 
     T value;
 
-    public Optional(T value) {
+    private Optional(T value) {
         this.value = value;
     }
 
-    public boolean has() {
+    /**
+     * Returns <code>true</code> if the value is present, ie. not-null.
+     */
+    public boolean isPresent() {
         return value != null;
     }
 
+    /**
+     * Returns the value or throws {@link NoSuchElementException} if the value does not
+     * exist.
+     */
     public T get() {
         return get("null value");
     }
 
-    public T get(String errmsg) {
+    /**
+     * Returns the value or throws {@link NoSuchElementException} if the value does not
+     * exist.
+     * @param errMsg The message to use for the exception if the value is null.
+     */
+    public T get(String errMsg) {
         if (value == null) {
-            throw new IllegalArgumentException(errmsg);
+            throw new NoSuchElementException(errMsg);
         }
         return value;
     }
 
-    public T or(T fallback) {
+    /**
+     * Returns the underlying value if the optional is present, otherwise returns the
+     * specified fallback.
+     *
+     * @param fallback Value to return if this optional is empty.
+     */
+    public T orElse(T fallback) {
         return value != null ? value : fallback;
     }
 
+    /**
+     * Returns the underlying value if the optional is present, otherwise throws the
+     * exception supplied by <tt>err</tt>.
+     *
+     */
+    public T orElseThrow(Supplier<RuntimeException> err) {
+        if (value != null) {
+            return value;
+        }
+
+        throw err.get();
+    }
+
+    /**
+     * Maps the optional to a different type.
+     *
+     * @param f The mapping function.
+     *
+     * @return The new optional, or empty if this optoinal is empty.
+     */
     public <R> Optional<R> map(Function<T,R> f) {
-        if (!has()) {
+        if (!isPresent()) {
             return (Optional<R>) this;
         }
 
         return Optional.of(f.apply(get()));
     }
 
+    /**
+     * Applies a predicate to the optional, returning empty if the value doesn't match the
+     * predicate.
+     *
+     * @param filter The predicate to apply to the value.
+     */
     public Optional<T> filter(Predicate<T> filter) {
-        if (!has()) {
+        if (!isPresent()) {
             return this;
         }
 
@@ -73,6 +125,6 @@ public class Optional<T> {
             return this;
         }
 
-        return nil();
+        return empty();
     }
 }

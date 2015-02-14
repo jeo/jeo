@@ -213,7 +213,7 @@ public class DirectoryRepository implements DataRepository {
                }
             }
 
-            if (drv instanceof FileDriver && !FileDriver.FILE.has(opts) && !grp.files().isEmpty()) {
+            if (drv instanceof FileDriver && !FileDriver.FILE.in(opts) && !grp.files().isEmpty()) {
                 // TODO: instead of grab first perhaps we should figure out what the primary 
                 // file is
                 opts.put(FileDriver.FILE.getName(), grp.files().get(0));

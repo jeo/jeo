@@ -108,10 +108,10 @@ public class GeoGit extends FileVectorDriver<GeoGitWorkspace> {
     GeoGitOpts ggopts(File file, Map<?,Object> opts) {
         GeoGitOpts ggopts = new GeoGitOpts(file);
 
-        if (USER.has(opts)) {
+        if (USER.in(opts)) {
             ggopts.user(USER.get(opts));
         }
-        if (EMAIL.has(opts)) {
+        if (EMAIL.in(opts)) {
             ggopts.email(EMAIL.get(opts));
         }
 

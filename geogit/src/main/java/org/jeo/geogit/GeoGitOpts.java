@@ -33,10 +33,10 @@ public class GeoGitOpts {
     public static GeoGitOpts fromMap(Map<?,Object> map) {
         GeoGitOpts ggopts = new GeoGitOpts(FILE.get(map));
 
-        if (USER.has(map)) {
+        if (USER.in(map)) {
             ggopts.user(USER.get(map));
         }
-        if (EMAIL.has(map)) {
+        if (EMAIL.in(map)) {
             ggopts.email(EMAIL.get(map));
         }
 

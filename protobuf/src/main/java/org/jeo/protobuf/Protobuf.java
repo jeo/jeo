@@ -55,7 +55,7 @@ public class Protobuf extends FileDriver<ProtobufDataset> implements VectorDrive
 
     @Override
     public boolean canCreate(Map<?, Object> opts, Messages msgs) {
-        return FILE.has(opts);
+        return FILE.in(opts);
     }
 
     @Override

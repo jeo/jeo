@@ -1,4 +1,4 @@
-/* Copyright 2013 The jeo project. All rights reserved.
+/* Copyright 2015 The jeo project. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,25 +14,26 @@
  */
 package org.jeo.cli.cmd;
 
-import org.jeo.Jeo;
 import org.jeo.cli.JeoCLI;
+import org.jeo.data.Cursor;
+import org.jeo.vector.Feature;
+import org.jeo.vector.VectorDataset;
 
-import com.beust.jcommander.Parameter;
+import java.io.IOException;
+import java.io.OutputStream;
 
-public class RootCmd extends JeoCmd {
+/**
+ * Abstraction for the vector output of a cli command.
+ */
+public interface VectorSink {
 
-    @Parameter(names={"-v", "--version"}, description="Prints version info", help=true)
-    boolean version;
-
-    @Override
-    protected void run(JeoCLI cli) throws Exception {
-        if (version) {
-            Jeo.printVersionInfo(cli.stream());
-        }
-    }
-
-    @Override
-    public void usage(JeoCLI cli) {
-        cli.usage();
-    }
+    /**
+     * Encodes a cursor.
+     *
+     * @param cursor The cursor to encode.
+     * @param source The dataset, possibly <code>null</code> the cursor originated from.
+     * @param cli The cli object.
+     *
+     */
+    void encode(Cursor<Feature> cursor, VectorDataset source, JeoCLI cli) throws IOException;
 }

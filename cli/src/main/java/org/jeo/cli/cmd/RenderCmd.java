@@ -24,6 +24,7 @@ import java.util.List;
 
 import org.jeo.cli.JeoCLI;
 import org.jeo.data.Drivers;
+import org.jeo.util.Supplier;
 import org.jeo.vector.VectorDataset;
 import org.jeo.geojson.GeoJSONWriter;
 import org.jeo.map.Map;
@@ -40,7 +41,7 @@ import com.beust.jcommander.internal.Maps;
 import com.vividsolutions.jts.geom.Envelope;
 
 @Parameters(commandNames="render", commandDescription="Renders a data set")
-public class RenderCmd extends JeoCmd {
+public class RenderCmd extends VectorCmd {
 
     @Parameter(description="dataset", arity = 1, required=true)
     List<String> datas;
@@ -67,7 +68,7 @@ public class RenderCmd extends JeoCmd {
     String file;
 
     @Override
-    protected void doCommand(JeoCLI cli) throws Exception {
+    protected void run(JeoCLI cli) throws Exception {
         if (list) {
             list(cli);
         }
@@ -76,14 +77,13 @@ public class RenderCmd extends JeoCmd {
             MapBuilder mb = Map.build();
 
             // layers
-            for (String data : datas) {
-                URI uri = parseDataURI(data);
-
-                VectorDataset dataset = open(Drivers.open(uri, VectorDataset.class));
-                if (dataset == null) {
-                    throw new IllegalArgumentException("Unable to load dataset: " + data);
-                }
-
+            for (final String data : datas) {
+                VectorDataset dataset = openVectorDataset(data).orElseThrow(new Supplier<RuntimeException>() {
+                    @Override
+                    public RuntimeException get() {
+                        return new IllegalArgumentException("Unable to load data set: " + data);
+                    }
+                });
                 mb.layer(dataset);
             }
 

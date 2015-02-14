@@ -14,74 +14,48 @@
  */
 package org.jeo.cli.cmd;
 
-import java.net.URI;
-import java.util.List;
-
 import org.jeo.cli.JeoCLI;
 import org.jeo.data.Cursor;
-import org.jeo.data.Cursors;
-import org.jeo.data.Dataset;
-import org.jeo.data.Drivers;
-import org.jeo.vector.VectorQuery;
-import org.jeo.tile.TileDataset;
-import org.jeo.data.TileDataView;
+import org.jeo.util.Supplier;
+import org.jeo.vector.Feature;
 import org.jeo.vector.VectorDataset;
+import org.jeo.vector.VectorQuery;
 import org.jeo.filter.Filter;
-import org.jeo.geojson.GeoJSONWriter;
-import org.jeo.tile.Tile;
 
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.Parameters;
 import com.vividsolutions.jts.geom.Envelope;
 
-@Parameters(commandNames="query", commandDescription="Executes a query against a data set")
-public class QueryCmd extends JeoCmd {
+import java.util.List;
 
-    @Parameter(description="dataset", arity = 1, required=true)
-    List<String> datas; 
-    
+import static java.lang.String.format;
+
+@Parameters(commandNames="query", commandDescription="Run a query against a data set")
+public class QueryCmd extends VectorCmd {
+
+    @Parameter(names = {"-i", "--input"}, description = "Input data set")
+    String dataRef;
+
     @Parameter(names = {"-b", "--bbox"}, description = "Bounding box (xmin,ymin,xmax,ymax)")
     Envelope bbox;
 
     @Parameter(names = {"-f", "--filter"}, description = "Predicate used to constrain results")
     Filter filter;
 
-    @Parameter(names = {"-c", "-count" }, description = "Maximum number of results to return")
-    Integer count;
+    @Parameter(names = {"-l", "--limit" }, description = "Maximum number of results to return")
+    Integer limit;
 
-    @Parameter(names = {"-s", "-summary"}, description = "Summarize results only")
-    boolean summary;
-    
+    @Parameter(names = {"-s", "--skip" }, description = "Number of results to skip over")
+    Integer offset;
+
+    @Parameter(names = {"-p", "--props" }, description = "Feature properties to include, comma separated")
+    List<String> props;
+
+    @Parameter(names = {"-o", "--output"}, description = "Output for results")
+    VectorSink sink = new GeoJSONSink();
+
     @Override
-    protected void doCommand(JeoCLI cli) throws Exception {
-        for (String data : datas) {
-            URI uri = parseDataURI(data);
-
-            Dataset dataset = null;
-            try {
-                dataset = open((Dataset)Drivers.open(uri));
-            }
-            catch(ClassCastException e) {
-                throw new IllegalArgumentException(data + " is not a dataset");
-            }
-
-            if (dataset == null) {
-                throw new IllegalArgumentException("Unable to open data source: " + data);
-            }
-
-            if (dataset instanceof VectorDataset) {
-                query((VectorDataset)dataset, cli);
-            }
-            else {
-                query((TileDataset)dataset, cli);
-            }
-
-        }
-    }
-
-    void query(VectorDataset dataset, JeoCLI cli) throws Exception {
-        GeoJSONWriter w = cli.newJSONWriter();
-
+    protected void run(JeoCLI cli) throws Exception {
         VectorQuery q = new VectorQuery();
         if (bbox != null) {
             q.bounds(bbox);
@@ -89,39 +63,37 @@ public class QueryCmd extends JeoCmd {
         if (filter != null) {
             q.filter(filter);
         }
-        if (count != null) {
-            q.limit(count);
+        if (limit != null) {
+            q.limit(limit);
+        }
+        if (offset != null) {
+            q.offset(offset);
+        }
+        if (props != null && !props.isEmpty()) {
+            q.fields(props);
         }
 
-        if (summary) {
-            w.object().key("count").value(dataset.count(q)).endObject();
+        Cursor<Feature> cursor = null;
+        VectorDataset data = null;
+        if (dataRef != null) {
+            data = openVectorDataset(dataRef).orElseThrow(new Supplier<RuntimeException>() {
+                @Override
+                public RuntimeException get() {
+                    return new IllegalArgumentException(format("%s is not a data set", dataRef));
+                }
+            });
+            cursor = data.cursor(q);
         }
         else {
-            w.featureCollection(dataset.cursor(q));
-        }
-    }
-
-    void query(TileDataset dataset, JeoCLI cli) throws Exception {
-        if (bbox == null) {
-            throw new IllegalArgumentException("Tile query must specify bbox");
+            // look for a direct cursor from stdin
+            cursor = cursorFromStdin(cli);
         }
 
-        GeoJSONWriter w = cli.newJSONWriter();
-
-        Cursor<Tile> cursor = new TileDataView(dataset).cursor(bbox, 1024, 1024);
-        if (count != null) {
-            cursor = cursor.limit(count);
+        try {
+            sink.encode(cursor, data, cli);
         }
-
-        if (summary) {
-            w.object().key("count").value(cursor.count()).endObject();
-        }
-        else {
-            w.array();
-            for (Tile t : cursor) {
-                w.array().value(t.getZ()).value(t.getX()).value(t.getY());
-            }
-            w.endArray();
+        finally {
+            cursor.close();
         }
     }
 }

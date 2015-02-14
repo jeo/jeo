@@ -14,15 +14,12 @@
  */
 package org.jeo.cli;
 
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.PrintStream;
-import java.io.Writer;
-import java.util.Set;
-
+import com.beust.jcommander.JCommander;
+import com.google.common.base.Strings;
+import com.google.common.base.Throwables;
+import com.google.common.collect.Ordering;
+import com.google.common.primitives.Ints;
 import jline.console.ConsoleReader;
-
-import org.jeo.cli.cmd.ConvertCmd;
 import org.jeo.cli.cmd.DriversCmd;
 import org.jeo.cli.cmd.InfoCmd;
 import org.jeo.cli.cmd.JeoCmd;
@@ -31,48 +28,89 @@ import org.jeo.cli.cmd.RenderCmd;
 import org.jeo.cli.cmd.RootCmd;
 import org.jeo.cli.cmd.ServeCmd;
 import org.jeo.cli.conv.JeoCLIConverterFactory;
-import org.jeo.geojson.GeoJSONWriter;
-
-import com.beust.jcommander.JCommander;
-import com.google.common.base.Strings;
-import com.google.common.base.Throwables;
-import com.google.common.collect.Ordering;
-import com.google.common.primitives.Ints;
 import org.jeo.json.JeoJSONWriter;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.PrintStream;
+import java.io.Writer;
+import java.util.Set;
 
 public class JeoCLI {
 
-    ConsoleReader console;
+    /**
+     * input / output
+     */
+    CLIConsoleReader console;
 
+    /**
+     * root command
+     */
     RootCmd root;
 
+    /**
+     * the commander
+     */
     JCommander cmdr;
 
+    /**
+     * flag to control whether cli throws back errors
+     */
+    boolean throwErrors = false;
+
+    /**
+     * Runs the cli.
+     */
     public static void main(String[] args) throws Exception {
-        JeoCLI cli = new JeoCLI(createConsoleReader());
+        JeoCLI cli = new JeoCLI(System.in, System.out);
         cli.handle(args);
     }
 
-    static ConsoleReader createConsoleReader() {
+    /**
+     * Creates a new cli instance with the specified input / output streams.
+     */
+    public JeoCLI(InputStream in, OutputStream out) {
         try {
-            ConsoleReader reader = new ConsoleReader(System.in, System.out);
-            // needed for CTRL+C not to let the console broken
-            reader.getTerminal().setEchoEnabled(true);
-            return reader;
+            console = new CLIConsoleReader(in, out);
         } catch (Exception e) {
             throw Throwables.propagate(e);
         }
-    }
 
-    public JeoCLI(ConsoleReader console) {
-        this.console = console;
+        // needed for CTRL+C not to let the console broken
+        console.getTerminal().setEchoEnabled(true);
         this.cmdr = initJCommander();
     }
 
-    public ConsoleReader getConsole() {
+    /**
+     * Sets flag controlling whether cli should throw back errors.
+     * <p>
+     *  Default value is false, this method may be set to true for cases where
+     *  the cli is being embedded.
+     * </p>
+     */
+    public JeoCLI throwErrors(boolean throwErrors) {
+        this.throwErrors = throwErrors;
+        return this;
+    }
+
+    /**
+     * Flag controlling whether cli should throw back errors.
+     */
+    public boolean throwErrors() {
+        return throwErrors;
+    }
+
+    /**
+     * The console reader containing reference to input/output streams.
+     */
+    public ConsoleReader console() {
         return console;
     }
 
+    /**
+     * Returns a print stream around <tt>console().getOutput()</tt>.
+     */
     public PrintStream stream() {
         final Writer w = console.getOutput();
         return new PrintStream(new OutputStream() {
@@ -95,20 +133,38 @@ public class JeoCLI {
     }
 
     /**
+     * Raw output stream.
+     * <p>
+     * For writing text based content <tt>console().getOutput()</tt> should be used.
+     * Commands that need to output binary content should utilize this stream.
+     * </p>
+     */
+    public OutputStream output() {
+        return console.out;
+    }
+
+    /**
      * Returns a new JSON writer connected to the console output stream.
      */
     public JeoJSONWriter newJSONWriter() {
-        return new JeoJSONWriter(getConsole().getOutput(), 2);
+        return new JeoJSONWriter(console().getOutput(), 2);
+    }
+
+    /**
+     * Returns a new progress object for displaying a progress bar on the console.
+     */
+    public ConsoleProgress progress(int total) {
+        return new ConsoleProgress(console(), total);
     }
 
     JCommander initJCommander() {
         root = new RootCmd();
         JCommander jcmdr = new JCommander(root);
         jcmdr.addConverterFactory(new JeoCLIConverterFactory());
+
         jcmdr.addCommand("drivers", new DriversCmd());
-        jcmdr.addCommand("query", new QueryCmd());
         jcmdr.addCommand("info", new InfoCmd());
-        jcmdr.addCommand("convert", new ConvertCmd());
+        jcmdr.addCommand("query", new QueryCmd());
         jcmdr.addCommand("serve", new ServeCmd());
         jcmdr.addCommand("render", new RenderCmd());
         return jcmdr;
@@ -126,16 +182,23 @@ public class JeoCLI {
             JCommander subcmdr = cmdr.getCommands().get(cmdr.getParsedCommand());
 
             JeoCmd cmd = subcmdr != null ? (JeoCmd) subcmdr.getObjects().get(0) : root;
-            cmd.run(this);
+            cmd.exec(this);
         }
         catch(Exception e) {
+            if (throwErrors) {
+                throw e;
+            }
+
             if (e.getMessage() != null) {
                 console.println(e.getMessage());
             }
-            console.flush();
+            //console.flush();
         }
     }
 
+    /**
+     * Displays cli usage.
+     */
     public void usage() {
         Set<String> commands = cmdr.getCommands().keySet();
         int maxLength = new Ordering<String>() {
@@ -160,6 +223,18 @@ public class JeoCLI {
             console.flush();
         } catch (IOException e) {
             throw Throwables.propagate(e);
+        }
+    }
+
+    /**
+     * Subclass used to maintain reference to output stream.
+     */
+    static class CLIConsoleReader extends ConsoleReader {
+
+        OutputStream out;
+        public CLIConsoleReader(InputStream in, OutputStream out) throws IOException {
+            super(in, out);
+            this.out = out;
         }
     }
 }

@@ -21,27 +21,28 @@ import org.jeo.data.*;
 import org.jeo.filter.Filters;
 import org.jeo.json.JeoJSONWriter;
 import org.jeo.map.Style;
+import org.jeo.util.Pair;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.util.List;
 
-@Parameters(commandNames="info", commandDescription="Provides information about a data source")
+@Parameters(commandNames="info", commandDescription="Get information about a data source")
 public class InfoCmd extends JeoCmd {
 
-    @Parameter(description="datasource", required=true)
+    @Parameter(description="data source", required=true)
     List<String> datas;
 
     @Override
-    protected void doCommand(JeoCLI cli) throws Exception {
+    protected void run(JeoCLI cli) throws Exception {
         JeoJSONWriter w = cli.newJSONWriter();
 
         for (String data : datas) {
-            URI uri = parseDataURI(data);
+            Pair<URI,String> uri = parseDataURI(data);
 
             try {
-                Object obj = Drivers.open(uri);
+                Object obj = Drivers.open(uri.first);
                 if (obj == null) {
                     throw new IllegalArgumentException("Unable to open data source: " + uri);
                 }
@@ -52,7 +53,7 @@ public class InfoCmd extends JeoCmd {
                 // try to parse input as file
                 File f = null;
                 try {
-                    f = new File(uri);
+                    f = new File(uri.first);
                 }
                 catch(Exception e2) {}
 
@@ -100,6 +101,6 @@ public class InfoCmd extends JeoCmd {
     }
 
     void print(Style style, JeoJSONWriter w, JeoCLI cli) throws IOException {
-        cli.getConsole().getOutput().write(style.toString());
+        cli.console().getOutput().write(style.toString());
     }
 }

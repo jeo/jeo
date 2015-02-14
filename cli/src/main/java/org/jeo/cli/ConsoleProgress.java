@@ -20,6 +20,9 @@ import jline.console.ConsoleReader;
 
 import com.google.common.base.Strings;
 
+/**
+ * Displays progress on the console.
+ */
 public class ConsoleProgress {
 
     ConsoleReader console;
@@ -28,20 +31,41 @@ public class ConsoleProgress {
 
     public ConsoleProgress(ConsoleReader console, int total) {
         this.console = console;
+        init(total);
+    }
+
+    public ConsoleProgress init(int total) {
         this.total = total;
-        this.count = 0;
+        count = 0;
+        return this;
     }
 
-    public void progress() {
-        progress(1);
+    /**
+     * Increments progress by one unit.
+     */
+    public ConsoleProgress inc() {
+        return inc(1);
     }
-    
-    public void progress(int amt) {
+
+    /**
+     * Increments progress by the specified amount.
+     */
+    public ConsoleProgress inc(int amt) {
         count += amt;
-        redraw();
+        return redraw();
     }
 
-    public void redraw() {
+    /**
+     * Redraws the progress bar.
+     * <p>
+     * This method is called from {@link #inc()} so no need to call it explicitly.
+     * </p>
+     */
+    public ConsoleProgress redraw() {
+        if (total < 0) {
+            return this;
+        }
+
         PrintStream out = System.out;
 
         //number of digits in total to padd count
@@ -58,7 +82,7 @@ public class ConsoleProgress {
 
         //last is progress bar
         int left = console.getTerminal().getWidth() - sb.length() - 2;
-        int progress = count * left / total; 
+        int progress = count * left / total;
 
         sb.append("[")
             .append(Strings.repeat("=", progress))
@@ -66,15 +90,6 @@ public class ConsoleProgress {
             .append("]");
 
         out.print(sb.toString() + "\r");
-//        console.getCursorBuffer().clear();
-//        console.getCursorBuffer().write("\r");
-//        console.getCursorBuffer().write(sb.toString());
-//        try {
-//            console.setCursorPosition(sb.length());
-//            console.redrawLine();
-//            console.flush();
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
+        return this;
     }
 }

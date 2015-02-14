@@ -15,6 +15,7 @@
 package org.jeo.cli.cmd;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -25,11 +26,19 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.jeo.cli.JeoCLI;
+import org.jeo.data.Dataset;
 import org.jeo.data.Disposable;
 
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.Parameters;
+import org.jeo.data.Drivers;
+import org.jeo.data.Workspace;
+import org.jeo.util.Disposer;
+import org.jeo.util.Optional;
+import org.jeo.util.Pair;
+
+import static java.lang.String.format;
 
 public abstract class JeoCmd {
 
@@ -39,9 +48,9 @@ public abstract class JeoCmd {
     @Parameter(names={"-x", "--debug"}, description="Runs command in debug mode", help=true)
     boolean debug;
     
-    Deque<Disposable> toDispose = new ArrayDeque<Disposable>();
+    Disposer disposer = new Disposer();
 
-    public final void run(JeoCLI cli) throws Exception {
+    public final void exec(JeoCLI cli) throws Exception {
         if (help) {
             usage(cli);
             return;
@@ -51,28 +60,23 @@ public abstract class JeoCmd {
             setUpDebugLogging();
         }
         try {
-            doCommand(cli);
+            run(cli);
         }
         catch(Exception e) {
+            if (cli.throwErrors()) {
+                throw e;
+            }
             if (debug) {
                 print(e, cli);
             }
             else {
-                cli.getConsole().println(e.getMessage());
+                cli.console().println(e.getMessage());
             }
         }
         finally {
-            while(!toDispose.isEmpty()) {
-                Disposable d = toDispose.pop();
-                try {
-                    d.close();
-                }
-                catch(Exception e) {
-                    //TODO: log this
-                }
-            }
+            disposer.close();
         }
-        cli.getConsole().flush();
+        cli.console().flush();
     }
     
     void setUpDebugLogging() {
@@ -87,7 +91,7 @@ public abstract class JeoCmd {
         }
     }
 
-    protected abstract void doCommand(JeoCLI cli) throws Exception;
+    protected abstract void run(JeoCLI cli) throws Exception;
 
     public void usage(JeoCLI cli) {
         JCommander jc = new JCommander(this);
@@ -96,30 +100,76 @@ public abstract class JeoCmd {
         jc.usage();
     }
 
-    protected URI parseDataURI(String str) {
+    protected <T extends Disposable> T open(T obj) {
+        return disposer.open(obj);
+    }
+
+    protected void print(Exception e, JeoCLI cli) {
+        e.printStackTrace(new PrintWriter(cli.console().getOutput()));
+    }
+
+    /**
+     * Parses a data uri.
+     * <p>
+     * The fragment is stripped off the uri and returned separately.
+     * </p>
+     * @return A pair of (base uri, fragment)
+     */
+    public static Pair<URI,String> parseDataURI(String str) {
         try {
             URI uri = new URI(str);
             if (uri.getScheme() == null) {
                 //assume a file based uri
                 URI tmp = new File(uri.getPath()).toURI();
-                uri = uri.getFragment() != null ? 
+                uri = uri.getFragment() != null ?
                     new URI(tmp.getScheme(), null, tmp.getPath(), uri.getFragment()) : tmp;
             }
-            return uri;
+
+            // strip off fragment
+            String frag = uri.getFragment();
+            if (frag != null) {
+                uri = new URI(
+                    uri.getScheme(), uri.getUserInfo(), uri.getHost(), uri.getPort(), uri.getPath(), uri.getQuery(), null);
+            }
+
+            return Pair.of(uri, frag);
         }
         catch(URISyntaxException e) {
-            throw new IllegalArgumentException("Invalid data source uri: " + str);
+            throw new IllegalArgumentException("Invalid data source uri: " + str, e);
         }
     }
 
-    protected <T extends Disposable> T open(T obj) {
-        if (obj != null) {
-            toDispose.push(obj);
-        }
-        return obj;
-    }
+    /**
+     * Opens a dataset from a data uri.
+     */
+    protected Optional<Dataset> openDataset(String ref) throws IOException {
+        Pair<URI,String> uri = parseDataURI(ref);
 
-    protected void print(Exception e, JeoCLI cli) {
-        e.printStackTrace(new PrintWriter(cli.getConsole().getOutput()));
+        Dataset dataset;
+
+        if (uri.second != null) {
+            // reference through a workspace
+            Workspace ws = open(Drivers.open(uri.first, Workspace.class));
+            if (ws == null) {
+                throw new IllegalArgumentException("Unable to open workspace: " + uri.first);
+            }
+
+            dataset = open(ws.get(uri.second));
+            if (dataset == null) {
+                throw new IllegalArgumentException(
+                    format("No dataset named %s in workspace: %s", uri.second, uri.first));
+            }
+        }
+        else {
+            // straight dataset reference
+            try {
+                dataset = open((Dataset) Drivers.open(uri.first));
+            }
+            catch(ClassCastException e) {
+                throw new IllegalArgumentException(uri.first + " is not a dataset");
+            }
+        }
+
+        return Optional.of(dataset);
     }
 }

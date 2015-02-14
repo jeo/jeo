@@ -43,8 +43,8 @@ public class ServeCmd extends JeoCmd {
     Integer nThreads = NanoServer.DEFAULT_NUM_THREADS;
 
     @Override
-    protected void doCommand(JeoCLI cli) throws Exception {
-        ConsoleReader console = cli.getConsole();
+    protected void run(JeoCLI cli) throws Exception {
+        ConsoleReader console = cli.console();
         console.println("Starting NanoHTTPD on port " + port);
         console.println("Serving data from " + reg);
         console.flush();

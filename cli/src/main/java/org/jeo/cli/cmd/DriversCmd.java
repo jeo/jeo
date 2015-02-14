@@ -30,14 +30,14 @@ import org.jeo.util.Key;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.Parameters;
 
-@Parameters(commandNames="drivers", commandDescription="Lists avialable format drivers")
+@Parameters(commandNames="drivers", commandDescription="List available format drivers")
 public class DriversCmd extends JeoCmd {
 
     @Parameter(description="drivers", required=false)
     List<String> drivers;
 
     @Override
-    protected void doCommand(JeoCLI cli) throws Exception {
+    protected void run(JeoCLI cli) throws Exception {
         GeoJSONWriter w = cli.newJSONWriter();
 
         if (drivers != null && !drivers.isEmpty()) {

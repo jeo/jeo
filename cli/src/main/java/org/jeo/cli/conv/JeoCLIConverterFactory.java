@@ -15,6 +15,7 @@
 package org.jeo.cli.conv;
 
 import org.jeo.cli.cmd.Dimension;
+import org.jeo.cli.cmd.VectorSink;
 import org.jeo.filter.Filter;
 import org.jeo.map.Style;
 import org.osgeo.proj4j.CoordinateReferenceSystem;
@@ -44,6 +45,9 @@ public class JeoCLIConverterFactory implements IStringConverterFactory {
         }
         if (clazz == java.util.Map.class) {
             return MapConverter.class;
+        }
+        if (clazz == VectorSink.class) {
+            return VectorSinkConverter.class;
         }
         return null;
     }

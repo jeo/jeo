@@ -29,6 +29,7 @@ import org.jeo.data.mem.Memory;
 import org.jeo.vector.Feature;
 import org.jeo.geojson.GeoJSONReader;
 import org.jeo.proj.Proj;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.osgeo.proj4j.CoordinateTransform;
 
@@ -36,6 +37,7 @@ import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.MultiPoint;
 import com.vividsolutions.jts.geom.Point;
 
+@Ignore
 public class ConvertTest extends CLITestSupport {
 
     @Test

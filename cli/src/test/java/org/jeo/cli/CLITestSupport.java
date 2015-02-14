@@ -15,25 +15,22 @@
 package org.jeo.cli;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.PipedInputStream;
-import java.io.PipedOutputStream;
 
-import jline.console.ConsoleReader;
+import com.google.common.io.ByteStreams;
 
-import org.jeo.data.Cursor;
-import org.jeo.vector.VectorQuery;
-import org.jeo.data.mem.MemVector;
-import org.jeo.data.mem.MemWorkspace;
+import org.jeo.TestData;
 import org.jeo.data.mem.Memory;
-import org.jeo.vector.Feature;
-import org.jeo.vector.Schema;
-import org.jeo.geom.Geom;
+import org.jeo.geojson.GeoJSONReader;
+import org.jeo.vector.FeatureCursor;
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
 
-import com.vividsolutions.jts.geom.Point;
+import org.junit.BeforeClass;
 
 /**
  * Base test for CLI command tests.
@@ -43,59 +40,51 @@ import com.vividsolutions.jts.geom.Point;
  */
 public class CLITestSupport {
 
-    protected PipedInputStream in;
-    protected PipedOutputStream out;
+    protected ByteArrayOutputStream out;
     protected JeoCLI cli;
 
     @Before
     public void setUpCLI() throws IOException {
-        in = new PipedInputStream();
-        out = new PipedOutputStream(in);
+        out = new ByteArrayOutputStream();
 
-        ConsoleReader in = new ConsoleReader(new ByteArrayInputStream(new byte[]{}), out);
-        cli = new JeoCLI(in);
+        cli = new JeoCLI(new ByteArrayInputStream(new byte[]{}), out);
+        cli.throwErrors(true);
     }
 
-    @Before
-    public void setUpData() throws IOException {
-        MemWorkspace mem = Memory.open("test");
-        MemVector widgets = mem.create(Schema.build("cities")
-            .field("geometry", Point.class).field("name", String.class).schema());
-
-        Cursor<Feature> c = widgets.cursor(new VectorQuery().append());
-
-        Feature f = c.next();
-        f.put(Geom.point(-114, 51));
-        f.put("name", "Calgary");
-        f = c.write().next();
-
-        f.put(Geom.point(-123, 48));
-        f.put("name", "Vancouver");
-        f = c.write().next();
-        
-        f.put(Geom.point(-79, 44));
-        f.put("name", "Toronto");
-        c.write().close();
-    }
-
-    public void tearDownCLI() throws IOException {
-        out.close();
-        in.close();
+    @BeforeClass
+    public static void setUpData() throws IOException {
+        Memory.open("test").put("states", TestData.states());
     }
 
     @After
-    public void tearDownData() throws IOException {
+    public void tearDownCLI() throws IOException {
+        out.close();
+    }
+
+    @AfterClass
+    public static void tearDownData() throws IOException {
         Memory.open("test").clear();
     }
 
     /**
-     * Dumps current output stream to stdout.
+     * Copies current cli output to the specified stream.
      */
-    protected void dump(OutputStream out) throws IOException {
-        byte[] buf = new byte[1024];
-        int r = -1;
-        while(in.available() > 0 && (r = in.read(buf)) > 0) {
-            out.write(buf, 0, r);
-        }
+    protected void dump(OutputStream stream) throws IOException {
+        ByteStreams.copy(output(), stream);
+    }
+
+    /**
+     * Returns the command output as an input stream.
+     */
+    protected InputStream output() throws IOException {
+        return ByteStreams.newInputStreamSupplier(out.toByteArray()).getInput();
+    }
+
+    /**
+     * Returns the command output as a feature cursor.
+     */
+    protected FeatureCursor featureOutput() throws IOException {
+        GeoJSONReader reader = new GeoJSONReader();
+        return reader.features(output());
     }
 }

@@ -313,6 +313,11 @@ public abstract class FeatureCursor extends Cursor<Feature> {
         return wrap(super.skip(offset));
     }
 
+    @Override
+    public FeatureCursor buffer(int n) {
+        return wrap(super.buffer(n));
+    }
+
     FeatureCursor wrap(Cursor<Feature> delegate) {
         return new CursorWrapper(delegate);
     }
@@ -347,10 +352,13 @@ public abstract class FeatureCursor extends Cursor<Feature> {
         }
 
         @Override
+        public boolean rewind() throws IOException {
+            return delegate.rewind();
+        }
+
+        @Override
         public void close() throws IOException {
             delegate.close();
         }
-
-
     }
 }

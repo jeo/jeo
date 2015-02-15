@@ -25,7 +25,9 @@ import org.jeo.vector.Feature;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 /**
  * An iterator like object used to read contents of {@link Dataset} objects. 
@@ -151,6 +153,18 @@ public abstract class Cursor<T> implements Closeable, Iterable<T> {
 
     protected void doRemove() throws IOException {
         throw new UnsupportedOperationException();
+    }
+
+    /**
+     * Rewinds the cursor to it's original state, if supported.
+     * <p>
+     *
+     * </p>
+     * @return
+     * @throws IOException
+     */
+    public boolean rewind() throws IOException {
+        return false;
     }
 
     @Override
@@ -418,6 +432,74 @@ public abstract class Cursor<T> implements Closeable, Iterable<T> {
         }
     }
 
+    /**
+     * Returns a cursor capable of being {@link #rewind()} within a certain number
+     * of objects.
+     * <p>
+     *   The <tt>n</tt> parameter specifies the buffer size. Up to n objects can be
+     *   read from the cursor before calling {@link #rewind()}. After n objects have
+     *   been read the cursor stops buffering and delegates to the original cursor.
+     * </p>
+     * @param n The buffer size.
+     */
+    public Cursor<T> buffer(int n) {
+        return new BufferedCursor(this, n);
+    }
+
+    static class BufferedCursor<T> extends CursorWrapper<T> {
+
+        int bufferSize;
+        List<T> buffer;
+
+        /* buffer index */
+        int i = 0;
+
+        /* total read */
+        int total = 0;
+
+        BufferedCursor(Cursor delegate, int bufferSize) {
+            super(delegate);
+            this.bufferSize = bufferSize;
+            this.buffer = new ArrayList<>(bufferSize);
+        }
+
+        @Override
+        public boolean hasNext() throws IOException {
+            if (i < buffer.size()) {
+                return true;
+            }
+
+            return delegate.hasNext();
+        }
+
+        @Override
+        public T next() throws IOException {
+            if (i < buffer.size()) {
+                return buffer.get(i++);
+            }
+
+            T next = delegate.next();
+            if (buffer.size() < bufferSize) {
+                buffer.add(next);
+                i++;
+            }
+
+            total++;
+            return next;
+        }
+
+        @Override
+        public boolean rewind() throws IOException {
+            if (total > bufferSize) {
+                // past the buffer, can't rewind
+                return delegate.rewind();
+            }
+
+            i = total = 0;
+            return true;
+        }
+    }
+
     static class CursorWrapper<T> extends Cursor<T> {
         protected Cursor<T> delegate;
 
@@ -446,9 +528,16 @@ public abstract class Cursor<T> implements Closeable, Iterable<T> {
         }
 
         @Override
+        public boolean rewind() throws IOException {
+            return delegate.rewind();
+        }
+
+        @Override
         public void close() throws IOException {
             delegate.close();
         }
+
+
     }
 
 }

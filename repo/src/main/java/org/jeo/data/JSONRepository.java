@@ -113,7 +113,7 @@ public class JSONRepository implements DataRepository {
             }
 
             Handle<?> h = Handle.to(key, handleType(drv), drv, this);
-            if (filter.apply(h)) {
+            if (filter.test(h)) {
                 list.add(h);
             }
         }

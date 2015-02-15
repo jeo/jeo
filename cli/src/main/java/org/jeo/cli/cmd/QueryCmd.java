@@ -110,11 +110,11 @@ public class QueryCmd extends JeoCmd {
 
         Cursor<Tile> cursor = new TileDataView(dataset).cursor(bbox, 1024, 1024);
         if (count != null) {
-            cursor = Cursors.limit(cursor, count);
+            cursor = cursor.limit(count);
         }
 
         if (summary) {
-            w.object().key("count").value(Cursors.size(cursor)).endObject();
+            w.object().key("count").value(cursor.count()).endObject();
         }
         else {
             w.array();

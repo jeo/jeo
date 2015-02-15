@@ -35,6 +35,7 @@ import org.jeo.data.Cursor.Mode;
 import org.jeo.data.Cursors;
 import org.jeo.data.Transaction;
 import org.jeo.data.Transactional;
+import org.jeo.vector.FeatureCursor;
 import org.jeo.vector.VectorDataset;
 import org.jeo.vector.Feature;
 import org.jeo.vector.Schema;
@@ -107,7 +108,7 @@ public class GeoGitDataset implements VectorDataset, Transactional {
             return q.adjustCount(countAll());
         }
 
-        return Cursors.size(cursor(q));
+        return cursor(q).count();
     }
 
     long countAll() {
@@ -122,7 +123,7 @@ public class GeoGitDataset implements VectorDataset, Transactional {
     }
 
     @Override
-    public Cursor<Feature> cursor(VectorQuery q) throws IOException {
+    public FeatureCursor cursor(VectorQuery q) throws IOException {
         //require a transaction for non read only 
         if (q.getMode() != Mode.READ && q.getTransaction() == null) {
             throw new IllegalArgumentException("Writable cursor requires a transaction");

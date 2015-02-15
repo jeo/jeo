@@ -25,6 +25,7 @@ import org.jeo.data.Cursors;
 import org.jeo.data.Dataset;
 import org.jeo.data.Disposable;
 import org.jeo.data.Drivers;
+import org.jeo.vector.FeatureCursor;
 import org.jeo.vector.VectorQuery;
 import org.jeo.data.Transaction;
 import org.jeo.data.Transactional;
@@ -143,13 +144,13 @@ public class ConvertCmd extends JeoCmd {
             q.reproject(fromCRS, toCRS);
         }
 
-        Cursor<Feature> o = null;
+        FeatureCursor o = null;
         try {
             o = orig.cursor(q);
 
             //multification
             if (multify) {
-                o = Cursors.multify(o);
+                o = o.multify();
             }
 
             sink.start(orig, cli);

@@ -157,7 +157,7 @@ public class RuleList extends ArrayList<Rule> {
         List<Rule> match = new ArrayList<Rule>();
         O: for (Rule r : this) {
             for (Selector s : r.getSelectors()) {
-                if (s.getFilter() == null || s.getFilter().apply(feature)) {
+                if (s.getFilter() == null || s.getFilter().test(feature)) {
                     match.add(r);
                     continue O;
                 }

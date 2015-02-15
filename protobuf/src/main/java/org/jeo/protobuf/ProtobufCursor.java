@@ -4,9 +4,10 @@ import java.io.IOException;
 
 import org.jeo.data.Cursor;
 import org.jeo.vector.Feature;
+import org.jeo.vector.FeatureCursor;
 import org.jeo.vector.Schema;
 
-public class ProtobufCursor extends Cursor<Feature> {
+public class ProtobufCursor extends FeatureCursor {
 
     ProtobufReader pbr;
     Schema schema;

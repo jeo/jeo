@@ -6,9 +6,10 @@ import java.util.List;
 import org.jeo.data.Cursor;
 import org.jeo.vector.BasicFeature;
 import org.jeo.vector.Feature;
+import org.jeo.vector.FeatureCursor;
 import org.jeo.vector.Schema;
 
-public class ProtobufAppendCursor extends Cursor<Feature> {
+public class ProtobufAppendCursor extends FeatureCursor {
 
     ProtobufWriter pbw;
 

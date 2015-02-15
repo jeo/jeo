@@ -22,8 +22,9 @@ import org.jeo.data.Transaction;
 import org.jeo.vector.Feature;
 import org.jeo.geotools.GT;
 import org.jeo.geotools.GTFeature;
+import org.jeo.vector.FeatureCursor;
 
-public class GeoGitAppendCursor extends Cursor<Feature> {
+public class GeoGitAppendCursor extends FeatureCursor {
 
     GeoGitDataset dataset;
     Transaction tx;

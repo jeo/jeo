@@ -163,7 +163,7 @@ public class FeatureHandler extends Handler {
         } else {
             // if the request specifies fields, wrap the cursor to prevent
             // any fields referenced in the query from getting into the response
-            c = Cursors.selectFields(layer.cursor(q), Arrays.asList(fields));
+            c = layer.cursor(q).select(Arrays.asList(fields));
         }
 
         // if requesting a specific feature, fail if not found

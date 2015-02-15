@@ -64,7 +64,7 @@ public class MemRepository implements DataRepository {
                     return obj;
                 }
             };
-            if (filter.apply(h)) {
+            if (filter.test(h)) {
                 list.add(h);
             }
         }

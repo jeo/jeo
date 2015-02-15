@@ -39,6 +39,7 @@ import org.jeo.data.DataRepositoryView;
 import org.jeo.data.Dataset;
 import org.jeo.data.Driver;
 import org.jeo.data.Handle;
+import org.jeo.vector.FeatureCursor;
 import org.jeo.vector.VectorQuery;
 import org.jeo.filter.*;
 import org.jeo.map.Style;
@@ -132,7 +133,7 @@ public class MockServer {
 
     MockServer withNoFeatures() throws Exception {
         expect(vectorLayer.cursor(new VectorQuery().bounds(new Envelope(-180, 180, -90, 90))))
-                .andReturn(Cursors.empty(Feature.class)).once();
+                .andReturn(FeatureCursor.empty()).once();
 
         return this;
     }
@@ -141,38 +142,38 @@ public class MockServer {
         Feature f = new BasicFeature(id);
         f.put("id", id);
 
-        Cursor<Feature> c = createMock(Cursor.class);
+        FeatureCursor c = createMock(FeatureCursor.class);
         expect(c.iterator()).andReturn(Iterators.forArray(f));
         expect(c.hasNext()).andReturn(true);
         
         expect(vectorLayer.cursor(new VectorQuery().filter(new Id(new Literal(id))))).andReturn(c);
-        expect(vectorLayer.cursor((VectorQuery) anyObject())).andReturn(Cursors.empty(Feature.class)).anyTimes();
+        expect(vectorLayer.cursor((VectorQuery) anyObject())).andReturn(FeatureCursor.empty()).anyTimes();
         c.close();
         expectLastCall().once();
 
         expect(vectorLayer.cursor(new VectorQuery().filter((Filter) anyObject())))
-                .andReturn(Cursors.empty(Feature.class)).anyTimes();
+                .andReturn(FeatureCursor.empty()).anyTimes();
 
         return this;
     }
 
     MockServer withFeatureHavingIdForEdit(Feature feature, boolean expectSuccess) throws Exception {
-        Cursor<Feature> c = createMock(Cursor.class);
+        FeatureCursor c = createMock(FeatureCursor.class);
         expect(c.hasNext()).andReturn(Boolean.TRUE);
         expect(c.next()).andReturn(feature);
         expect(c.write()).andReturn(c);
 
-        IExpectationSetters<Cursor<Feature>> cursor = 
+        IExpectationSetters<FeatureCursor> cursor =
                 expect(vectorLayer.cursor(new VectorQuery().update().filter(new Id(new Literal(feature.getId()))))).andReturn(c);
         if (!expectSuccess) {
             cursor.anyTimes();
         }
-        expect(vectorLayer.cursor((VectorQuery) anyObject())).andReturn(Cursors.empty(Feature.class)).anyTimes();
+        expect(vectorLayer.cursor((VectorQuery) anyObject())).andReturn(FeatureCursor.empty()).anyTimes();
         c.close();
         expectLastCall().once();
 
         expect(vectorLayer.cursor(new VectorQuery().filter((Filter) anyObject())))
-                .andReturn(Cursors.empty(Feature.class)).anyTimes();
+                .andReturn(FeatureCursor.empty()).anyTimes();
 
         return this;
     }
@@ -180,7 +181,7 @@ public class MockServer {
     MockServer withSingleFeature() throws Exception {
         Feature f = createNiceMock(Feature.class);
 
-        Cursor<Feature> c = createMock(Cursor.class);
+        FeatureCursor c = createMock(FeatureCursor.class);
         expect(c.next()).andReturn(f).once();
         expect(c.write()).andReturn(c).once();
         c.close();
@@ -345,7 +346,7 @@ public class MockServer {
     MockServer withWritableVectorLayer(Feature receiver) throws Exception {
         withVectorLayer();
 
-        Cursor<Feature> c = createMock(Cursor.class);
+        FeatureCursor c = createMock(FeatureCursor.class);
         expect(c.next()).andReturn(receiver);
         expect(c.write()).andReturn(c);
 

@@ -41,11 +41,11 @@ public class ConvertTest extends CLITestSupport {
     @Test
     public void testReproject() throws Exception {
         cli.handle("convert", 
-            "-fc", "epsg:4326", "-tc", "epsg:900913", "mem://#cities", "mem://#reprojected");
+            "-fc", "epsg:4326", "-tc", "epsg:900913", "mem://test#cities", "mem://test#reprojected");
 
-        VectorDataset orig =  (VectorDataset)Memory.open().get("cities");
+        VectorDataset orig =  (VectorDataset)Memory.open("test").get("cities");
 
-        VectorDataset repr = (VectorDataset) Memory.open().get("reprojected");
+        VectorDataset repr = (VectorDataset) Memory.open("test").get("reprojected");
         assertNotNull(repr);
 
         assertEquals(orig.count(new VectorQuery()), repr.count(new VectorQuery()));
@@ -64,12 +64,12 @@ public class ConvertTest extends CLITestSupport {
 
     @Test
     public void testMultify() throws Exception {
-        cli.handle("convert", "--multify", "mem://#cities", "mem://#multified");
+        cli.handle("convert", "--multify", "mem://test#cities", "mem://test#multified");
 
-        VectorDataset mult = (VectorDataset) Memory.open().get("multified");
+        VectorDataset mult = (VectorDataset) Memory.open("test").get("multified");
         assertNotNull(mult);
 
-        VectorDataset orig =  (VectorDataset)Memory.open().get("cities");
+        VectorDataset orig =  (VectorDataset)Memory.open("test").get("cities");
         
         assertEquals(orig.count(new VectorQuery()), mult.count(new VectorQuery()));
 
@@ -86,31 +86,31 @@ public class ConvertTest extends CLITestSupport {
 
     @Test
     public void testFilter() throws Exception {
-        cli.handle("convert", "-f", "name = 'Calgary'", "mem://#cities", "mem://#filtered");
+        cli.handle("convert", "-f", "name = 'Calgary'", "mem://test#cities", "mem://test#filtered");
 
-        VectorDataset filt = (VectorDataset) Memory.open().get("filtered");
+        VectorDataset filt = (VectorDataset) Memory.open("test").get("filtered");
         assertEquals(1, filt.count(new VectorQuery()));
 
-        Feature f = Cursors.first(filt.cursor(new VectorQuery()));
+        Feature f = filt.cursor(new VectorQuery()).first().get();
         assertNotNull(f);
         assertEquals("Calgary", f.get("name"));
     }
 
     @Test
     public void testBBOXFilter() throws Exception {
-        cli.handle("convert", "-b", "-123.5,47.5,122.5,48.5", "mem://#cities", "mem://#filtered");
+        cli.handle("convert", "-b", "-123.5,47.5,122.5,48.5", "mem://test#cities", "mem://test#filtered");
 
-        VectorDataset filt = (VectorDataset) Memory.open().get("filtered");
+        VectorDataset filt = (VectorDataset) Memory.open("test").get("filtered");
         assertEquals(1, filt.count(new VectorQuery()));
 
-        Feature f = Cursors.first(filt.cursor(new VectorQuery()));
+        Feature f = filt.cursor(new VectorQuery()).first().get();
         assertNotNull(f);
         assertEquals("Vancouver", f.get("name"));
     }
 
     @Test
     public void testOutputAsGeoJSON() throws Exception {
-        cli.handle("convert", "mem://#cities");
+        cli.handle("convert", "mem://test#cities");
 
         ByteArrayOutputStream bout = new ByteArrayOutputStream();
         dump(bout);
@@ -118,7 +118,6 @@ public class ConvertTest extends CLITestSupport {
         GeoJSONReader r = new GeoJSONReader();
         Cursor<Feature> c = 
             (Cursor<Feature>) r.read(new ByteArrayInputStream(bout.toByteArray()));
-        assertEquals(((VectorDataset)Memory.open().get("cities")).count(new VectorQuery()),
-            Cursors.size(c));
+        assertEquals(((VectorDataset)Memory.open("test").get("cities")).count(new VectorQuery()), c.count());
     }
 }

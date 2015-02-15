@@ -58,7 +58,7 @@ public class CLITestSupport {
 
     @Before
     public void setUpData() throws IOException {
-        MemWorkspace mem = Memory.open();
+        MemWorkspace mem = Memory.open("test");
         MemVector widgets = mem.create(Schema.build("cities")
             .field("geometry", Point.class).field("name", String.class).schema());
 
@@ -85,7 +85,7 @@ public class CLITestSupport {
 
     @After
     public void tearDownData() throws IOException {
-        Memory.open().clear();
+        Memory.open("test").clear();
     }
 
     /**

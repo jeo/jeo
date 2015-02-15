@@ -131,7 +131,7 @@ public class DirectoryRepository implements DataRepository {
 
             if (drv != null) {
                 Handle<?> h = Handle.to(name, handleType(drv), drv, this);
-                if (filter.apply(h)) {
+                if (filter.test(h)) {
                     items.add(h);
                 }
             }

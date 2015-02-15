@@ -14,6 +14,7 @@ import org.jeo.data.Cursors;
 import org.jeo.data.Driver;
 import org.jeo.data.FileData;
 import org.jeo.data.Cursor.Mode;
+import org.jeo.vector.FeatureCursor;
 import org.jeo.vector.VectorQuery;
 import org.jeo.vector.VectorQueryPlan;
 import org.jeo.vector.VectorDataset;
@@ -91,16 +92,16 @@ public class ProtobufDataset implements VectorDataset, FileData {
 
     @Override
     public Envelope bounds() throws IOException {
-        return Cursors.extent(cursor(new VectorQuery()));
+        return cursor(new VectorQuery()).bounds();
     }
 
     @Override
     public long count(VectorQuery q) throws IOException {
-      return Cursors.size(cursor(q));
+      return cursor(q).count();
     }
 
     @Override
-    public Cursor<Feature> cursor(VectorQuery q) throws IOException {
+    public FeatureCursor cursor(VectorQuery q) throws IOException {
         if (q.getMode() == Mode.UPDATE) {
             throw new IOException("Update cursor not supported");
         }

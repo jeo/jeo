@@ -26,12 +26,13 @@ import org.jeo.data.Transaction;
 import org.jeo.vector.Feature;
 import org.jeo.geotools.GT;
 import org.jeo.geotools.GTFeature;
+import org.jeo.vector.FeatureCursor;
 import org.opengis.feature.simple.SimpleFeature;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 
-public class GeoGitCursor extends Cursor<Feature> {
+public class GeoGitCursor extends FeatureCursor {
 
     Iterator<NodeRef> nodeit;
     GeoGitDataset dataset;

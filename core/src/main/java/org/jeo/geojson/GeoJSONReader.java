@@ -39,6 +39,7 @@ import com.vividsolutions.jts.geom.MultiPoint;
 import com.vividsolutions.jts.geom.MultiPolygon;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
+import org.jeo.vector.FeatureCursor;
 
 /**
  * GeoJSON reader class.
@@ -166,7 +167,7 @@ public class GeoJSONReader {
      * 
      * @return The feature collection as a cursor. 
      */
-    public Cursor<Feature> features(Object json) {
+    public FeatureCursor features(Object json) {
         try {
             return new GeoJSONCursor(toReader(json));
         } catch (IOException e) {

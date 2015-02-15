@@ -210,16 +210,7 @@ public class Features {
         return new GeometryTransformWrapper(feature) {
             @Override
             protected Geometry wrap(Geometry g) {
-                switch(Geom.Type.from(g)) {
-                case POINT:
-                    return gfac.createMultiPoint(new Point[]{(Point)g});
-                case LINESTRING:
-                    return gfac.createMultiLineString(new LineString[]{(LineString)g});
-                case POLYGON:
-                    return gfac.createMultiPolygon(new Polygon[]{(Polygon)g});
-                default:
-                    return g;
-                }
+                return Geom.multi(g);
             }
         };
     }

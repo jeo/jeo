@@ -48,7 +48,7 @@ public class In<T> extends Filter<T> {
     }
 
     @Override
-    public boolean apply(T obj) {
+    public boolean test(T obj) {
         Object evaluate = prop.evaluate(obj);
         boolean result = false;
         for (int i = 0; i < values.size() && !result; i++) {

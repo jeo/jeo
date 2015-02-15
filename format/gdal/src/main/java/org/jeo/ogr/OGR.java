@@ -128,7 +128,7 @@ public class OGR extends FileVectorDriver<OGRWorkspace> implements Disposable {
     protected boolean canOpen(File file, Map<?, Object> opts, Messages msgs) {
         msgs = Messages.of(msgs);
 
-        if (DRIVER.has(opts)) {
+        if (DRIVER.in(opts)) {
             String drvName = DRIVER.get(opts);
             Driver drv = ogr.GetDriverByName(drvName);
             if (drv == null) {
@@ -155,7 +155,7 @@ public class OGR extends FileVectorDriver<OGRWorkspace> implements Disposable {
     @Override
     protected OGRWorkspace open(File file, Map<?, Object> opts) throws IOException {
         // was driver explicitly specified
-        if (DRIVER.has(opts)) {
+        if (DRIVER.in(opts)) {
             Driver drv = ogr.GetDriverByName(DRIVER.get(opts));
             return new OGRWorkspace(file, new OGR(drv));
         }

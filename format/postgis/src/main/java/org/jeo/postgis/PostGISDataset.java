@@ -32,6 +32,7 @@ import java.util.Map;
 import org.jeo.data.Cursor;
 import org.jeo.data.Cursors;
 import org.jeo.data.Driver;
+import org.jeo.vector.FeatureCursor;
 import org.jeo.vector.VectorQuery;
 import org.jeo.vector.VectorQueryPlan;
 import org.jeo.vector.VectorDataset;
@@ -160,12 +161,12 @@ public class PostGISDataset implements VectorDataset {
             });
         }
         else {
-            return Cursors.size(cursor(q));
+            return cursor(q).count();
         }
     }
 
     @Override
-    public Cursor<Feature> cursor(VectorQuery q) throws IOException {
+    public FeatureCursor cursor(VectorQuery q) throws IOException {
         try {
             VectorQueryPlan qp = new VectorQueryPlan(q);
 

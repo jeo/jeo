@@ -16,6 +16,9 @@ package org.jeo.geom;
 
 import java.util.Iterator;
 
+import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.geom.prep.PreparedGeometry;
+import com.vividsolutions.jts.geom.prep.PreparedGeometryFactory;
 import org.jeo.geojson.GeoJSONWriter;
 
 import com.vividsolutions.jts.geom.Envelope;
@@ -34,6 +37,11 @@ import com.vividsolutions.jts.geom.Polygon;
  * @author Justin Deoliveira, OpenGeo
  */
 public class Geom {
+
+    /**
+     * static default factory
+     */
+    public final static GeometryFactory factory = new GeometryFactory();
 
     /**
      * Geometry type enumeration.
@@ -292,5 +300,35 @@ public class Geom {
      */
     public String json(Geometry g) {
         return GeoJSONWriter.toString(g);
+    }
+
+    /**
+     * Creates a prepared geometry.
+     * <p>
+     * Prepared geometries make operations like intersection must faster.
+     * </p>
+     */
+    public static PreparedGeometry prepare(Geometry g) {
+        return PreparedGeometryFactory.prepare(g);
+    }
+
+    /**
+     * Convers a geometry object into the associated geometry collection. For
+     * example Polygon to MultiPolygon.
+     * <p>
+     *  If the input is already a collection it is returned as is.
+     * </p>
+     */
+    public static GeometryCollection multi(Geometry g) {
+        switch(Geom.Type.from(g)) {
+            case POINT:
+                return factory.createMultiPoint(new Point[]{(Point)g});
+            case LINESTRING:
+                return factory.createMultiLineString(new LineString[]{(LineString)g});
+            case POLYGON:
+                return factory.createMultiPolygon(new Polygon[]{(Polygon)g});
+            default:
+                return (GeometryCollection) g;
+        }
     }
 }

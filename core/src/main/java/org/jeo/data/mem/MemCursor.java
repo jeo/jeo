@@ -23,8 +23,9 @@ import org.jeo.data.Cursors;
 import org.jeo.vector.BasicFeature;
 import org.jeo.vector.DiffFeature;
 import org.jeo.vector.Feature;
+import org.jeo.vector.FeatureCursor;
 
-public class MemCursor extends Cursor<Feature> {
+public class MemCursor extends FeatureCursor {
 
     MemVector dataset;
     Cursor<Feature> cursor;

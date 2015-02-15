@@ -45,7 +45,7 @@ public class Id<T> extends Filter<T> {
     }
 
     @Override
-    public boolean apply(T obj) {
+    public boolean test(T obj) {
         if (obj instanceof Feature) {
             for (Expression e : ids) {
                 Object val = e.evaluate(obj);

@@ -169,43 +169,43 @@ public class VectorQueryPlan {
      * not be processed natively.
      * <p>
      * For example, if a format is unable to process {@link VectorQuery#getFilter()} objects natively
-     * then {@link #isFiltered()} should return <tt>false</tt> and this method should wrap the 
-     * cursor with {@link org.jeo.data.Cursors#filter(org.jeo.data.Cursor, Filter)}.
+     * then {@link #isFiltered()} should return <tt>false</tt> and this method should transform the
+     * cursor with {@link Cursor#filter(org.jeo.util.Predicate)}.
      * </p>
      * @param cursor Cursor to augment.
      * 
      * @return The augmented cursor.
      */
-    public Cursor<Feature> apply(Cursor<Feature> cursor) {
+    public FeatureCursor apply(FeatureCursor cursor) {
 
         Envelope bounds = q.getBounds();
         if (!isBounded() && !Envelopes.isNull(bounds)) {
-            cursor = Cursors.intersects(cursor, bounds);
+            cursor = cursor.intersect(bounds, true);
         }
 
         Filter<Feature> filter = q.getFilter();
         if (!isFiltered() && !Filters.isFalseOrNull(filter)) {
-            cursor = Cursors.filter(cursor, filter);
+            cursor = cursor.filter(filter);
         }
 
         Integer offset = q.getOffset();
         if (!isOffsetted() && offset != null) {
-            cursor = Cursors.offset(cursor, offset);
+            cursor = cursor.skip(offset);
         }
 
         Integer limit = q.getLimit();
         if (!isLimited() && limit != null) {
-            cursor = Cursors.limit(cursor, limit);
+            cursor = cursor.limit(limit);
         }
 
         Pair<CoordinateReferenceSystem,CoordinateReferenceSystem> reproj = q.getReproject();
         if (!isReprojected() && reproj != null) {
-            cursor = Cursors.reproject(cursor, reproj.first, reproj.second);
+            cursor = cursor.reproject(reproj.first, reproj.second);
         }
 
         Set<String> fields = q.getFields();
         if (!isFields() && !fields.isEmpty()) {
-            cursor = Cursors.selectFields(cursor, fields);
+            cursor = cursor.select(fields);
         }
 
         //TODO: sorting

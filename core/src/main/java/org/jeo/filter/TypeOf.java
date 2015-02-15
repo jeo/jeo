@@ -38,7 +38,7 @@ public class TypeOf<T> extends Filter<T> {
     }
 
     @Override
-    public boolean apply(Object obj) {
+    public boolean test(Object obj) {
         obj = expr.evaluate(obj);
 
         if (obj instanceof Class) {

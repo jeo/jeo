@@ -54,37 +54,37 @@ public class FilterTest {
 
         Comparison c = new Comparison(Comparison.Type.EQUAL, 
             new Property("str"), new Literal("one"));
-        assertTrue(c.apply(f));
+        assertTrue(c.test(f));
 
         c = new Comparison(Comparison.Type.EQUAL, 
                 new Property("int"), new Literal(2));
-        assertFalse(c.apply(f));
+        assertFalse(c.test(f));
 
         c = new Comparison(Comparison.Type.LESS, 
                 new Property("int"), new Literal(2));
-        assertTrue(c.apply(f));
+        assertTrue(c.test(f));
 
         c = new Comparison(Comparison.Type.LESS_OR_EQUAL, 
                 new Property("int"), new Literal(1));
-        assertTrue(c.apply(f));
+        assertTrue(c.test(f));
 
         c = new Comparison(Comparison.Type.GREATER_OR_EQUAL, 
                 new Property("int"), new Literal(1));
-        assertTrue(c.apply(f));
+        assertTrue(c.test(f));
 
         c = new Comparison(Comparison.Type.GREATER, 
                 new Property("int"), new Literal(1));
-        assertFalse(c.apply(f));
+        assertFalse(c.test(f));
     }
 
     @Test
     public void testComparisonConversion() {
         assertTrue(
-            new Comparison(Comparison.Type.EQUAL, new Literal(1), new Literal(1.0)).apply(null));
+            new Comparison(Comparison.Type.EQUAL, new Literal(1), new Literal(1.0)).test(null));
         assertTrue(
-            new Comparison(Comparison.Type.EQUAL, new Literal("1"), new Literal(1)).apply(null));
+            new Comparison(Comparison.Type.EQUAL, new Literal("1"), new Literal(1)).test(null));
         assertTrue(
-            new Comparison(Comparison.Type.EQUAL, new Literal(1.0), new Literal("1")).apply(null));
+            new Comparison(Comparison.Type.EQUAL, new Literal(1.0), new Literal("1")).test(null));
     }
 
     @Test
@@ -101,7 +101,7 @@ public class FilterTest {
                 new Property("int"), new Literal(1));
 
         Logic l = new Logic(Logic.Type.AND, c1, c2);
-        assertTrue(l.apply(f));
+        assertTrue(l.test(f));
     }
 
     @Test
@@ -112,11 +112,11 @@ public class FilterTest {
 
         Feature f = new BasicFeature(null, map);
 
-        assertTrue(new In(new Property("str"), Arrays.asList(new Literal("one")), false).apply(f));
-        assertTrue(new In(new Property("str"), Arrays.asList(new Literal("two"), new Literal("one")), false).apply(f));
+        assertTrue(new In(new Property("str"), Arrays.asList(new Literal("one")), false).test(f));
+        assertTrue(new In(new Property("str"), Arrays.asList(new Literal("two"), new Literal("one")), false).test(f));
 
-        assertFalse(new In(new Property("str"), Arrays.asList(new Literal("one")), true).apply(f));
-        assertFalse(new In(new Property("str"), Arrays.asList(new Literal("two")), false).apply(f));
+        assertFalse(new In(new Property("str"), Arrays.asList(new Literal("one")), true).test(f));
+        assertFalse(new In(new Property("str"), Arrays.asList(new Literal("two")), false).test(f));
     }
 
     @Test
@@ -126,12 +126,12 @@ public class FilterTest {
         map.put("num", 123456);
 
         Feature f = new BasicFeature(null, map);
-        assertTrue(new Like(new Property("name"), new Literal("%cd%"), false).apply(f));
-        assertFalse(new Like(new Property("name"), new Literal("%cd"), false).apply(f));
-        assertFalse(new Like(new Property("name"), new Literal("cd%"), false).apply(f));
-        assertTrue(new Like(new Property("name"), new Literal("cd%"), true).apply(f));
+        assertTrue(new Like(new Property("name"), new Literal("%cd%"), false).test(f));
+        assertFalse(new Like(new Property("name"), new Literal("%cd"), false).test(f));
+        assertFalse(new Like(new Property("name"), new Literal("cd%"), false).test(f));
+        assertTrue(new Like(new Property("name"), new Literal("cd%"), true).test(f));
 
-        assertTrue(new Like(new Property("num"), new Literal("123%"), false).apply(f));
+        assertTrue(new Like(new Property("num"), new Literal("123%"), false).test(f));
     }
 
     @Test
@@ -141,13 +141,13 @@ public class FilterTest {
         map.put("y", 1);
 
         Feature f = new BasicFeature(null, map);
-        assertTrue(new Null("x", false).apply(f));
-        assertFalse(new Null("y", false).apply(f));
-        assertFalse(new Null("x", true).apply(f));
-        assertTrue(new Null("y", true).apply(f));
+        assertTrue(new Null("x", false).test(f));
+        assertFalse(new Null("y", false).test(f));
+        assertFalse(new Null("x", true).test(f));
+        assertTrue(new Null("y", true).test(f));
         // missing properties always short-cut to false
-        assertFalse(new Null("z", false).apply(f));
-        assertFalse(new Null("z", true).apply(f));
+        assertFalse(new Null("z", false).test(f));
+        assertFalse(new Null("z", true).test(f));
     }
 
     @Test
@@ -160,24 +160,24 @@ public class FilterTest {
         Feature f = new BasicFeature(null, map);
 
         // comparison
-        assertFalse(CQL.parse("y < 5").apply(f));
-        assertFalse(CQL.parse("y = 5").apply(f));
-        assertFalse(CQL.parse("5 > y").apply(f));
-        assertFalse(CQL.parse("5 = y").apply(f));
+        assertFalse(CQL.parse("y < 5").test(f));
+        assertFalse(CQL.parse("y = 5").test(f));
+        assertFalse(CQL.parse("5 > y").test(f));
+        assertFalse(CQL.parse("5 = y").test(f));
 
         // others
-        assertFalse(CQL.parse("y in (5)").apply(f));
-        assertFalse(CQL.parse("y like '5'").apply(f));
-        assertFalse(CQL.parse("contains(y, POINT(0 0))").apply(f));
-        assertFalse(CQL.parse("y is null").apply(f));
-        assertFalse(CQL.parse("in (5)").apply(f));
+        assertFalse(CQL.parse("y in (5)").test(f));
+        assertFalse(CQL.parse("y like '5'").test(f));
+        assertFalse(CQL.parse("contains(y, POINT(0 0))").test(f));
+        assertFalse(CQL.parse("y is null").test(f));
+        assertFalse(CQL.parse("in (5)").test(f));
 
         // math
-        assertFalse(CQL.parse("y < x + 5").apply(f));
-        assertFalse(CQL.parse("y + 5 < x").apply(f));
+        assertFalse(CQL.parse("y < x + 5").test(f));
+        assertFalse(CQL.parse("y + 5 < x").test(f));
 
         // logic
-        assertTrue(CQL.parse("y > 5 or x = 5").apply(f));
-        assertTrue(CQL.parse("x = 5 or y > 5").apply(f));
+        assertTrue(CQL.parse("y > 5 or x = 5").test(f));
+        assertTrue(CQL.parse("x = 5 or y > 5").test(f));
     }
 }

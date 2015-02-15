@@ -20,10 +20,11 @@ import java.io.IOException;
 import org.jeo.data.Cursor;
 import org.jeo.vector.BasicFeature;
 import org.jeo.vector.Feature;
+import org.jeo.vector.FeatureCursor;
 import org.jeo.vector.Schema;
 import org.jeo.geopkg.Backend.Session;
 
-public class FeatureAppendCursor extends Cursor<Feature> {
+public class GeoPkgFeatureAppendCursor extends FeatureCursor {
 
     final Session session;
     final FeatureEntry entry;
@@ -34,8 +35,8 @@ public class FeatureAppendCursor extends Cursor<Feature> {
 
     Feature next;
 
-    FeatureAppendCursor(Session session, FeatureEntry entry, GeoPkgWorkspace ws, 
-            Schema schema, boolean usingTransaction) throws IOException {
+    GeoPkgFeatureAppendCursor(Session session, FeatureEntry entry, GeoPkgWorkspace ws,
+                              Schema schema, boolean usingTransaction) throws IOException {
         super(Mode.APPEND);
         this.session = session;
         this.entry = entry;

@@ -23,8 +23,9 @@ import org.jeo.vector.BasicFeature;
 import org.jeo.vector.Feature;
 
 import com.vividsolutions.jts.geom.Geometry;
+import org.jeo.vector.FeatureCursor;
 
-public class GeoJSONAppendCursor extends Cursor<Feature> {
+public class GeoJSONAppendCursor extends FeatureCursor {
 
     GeoJSONWriter writer;
     Feature next;

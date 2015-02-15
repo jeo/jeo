@@ -111,7 +111,7 @@ public class PostGISWorkspace implements Workspace {
             protected List<Handle<Dataset>> doRun(Connection cx) throws Exception {
                 DatabaseMetaData md = cx.getMetaData();
                 ResultSet tables = 
-                    open(md.getTables(null, schema().or(null), null, new String[]{"TABLE", "VIEW"}));
+                    open(md.getTables(null, schema().orElse(null), null, new String[]{"TABLE", "VIEW"}));
 
                 //TODO: avoid pulling all into list
                 List<Handle<Dataset>> l = new ArrayList<Handle<Dataset>>();
@@ -167,7 +167,7 @@ public class PostGISWorkspace implements Workspace {
 
                 List<Pair<Field, Integer>> gcols = new ArrayList<Pair<Field,Integer>>();
 
-                SQL sql = new SQL("CREATE TABLE ").name(schema().or(null), schema.getName())
+                SQL sql = new SQL("CREATE TABLE ").name(schema().orElse(null), schema.getName())
                     .add(" (").name(findIdColumnName(schema)).add(" SERIAL PRIMARY KEY, ");
                 
                 for (Field fld : schema) {
@@ -223,7 +223,7 @@ public class PostGISWorkspace implements Workspace {
 
                         List<Pair<Object,Integer>> values = new ArrayList<Pair<Object,Integer>>();
                         values.add(new Pair("", Types.VARCHAR));
-                        values.add(new Pair(schema().or("public"), Types.VARCHAR));
+                        values.add(new Pair(schema().orElse("public"), Types.VARCHAR));
                         values.add(new Pair(schema.getName(), Types.VARCHAR));
                         values.add(new Pair(fld.getName(), Types.VARCHAR));
                         values.add(new Pair(2, Types.INTEGER));
@@ -281,7 +281,7 @@ public class PostGISWorkspace implements Workspace {
     }
 
     String datasetName(String tbl, String schema) {
-        if (schema().has() && schema().get().equals(schema)) {
+        if (schema().isPresent() && schema().get().equals(schema)) {
             return tbl;
         }
 
@@ -303,7 +303,7 @@ public class PostGISWorkspace implements Workspace {
         }
         else {
             tbl = name;
-            schema = schema().or("public");
+            schema = schema().orElse("public");
         }
 
         return run(new DbOP<Table>() {

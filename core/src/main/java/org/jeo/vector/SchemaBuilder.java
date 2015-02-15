@@ -188,7 +188,7 @@ public class SchemaBuilder {
      * @param key The property key.
      * @param value The property value.
      * 
-     * @see {@link Field#getProperty(String)}
+     * @see {@link Field#property(String, Class)}
      */
     public SchemaBuilder property(String key, Object value) {
         if (props == null) {
@@ -211,17 +211,17 @@ public class SchemaBuilder {
      * except those that are removed.
      * 
      * @param original The original Schema
-     * @param retain The fields to retain
+     * @param fields The fields to retain
      * @return a new Schema with only the specified fields
      */
-    public static Schema selectFields(Schema original, Collection<String> retain) {
-        List<Field> fields = new ArrayList<Field>(retain.size());
-        for (int i = 0; i < original.fields.size(); i++) {
-            Field f = original.fields.get(i);
-            if (retain.contains(f.getName())) {
-                fields.add(f);
+    public static Schema select(Schema original, Iterable<String> fields) {
+        List<Field> retain = new ArrayList<Field>();
+        for (String f : fields) {
+            Field field = original.field(f);
+            if (field != null) {
+                retain.add(field);
             }
         }
-        return new Schema(original.name, original.uri, fields);
+        return new Schema(original.name, original.uri, retain);
     }
 }

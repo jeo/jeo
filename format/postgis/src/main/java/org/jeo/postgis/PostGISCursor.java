@@ -31,8 +31,9 @@ import org.jeo.sql.PrimaryKey;
 import org.jeo.sql.PrimaryKeyColumn;
 
 import com.vividsolutions.jts.io.WKBReader;
+import org.jeo.vector.FeatureCursor;
 
-public class PostGISCursor extends Cursor<Feature> {
+public class PostGISCursor extends FeatureCursor {
 
     ResultSet rs;
     Connection cx;

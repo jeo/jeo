@@ -470,7 +470,7 @@ public class GeoJSONReadWriteTest {
             List<Feature> features = featureCollection();
             Envelope bbox;
             try {
-                bbox = Cursors.extent(Cursors.create(features));
+                bbox = Cursors.create(features).bounds();
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }

@@ -28,6 +28,7 @@ import org.jeo.data.Cursor;
 import org.jeo.data.Cursors;
 import org.jeo.data.Driver;
 import org.jeo.data.FileData;
+import org.jeo.vector.FeatureCursor;
 import org.jeo.vector.VectorQuery;
 import org.jeo.vector.VectorQueryPlan;
 import org.jeo.vector.VectorDataset;
@@ -298,7 +299,7 @@ public class OGRDataset implements VectorDataset, FileData {
             }
 
             //TODO: convert attribute filter to ogr sql
-            return Cursors.size(cursor(q));
+            return cursor(q).count();
 
         }
         catch(Exception e) {
@@ -310,7 +311,7 @@ public class OGRDataset implements VectorDataset, FileData {
     }
 
     @Override
-    public Cursor<Feature> cursor(VectorQuery q) throws IOException {
+    public FeatureCursor cursor(VectorQuery q) throws IOException {
         Pair<Layer,DataSource> data = open();
 
         Layer l = data.first;

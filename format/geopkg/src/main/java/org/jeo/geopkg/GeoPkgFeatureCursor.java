@@ -18,9 +18,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.jeo.data.Cursor;
 import org.jeo.vector.BasicFeature;
 import org.jeo.vector.Feature;
+import org.jeo.vector.FeatureCursor;
 import org.jeo.vector.Field;
 import org.jeo.vector.Schema;
 import org.jeo.geopkg.geom.GeoPkgGeomReader;
@@ -32,7 +32,7 @@ import org.jeo.geopkg.Backend.Session;
 import org.jeo.geopkg.Backend.Results;
 import org.jeo.vector.SchemaBuilder;
 
-public class FeatureCursor extends Cursor<Feature> {
+public class GeoPkgFeatureCursor extends FeatureCursor {
 
     final FeatureEntry entry;
     final GeoPkgWorkspace workspace;
@@ -54,7 +54,7 @@ public class FeatureCursor extends Cursor<Feature> {
     Boolean next;
     Feature feature;
 
-    FeatureCursor(Session session, Results results, Mode mode, FeatureEntry entry, GeoPkgWorkspace workspace,
+    GeoPkgFeatureCursor(Session session, Results results, Mode mode, FeatureEntry entry, GeoPkgWorkspace workspace,
             Schema schema, PrimaryKey primaryKey, boolean usingTransaction, List<String> fields)
         throws IOException {
         super(mode);
@@ -74,7 +74,7 @@ public class FeatureCursor extends Cursor<Feature> {
 
         if (!fields.isEmpty()) {
             // requested fields in schema require rebuilding schema
-            this.schema = SchemaBuilder.selectFields(schema, fields);
+            this.schema = SchemaBuilder.select(schema, fields);
         } else {
             this.schema = schema;
         }

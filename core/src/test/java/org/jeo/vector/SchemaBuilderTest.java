@@ -41,7 +41,7 @@ public class SchemaBuilderTest {
         Schema schema = new SchemaBuilder("widgets")
             .fields("sp:String,ip:Integer,pp:Point:srid=4326").schema();
 
-        Schema selected = SchemaBuilder.selectFields(schema, Arrays.asList("sp","pp","blah"));
+        Schema selected = SchemaBuilder.select(schema, Arrays.asList("sp","pp","blah"));
         assertEquals(2, selected.getFields().size());
         assertEquals(schema.field("sp"), selected.field("sp"));
         assertEquals(schema.field("pp"), selected.field("pp"));

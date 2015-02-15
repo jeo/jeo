@@ -23,8 +23,9 @@ import org.jeo.geojson.parser.FeatureCollectionHandler;
 import org.jeo.geojson.parser.RootHandler;
 import org.jeo.json.parser.JSONParser;
 import org.jeo.json.parser.ParseException;
+import org.jeo.vector.FeatureCursor;
 
-public class GeoJSONCursor extends Cursor<Feature> {
+public class GeoJSONCursor extends FeatureCursor {
 
     Reader input;
     JSONParser parser;

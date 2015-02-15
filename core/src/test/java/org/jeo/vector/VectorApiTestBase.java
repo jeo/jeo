@@ -130,11 +130,11 @@ public abstract class VectorApiTestBase {
     @Test
     public void testCursorRead() throws Exception {
         // all
-        Assert.assertEquals(49, Cursors.size(data.cursor(new VectorQuery())));
+        Assert.assertEquals(49, data.cursor(new VectorQuery()).count());
 
         // limit offset
-        assertEquals(39, Cursors.size(data.cursor(new VectorQuery().offset(10))));
-        assertEquals(10, Cursors.size(data.cursor(new VectorQuery().limit(10))));
+        assertEquals(39, data.cursor(new VectorQuery().offset(10)).count());
+        assertEquals(10, data.cursor(new VectorQuery().limit(10)).count());
 
         // bounds
         Envelope bbox = new Envelope(-106.649513, -93.507217, 25.845198, 36.493877);
@@ -275,7 +275,7 @@ public abstract class VectorApiTestBase {
     void assertCount(int expected, VectorDataset dataSet, String filter) throws IOException {
         VectorQuery q = new VectorQuery().filter(filter);
         assertEquals(expected, dataSet.count(q));
-        assertEquals(expected, Cursors.size(dataSet.cursor(q)));
+        assertEquals(expected, dataSet.cursor(q).count());
     }
 
     String fidFor(VectorDataset dataset, String filter) throws IOException {

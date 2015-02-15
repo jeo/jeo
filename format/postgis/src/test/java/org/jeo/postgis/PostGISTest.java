@@ -203,7 +203,7 @@ public class PostGISTest {
     @Test
     public void testCursorFilter() throws Exception {
         VectorDataset states = pg.get("states");
-        assertEquals(1, Cursors.size(states.cursor(new VectorQuery().filter("STATE_NAME = 'Texas'"))));
+        assertEquals(1, states.cursor(new VectorQuery().filter("STATE_NAME = 'Texas'")).count());
     }
 
     @Test

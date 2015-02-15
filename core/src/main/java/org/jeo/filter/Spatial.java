@@ -69,7 +69,7 @@ public class Spatial<T> extends Filter<T> {
     }
 
     @Override
-    public boolean apply(T obj) {
+    public boolean test(T obj) {
         Object o1 = left.evaluate(obj);
         Object o2 = right.evaluate(obj);
         Number d = (Number) (distance == null ? null : distance.evaluate(obj));

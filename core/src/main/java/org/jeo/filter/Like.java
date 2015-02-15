@@ -58,7 +58,7 @@ public class Like<T> extends Filter<T> {
     }
 
     @Override
-    public boolean apply(T obj) {
+    public boolean test(T obj) {
         boolean result = false;
         if (obj instanceof Feature) {
             Object val = prop.evaluate((Feature) obj);

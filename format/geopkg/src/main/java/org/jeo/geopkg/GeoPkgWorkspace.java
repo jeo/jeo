@@ -30,6 +30,7 @@ import org.jeo.data.Cursors;
 import org.jeo.data.Dataset;
 import org.jeo.data.FileData;
 import org.jeo.data.Handle;
+import org.jeo.vector.FeatureCursor;
 import org.jeo.vector.VectorQuery;
 import org.jeo.vector.VectorQueryPlan;
 import org.jeo.tile.Tile;
@@ -207,7 +208,7 @@ public class GeoPkgWorkspace implements Workspace, FileData {
         VectorQueryPlan qp = new VectorQueryPlan(q);
 
         if (!Envelopes.isNull(q.getBounds())) {
-            return Cursors.size(cursor(entry, q));
+            return cursor(entry, q).count();
         }
 
         final SQL sql = new SQL("SELECT count(*) FROM ").name(entry.getTableName());
@@ -217,7 +218,7 @@ public class GeoPkgWorkspace implements Workspace, FileData {
                 Collections.EMPTY_LIST : encodeQuery(sql, q, qp, primaryKey(entry, session));
 
         if (q.isFiltered() && !qp.isFiltered()) {
-            return Cursors.size(cursor(entry, q));
+            return cursor(entry, q).count();
         }
 
         Results rs = session.queryPrepared(sql.toString(), args.toArray());
@@ -234,7 +235,7 @@ public class GeoPkgWorkspace implements Workspace, FileData {
         return count;
     }
 
-    public Cursor<Feature> cursor(FeatureEntry entry, VectorQuery q) throws IOException {
+    public FeatureCursor cursor(FeatureEntry entry, VectorQuery q) throws IOException {
         // session to use for read queries. db seems to lock things up when
         // using our transaction session for reads
         Session session = backend.session();
@@ -251,7 +252,7 @@ public class GeoPkgWorkspace implements Workspace, FileData {
 
         if (q.getMode() == Mode.APPEND) {
             // if session != transaction, tell the cursor not to close the session
-            return new FeatureAppendCursor(transaction, entry, this, schema, usingTransaction);
+            return new GeoPkgFeatureAppendCursor(transaction, entry, this, schema, usingTransaction);
         }
 
         VectorQueryPlan qp = new VectorQueryPlan(q);
@@ -296,11 +297,11 @@ public class GeoPkgWorkspace implements Workspace, FileData {
         }
 
         // if session != transaction, tell the cursor not to close the session
-        Cursor<Feature> c = new FeatureCursor(transaction, rs, q.getMode(), entry, this,
+        FeatureCursor c = new GeoPkgFeatureCursor(transaction, rs, q.getMode(), entry, this,
             schema, pk, usingTransaction, queryFields);
 
         if (!Envelopes.isNull(q.getBounds())) {
-            c = Cursors.intersects(c, q.getBounds());
+            c = c.intersect(q.getBounds(), true);
         }
 
         return qp.apply(c);

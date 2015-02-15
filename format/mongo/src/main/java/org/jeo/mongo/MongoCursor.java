@@ -22,8 +22,9 @@ import org.jeo.vector.Feature;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
+import org.jeo.vector.FeatureCursor;
 
-public class MongoCursor extends Cursor<Feature> {
+public class MongoCursor extends FeatureCursor {
 
     DBCursor dbCursor;
     MongoMapper mapper;

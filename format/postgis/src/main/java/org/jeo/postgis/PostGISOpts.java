@@ -45,19 +45,19 @@ public class PostGISOpts {
     public static PostGISOpts fromMap(Map<?,Object> map) {
         PostGISOpts pgopts = new PostGISOpts(DB.get(map));
 
-        if (SCHEMA.has(map)) {
+        if (SCHEMA.in(map)) {
             pgopts.schema(SCHEMA.get(map));
         }
-        if (HOST.has(map)) {
+        if (HOST.in(map)) {
             pgopts.host(HOST.get(map));
         }
-        if (PORT.has(map)) {
+        if (PORT.in(map)) {
             pgopts.port(PORT.get(map));
         }
-        if (USER.has(map)) {
+        if (USER.in(map)) {
             pgopts.user(USER.get(map));
         }
-        if (PASSWD.has(map)) {
+        if (PASSWD.in(map)) {
             pgopts.passwd(PASSWD.get(map));
         }
 

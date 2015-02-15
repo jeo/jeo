@@ -60,7 +60,7 @@ public class Logic<T> extends Filter<T> {
     }
 
     @Override
-    public boolean apply(T obj) {
+    public boolean test(T obj) {
         switch(type) {
         case AND:
             return and(obj);
@@ -74,23 +74,23 @@ public class Logic<T> extends Filter<T> {
     }
 
     boolean not(T obj) {
-        return !parts.get(0).apply(obj);
+        return !parts.get(0).test(obj);
     }
 
     boolean and(T obj) {
         Iterator<Filter<T>> it = parts.iterator();
-        boolean result = it.next().apply(obj);
+        boolean result = it.next().test(obj);
         while (it.hasNext()) {
-            result =  it.next().apply(obj) && result;
+            result =  it.next().test(obj) && result;
         }
         return result;
     }
 
     boolean or(T obj) {
         Iterator<Filter<T>> it = parts.iterator();
-        boolean result = it.next().apply(obj);
+        boolean result = it.next().test(obj);
         while (it.hasNext() && !result) {
-            result = result || it.next().apply(obj);
+            result = result || it.next().test(obj);
         }
         return result;
     }

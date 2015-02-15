@@ -14,6 +14,15 @@
  */
 package org.jeo.data;
 
+import com.vividsolutions.jts.geom.Envelope;
+import com.vividsolutions.jts.geom.Geometry;
+import org.jeo.geom.Envelopes;
+import org.jeo.util.Consumer;
+import org.jeo.util.Function;
+import org.jeo.util.Optional;
+import org.jeo.util.Predicate;
+import org.jeo.vector.Feature;
+
 import java.io.Closeable;
 import java.io.IOException;
 import java.util.Iterator;
@@ -146,7 +155,300 @@ public abstract class Cursor<T> implements Closeable, Iterable<T> {
 
     @Override
     public Iterator<T> iterator() {
-        return Cursors.iterator(this);
+        final Cursor<T> c = this;
+        return new Iterator<T>() {
+            boolean closed = false;
+
+            @Override
+            public boolean hasNext() {
+                if (closed) {
+                    return false;
+                }
+
+                try {
+                    boolean hasNext = c.hasNext();
+                    if (!hasNext) {
+                        //close the cursor
+                        c.close();
+                    }
+
+                    return hasNext;
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+
+            @Override
+            public T next() {
+                try {
+                    return c.next();
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+
+            @Override
+            public void remove() {
+                throw new UnsupportedOperationException();
+            }
+        };
+    }
+
+    /**
+     * Consumes all the values of the cursor.
+     */
+    public void forEach(Consumer<T> consumer) throws IOException {
+        try (Cursor<T> c = this) {
+            for (T obj : c) {
+                consumer.accept(obj);
+            }
+        }
+    }
+
+    /**
+     * Applies a mapping function to the cursor.
+     *
+     * @param mapper the mapping function.
+     *
+     * @return The new cursor.
+     */
+    public <R> Cursor<R> map(final Function<T,R> mapper) throws IOException {
+        return new CursorWrapper<R>(this) {
+            @Override
+            public R next() throws IOException {
+                return mapper.apply((T)delegate.next());
+            }
+        };
+    }
+
+    /**
+     * Returns the first element of a cursor, returning empty if the cursor has no more objects.
+     */
+    public Optional<T> first() throws IOException {
+        if (hasNext()) {
+            return Optional.of(next());
+        }
+
+        return Optional.empty();
+    }
+
+    /**
+     * Returns the number of results in the cursor.
+     */
+    public long count() throws IOException {
+        try {
+            int count = 0;
+            while(hasNext()) {
+                next();
+                count++;
+            }
+            return count;
+        }
+        finally {
+            close();
+        }
+    }
+
+    /**
+     * Returns the aggregated spatial extent of results in the cursor.
+     * <p>
+     * This method works on cursors containing {@link Feature} or {@link Geometry} objects.
+     * Use {@link #bounds(org.jeo.util.Function)} to provide an explicit bounds provider.
+     * </p>
+     *
+     * TODO: move this to FeatureCursor
+     */
+    public Envelope bounds() throws IOException {
+        return bounds(new Function<T, Envelope>() {
+            @Override
+            public Envelope apply(T obj) {
+                Geometry g = null;
+                if (obj instanceof Geometry) {
+                    g = (Geometry) obj;
+                } else if (obj instanceof Feature) {
+                    g = ((Feature) obj).geometry();
+                }
+                if (g != null) {
+                    return g.getEnvelopeInternal();
+                }
+                return null;
+            }
+        });
+    }
+
+    /**
+     * Returns the aggregated spatial extent of results in the cursor.
+     *
+     * @param env Function providing envelopes for objects in the cursor.
+     */
+    public Envelope bounds(Function<T, Envelope> env) throws IOException {
+        try {
+            Envelope extent = new Envelope();
+            extent.setToNull();
+
+            for (T obj : this) {
+                Envelope e = env.apply(obj);
+                if (!Envelopes.isNull(e)) {
+                    extent.expandToInclude(e);
+                }
+            }
+            return extent;
+        }
+        finally {
+            close();
+        }
+    }
+
+    /**
+     * Limits the number of results given back by the cursor to a fixed size.
+     *
+     * @param limit The maximum number of objects to return.
+     *
+     * @return The limited cursor.
+     */
+    public Cursor<T> limit(Integer limit) {
+        return new LimitCursor<T>(this, limit);
+    }
+
+    static class LimitCursor<T> extends CursorWrapper<T> {
+
+        Integer limit;
+        Integer count;
+
+        LimitCursor(Cursor<T> delegate, Integer limit) {
+            super(delegate);
+
+            if (limit == null) {
+                throw new NullPointerException("limit must not be null");
+            }
+
+            this.limit = limit;
+            this.count = 0;
+        }
+
+        @Override
+        public boolean hasNext() throws IOException {
+            if (count < limit) {
+                return delegate.hasNext();
+            }
+            return false;
+        }
+
+        @Override
+        public T next() throws IOException {
+            count++;
+            return delegate.next();
+        }
+    }
+
+    /**
+     * Returns a cursor that will skip over the specified number of objects.
+     *
+     * @param offset The number of objects to skip over.
+     *
+     * @return The skipped cursor.
+     */
+    public Cursor<T> skip(Integer offset) {
+        return new OffsetCursor<T>(this, offset);
+    }
+
+    static class OffsetCursor<T> extends CursorWrapper<T> {
+
+        Integer offset;
+
+        OffsetCursor(Cursor<T> delegate, Integer offset) {
+            super(delegate);
+
+            if (offset == null) {
+                throw new NullPointerException("limit must not be null");
+            }
+
+            this.offset = offset;
+        }
+
+        @Override
+        public boolean hasNext() throws IOException {
+            if (offset != null) {
+                for (int i = 0; i < offset && delegate.hasNext(); i++) {
+                    delegate.next();
+                }
+                offset = null;
+            }
+            return delegate.hasNext();
+        }
+    }
+
+    /**
+     * Wraps a cursor returning objects that pass a predicate.
+     *
+     * @param filter The predicate used to filter objects.
+     *
+     * @return The filtered cursor.
+     */
+    public Cursor<T> filter(Predicate<T> filter) {
+        return new FilterCursor<T>(this, filter);
+    }
+
+    private static class FilterCursor<T> extends CursorWrapper<T> {
+
+        Predicate<T> filter;
+        T next;
+
+        FilterCursor(Cursor<T> delegate, Predicate<T> filter) {
+            super(delegate);
+            this.filter = filter;
+        }
+
+        @Override
+        public boolean hasNext() throws IOException {
+            while(delegate.hasNext() && next == null) {
+                T obj = delegate.next();
+                if (filter.test(obj)) {
+                    next = obj;
+                }
+            }
+            return next != null;
+        }
+
+        @Override
+        public T next() throws IOException {
+            T obj = next;
+            next = null;
+            return obj;
+        }
+    }
+
+    static class CursorWrapper<T> extends Cursor<T> {
+        protected Cursor<T> delegate;
+
+        CursorWrapper(Cursor delegate) {
+            this.delegate = delegate;
+        }
+
+        @Override
+        public boolean hasNext() throws IOException {
+            return delegate.hasNext();
+        }
+
+        @Override
+        public T next() throws IOException {
+            return delegate.next();
+        }
+
+        @Override
+        public Cursor<T> write() throws IOException {
+            return delegate.write();
+        }
+
+        @Override
+        public Cursor<T> remove() throws IOException {
+            return delegate.remove();
+        }
+
+        @Override
+        public void close() throws IOException {
+            delegate.close();
+        }
     }
 
 }

@@ -47,6 +47,6 @@ public interface VectorDataset extends Dataset {
      * </p>
      * @param q A query used to constrain results, must not be <code>null</code>.
      */
-    Cursor<Feature> cursor(VectorQuery q) throws IOException;
+    FeatureCursor cursor(VectorQuery q) throws IOException;
 
 }

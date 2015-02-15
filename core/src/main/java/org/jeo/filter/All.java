@@ -20,7 +20,7 @@ package org.jeo.filter;
 public class All<T> extends Filter<T> {
 
     @Override
-    public boolean apply(T obj) {
+    public boolean test(T obj) {
         return true;
     }
 

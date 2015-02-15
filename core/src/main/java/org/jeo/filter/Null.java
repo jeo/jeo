@@ -42,7 +42,7 @@ public class Null<T> extends Filter<T> {
     }
 
     @Override
-    public boolean apply(Object obj) {
+    public boolean test(Object obj) {
         return prop.hasProperty(obj) && (not != (prop.evaluate(obj) == null));
     }
 

@@ -21,8 +21,9 @@ import org.jeo.data.Cursor;
 import org.jeo.vector.Feature;
 
 import com.csvreader.CsvReader;
+import org.jeo.vector.FeatureCursor;
 
-public class CSVCursor extends Cursor<Feature> {
+public class CSVCursor extends FeatureCursor {
 
     CSVDataset csv;
     CsvReader reader;

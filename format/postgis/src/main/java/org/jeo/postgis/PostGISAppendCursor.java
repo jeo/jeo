@@ -21,8 +21,9 @@ import java.sql.SQLException;
 import org.jeo.data.Cursor;
 import org.jeo.vector.BasicFeature;
 import org.jeo.vector.Feature;
+import org.jeo.vector.FeatureCursor;
 
-public class PostGISAppendCursor extends Cursor<Feature> {
+public class PostGISAppendCursor extends FeatureCursor {
 
     PostGISDataset dataset;
     Connection cx;

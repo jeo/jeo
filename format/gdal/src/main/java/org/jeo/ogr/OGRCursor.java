@@ -20,10 +20,11 @@ import org.gdal.ogr.DataSource;
 import org.gdal.ogr.Layer;
 import org.jeo.data.Cursor;
 import org.jeo.vector.Feature;
+import org.jeo.vector.FeatureCursor;
 import org.jeo.vector.Schema;
 import org.jeo.util.Pair;
 
-public class OGRCursor extends Cursor<Feature> {
+public class OGRCursor extends FeatureCursor {
 
     Layer layer;
     DataSource dataSource;

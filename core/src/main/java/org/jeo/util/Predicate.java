@@ -21,10 +21,23 @@ package org.jeo.util;
  * </p>
  * @param <T>
  */
-public interface Predicate<T> {
+public abstract class Predicate<T> {
 
     /**
      * Evalutes the predicate.
      */
-    boolean test(T val);
+    public abstract boolean test(T val);
+
+    /**
+     * And's this predicate to another.
+     */
+    public Predicate<T> and(final Predicate<T> other) {
+        final Predicate<T> self = this;
+        return new Predicate<T>() {
+            @Override
+            public boolean test(T val) {
+                return self.test(val) && other.test(val);
+            }
+        };
+    }
 }

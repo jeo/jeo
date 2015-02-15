@@ -14,12 +14,14 @@
  */
 package org.jeo.filter;
 
+import org.jeo.util.Predicate;
+
 /**
  * Predicate that applies a boolean filter for a given input. 
  *   
  * @author Justin Deoliveira, OpenGeo
  */
-public abstract class Filter<T> {
+public abstract class Filter<T> extends Predicate<T> {
 
     /**
      * Returns a new filter builder.
@@ -27,16 +29,6 @@ public abstract class Filter<T> {
     public static FilterBuilder build() {
         return new FilterBuilder();
     }
-
-    /**
-     * Applies the filter to the specified input.
-     * 
-     * @param obj The input.
-     * 
-     * @return The result, <code>true</code> if the filter matches the specific input, otherwise
-     *   <code>false</code>.
-     */
-    public abstract boolean apply(T obj);
 
     /**
      * Creates a new filter that is a logical AND of this filter and the specified filter.

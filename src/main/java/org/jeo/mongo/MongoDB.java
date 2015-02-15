@@ -65,7 +65,7 @@ public class MongoDB implements VectorDriver<MongoWorkspace> {
 
     @Override
     public boolean canOpen(Map<?, Object> opts, Messages msgs) {
-        if (!DB.has(opts)) {
+        if (!DB.in(opts)) {
             Messages.of(msgs).report("No " + DB + " option specified");
             return false;
         }

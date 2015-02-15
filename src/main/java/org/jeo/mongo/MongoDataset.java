@@ -21,6 +21,7 @@ import org.jeo.data.Cursor;
 import org.jeo.data.Cursor.Mode;
 import org.jeo.data.Cursors;
 import org.jeo.data.Driver;
+import org.jeo.vector.FeatureCursor;
 import org.jeo.vector.VectorQuery;
 import org.jeo.vector.VectorQueryPlan;
 import org.jeo.vector.VectorDataset;
@@ -119,7 +120,7 @@ public class MongoDataset implements VectorDataset {
         if (!Filters.isTrueOrNull(q.getFilter())) {
             // TODO: transform natively to filter 
             // we can't optimize
-            return Cursors.size(qp.apply(cursor(q)));
+            return qp.apply(cursor(q)).count();
         }
 
         long count = 
@@ -129,7 +130,7 @@ public class MongoDataset implements VectorDataset {
     }
 
     @Override
-    public Cursor<Feature> cursor(VectorQuery q) throws IOException {
+    public FeatureCursor cursor(VectorQuery q) throws IOException {
         if (q.getMode() == Mode.APPEND) {
             return new MongoCursor(q.getMode(), null, this);
         }

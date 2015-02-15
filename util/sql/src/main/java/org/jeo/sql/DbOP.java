@@ -14,15 +14,12 @@
  */
 package org.jeo.sql;
 
-import java.io.IOException;
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.ArrayDeque;
-import java.util.Deque;
+import org.jeo.util.Disposer;
 
 import javax.sql.DataSource;
+import java.io.IOException;
+import java.sql.Connection;
+import java.sql.SQLException;
 
 /**
  * A database operation.
@@ -53,7 +50,7 @@ public abstract class DbOP<T> {
     /**
      * resources to close
      */
-    Deque<Object> toClose = new ArrayDeque<Object>();
+    Disposer disposer = new Disposer();
 
     /**
      * Runs the db operation obtaining a new connection from the specified data source.
@@ -94,22 +91,7 @@ public abstract class DbOP<T> {
             throw propogate(e);
         }
         finally {
-            while(!toClose.isEmpty()) {
-                try {
-                    Object obj = toClose.pop();
-                    if (obj instanceof ResultSet) {
-                        ((ResultSet) obj).close();
-                    }
-                    else if (obj instanceof Statement) {
-                        ((Statement) obj).close();
-                    }
-                    else if (obj instanceof Connection) {
-                        ((Connection) obj).close();
-                    }
-                }
-                catch(SQLException e) {
-                }
-            }
+            disposer.close();
         }
     }
 
@@ -135,7 +117,6 @@ public abstract class DbOP<T> {
      * @return The original object, <tt>obj</tt>
      */
     protected <T> T open(T obj) {
-        toClose.add(obj);
-        return obj;
+        return disposer.open(obj);
     }
 }

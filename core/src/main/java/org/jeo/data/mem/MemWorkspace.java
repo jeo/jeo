@@ -93,6 +93,5 @@ public class MemWorkspace implements Workspace {
 
     @Override
     public void close() {
-        map.clear();
     }
 }

@@ -42,10 +42,6 @@ public class Memory implements VectorDriver<MemWorkspace>, RasterDriver<MemWorks
 
     static Map<String,MemWorkspace> WORKSPACES = new ConcurrentHashMap<String, MemWorkspace>();
 
-    public static MemWorkspace open() {
-        return Memory.open((String)null);
-    }
-
     public static MemWorkspace open(String name) {
         return new Memory().open((Map) Collections.singletonMap(NAME, name));
     }
@@ -67,7 +63,7 @@ public class Memory implements VectorDriver<MemWorkspace>, RasterDriver<MemWorks
 
     @Override
     public List<Key<?>> getKeys() {
-        return Collections.emptyList();
+        return (List) Arrays.asList(NAME);
     }
 
     @Override

@@ -13,6 +13,6 @@
  * limitations under the License.
  */
 /**
- * Feature model.
+ * Vector data model.
  */
 package org.jeo.vector;

@@ -1,0 +1,34 @@
+package org.jeo.protobuf;
+
+import "geom.proto";
+
+message Field {
+  enum Type {
+    INT = 1;
+    DOUBLE = 2;
+    STRING = 3;
+    BINARY = 4;
+  }
+
+  required string key = 1;
+  required Type type = 2;
+}
+
+message Schema {
+  required string name = 1;
+  optional string crs = 2;
+  optional Geometry.Type geomType = 3;
+  repeated Field field = 4;
+}
+
+message Value {
+  optional int32 intVal = 1;
+  optional double doubleVal = 2;
+  optional string strVal = 3;
+  optional bytes bytesVal = 4;
+}
+
+message Feature {
+  optional Geometry geom = 1;
+  repeated Value value = 2;
+}

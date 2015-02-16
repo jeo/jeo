@@ -21,4 +21,13 @@
     <module>postgis</module>
   </modules>
 
+  <profiles>
+    <profile>
+      <id>protobuf</id>
+      <modules>
+        <module>protobuf</module>
+      </modules>
+    </profile>
+  </profiles>
+
 </project>

@@ -1,0 +1,70 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>org.jeo</groupId>
+    <artifactId>format</artifactId>
+    <version>0-SNAPSHOT</version>
+  </parent>
+
+  <artifactId>jeo-protobuf</artifactId>
+  <name>Protocol Buffer Driver</name>
+  <packaging>jar</packaging>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.jeo</groupId>
+      <artifactId>jeo</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.google.protobuf</groupId>
+      <artifactId>protobuf-java</artifactId>
+      <version>2.6.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.jeo</groupId>
+      <artifactId>jeo</artifactId>
+      <version>${project.version}</version>
+      <scope>test</scope>
+      <classifier>tests</classifier>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <!--plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>build-helper-maven-plugin</artifactId>
+        <version>1.7</version>
+        <executions>
+          <execution>
+            <phase>generate-sources</phase>
+            <goals>
+               <goal>add-source</goal>
+            </goals>
+            <configuration>
+              <sources>
+                <source>src/main/gen</source>
+              </sources>
+            </configuration>
+          </execution>
+       </executions>
+      </plugin-->
+      <plugin>
+        <groupId>com.github.igor-petruk.protobuf</groupId>
+        <artifactId>protobuf-maven-plugin</artifactId>
+        <version>0.6.5</version>
+        <executions>
+         <execution>
+           <goals>
+             <goal>run</goal>
+           </goals>
+         </execution>
+        </executions>
+       </plugin>
+    </plugins>
+  </build>
+
+</project>

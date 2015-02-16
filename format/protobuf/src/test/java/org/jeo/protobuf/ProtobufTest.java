@@ -95,7 +95,9 @@ public class ProtobufTest {
         map.put("cost", 1.99);
 
         Feature f = new BasicFeature(null, map);
-        writer().feature(f);
+        try (ProtobufWriter w = writer()) {
+            w.feature(f);
+        }
 
         Feature f2 = reader().feature(f.schema());
         assertTrue(f.geometry().equalsExact(f2.geometry()));

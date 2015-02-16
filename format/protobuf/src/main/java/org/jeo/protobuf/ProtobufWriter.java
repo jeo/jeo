@@ -33,6 +33,7 @@ public class ProtobufWriter implements Disposable {
     static Logger LOG = LoggerFactory.getLogger(ProtobufWriter.class);
 
     OutputStream out;
+    Feature.Builder last;
 
     public static Point encode(com.vividsolutions.jts.geom.Point p) {
         return Point.newBuilder().setX(p.getX()).setY(p.getY()).build();
@@ -190,7 +191,12 @@ public class ProtobufWriter implements Disposable {
     }
 
     public ProtobufWriter feature(org.jeo.vector.Feature f) throws IOException {
+        if (last != null) {
+            last.build().writeDelimitedTo(out);
+        }
+
         Feature.Builder b = Feature.newBuilder();
+        last = b;
 
         com.vividsolutions.jts.geom.Geometry g = f.geometry();
         if (g != null) {
@@ -223,7 +229,6 @@ public class ProtobufWriter implements Disposable {
             b.addValue(vb.build());
         }
 
-        b.build().writeDelimitedTo(out);
         return this;
     }
 
@@ -282,6 +287,14 @@ public class ProtobufWriter implements Disposable {
     }
 
     public void close() {
+        if (last != null) {
+            try {
+                last.setLast(true).build().writeDelimitedTo(out);
+            } catch (IOException e) {
+                LOG.warn("Error writing feature to output", e);
+            }
+        }
+
         try {
             out.flush();
             out.close();

@@ -33,6 +33,8 @@ public class ProtobufReader {
 
     int id = 0;
     InputStream in;
+    Feature.Builder last;
+    End end;
 
     public static com.vividsolutions.jts.geom.Point decode(Point p) {
         return Geom.point(p.getX(), p.getY());
@@ -97,6 +99,22 @@ public class ProtobufReader {
 
     public ProtobufReader(InputStream in) {
         this.in = in;
+        end = new End() {
+            @Override
+            public boolean isEnd() throws IOException {
+                return ProtobufReader.this.in.available() == 0;
+            }
+        };
+    }
+
+    public ProtobufReader setReadUntilLastFeature() {
+        end = new End() {
+            @Override
+            public boolean isEnd() throws IOException {
+                return last != null && last.getLast();
+            }
+        };
+        return this;
     }
 
     public com.vividsolutions.jts.geom.Point point() throws IOException {
@@ -197,6 +215,7 @@ public class ProtobufReader {
             }
         }
 
+        last = b;
         return new BasicFeature(String.valueOf(id++), vals, schema);
     }
 
@@ -267,7 +286,11 @@ public class ProtobufReader {
         return new PBCoordinateSequence(array);
     }
 
+    static interface End {
+        boolean isEnd() throws IOException;
+    }
+
     boolean eoi() throws IOException {
-        return in.available() == 0;
+        return end.isEnd();
     }
 }

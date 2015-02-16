@@ -31,4 +31,5 @@ message Value {
 message Feature {
   optional Geometry geom = 1;
   repeated Value value = 2;
+  optional bool last = 3;
 }

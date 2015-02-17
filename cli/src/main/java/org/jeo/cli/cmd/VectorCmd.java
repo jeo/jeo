@@ -9,6 +9,7 @@ import org.jeo.util.Function;
 import org.jeo.util.Optional;
 import org.jeo.util.Predicate;
 import org.jeo.vector.Feature;
+import org.jeo.vector.FeatureCursor;
 import org.jeo.vector.VectorDataset;
 import org.jeo.vector.VectorQuery;
 import org.jeo.vector.VectorQueryPlan;
@@ -40,9 +41,9 @@ public abstract class VectorCmd extends JeoCmd {
     /**
      * Obtains an input cursor from stdin.
      */
-    protected Cursor<Feature> cursorFromStdin(JeoCLI cli) throws IOException {
+    protected FeatureCursor cursorFromStdin(JeoCLI cli) throws IOException {
         // look for input from stdin
         // TODO: something better than just assuming pbf
-        return new ProtobufCursor(new ProtobufReader(cli.console().getInput()));
+        return new ProtobufCursor(new ProtobufReader(cli.console().getInput()).setReadUntilLastFeature());
     }
 }

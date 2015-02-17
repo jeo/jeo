@@ -211,7 +211,7 @@ public abstract class Cursor<T> implements Closeable, Iterable<T> {
     /**
      * Consumes all the values of the cursor.
      */
-    public void forEach(Consumer<T> consumer) throws IOException {
+    public void each(Consumer<T> consumer) throws IOException {
         try (Cursor<T> c = this) {
             for (T obj : c) {
                 consumer.accept(obj);

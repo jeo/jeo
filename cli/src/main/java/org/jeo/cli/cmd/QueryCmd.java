@@ -18,6 +18,7 @@ import org.jeo.cli.JeoCLI;
 import org.jeo.data.Cursor;
 import org.jeo.util.Supplier;
 import org.jeo.vector.Feature;
+import org.jeo.vector.FeatureCursor;
 import org.jeo.vector.VectorDataset;
 import org.jeo.vector.VectorQuery;
 import org.jeo.filter.Filter;
@@ -25,6 +26,7 @@ import org.jeo.filter.Filter;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.Parameters;
 import com.vividsolutions.jts.geom.Envelope;
+import org.jeo.vector.VectorQueryPlan;
 
 import java.util.List;
 
@@ -73,7 +75,7 @@ public class QueryCmd extends VectorCmd {
             q.fields(props);
         }
 
-        Cursor<Feature> cursor = null;
+        FeatureCursor cursor = null;
         VectorDataset data = null;
         if (dataRef != null) {
             data = openVectorDataset(dataRef).orElseThrow(new Supplier<RuntimeException>() {
@@ -87,6 +89,7 @@ public class QueryCmd extends VectorCmd {
         else {
             // look for a direct cursor from stdin
             cursor = cursorFromStdin(cli);
+            cursor = new VectorQueryPlan(q).apply(cursor);
         }
 
         try {

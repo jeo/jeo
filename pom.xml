@@ -31,7 +31,6 @@
 
   <modules>
    <module>carto</module>
-   <module>cli</module>
    <module>geogit</module>
    <module>geotools</module>
    <module>guava</module>

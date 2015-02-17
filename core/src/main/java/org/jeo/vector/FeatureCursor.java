@@ -318,8 +318,15 @@ public abstract class FeatureCursor extends Cursor<Feature> {
         return wrap(super.buffer(n));
     }
 
-    FeatureCursor wrap(Cursor<Feature> delegate) {
-        return new CursorWrapper(delegate);
+    /**
+     * Wraps a cursor of Feature as a FeatureCursor, if it is not an instance
+     * already.
+     */
+    public static FeatureCursor wrap(Cursor<Feature> cursor) {
+        if (cursor instanceof FeatureCursor) {
+            return (FeatureCursor) cursor;
+        }
+        return new CursorWrapper(cursor);
     }
 
     static class CursorWrapper extends FeatureCursor {

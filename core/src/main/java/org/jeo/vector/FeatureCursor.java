@@ -291,7 +291,7 @@ public abstract class FeatureCursor extends Cursor<Feature> {
             // now look invalid due to removed features
             // otherwise, derive a new one
             Schema s = original.schema(false);
-            if (s == null) {
+            if (s != null) {
                 s = SchemaBuilder.select(original.schema(), fields);
             }
             return s;

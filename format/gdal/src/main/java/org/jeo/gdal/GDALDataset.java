@@ -51,32 +51,32 @@ public class GDALDataset implements RasterDataset, FileData {
     }
 
     @Override
-    public File getFile() {
+    public File file() {
         return file;
     }
 
     @Override
-    public String getName() {
+    public String name() {
         return Util.base(file.getName());
     }
 
     @Override
-    public String getTitle() {
+    public String title() {
         return null;
     }
 
     @Override
-    public String getDescription() {
+    public String description() {
         return dataset.GetDescription();
     }
 
     @Override
-    public Driver<?> getDriver() {
+    public Driver<?> driver() {
         return driver;
     }
 
     @Override
-    public Map<Key<?>, Object> getDriverOptions() {
+    public Map<Key<?>, Object> driverOptions() {
         LinkedHashMap<Key<?>, Object> opts = new LinkedHashMap<Key<?>, Object>();
         opts.put(GDAL.FILE, file);
         return opts;
@@ -154,23 +154,23 @@ public class GDALDataset implements RasterDataset, FileData {
         // area of raster to load
         Rect r = rect(data);            // raster space
         Envelope bbox = bounds(data);   // world space
-        if (query.getBounds() != null) {
+        if (query.bounds() != null) {
             // intersect bounds with query bounds
-            Envelope i = bbox.intersection(query.getBounds());
+            Envelope i = bbox.intersection(query.bounds());
             r = r.map(i, bbox);
             bbox = i;
         }
         raster.bounds(bbox);
 
         // raster size
-        Dimension s = query.getSize();
+        Dimension s = query.size();
         if (s == null) {
             s = size(data);
         }
         raster.size(s);
 
         // band selection
-        List<GDALBand> queryBands = bands(query.getBands());
+        List<GDALBand> queryBands = bands(query.bands());
         int[] bands = new int[queryBands.size()];
         for (int i = 0 ; i < queryBands.size(); i++) {
             GDALBand band = queryBands.get(i);
@@ -179,7 +179,7 @@ public class GDALDataset implements RasterDataset, FileData {
         raster.bands((List)queryBands);
 
         // figure out the buffer type if not specified
-        DataType datatype = query.getDataType();
+        DataType datatype = query.datatype();
         if (datatype == null) {
             datatype = DataType.BYTE;
             for (int i = 0 ; i < queryBands.size(); i++) {

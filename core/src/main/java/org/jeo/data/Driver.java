@@ -46,25 +46,25 @@ public interface Driver<T> {
      * description but should be human readable. 
      * </p>
      */
-    String getName();
+    String name();
 
     /**
      * Secondary names identifying the driver.
      * <p>
-     * Aliases are typically shorter abbreviations for {@link #getName()}  
+     * Aliases are typically shorter abbreviations for {@link #name()}
      * </p>
      */
-    List<String> getAliases();
+    List<String> aliases();
 
     /**
      * Returns the class of object returned by the driver.
      */
-    Class<T> getType();
+    Class<T> type();
 
     /**
      * Returns the keys supported by the driver.
      */
-    List<Key<?>> getKeys();
+    List<Key<?>> keys();
 
     /**
      * Determines if the driver is enabled.

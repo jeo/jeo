@@ -281,7 +281,7 @@ public abstract class FeatureCursor extends Cursor<Feature> {
 
                 // this may not be the most efficient approach compared
                 // to wrapping the feature
-                next = new BasicFeature(next.getId(), values, schema);
+                next = new BasicFeature(next.id(), values, schema);
             }
             return next;
         }

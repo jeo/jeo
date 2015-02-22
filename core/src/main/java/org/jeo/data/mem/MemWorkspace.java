@@ -43,19 +43,19 @@ public class MemWorkspace implements Workspace {
     }
 
     public MemWorkspace(Dataset dataset) {
-        this(Collections.singletonMap(dataset.getName(), dataset));
+        this(Collections.singletonMap(dataset.name(), dataset));
     }
     public MemWorkspace(Map<String,Dataset> map) {
         this.map = new LinkedHashMap<String, Dataset>(map);
     }
 
     @Override
-    public Memory getDriver() {
+    public Memory driver() {
         return new Memory();
     }
 
     @Override
-    public Map<Key<?>, Object> getDriverOptions() {
+    public Map<Key<?>, Object> driverOptions() {
         return Collections.emptyMap();
     }
 

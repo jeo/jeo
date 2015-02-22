@@ -52,19 +52,19 @@ public class Spatial<T> extends Filter<T> {
         this.distance = distance;
     }
 
-    public Type getType() {
+    public Type type() {
         return type;
     }
 
-    public Expression getDistance() {
+    public Expression distance() {
         return distance;
     }
 
-    public Expression getLeft() {
+    public Expression left() {
         return left;
     }
 
-    public Expression getRight() {
+    public Expression right() {
         return right;
     }
 

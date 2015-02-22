@@ -55,12 +55,12 @@ public class MongoWorkspace implements Workspace {
     }
 
     @Override
-    public Driver<?> getDriver() {
+    public Driver<?> driver() {
         return new MongoDB();
     }
 
     @Override
-    public Map<Key<?>, Object> getDriverOptions() {
+    public Map<Key<?>, Object> driverOptions() {
         return mopts.toMap();
     }
 
@@ -69,7 +69,7 @@ public class MongoWorkspace implements Workspace {
         List<Handle<Dataset>> refs = new ArrayList<Handle<Dataset>>(); 
         for (String name : db.getCollectionNames()) {
             if (!name.startsWith("system.")) {
-                refs.add(new Handle<Dataset>(name, Dataset.class, getDriver()) {
+                refs.add(new Handle<Dataset>(name, Dataset.class, driver()) {
                     @Override
                     protected Dataset doResolve() throws IOException {
                         return get(name);

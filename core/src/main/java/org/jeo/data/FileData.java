@@ -26,5 +26,5 @@ public interface FileData {
     /**
      * Gets the backing file.
      */
-    File getFile();
+    File file();
 }

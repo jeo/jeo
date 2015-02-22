@@ -16,8 +16,6 @@ package org.jeo.vector;
 
 import java.io.IOException;
 
-import com.vividsolutions.jts.geom.Envelope;
-import org.jeo.data.Cursor;
 import org.jeo.data.Dataset;
 
 /**
@@ -42,7 +40,7 @@ public interface VectorDataset extends Dataset {
     /**
      * Returns a feature cursor for the data set.
      * <p>
-     * {@link VectorQuery#getMode()} is used to control whether the cursor is read or write. All
+     * {@link VectorQuery#mode()} is used to control whether the cursor is read or write. All
      * implementations must support {@link org.jeo.data.Cursor.Mode#READ}.
      * </p>
      * @param q A query used to constrain results, must not be <code>null</code>.

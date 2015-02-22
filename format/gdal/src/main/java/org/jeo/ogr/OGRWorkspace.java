@@ -43,20 +43,20 @@ public class OGRWorkspace implements Workspace, FileData {
     }
 
     @Override
-    public Driver<?> getDriver() {
+    public Driver<?> driver() {
         return driver;
     }
 
     @Override
-    public Map<Key<?>, Object> getDriverOptions() {
+    public Map<Key<?>, Object> driverOptions() {
         LinkedHashMap<Key<?>, Object> opts = new LinkedHashMap<Key<?>, Object>();
         opts.put(OGR.FILE, file);
-        opts.put(OGR.DRIVER, driver.getName());
+        opts.put(OGR.DRIVER, driver.name());
         return opts;
     }
 
     @Override
-    public File getFile() {
+    public File file() {
         return file;
     }
 

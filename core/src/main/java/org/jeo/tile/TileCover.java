@@ -46,55 +46,55 @@ public class TileCover {
         this.x1 = x1;
         this.y1 = y1;
 
-        tiles = new Tile[getWidth()][getHeight()];
+        tiles = new Tile[width()][height()];
     }
 
     /**
      * The grid / zoom level at which the coverage occurs. 
      */
-    public TileGrid getGrid() {
+    public TileGrid grid() {
         return grid;
     }
 
     /**
      * Horizontal index of the leftmost tile in the coverage.
      */
-    public int getX0() {
+    public int x0() {
         return x0;
     }
 
     /**
      * Horizontal index of the rightmost tile in the coverage.
      */
-    public int getX1() {
+    public int x1() {
         return x1;
     }
 
     /**
      * Vertical index of the bottommost tile in the coverage.
      */
-    public int getY0() {
+    public int y0() {
         return y0;
     }
 
     /**
      * Vertical index of the rightmost tile in the coverage.
      */
-    public int getY1() {
+    public int y1() {
         return y1;
     }
 
     /**
      * The number of tiles horizontally in the coverage.
      */
-    public int getWidth() {
+    public int width() {
         return x1 - x0 + 1;
     }
 
     /**
      * The number of tiles vertically in the coverage.
      */
-    public int getHeight() {
+    public int height() {
         return y1 - y0 + 1;
     }
 
@@ -104,7 +104,7 @@ public class TileCover {
      * @param tileset The tile source.
      */
     public Cursor<Tile> cursor(TileDataset tileset) throws IOException {
-        return tileset.read(grid.getZ(), grid.getZ(), x0, x1, y0, y1);
+        return tileset.read(grid.z(), grid.z(), x0, x1, y0, y1);
     }
 
     /**
@@ -116,7 +116,7 @@ public class TileCover {
         Cursor<Tile> cursor = cursor(tileset);
         try {
             for (Tile t : cursor) {
-                tiles[t.getX()-x0][t.getY()-y0] = t;
+                tiles[t.x()-x0][t.y()-y0] = t;
             }
         }
         finally {
@@ -137,14 +137,14 @@ public class TileCover {
         Tile t = tiles[x][y];
         if (t == null) {
             // "blank" tile
-            t = new Tile(grid.getZ(), x0 + x, y0 + y, null, null);
+            t = new Tile(grid.z(), x0 + x, y0 + y, null, null);
         }
         return t;
     }
 
     @Override
     public String toString() {
-        return new StringBuilder().append(grid.getZ()).append(": ")
+        return new StringBuilder().append(grid.z()).append(": ")
             .append(x0).append(",").append(y0).append(" - ").append(x1).append(",").append(y1)
             .toString();
     }

@@ -59,36 +59,38 @@ public class TilePyramid {
     /**
      * The grids making up the pyramid, sorted by ascending z/zoom value.
      */
-    public List<TileGrid> getGrids() {
+    public List<TileGrid> grids() {
         return grids;
     }
 
     /**
      * The spatial extent of the tile pyramid.
      */
-    public Envelope getBounds() {
+    public Envelope bounds() {
         return bounds;
     }
 
     /**
      * Sets the spatial extent of the tile pyramid.
      */
-    public void setBounds(Envelope bounds) {
+    public TilePyramid bounds(Envelope bounds) {
         this.bounds = bounds;
+        return this;
     }
 
     /**
      * The coordinate reference system of the tile pyramid. 
      */
-    public CoordinateReferenceSystem getCRS() {
+    public CoordinateReferenceSystem crs() {
         return crs;
     }
 
     /**
      * Sets the coordinate reference system of the tile pyramid.
      */
-    public void setCRS(CoordinateReferenceSystem crs) {
+    public TilePyramid crs(CoordinateReferenceSystem crs) {
         this.crs = crs;
+        return this;
     }
 
     /**
@@ -98,15 +100,16 @@ public class TilePyramid {
      * this property is {@link Origin#BOTTOM_LEFT}.
      * </p>
      */
-    public Origin getOrigin() {
+    public Origin origin() {
         return origin;
     }
 
     /**
      * Sets origin of tile coordinate system.
      */
-    public void setOrigin(Origin origin) {
+    public TilePyramid origin(Origin origin) {
         this.origin = origin;
+        return this;
     }
 
     /**
@@ -115,15 +118,16 @@ public class TilePyramid {
      * The default value for this property is 256.
      * </p>
      */
-    public Integer getTileWidth() {
+    public Integer tileWidth() {
         return tileWidth;
     }
 
     /**
      * Sets the width in pixels of tiles in the pyramid.
      */
-    public void setTileWidth(Integer tileWidth) {
+    public TilePyramid tileWidth(Integer tileWidth) {
         this.tileWidth = tileWidth;
+        return this;
     }
 
     /**
@@ -132,15 +136,16 @@ public class TilePyramid {
      * The default value for this property is 256.
      * </p>
      */
-    public Integer getTileHeight() {
+    public Integer tileHeight() {
         return tileHeight;
     }
 
     /**
      * Sets the height in pixels of tiles in the pyramid.
      */
-    public void setTileHeight(Integer tileHeight) {
+    public TilePyramid tileHeight(Integer tileHeight) {
         this.tileHeight = tileHeight;
+        return this;
     }
 
     /**
@@ -152,7 +157,7 @@ public class TilePyramid {
      */
     public TileGrid grid(int z) {
         for (TileGrid grid : grids) {
-            if (grid.getZ() == z) {
+            if (grid.z() == z) {
                 return grid;
             }
         }
@@ -172,13 +177,13 @@ public class TilePyramid {
      * @throws IllegalArgumentException If the tile has a z value not defined by the pyramid. 
      */
     public Envelope bounds(Tile t) {
-        TileGrid grid = grid(t.getZ());
+        TileGrid grid = grid(t.z());
         if (grid == null) {
-            throw new IllegalArgumentException(String.format("no grid at zoom %d", t.getZ()));
+            throw new IllegalArgumentException(String.format("no grid at zoom %d", t.z()));
         }
 
-        int w = grid.getWidth();
-        int h = grid.getHeight();
+        int w = grid.width();
+        int h = grid.height();
 
         Envelope b = bounds;
         
@@ -190,19 +195,19 @@ public class TilePyramid {
         switch(origin) {
         case BOTTOM_LEFT:
         case TOP_LEFT:
-            x = b.getMinX() + dx*t.getX();
+            x = b.getMinX() + dx*t.x();
             break;
         default:
-            x = b.getMinX() + dx*(w - t.getX());
+            x = b.getMinX() + dx*(w - t.x());
         }
 
         switch(origin) {
         case BOTTOM_LEFT:
         case BOTTOM_RIGHT:
-            y = b.getMinY() + dy*t.getY();
+            y = b.getMinY() + dy*t.y();
             break;
         default:
-            y = b.getMinY() + dy*(h - t.getY());
+            y = b.getMinY() + dy*(h - t.y());
         }
 
         return new Envelope(x, x+dx, y, y+dx);
@@ -217,47 +222,47 @@ public class TilePyramid {
      * @return A newly realigned tile, or null if the t did not map to a grid in the pyramid.
      */
     public Tile realign(Tile t, Origin o) {
-        TileGrid grid = grid(t.getZ());
+        TileGrid grid = grid(t.z());
         if (grid == null) {
             return null;
         }
 
-        int w = grid.getWidth();
-        int h = grid.getHeight();
+        int w = grid.width();
+        int h = grid.height();
 
         Tile u = new Tile(t);
         
         switch(origin) {
         case BOTTOM_LEFT:
             if (o == Origin.BOTTOM_RIGHT || o == Origin.TOP_RIGHT) {
-                u.setX(w - (t.getX()+1));
+                u.x(w - (t.x() + 1));
             }
             if (o == Origin.TOP_LEFT || o == Origin.TOP_RIGHT) {
-                u.setY(h - (t.getY()+1));
+                u.y(h - (t.y() + 1));
             }
             break;
         case BOTTOM_RIGHT:
             if (o == Origin.BOTTOM_LEFT || o == Origin.TOP_LEFT) {
-                u.setX(w - (t.getX()+1));
+                u.x(w - (t.x() + 1));
             }
             if (o == Origin.TOP_LEFT || o == Origin.TOP_RIGHT) {
-                u.setY(h - (t.getY()+1));
+                u.y(h - (t.y() + 1));
             }
             break;
         case TOP_LEFT:
             if (o == Origin.BOTTOM_RIGHT || o == Origin.TOP_RIGHT) {
-                u.setX(w - (t.getX()+1));
+                u.x(w - (t.x() + 1));
             }
             if (o == Origin.BOTTOM_LEFT || o == Origin.BOTTOM_RIGHT) {
-                u.setY(h - (t.getY()+1));
+                u.y(h - (t.y() + 1));
             }
             break;
         case TOP_RIGHT:
             if (o == Origin.BOTTOM_LEFT || o == Origin.TOP_LEFT) {
-                u.setX(w - (t.getX()+1));
+                u.x(w - (t.x() + 1));
             }
             if (o == Origin.BOTTOM_LEFT || o == Origin.BOTTOM_RIGHT) {
-                u.setY(h - (t.getY()+1));
+                u.y(h - (t.y() + 1));
             }
             break;
         }
@@ -311,7 +316,7 @@ public class TilePyramid {
         TileGrid best = null;
         double score = Double.MAX_VALUE;
         for (TileGrid grid : grids) {
-            double res = Math.abs(resx - grid.getXRes()) + Math.abs(resy - grid.getYRes());
+            double res = Math.abs(resx - grid.xres()) + Math.abs(resy - grid.yres());
             if (res < score) {
                 score = res;
                 best = grid;
@@ -327,13 +332,13 @@ public class TilePyramid {
     
     int[] cov(Envelope bbox, TileGrid grid) {
         int x1 = (int) 
-            floor((((bbox.getMinX() - bounds.getMinX()) / bounds.getWidth()) * grid.getWidth()));
+            floor((((bbox.getMinX() - bounds.getMinX()) / bounds.getWidth()) * grid.width()));
         int x2 = (int) 
-            ceil(((bbox.getMaxX() - bounds.getMinX()) / bounds.getWidth()) * grid.getWidth())-1;
+            ceil(((bbox.getMaxX() - bounds.getMinX()) / bounds.getWidth()) * grid.width())-1;
         int y1 = (int)
-            floor(((bbox.getMinY() - bounds.getMinY()) / bounds.getHeight()) * grid.getHeight());
+            floor(((bbox.getMinY() - bounds.getMinY()) / bounds.getHeight()) * grid.height());
         int y2 = (int) 
-            ceil(((bbox.getMaxY() - bounds.getMinY()) / bounds.getHeight()) * grid.getHeight())-1;
+            ceil(((bbox.getMaxY() - bounds.getMinY()) / bounds.getHeight()) * grid.height())-1;
 
         return new int[]{x1, x2, y1, y2};
     }

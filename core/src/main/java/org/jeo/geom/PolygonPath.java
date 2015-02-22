@@ -42,7 +42,7 @@ public class PolygonPath extends CoordinatePath {
     }
 
     @Override
-    public Geometry getGeometry() {
+    public Geometry geometry() {
         return poly;
     }
 

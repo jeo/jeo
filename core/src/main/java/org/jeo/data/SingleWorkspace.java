@@ -36,13 +36,13 @@ public class SingleWorkspace implements Workspace {
     }
 
     @Override
-    public Driver<?> getDriver() {
-        return dataset.getDriver();
+    public Driver<?> driver() {
+        return dataset.driver();
     }
     
     @Override
-    public Map<Key<?>, Object> getDriverOptions() {
-        return dataset.getDriverOptions();
+    public Map<Key<?>, Object> driverOptions() {
+        return dataset.driverOptions();
     }
     
     @Override
@@ -52,7 +52,7 @@ public class SingleWorkspace implements Workspace {
 
     @Override
     public Dataset get(String layer) throws IOException {
-        if (dataset.getName().equals(layer)) {
+        if (dataset.name().equals(layer)) {
             return dataset;
         }
         return null;

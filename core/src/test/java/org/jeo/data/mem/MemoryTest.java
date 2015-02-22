@@ -65,7 +65,7 @@ public class MemoryTest {
         assertTrue(Iterables.any(mem.list(), new Predicate<Handle<Dataset>>() {
             @Override
             public boolean apply(Handle<Dataset> h) {
-                return "widgets".equals(h.getName());
+                return "widgets".equals(h.name());
             }
         }));
     }

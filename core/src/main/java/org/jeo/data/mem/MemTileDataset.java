@@ -38,42 +38,42 @@ public class MemTileDataset implements TileDataset {
     public MemTileDataset(String name, TilePyramid pyramid) {
         this.name = name;
         this.pyramid = pyramid;
-        tiles = new Tile[pyramid.getGrids().size()][][];
+        tiles = new Tile[pyramid.grids().size()][][];
     }
 
     @Override
-    public Driver<?> getDriver() {
+    public Driver<?> driver() {
         return new Memory();
     }
     
     @Override
-    public Map<Key<?>, Object> getDriverOptions() {
+    public Map<Key<?>, Object> driverOptions() {
         return Collections.emptyMap();
     }
     
     @Override
-    public String getName() {
+    public String name() {
         return name;
     }
     
     @Override
-    public String getTitle() {
+    public String title() {
         return null;
     }
     
     @Override
-    public String getDescription() {
+    public String description() {
         return null;
     }
     
     @Override
     public CoordinateReferenceSystem crs() throws IOException {
-        return pyramid.getCRS();
+        return pyramid.crs();
     }
 
     @Override
     public Envelope bounds() throws IOException {
-        return pyramid.getBounds();
+        return pyramid.bounds();
     }
 
     @Override
@@ -89,12 +89,12 @@ public class MemTileDataset implements TileDataset {
             return null;
         }
 
-        if (y >= grid.getHeight()) {
+        if (y >= grid.height()) {
             return null;
             //throw new IOException(String.format("y must be < %d", grid.getHeight()));
         }
         
-        if (x >= grid.getWidth()) {
+        if (x >= grid.width()) {
             return null;
             //throw new IOException(String.format("x must be < %d", grid.getWidth()));
         }
@@ -144,15 +144,15 @@ public class MemTileDataset implements TileDataset {
         }
 
         TileGrid grid = pyramid.grid(z);
-        if (tiles.length != grid.getHeight()) {
+        if (tiles.length != grid.height()) {
             throw new IllegalArgumentException(String.format(
-                "number of vertical tiles  %d != grid height %d", tiles.length, grid.getHeight()));
+                "number of vertical tiles  %d != grid height %d", tiles.length, grid.height()));
         }
 
         for (Tile[] row : tiles) {
-            if (row.length != grid.getWidth()) {
+            if (row.length != grid.width()) {
                 throw new IndexOutOfBoundsException(String.format(
-                    "number of horizontal tiles  %d != grid width %d", tiles.length, grid.getWidth()));
+                    "number of horizontal tiles  %d != grid width %d", tiles.length, grid.width()));
             }
         }
 

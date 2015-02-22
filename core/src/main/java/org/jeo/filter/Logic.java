@@ -51,11 +51,11 @@ public class Logic<T> extends Filter<T> {
         }
     }
 
-    public Type getType() {
+    public Type type() {
         return type;
     }
 
-    public List<Filter<T>> getParts() {
+    public List<Filter<T>> parts() {
         return parts;
     }
 

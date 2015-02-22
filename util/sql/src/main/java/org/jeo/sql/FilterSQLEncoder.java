@@ -138,7 +138,7 @@ public class FilterSQLEncoder extends FilterVisitor {
                     if (obj instanceof Field) {
                         // if field passed in as context use it to determine the type
                         Field fld = (Field) obj;
-                        sqlType = dbtypes.toSQL(fld.getType());
+                        sqlType = dbtypes.toSQL(fld.type());
                     }
                     else {
                         // use the value class
@@ -186,13 +186,13 @@ public class FilterSQLEncoder extends FilterVisitor {
     }
 
     public Object visit(Property property, Object obj) {
-        sql.name(property.getProperty());
+        sql.name(property.property());
         return obj;
     }
 
     public Object visit(Function function, Object obj) {
-        sql.add(function.getName()).add("(");
-        for (Expression e : function.getArgs()) {
+        sql.add(function.name()).add("(");
+        for (Expression e : function.args()) {
             e.accept(this, obj);
         }
         sql.add(")");
@@ -227,7 +227,7 @@ public class FilterSQLEncoder extends FilterVisitor {
         sql.name(pkeyCol.getName()).add(" IN (");
 
         // grab the field for the primary key so we can properly handle the type
-        for (Expression e : id.getIds()) {
+        for (Expression e : id.ids()) {
             e.accept(this, pkeyCol.getField());
             sql.add(",");
         }
@@ -236,15 +236,15 @@ public class FilterSQLEncoder extends FilterVisitor {
     }
 
     public Object visit(Logic<?> logic, Object obj) {
-        switch(logic.getType()) {
+        switch(logic.type()) {
         case NOT:
             sql.add("NOT (");
-            logic.getParts().get(0).accept(this, obj);
+            logic.parts().get(0).accept(this, obj);
             sql.add(")");
             break;
         default:
-            String op = logic.getType().name();
-            for (Filter<?> f : logic.getParts()) {
+            String op = logic.type().name();
+            for (Filter<?> f : logic.parts()) {
                 sql.add("(");
                 f.accept(this, obj);
                 sql.add(") ").add(op).add(" ");
@@ -256,19 +256,19 @@ public class FilterSQLEncoder extends FilterVisitor {
     }
 
     public Object visit(Comparison<?> compare, Object obj) {
-        Field fld = field(compare.getLeft(), compare.getRight());
+        Field fld = field(compare.left(), compare.right());
 
-        compare.getLeft().accept(this, fld);
-        sql.add(" ").add(compare.getType().toString()).add(" ");
-        compare.getRight().accept(this,  fld);
+        compare.left().accept(this, fld);
+        sql.add(" ").add(compare.type().toString()).add(" ");
+        compare.right().accept(this,  fld);
         return obj;
     }
 
     public Object visit(Spatial<?> spatial, Object obj) {
-        Field fld = field(spatial.getLeft(), spatial.getRight());
+        Field fld = field(spatial.left(), spatial.right());
         
         String function = null;
-        switch(spatial.getType()) {
+        switch(spatial.type()) {
         case INTERSECTS:
             function = "ST_Intersects";
             break;
@@ -295,9 +295,9 @@ public class FilterSQLEncoder extends FilterVisitor {
         }
 
         sql.add(function).add("(");
-        spatial.getLeft().accept(this, fld);
+        spatial.left().accept(this, fld);
         sql.add(", ");
-        spatial.getRight().accept(this, fld);
+        spatial.right().accept(this, fld);
         sql.add(")");
         return obj;
     }
@@ -305,27 +305,27 @@ public class FilterSQLEncoder extends FilterVisitor {
     @Override
     public Object visit(Math math, Object obj) {
         sql.add('(');
-        math.getLeft().accept(this, obj);
-        sql.add(math.getOperator());
-        math.getRight().accept(this, obj);
+        math.left().accept(this, obj);
+        sql.add(math.operator());
+        math.right().accept(this, obj);
         sql.add(')');
         return obj;
     }
 
     @Override
     public Object visit(Like like, Object obj) {
-        like.getProperty().accept(this, obj);
+        like.property().accept(this, obj);
         sql.add(" LIKE ");
-        sql.str((String) like.getMatch().evaluate(null));
+        sql.str((String) like.match().evaluate(null));
         return obj;
     }
 
     @Override
     public Object visit(In in, Object obj) {
-        in.getProperty().accept(this, obj);
+        in.property().accept(this, obj);
         sql.add(" IN ");
         sql.add('(');
-        List<Expression> vals = in.getValues();
+        List<Expression> vals = in.values();
         for (int i = 0; i < vals.size(); i++) {
             Object evaluate = vals.get(i).evaluate(null);
             if (evaluate instanceof String) {
@@ -343,7 +343,7 @@ public class FilterSQLEncoder extends FilterVisitor {
 
     @Override
     public Object visit(Null isNull, Object obj) {
-        isNull.getProp().accept(this, obj);
+        isNull.property().accept(this, obj);
         sql.add(" IS");
         if (isNull.isNegated()) {
             sql.add(" NOT");
@@ -366,7 +366,7 @@ public class FilterSQLEncoder extends FilterVisitor {
         }
 
         if (prop != null) {
-            return schema.field(prop.getProperty());
+            return schema.field(prop.property());
         }
 
         return null;

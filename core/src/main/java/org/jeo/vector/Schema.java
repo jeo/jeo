@@ -115,7 +115,7 @@ public class Schema implements Iterable<Field> {
      */
     public CoordinateReferenceSystem crs() {
         Field g = geometry();
-        return g != null ? g.getCRS() : null;
+        return g != null ? g.crs() : null;
     }
 
     /**
@@ -148,7 +148,7 @@ public class Schema implements Iterable<Field> {
         //TODO: potentially add an index of name to field
         for (int i = 0; i < fields.size(); i++) {
             Field f = fields.get(i);
-            if (f.getName().equals(name)) {
+            if (f.name().equals(name)) {
                 return i;
             }
         }

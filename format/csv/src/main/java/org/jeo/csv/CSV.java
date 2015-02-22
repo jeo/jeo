@@ -42,17 +42,17 @@ public class CSV extends FileVectorDriver<CSVDataset> {
     }
 
     @Override
-    public String getName() {
+    public String name() {
         return "CSV";
     }
 
     @Override
-    public List<Key<?>> getKeys() {
+    public List<Key<?>> keys() {
         return (List) Arrays.asList(FILE, DELIM, HEADER, X, Y);
     }
 
     @Override
-    public Class<CSVDataset> getType() {
+    public Class<CSVDataset> type() {
         return CSVDataset.class;
     }
 

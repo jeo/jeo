@@ -17,9 +17,6 @@ package org.jeo.tile;
 import static org.junit.Assert.*;
 
 import org.jeo.geom.Envelopes;
-import org.jeo.tile.Tile;
-import org.jeo.tile.TileCover;
-import org.jeo.tile.TilePyramid;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -61,32 +58,32 @@ public class TilePyramidTest {
 
     @Test
     public void testCover() {
-        Envelope b = tp.getBounds();
+        Envelope b = tp.bounds();
 
         TileCover cov = tp.cover(b, 1);
-        assertEquals(4, cov.getWidth());
-        assertEquals(2, cov.getHeight());
-        assertEquals(0, cov.getX0());
-        assertEquals(0, cov.getY0());
-        assertEquals(3, cov.getX1());
-        assertEquals(1, cov.getY1());
+        assertEquals(4, cov.width());
+        assertEquals(2, cov.height());
+        assertEquals(0, cov.x0());
+        assertEquals(0, cov.y0());
+        assertEquals(3, cov.x1());
+        assertEquals(1, cov.y1());
         
         cov = tp.cover(
             Envelopes.translate(b, -b.getWidth()/2f, -b.getHeight()/2f), 1);
-        assertEquals(4, cov.getWidth());
-        assertEquals(2, cov.getHeight());
-        assertEquals(-2, cov.getX0());
-        assertEquals(-1, cov.getY0());
-        assertEquals(1, cov.getX1());
-        assertEquals(0, cov.getY1());
+        assertEquals(4, cov.width());
+        assertEquals(2, cov.height());
+        assertEquals(-2, cov.x0());
+        assertEquals(-1, cov.y0());
+        assertEquals(1, cov.x1());
+        assertEquals(0, cov.y1());
 
         cov = tp.cover(Envelopes.scale(b, 0.1), 1);
-        assertEquals(2, cov.getWidth());
-        assertEquals(2, cov.getHeight());
-        assertEquals(1, cov.getX0());
-        assertEquals(0, cov.getY0());
-        assertEquals(2, cov.getX1());
-        assertEquals(1, cov.getY1());
+        assertEquals(2, cov.width());
+        assertEquals(2, cov.height());
+        assertEquals(1, cov.x0());
+        assertEquals(0, cov.y0());
+        assertEquals(2, cov.x1());
+        assertEquals(1, cov.y1());
     }
 
     void assertEnvelope(Envelope e, double x1, double y1, double x2, double y2) {

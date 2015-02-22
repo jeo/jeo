@@ -180,7 +180,7 @@ public class OGRFeature extends BasicFeature {
             cal.set(Calendar.SECOND, second[0]);
 
             Field fld = schema().getFields().get(unmapIndex(i));
-            Class<?> clazz = fld.getType();
+            Class<?> clazz = fld.type();
             
             if (clazz.equals(java.sql.Date.class)) {
                 cal.clear(Calendar.HOUR_OF_DAY);
@@ -224,7 +224,7 @@ public class OGRFeature extends BasicFeature {
             Map<String,Object> map = new LinkedHashMap<String, Object>();
 
             for (Field fld : schema()) {
-                map.put(fld.getName(), get(fld.getName()));
+                map.put(fld.name(), get(fld.name()));
             }
             return map;
         }

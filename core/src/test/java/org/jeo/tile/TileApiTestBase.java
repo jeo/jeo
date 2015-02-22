@@ -52,13 +52,13 @@ public abstract class TileApiTestBase {
     @Test
     public void testPyramid() throws Exception {
         TilePyramid tpyr = data.pyramid();
-        assertEquals(2, tpyr.getGrids().size());
+        assertEquals(2, tpyr.grids().size());
         assertNotNull(tpyr.grid(0));
         assertNotNull(tpyr.grid(1));
         assertNull(tpyr.grid(2));
 
-        assertEquals(Integer.valueOf(2), tpyr.grid(0).getWidth());
-        assertEquals(Integer.valueOf(1), tpyr.grid(0).getHeight());
+        assertEquals(Integer.valueOf(2), tpyr.grid(0).width());
+        assertEquals(Integer.valueOf(1), tpyr.grid(0).height());
     }
 
     @Test

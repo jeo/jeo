@@ -67,21 +67,21 @@ public class Version implements Serializable, Comparable<Version> {
     /**
      * The major number component of the version.
      */
-    public Integer getMajor() {
+    public Integer major() {
         return major;
     }
 
     /**
      * The minor number component of the version.
      */
-    public Integer getMinor() {
+    public Integer minor() {
         return minor;
     }
 
     /**
      * The pach number component of the version.
      */
-    public Integer getPatch() {
+    public Integer patch() {
         return patch;
     }
 

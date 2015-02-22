@@ -15,7 +15,6 @@
 package org.jeo.vector;
 
 import org.jeo.data.Cursor;
-import org.jeo.data.Cursors;
 import org.jeo.filter.Filter;
 import org.jeo.filter.Filters;
 import org.jeo.geom.Envelopes;
@@ -53,112 +52,112 @@ public class VectorQueryPlan {
     }
 
     /**
-     * Whether {@link VectorQuery#getBounds()} was handled natively.
+     * Whether {@link VectorQuery#bounds()} was handled natively.
      */
     public boolean isBounded() {
         return bounded;
     }
 
     /**
-     * Marks {@link VectorQuery#getBounds()} as being handled natively.
+     * Marks {@link VectorQuery#bounds()} as being handled natively.
      */
     public void bounded() {
         this.bounded = true;
     }
 
     /**
-     * Whether {@link VectorQuery#getFilter()} was handled natively.
+     * Whether {@link VectorQuery#filter()} was handled natively.
      */
     public boolean isFiltered() {
         return filtered;
     }
 
     /**
-     * Marks {@link VectorQuery#getFilter()} as being handled natively.
+     * Marks {@link VectorQuery#filter()} as being handled natively.
      */
     public void filtered() {
         filtered = true;
     }
 
     /**
-     * Whether {@link VectorQuery#getSort()} was handled natively.
+     * Whether {@link VectorQuery#sort()} was handled natively.
      */
     public boolean isSorted() {
         return sorted;
     }
 
     /**
-     * Marks {@link VectorQuery#getSort()} as being handled natively.
+     * Marks {@link VectorQuery#sort()} as being handled natively.
      */
     public void sorted() {
         sorted = true;
     }
 
     /**
-     * Whether {@link VectorQuery#getOffset()} was handled natively.
+     * Whether {@link VectorQuery#offset()} was handled natively.
      */
     public boolean isOffsetted() {
         return offsetted;
     }
 
     /**
-     * Marks {@link VectorQuery#getOffset()} as being handled natively.
+     * Marks {@link VectorQuery#offset()} as being handled natively.
      */
     public void offsetted() {
         offsetted = true;
     }
 
     /**
-     * Whether {@link VectorQuery#getLimit()} was handled natively.
+     * Whether {@link VectorQuery#limit()} was handled natively.
      */
     public boolean isLimited() {
         return limited;
     }
 
     /**
-     * Marks {@link VectorQuery#getLimit()} as being handled natively.
+     * Marks {@link VectorQuery#limit()} as being handled natively.
      */
     public void limited() {
         limited = true;
     }
 
     /**
-     * Whether {@link VectorQuery#getReproject()} was handled natively.
+     * Whether {@link VectorQuery#reproject()} was handled natively.
      */
     public boolean isReprojected() {
         return reprojected;
     }
 
     /**
-     * Marks {@link VectorQuery#getReproject()} as being handled natively.
+     * Marks {@link VectorQuery#reproject()} as being handled natively.
      */
     public void reprojected() {
         reprojected = true;
     }
 
     /**
-     * Whether {@link VectorQuery#getSimplify()} was handled natively.
+     * Whether {@link VectorQuery#simplify()} was handled natively.
      */
     public boolean isSimplified() {
         return simplified;
     }
 
     /**
-     * Marks {@link VectorQuery#getSimplify()} as being handled natively.
+     * Marks {@link VectorQuery#simplify()} as being handled natively.
      */
     public void simplified() {
         simplified = true;
     }
 
     /**
-     * Whether {@link VectorQuery#getFields()} was handled natively.
+     * Whether {@link VectorQuery#fields()} was handled natively.
      */
     public boolean isFields() {
         return fieldsSelected;
     }
 
     /**
-     * Marks {@link VectorQuery#getFields()} as being handled natively.
+     * Marks {@link VectorQuery#fields()} as being handled natively.
      */
     public void fields() {
         this.fieldsSelected = true;
@@ -168,7 +167,7 @@ public class VectorQueryPlan {
      * Augments the specified cursor with wrappers that handle the parts of the query that could
      * not be processed natively.
      * <p>
-     * For example, if a format is unable to process {@link VectorQuery#getFilter()} objects natively
+     * For example, if a format is unable to process {@link VectorQuery#filter()} objects natively
      * then {@link #isFiltered()} should return <tt>false</tt> and this method should transform the
      * cursor with {@link Cursor#filter(org.jeo.util.Predicate)}.
      * </p>
@@ -178,32 +177,32 @@ public class VectorQueryPlan {
      */
     public FeatureCursor apply(FeatureCursor cursor) {
 
-        Envelope bounds = q.getBounds();
+        Envelope bounds = q.bounds();
         if (!isBounded() && !Envelopes.isNull(bounds)) {
             cursor = cursor.intersect(bounds, true);
         }
 
-        Filter<Feature> filter = q.getFilter();
+        Filter<Feature> filter = q.filter();
         if (!isFiltered() && !Filters.isFalseOrNull(filter)) {
             cursor = cursor.filter(filter);
         }
 
-        Integer offset = q.getOffset();
+        Integer offset = q.offset();
         if (!isOffsetted() && offset != null) {
             cursor = cursor.skip(offset);
         }
 
-        Integer limit = q.getLimit();
+        Integer limit = q.limit();
         if (!isLimited() && limit != null) {
             cursor = cursor.limit(limit);
         }
 
-        Pair<CoordinateReferenceSystem,CoordinateReferenceSystem> reproj = q.getReproject();
+        Pair<CoordinateReferenceSystem,CoordinateReferenceSystem> reproj = q.reproject();
         if (!isReprojected() && reproj != null) {
             cursor = cursor.reproject(reproj.first, reproj.second);
         }
 
-        Set<String> fields = q.getFields();
+        Set<String> fields = q.fields();
         if (!isFields() && !fields.isEmpty()) {
             cursor = cursor.select(fields);
         }

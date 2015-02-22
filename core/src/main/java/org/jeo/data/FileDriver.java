@@ -45,12 +45,12 @@ public abstract class FileDriver<T> implements Driver<T> {
     }
 
     @Override
-    public List<String> getAliases() {
+    public List<String> aliases() {
         return Collections.emptyList();
     }
 
     @Override
-    public List<Key<?>> getKeys() {
+    public List<Key<?>> keys() {
         return (List) Arrays.asList(FILE);
     }
 

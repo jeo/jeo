@@ -36,14 +36,14 @@ public abstract class Function implements Expression {
     /**
      * The name of the function.
      */
-    public String getName() {
+    public String name() {
         return name;
     }
 
     /**
      * Function arguments.
      */
-    public List<Expression> getArgs() {
+    public List<Expression> args() {
         return args;
     }
 

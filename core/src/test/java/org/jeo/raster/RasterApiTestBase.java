@@ -67,7 +67,7 @@ public abstract class RasterApiTestBase {
 
     @Test
     public void testGetName() {
-        Assert.assertEquals("dem", dem.getName());
+        Assert.assertEquals("dem", dem.name());
     }
 
     @Test
@@ -193,7 +193,7 @@ public abstract class RasterApiTestBase {
     @Test
     public void testReproject() throws IOException {
         Assume.assumeTrue("Driver does not support reprojection",
-            ((RasterDriver)dem.getDriver()).supports(RasterDriver.Capability.REPROJECT));
+            ((RasterDriver)dem.driver()).supports(RasterDriver.Capability.REPROJECT));
 
         RasterQuery q = new RasterQuery()
             .size(10,10)

@@ -29,11 +29,11 @@ public class TypeOf<T> extends Filter<T> {
         this.type = type;
     }
 
-    public Class<?> getType() {
+    public Class<?> type() {
         return type;
     }
 
-    public Expression getExpression() {
+    public Expression expression() {
         return expr;
     }
 

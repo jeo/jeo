@@ -64,63 +64,67 @@ public class Tile {
     /**
      * The z value (zoom level) of the tile.
      */
-    public Integer getZ() {
+    public Integer z() {
         return z;
     }
 
     /**
      * Sets the z value (zoom level) of the tile.
      */
-    public void setZ(Integer z) {
+    public Tile z(Integer z) {
         this.z = z;
+        return this;
     }
 
     /**
      * The x value (column index) of the tile.
      */
-    public Integer getX() {
+    public Integer x() {
         return x;
     }
 
     /**
      * Sets the x value (column index) of the tile.
      */
-    public void setX(Integer x) {
+    public Tile x(Integer x) {
         this.x = x;
+        return this;
     }
 
     /**
      * The y value (row index) of the tile.
      */
-    public Integer getY() {
+    public Integer y() {
         return y;
     }
 
     /**
      * Sets the y value (row index) of the tile.
      */
-    public void setY(Integer y) {
+    public Tile y(Integer y) {
         this.y = y;
+        return this;
     }
 
     /**
      * The tile image data.
      */
-    public byte[] getData() {
+    public byte[] data() {
         return data;
     }
 
     /**
      * Sets the tile image data.
      */
-    public void setData(byte[] data) {
+    public Tile data(byte[] data) {
         this.data = data;
+        return this;
     }
 
     /**
      * The mime type specifying the format of the tile image data.
      */
-    public String getMimeType() {
+    public String mimeType() {
         if (mimeType == null && data != null) {
             // try sniffing the data
             if (isMagic(JPG)) {
@@ -136,8 +140,9 @@ public class Tile {
     /**
      * Sets the mime type specifying the format of the tile image data.
      */
-    public void setMimeType(String mimeType) {
+    public Tile mimeType(String mimeType) {
         this.mimeType = mimeType;
+        return this;
     }
 
     @Override

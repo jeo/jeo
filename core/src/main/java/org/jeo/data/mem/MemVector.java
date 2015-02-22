@@ -21,8 +21,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.jeo.data.Cursor;
-import org.jeo.data.Cursors;
 import org.jeo.vector.FeatureCursor;
 import org.jeo.vector.VectorQuery;
 import org.jeo.vector.VectorQueryPlan;
@@ -51,11 +49,11 @@ public class MemVector implements VectorDataset {
         index = new Quadtree();
     }
 
-    public Memory getDriver() {
+    public Memory driver() {
         return new Memory();
     }
 
-    public Map<Key<?>,Object> getDriverOptions() {
+    public Map<Key<?>,Object> driverOptions() {
         return Collections.emptyMap();
     }
     
@@ -64,17 +62,17 @@ public class MemVector implements VectorDataset {
     }
 
     @Override
-    public String getName() {
+    public String name() {
         return schema.getName();
     }
     
     @Override
-    public String getTitle() {
-        return getName();
+    public String title() {
+        return name();
     }
     
     @Override
-    public String getDescription() {
+    public String description() {
         return null;
     }
     
@@ -121,12 +119,12 @@ public class MemVector implements VectorDataset {
         VectorQueryPlan qp = new VectorQueryPlan(q);
 
         List<Feature> features = this.features;
-        if (!Envelopes.isNull(q.getBounds())) {
-            features = query(q.getBounds()); 
+        if (!Envelopes.isNull(q.bounds())) {
+            features = query(q.bounds());
             qp.bounded();
         }
 
-        return qp.apply(new MemCursor(q.getMode(), features, this));
+        return qp.apply(new MemCursor(q.mode(), features, this));
     }
 
     List<Feature> query(Envelope bounds) {
@@ -163,7 +161,7 @@ public class MemVector implements VectorDataset {
         Feature pre = f.getDelegate();
 
         Field geo = schema.geometry(); 
-        if (geo != null && f.getChanged().containsKey(geo.getName())) {
+        if (geo != null && f.changed().containsKey(geo.name())) {
             Geometry g1 = pre.geometry();
             Geometry g2 = f.geometry();
 

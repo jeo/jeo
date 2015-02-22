@@ -55,7 +55,7 @@ public class TilePyramidBuilder {
      * Sets bounds of the pyramid.
      */
     public TilePyramidBuilder bounds(Envelope bounds) {
-        tp.setBounds(bounds);
+        tp.bounds(bounds);
         return this;
     }
 
@@ -70,7 +70,7 @@ public class TilePyramidBuilder {
      * Sets crs of the pyramid.
      */
     public TilePyramidBuilder crs(CoordinateReferenceSystem crs) {
-        tp.setCRS(crs);
+        tp.crs(crs);
         return this;
     }
 
@@ -78,8 +78,8 @@ public class TilePyramidBuilder {
      * Sets the tile dimensions for the pyramid.
      */
     public TilePyramidBuilder tileSize(int width, int height) {
-        tp.setTileWidth(width);
-        tp.setTileHeight(height);
+        tp.tileWidth(width);
+        tp.tileHeight(height);
         return this;
     }
 
@@ -87,7 +87,7 @@ public class TilePyramidBuilder {
      * Sets the origin of the tile coordinate system.
      */
     public TilePyramidBuilder origin(TilePyramid.Origin origin) {
-        tp.setOrigin(origin);
+        tp.origin(origin);
         return this;
     }
 
@@ -100,10 +100,10 @@ public class TilePyramidBuilder {
      * 
      */
     public TilePyramidBuilder grid(int z, int width, int height) {
-        double xres = tp.getBounds().getWidth() / ((double)width) / ((double)tp.getTileWidth());
-        double yres = tp.getBounds().getHeight() / ((double)height) / ((double)tp.getTileHeight());
+        double xres = tp.bounds().getWidth() / ((double)width) / ((double)tp.tileWidth());
+        double yres = tp.bounds().getHeight() / ((double)height) / ((double)tp.tileHeight());
 
-        tp.getGrids().add(new TileGrid(z, width, height, xres, yres));
+        tp.grids().add(new TileGrid(z, width, height, xres, yres));
         return this;
     }
 
@@ -119,13 +119,13 @@ public class TilePyramidBuilder {
     public TilePyramidBuilder grid(int width, int height) {
         int z;
 
-        List<TileGrid> grids = tp.getGrids();
+        List<TileGrid> grids = tp.grids();
         if (grids.isEmpty()) {
             z = 0;
         }
         else {
             TileGrid last = grids.get(grids.size()-1);
-            z = last.getZ()+1;
+            z = last.z()+1;
         }
 
         return grid(z, width, height);
@@ -141,9 +141,9 @@ public class TilePyramidBuilder {
      * </p>
      */
     public TilePyramidBuilder grid() {
-        List<TileGrid> grids = tp.getGrids();
+        List<TileGrid> grids = tp.grids();
         if (grids.isEmpty()) {
-            Envelope bounds = tp.getBounds();
+            Envelope bounds = tp.bounds();
             if (bounds != null) {
                 if (bounds.getWidth() > bounds.getHeight()) {
                     return grid(0, (int)(bounds.getWidth()/bounds.getHeight()), 1);
@@ -158,7 +158,7 @@ public class TilePyramidBuilder {
         }
         else {
             TileGrid last = grids.get(grids.size()-1);
-            return grid(last.getZ()+1, last.getWidth()*2, last.getHeight()*2);
+            return grid(last.z()+1, last.width()*2, last.height()*2);
         }
         return this;
     }

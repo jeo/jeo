@@ -83,12 +83,12 @@ public class PostGISWorkspace implements Workspace {
     }
 
     @Override
-    public Driver<?> getDriver() {
+    public Driver<?> driver() {
         return new PostGIS();
     }
 
     @Override
-    public Map<Key<?>, Object> getDriverOptions() {
+    public Map<Key<?>, Object> driverOptions() {
         return opts.toMap();
     }
 
@@ -119,7 +119,7 @@ public class PostGISWorkspace implements Workspace {
                     String tbl = tables.getString("TABLE_NAME");
                     String schema = tables.getString("TABLE_SCHEM");
                     if (includeTable(tbl, schema)) {
-                        l.add(new Handle<Dataset>(datasetName(tbl, schema), Dataset.class, getDriver()) {
+                        l.add(new Handle<Dataset>(datasetName(tbl, schema), Dataset.class, driver()) {
                             @Override
                             protected Dataset doResolve() throws IOException {
                                 return get(name);
@@ -171,9 +171,9 @@ public class PostGISWorkspace implements Workspace {
                     .add(" (").name(findIdColumnName(schema)).add(" SERIAL PRIMARY KEY, ");
                 
                 for (Field fld : schema) {
-                    String typename = dbtypes.toName(fld.getType());
+                    String typename = dbtypes.toName(fld.type());
                     if (typename == null) {
-                        Integer sqlType = dbtypes.toSQL(fld.getType());
+                        Integer sqlType = dbtypes.toSQL(fld.type());
                         if (sqlType != null) {
                             typename = lookupTypeName(sqlType, cx);
                         }
@@ -184,14 +184,14 @@ public class PostGISWorkspace implements Workspace {
                             "Unable to map field " + fld + " to database type"); 
                     }
 
-                    sql.name(fld.getName()).add(" ");
+                    sql.name(fld.name()).add(" ");
                     if (fld.isGeometry()) {
-                        Integer srid = fld.getCRS() != null ? Proj.epsgCode(fld.getCRS()) : null;
+                        Integer srid = fld.crs() != null ? Proj.epsgCode(fld.crs()) : null;
                         srid = srid != null ? srid : -1;
 
                         if (info.isAtLeastVersion2()) {
                             //declare all info inline
-                            sql.add("Geometry(").add(Geom.Type.from(fld.getType()).getName())
+                            sql.add("Geometry(").add(Geom.Type.from(fld.type()).getName())
                                .add(", ").add(srid).add(")");
                         }
                         else {
@@ -225,10 +225,10 @@ public class PostGISWorkspace implements Workspace {
                         values.add(new Pair("", Types.VARCHAR));
                         values.add(new Pair(schema().orElse("public"), Types.VARCHAR));
                         values.add(new Pair(schema.getName(), Types.VARCHAR));
-                        values.add(new Pair(fld.getName(), Types.VARCHAR));
+                        values.add(new Pair(fld.name(), Types.VARCHAR));
                         values.add(new Pair(2, Types.INTEGER));
                         values.add(new Pair(p.second, Types.INTEGER));
-                        values.add(new Pair(Geom.Type.from(fld.getType()).getName(), Types.VARCHAR));
+                        values.add(new Pair(Geom.Type.from(fld.type()).getName(), Types.VARCHAR));
 
                         logQuery(sql, values);
                         open(prepareStatement(sql, values, cx)).execute();

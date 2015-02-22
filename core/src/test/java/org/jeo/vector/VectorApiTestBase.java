@@ -22,7 +22,6 @@ import java.util.Set;
 
 import org.jeo.TestData;
 import org.jeo.data.Cursor;
-import org.jeo.data.Cursors;
 import org.jeo.geom.Envelopes;
 import org.jeo.geom.Geom;
 import org.jeo.proj.Proj;
@@ -63,7 +62,7 @@ public abstract class VectorApiTestBase {
 
     @Test
     public void testGetName() {
-        assertEquals("states", data.getName());
+        assertEquals("states", data.name());
     }
 
     @Test
@@ -109,7 +108,7 @@ public abstract class VectorApiTestBase {
 
         // count with spatial filters
         assertEquals(abbrs.size(), data.count(new VectorQuery().filter(String.format("INTERSECTS(%s, %s)",
-            data.schema().geometry().getName(), Envelopes.toPolygon(bbox)))));
+            data.schema().geometry().name(), Envelopes.toPolygon(bbox)))));
 
         // count with attribute filters
         assertEquals(1, data.count(new VectorQuery().filter("STATE_NAME = 'Texas'")));
@@ -142,7 +141,7 @@ public abstract class VectorApiTestBase {
 
         // spatial filter
         assertCovered(data.cursor(new VectorQuery().filter(String.format("INTERSECTS(%s, %s)",
-            data.schema().geometry().getName(), Envelopes.toPolygon(bbox)))), 
+            data.schema().geometry().name(), Envelopes.toPolygon(bbox)))),
             "MO", "OK", "TX", "NM", "AR", "LA");
 
         // comparison filter
@@ -199,7 +198,7 @@ public abstract class VectorApiTestBase {
         } finally {
             cursor.close();
         }
-        assertTrue(next.has(next.schema().geometry().getName()));
+        assertTrue(next.has(next.schema().geometry().name()));
         assertTrue(next.has("STATE_NAME"));
         assertFalse(next.has("NOT THERE AT ALL"));
 
@@ -210,7 +209,7 @@ public abstract class VectorApiTestBase {
         Feature feature = cursor.next();
         assertEquals(data.schema().getFields().size(), feature.schema().size());
         for (Field f: data.schema().getFields()) {
-            assertNotNull(feature.schema().field(f.getName()));
+            assertNotNull(feature.schema().field(f.name()));
         }
     }
 
@@ -228,7 +227,7 @@ public abstract class VectorApiTestBase {
         assertTrue(next.map().size() == 2);
         // make sure query reduction doesn't result in missing id but hard to
         // test specifics across drivers as they return differing values now
-        assertTrue(next.getId() != null && next.getId().length() > 0);
+        assertTrue(next.id() != null && next.id().length() > 0);
         // this should be here but hard to test specific value as order varies
         assertTrue(next.get("STATE_NAME") != null);
         assertTrue(next.get("SAMP_POP") != null);
@@ -282,7 +281,7 @@ public abstract class VectorApiTestBase {
         Cursor<Feature> c = dataset.cursor(new VectorQuery().filter(filter));
         try {
             assertTrue(c.hasNext());
-            return c.next().getId();
+            return c.next().id();
         }
         finally {
             c.close();

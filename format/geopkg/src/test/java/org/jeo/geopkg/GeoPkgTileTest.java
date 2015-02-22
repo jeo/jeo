@@ -43,7 +43,7 @@ public class GeoPkgTileTest extends GeoPkgTestSupport {
     @After
     public void tearDown() throws Exception {
         geopkg.close();
-        FileUtils.deleteQuietly(geopkg.getFile().getParentFile());
+        FileUtils.deleteQuietly(geopkg.file().getParentFile());
     }
 
     @Test

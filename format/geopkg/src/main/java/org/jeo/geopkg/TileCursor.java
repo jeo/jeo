@@ -49,10 +49,10 @@ public class TileCursor extends Cursor<Tile> {
         Tile t = new Tile();
 
         try {
-            t.setZ(rs.getInt(0));
-            t.setX(rs.getInt(1));
-            t.setY(rs.getInt(2));
-            t.setData(rs.getBytes(3));
+            t.z(rs.getInt(0));
+            t.x(rs.getInt(1));
+            t.y(rs.getInt(2));
+            t.data(rs.getBytes(3));
         }
         catch(Exception e) {
             throw new IOException(e);

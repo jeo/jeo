@@ -59,7 +59,7 @@ public class DefaultMapper implements MongoMapper {
 
     @Override
     public Feature feature(DBObject obj, MongoDataset data) {
-        return new MongoFeature(obj, data.getName(), mapping);
+        return new MongoFeature(obj, data.name(), mapping);
     }
 
     @Override

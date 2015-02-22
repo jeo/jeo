@@ -46,17 +46,17 @@ public class GeoJSON extends FileVectorDriver<GeoJSONDataset> {
     }
 
     @Override
-    public String getName() {
+    public String name() {
         return "GeoJSON";
     }
 
     @Override
-    public List<String> getAliases() {
+    public List<String> aliases() {
         return Arrays.asList("json");
     }
     
     @Override
-    public Class<GeoJSONDataset> getType() {
+    public Class<GeoJSONDataset> type() {
         return GeoJSONDataset.class;
     }
 

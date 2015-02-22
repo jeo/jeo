@@ -42,17 +42,17 @@ public class Shapefile extends OGRDriver<OGRDataset> {
     }
 
     @Override
-    public String getName() {
+    public String name() {
         return "Shapefile";
     }
 
     @Override
-    public Class<OGRDataset> getType() {
+    public Class<OGRDataset> type() {
         return OGRDataset.class;
     }
 
     @Override
-    public List<String> getAliases() {
+    public List<String> aliases() {
         return Arrays.asList("shp");
     }
 

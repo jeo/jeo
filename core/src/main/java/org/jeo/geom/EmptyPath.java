@@ -26,7 +26,7 @@ public class EmptyPath extends CoordinatePath {
     }
 
     @Override
-    public Geometry getGeometry() {
+    public Geometry geometry() {
         return g;
     }
 

@@ -155,11 +155,11 @@ public class CoordinatePathTest {
             Coordinate c = 
                 new Coordinate(((Number)seq[i]).doubleValue(),((Number)seq[i+1]).doubleValue());
             assertEquals(c, it.next());
-            assertEquals((PathStep)seq[i+2], it.getStep());
+            assertEquals((PathStep)seq[i+2], it.step());
         }
 
         assertFalse(it.hasNext());
         assertNull(it.next());
-        assertEquals(PathStep.STOP, it.getStep());
+        assertEquals(PathStep.STOP, it.step());
     }
 }

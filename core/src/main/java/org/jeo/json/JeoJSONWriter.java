@@ -16,7 +16,6 @@ package org.jeo.json;
 
 import com.vividsolutions.jts.geom.Envelope;
 import org.jeo.data.*;
-import org.jeo.json.encoder.JSONEncoder;
 import org.jeo.raster.RasterDataset;
 import org.jeo.tile.TileDataset;
 import org.jeo.vector.Field;
@@ -78,11 +77,11 @@ public class JeoJSONWriter extends GeoJSONWriter {
         object();
 
         key("type").value("workspace");
-        key("driver").value(ws.getDriver().getName());
+        key("driver").value(ws.driver().name());
 
         key("datasets").array();
         for (Handle<Dataset> ref : ws.list()) {
-            value(ref.getName());
+            value(ref.name());
         }
         endArray();
 
@@ -130,7 +129,7 @@ public class JeoJSONWriter extends GeoJSONWriter {
 
         key("schema").object();
         for (Field fld : vds.schema()) {
-            key(fld.getName()).value(fld.getType().getSimpleName());
+            key(fld.name()).value(fld.type().getSimpleName());
         }
         endObject();
 
@@ -197,15 +196,15 @@ public class JeoJSONWriter extends GeoJSONWriter {
         encode(tds);
 
         TilePyramid pyr = tds.pyramid();
-        key("tilesize").array().value(pyr.getTileWidth())
-                .value(pyr.getTileHeight()).endArray();
+        key("tilesize").array().value(pyr.tileWidth())
+                .value(pyr.tileHeight()).endArray();
 
         key("grids").array();
-        for (TileGrid grid : tds.pyramid().getGrids()) {
-            object().key("zoom").value(grid.getZ()).key("width")
-                .value(grid.getWidth()).key("height")
-                .value(grid.getHeight()).key("res").array()
-                .value(grid.getXRes()).value(grid.getYRes()).endArray()
+        for (TileGrid grid : tds.pyramid().grids()) {
+            object().key("zoom").value(grid.z()).key("width")
+                .value(grid.width()).key("height")
+                .value(grid.height()).key("res").array()
+                .value(grid.xres()).value(grid.yres()).endArray()
                 .endObject();
         }
         endArray();
@@ -219,7 +218,7 @@ public class JeoJSONWriter extends GeoJSONWriter {
      * Helper to encode common Dataset attributes.
      */
     JeoJSONWriter encode(Dataset ds) throws IOException {
-        key("name").value(ds.getName());
+        key("name").value(ds.name());
 
         key("type");
         if (ds instanceof VectorDataset) {
@@ -235,7 +234,7 @@ public class JeoJSONWriter extends GeoJSONWriter {
             nul();
         }
 
-        key("driver").value(ds.getDriver().getName());
+        key("driver").value(ds.driver().name());
 
         Envelope bbox = ds.bounds();
         if (!Envelopes.isNull(bbox)) {

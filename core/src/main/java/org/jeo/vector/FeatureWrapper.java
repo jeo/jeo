@@ -39,8 +39,8 @@ public class FeatureWrapper implements Feature {
     }
 
     @Override
-    public String getId() {
-        return delegate.getId();
+    public String id() {
+        return delegate.id();
     }
 
     @Override

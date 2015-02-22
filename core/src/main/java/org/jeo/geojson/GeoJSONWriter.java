@@ -382,8 +382,8 @@ public class GeoJSONWriter extends JSONEncoder {
 
         object();
 
-        if (f.getId() != null) {
-            key("id").value(f.getId());
+        if (f.id() != null) {
+            key("id").value(f.id());
         }
 
         Geometry g = f.geometry();

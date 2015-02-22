@@ -17,15 +17,12 @@ package org.jeo.mongo;
 import java.io.IOException;
 import java.util.Map;
 
-import org.jeo.data.Cursor;
 import org.jeo.data.Cursor.Mode;
-import org.jeo.data.Cursors;
 import org.jeo.data.Driver;
 import org.jeo.vector.FeatureCursor;
 import org.jeo.vector.VectorQuery;
 import org.jeo.vector.VectorQueryPlan;
 import org.jeo.vector.VectorDataset;
-import org.jeo.vector.Feature;
 import org.jeo.vector.Schema;
 import org.jeo.vector.SchemaBuilder;
 import org.jeo.filter.Filters;
@@ -70,27 +67,27 @@ public class MongoDataset implements VectorDataset {
     }
 
     @Override
-    public Driver<?> getDriver() {
-        return mongo.getDriver();
+    public Driver<?> driver() {
+        return mongo.driver();
     }
 
     @Override
-    public Map<Key<?>, Object> getDriverOptions() {
-        return mongo.getDriverOptions();
+    public Map<Key<?>, Object> driverOptions() {
+        return mongo.driverOptions();
     }
 
     @Override
-    public String getName() {
+    public String name() {
         return dbcol.getName();
     }
 
     @Override
-    public String getTitle() {
+    public String title() {
         return null;
     }
 
     @Override
-    public String getDescription() {
+    public String description() {
         return null;
     }
 
@@ -117,44 +114,44 @@ public class MongoDataset implements VectorDataset {
 
         VectorQueryPlan qp = new VectorQueryPlan(q);
 
-        if (!Filters.isTrueOrNull(q.getFilter())) {
+        if (!Filters.isTrueOrNull(q.filter())) {
             // TODO: transform natively to filter 
             // we can't optimize
             return qp.apply(cursor(q)).count();
         }
 
         long count = 
-            q.getBounds() != null ? dbcol.count(encodeBboxQuery(q.getBounds())) : dbcol.count();
+            q.bounds() != null ? dbcol.count(encodeBboxQuery(q.bounds())) : dbcol.count();
 
         return q.adjustCount(count);
     }
 
     @Override
     public FeatureCursor cursor(VectorQuery q) throws IOException {
-        if (q.getMode() == Mode.APPEND) {
-            return new MongoCursor(q.getMode(), null, this);
+        if (q.mode() == Mode.APPEND) {
+            return new MongoCursor(q.mode(), null, this);
         }
 
         VectorQueryPlan qp = new VectorQueryPlan(q);
 
         //TODO: sorting
-        DBCursor dbCursor = !Envelopes.isNull(q.getBounds()) ? 
-            dbcol.find(encodeBboxQuery(q.getBounds())) : dbcol.find();
+        DBCursor dbCursor = !Envelopes.isNull(q.bounds()) ?
+            dbcol.find(encodeBboxQuery(q.bounds())) : dbcol.find();
         qp.bounded();
 
-        Integer offset = q.getOffset();
+        Integer offset = q.offset();
         if (offset != null) {
             dbCursor.skip(offset);
             qp.offsetted();
         }
 
-        Integer limit = q.getLimit();
+        Integer limit = q.limit();
         if (limit != null) {
             dbCursor.limit(limit);
             qp.limited();
         }
 
-        return qp.apply(new MongoCursor(q.getMode(), dbCursor, this));
+        return qp.apply(new MongoCursor(q.mode(), dbCursor, this));
     }
 
     DBObject encodeBboxQuery(Envelope bbox) {

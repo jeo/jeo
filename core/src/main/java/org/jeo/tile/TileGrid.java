@@ -46,21 +46,21 @@ public class TileGrid {
     /**
      * The z (zoom) level of the tile grid.
      */
-    public Integer getZ() {
+    public Integer z() {
         return z;
     }
 
     /**
      * The number of columns of the tile grid.
      */
-    public Integer getWidth() {
+    public Integer width() {
         return width;
     }
 
     /**
      * The number of rows of the tile grid.
      */
-    public Integer getHeight() {
+    public Integer height() {
         return height;
     }
 
@@ -70,7 +70,7 @@ public class TileGrid {
      * More specifically the horizontal size of a single pixel in "map" units. 
      * </p>
      */
-    public Double getXRes() {
+    public Double xres() {
         return xRes;
     }
 
@@ -80,7 +80,7 @@ public class TileGrid {
      * More specifically the vertical size of a single pixel in "map" units. 
      * </p>
      */
-    public Double getYRes() {
+    public Double yres() {
         return yRes;
     }
 }

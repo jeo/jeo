@@ -43,17 +43,17 @@ public class Protobuf extends FileDriver<ProtobufDataset> implements VectorDrive
     }
 
     @Override
-    public String getName() {
+    public String name() {
         return "Protobuf";
     }
 
     @Override
-    public List<String> getAliases() {
+    public List<String> aliases() {
         return Arrays.asList("pb", "pbf");
     }
 
     @Override
-    public Class<ProtobufDataset> getType() {
+    public Class<ProtobufDataset> type() {
         return ProtobufDataset.class;
     }
     

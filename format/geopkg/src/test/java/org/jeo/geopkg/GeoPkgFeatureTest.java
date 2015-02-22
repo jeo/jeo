@@ -59,7 +59,7 @@ public class GeoPkgFeatureTest extends GeoPkgTestSupport {
     @After
     public void tearDown() throws Exception {
         geopkg.close();
-        FileUtils.deleteQuietly(geopkg.getFile().getParentFile());
+        FileUtils.deleteQuietly(geopkg.file().getParentFile());
     }
 
     @Test
@@ -80,7 +80,7 @@ public class GeoPkgFeatureTest extends GeoPkgTestSupport {
         assertEquals("states", schema.getName());
 
         assertNotNull(schema.geometry());
-        assertEquals(MultiPolygon.class, schema.geometry().getType());
+        assertEquals(MultiPolygon.class, schema.geometry().type());
 
         assertNotNull(schema.field("STATE_NAME"));
     }
@@ -133,7 +133,7 @@ public class GeoPkgFeatureTest extends GeoPkgTestSupport {
         assertTrue(cursor.hasNext());
         Geometry g = Geom.point(0,0).buffer(1);
         Feature f = cursor.next();
-        f.put(schema.geometry().getName(), g);
+        f.put(schema.geometry().name(), g);
         f.put("STATE_NAME", "JEOLAND");
         cursor.write().close();
 

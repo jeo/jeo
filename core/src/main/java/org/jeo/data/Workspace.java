@@ -31,12 +31,12 @@ public interface Workspace extends Disposable {
     /**
      * The driver used to open the workspace.
      */
-    Driver<?> getDriver();
+    Driver<?> driver();
 
     /**
      * The driver options for the workspace.
      */
-    Map<Key<?>,Object> getDriverOptions();
+    Map<Key<?>,Object> driverOptions();
 
     /**
      * The names of all datasets of the workspace.

@@ -63,14 +63,14 @@ public class Field {
     /**
      * The name of the field.
      */
-    public String getName() {
+    public String name() {
         return name;
     }
 
     /**
      * The type of the field.
      */
-    public Class<?> getType() {
+    public Class<?> type() {
         return type;
     }
 
@@ -92,7 +92,7 @@ public class Field {
      * This value is typically only set when {@link #isGeometry()} returns <code>true</code>.
      * </p>
      */
-    public CoordinateReferenceSystem getCRS() {
+    public CoordinateReferenceSystem crs() {
         return crs;
     }
 
@@ -113,7 +113,7 @@ public class Field {
 
     @Override
     public String toString() {
-        return String.format("(%s,%s)", name, getType().getSimpleName());
+        return String.format("(%s,%s)", name, type().getSimpleName());
     }
 
     @Override

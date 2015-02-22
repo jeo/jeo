@@ -14,12 +14,9 @@
  */
 package org.jeo.gdal;
 
-import org.gdal.gdal.gdal;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -45,7 +42,7 @@ public class GeoTIFF extends GDAL {
     }
 
     @Override
-    public String getName() {
+    public String name() {
         return "GeoTIFF";
     }
 
@@ -55,9 +52,9 @@ public class GeoTIFF extends GDAL {
     }
 
     @Override
-    public List<String> getAliases() {
+    public List<String> aliases() {
         List<String> aliases = new ArrayList<>();
-        aliases.addAll(super.getAliases());
+        aliases.addAll(super.aliases());
         aliases.add("tif");
         aliases.add("tiff");
         return aliases;

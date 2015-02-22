@@ -27,7 +27,6 @@ import java.util.NoSuchElementException;
 import java.util.Set;
 
 import org.jeo.data.Cursor;
-import org.jeo.data.Cursors;
 import org.jeo.data.Dataset;
 import org.jeo.data.Handle;
 import org.jeo.vector.VectorQuery;
@@ -129,7 +128,7 @@ public class PostGISTest {
         return new Predicate<Handle<Dataset>>() {
             @Override
             public boolean apply(Handle<Dataset> input) {
-                return name.equals(input.getName());
+                return name.equals(input.name());
             }
         };
     }
@@ -143,7 +142,7 @@ public class PostGISTest {
 
         assertNotNull(schema.field("STATE_NAME"));
         assertNotNull(schema.geometry());
-        assertEquals(MultiPolygon.class, schema.geometry().getType());
+        assertEquals(MultiPolygon.class, schema.geometry().type());
 
         assertNotNull(schema.crs());
         assertEquals("EPSG:4326", schema.crs().getName());
@@ -241,7 +240,7 @@ public class PostGISTest {
 
         GeomBuilder gb = new GeomBuilder();
         Geometry g = gb.point(0,0).point().buffer(1).toMultiPolygon();
-        f.put(schema.geometry().getName(), g);
+        f.put(schema.geometry().name(), g);
         f.put("STATE_NAME", "JEOLAND");
         c.write();
         c.close();

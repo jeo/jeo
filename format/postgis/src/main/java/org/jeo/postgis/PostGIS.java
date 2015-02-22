@@ -69,22 +69,22 @@ public class PostGIS implements VectorDriver<PostGISWorkspace>{
     }
 
     @Override
-    public String getName() {
+    public String name() {
         return "PostGIS";
     }
 
     @Override
-    public List<String> getAliases() {
+    public List<String> aliases() {
         return Arrays.asList("pg");
     }
 
     @Override
-    public Class<PostGISWorkspace> getType() {
+    public Class<PostGISWorkspace> type() {
         return PostGISWorkspace.class;
     }
 
     @Override
-    public List<Key<? extends Object>> getKeys() {
+    public List<Key<? extends Object>> keys() {
         return (List) Arrays.asList(DB, SCHEMA, HOST, PORT, USER, PASSWD);
     }
 

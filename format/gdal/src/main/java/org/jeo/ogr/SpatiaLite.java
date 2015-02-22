@@ -40,12 +40,12 @@ public class SpatiaLite extends OGRDriver<OGRWorkspace> {
     }
 
     @Override
-    public String getName() {
+    public String name() {
         return "SpatiaLite";
     }
     
     @Override
-    public Class<OGRWorkspace> getType() {
+    public Class<OGRWorkspace> type() {
         return OGRWorkspace.class;
     }
     

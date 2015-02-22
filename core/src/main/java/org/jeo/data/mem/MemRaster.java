@@ -70,27 +70,27 @@ public class MemRaster implements RasterDataset {
     }
 
     @Override
-    public String getName() {
+    public String name() {
         return name;
     }
 
     @Override
-    public String getTitle() {
+    public String title() {
         return null;
     }
 
     @Override
-    public String getDescription() {
+    public String description() {
         return null;
     }
 
     @Override
-    public Driver<?> getDriver() {
+    public Driver<?> driver() {
         return new Memory();
     }
 
     @Override
-    public Map<Key<?>, Object> getDriverOptions() {
+    public Map<Key<?>, Object> driverOptions() {
         return Collections.EMPTY_MAP;
     }
 
@@ -129,20 +129,20 @@ public class MemRaster implements RasterDataset {
         raster.bounds(bounds()).crs(crs());
 
         Rect r = rect();
-        if (query.getBounds() != null) {
-            r = r.map(query.getBounds(), raster.bounds());
-            raster.bounds(raster.bounds().intersection(query.getBounds()));
+        if (query.bounds() != null) {
+            r = r.map(query.bounds(), raster.bounds());
+            raster.bounds(raster.bounds().intersection(query.bounds()));
         }
 
-        Dimension size = query.getSize();
+        Dimension size = query.size();
         if (size == null) {
             size = size();
         }
         raster.size(size);
 
         List<Band> bands = null;
-        if (query.getBands() != null) {
-            int[] b = query.getBands();
+        if (query.bands() != null) {
+            int[] b = query.bands();
             bands = new ArrayList<Band>(b.length);
             for (int i : b) {
                 bands.add(bands().get(i));
@@ -153,7 +153,7 @@ public class MemRaster implements RasterDataset {
         }
         raster.bands(bands);
 
-        DataType dataType = query.getDataType();
+        DataType dataType = query.datatype();
         if (dataType == null) {
             dataType = bands.get(0).datatype();
         }

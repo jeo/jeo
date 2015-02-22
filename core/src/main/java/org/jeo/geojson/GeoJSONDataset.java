@@ -59,32 +59,32 @@ public class GeoJSONDataset implements VectorDataset, FileData {
     }
 
     @Override
-    public Driver<?> getDriver() {
+    public Driver<?> driver() {
         return new GeoJSON();
     }
 
     @Override
-    public Map<Key<?>, Object> getDriverOptions() {
+    public Map<Key<?>, Object> driverOptions() {
         return (Map) Collections.singletonMap(GeoJSON.FILE, file);
     }
 
     @Override
-    public File getFile() {
+    public File file() {
         return file;
     }
 
     @Override
-    public String getName() {
+    public String name() {
         return Util.base(file.getName());
     }
 
     @Override
-    public String getTitle() {
+    public String title() {
         return null;
     }
 
     @Override
-    public String getDescription() {
+    public String description() {
         return null;
     }
 
@@ -93,10 +93,10 @@ public class GeoJSONDataset implements VectorDataset, FileData {
         Optional<Feature> f = first();
         if (f.isPresent()) {
             Schema schema = f.get().schema();
-            SchemaBuilder sb = Schema.build(getName());
+            SchemaBuilder sb = Schema.build(name());
             for (Field fld : schema) {
-                if (fld.isGeometry() && fld.getCRS() == null) {
-                    sb.field(fld.getName(), (Class<Geometry>) fld.getType(), crs());
+                if (fld.isGeometry() && fld.crs() == null) {
+                    sb.field(fld.name(), (Class<Geometry>) fld.type(), crs());
                 }
                 else {
                     sb.field(fld);
@@ -143,10 +143,10 @@ public class GeoJSONDataset implements VectorDataset, FileData {
 
     @Override
     public FeatureCursor cursor(VectorQuery q) throws IOException {
-        if (q.getMode() == Mode.UPDATE) {
+        if (q.mode() == Mode.UPDATE) {
             throw new IOException("Update cursor not supported");
         }
-        if (q.getMode() == Mode.APPEND) {
+        if (q.mode() == Mode.APPEND) {
             if (!Util.isEmpty(file)) {
                 throw new IOException("Can't append to non empty dataset");
             }

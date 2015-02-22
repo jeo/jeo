@@ -40,7 +40,7 @@ public class FilterVisitor {
     }
 
     public Object visit(Mixed mixed, Object obj) {
-        for (Expression e : mixed.getExpressions()) {
+        for (Expression e : mixed.expressions()) {
             e.accept(this, obj);
         }
         return obj;
@@ -63,41 +63,41 @@ public class FilterVisitor {
     }
 
     public Object visit(Logic<?> logic, Object obj) {
-        for (Filter<?> f : logic.getParts()) {
+        for (Filter<?> f : logic.parts()) {
             f.accept(this, obj);
         }
         return obj;
     }
 
     public Object visit(Comparison<?> compare, Object obj) {
-        if (compare.getLeft() != null) {
-            compare.getLeft().accept(this, obj);
+        if (compare.left() != null) {
+            compare.left().accept(this, obj);
         }
-        if (compare.getRight() != null) {
-            compare.getRight().accept(this, obj);
+        if (compare.right() != null) {
+            compare.right().accept(this, obj);
         }
         return obj;
     }
 
     public Object visit(Spatial<?> spatial, Object obj) {
-        if (spatial.getLeft() != null) {
-            spatial.getLeft().accept(this, obj);
+        if (spatial.left() != null) {
+            spatial.left().accept(this, obj);
         }
-        if (spatial.getRight() != null) {
-            spatial.getRight().accept(this, obj);
+        if (spatial.right() != null) {
+            spatial.right().accept(this, obj);
         }
         
         return obj;
     }
 
     public Object visit(TypeOf<?> inst, Object obj) {
-        inst.getExpression().accept(this, obj);
+        inst.expression().accept(this, obj);
         return obj;
     }
 
     public Object visit(In<?> in, Object obj) {
-        in.getProperty().accept(this, obj);
-        List<Expression> values = in.getValues();
+        in.property().accept(this, obj);
+        List<Expression> values = in.values();
         for (Expression e: values) {
             e.accept(this, obj);
         }
@@ -105,18 +105,18 @@ public class FilterVisitor {
     }
 
     public Object visit(Like<?> like, Object obj) {
-        like.getProperty().accept(this, obj);
+        like.property().accept(this, obj);
         return obj;
     }
 
     public Object visit(Math math, Object obj) {
-        math.getLeft().accept(this, obj);
-        math.getRight().accept(this, obj);
+        math.left().accept(this, obj);
+        math.right().accept(this, obj);
         return obj;
     }
 
     public Object visit(Null<?> isNull, Object obj) {
-        isNull.getProp().accept(this, obj);
+        isNull.property().accept(this, obj);
         return obj;
     }
 

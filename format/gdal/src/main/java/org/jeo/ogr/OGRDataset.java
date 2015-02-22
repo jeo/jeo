@@ -24,15 +24,12 @@ import org.gdal.ogr.FeatureDefn;
 import org.gdal.ogr.FieldDefn;
 import org.gdal.ogr.Layer;
 import org.gdal.osr.SpatialReference;
-import org.jeo.data.Cursor;
-import org.jeo.data.Cursors;
 import org.jeo.data.Driver;
 import org.jeo.data.FileData;
 import org.jeo.vector.FeatureCursor;
 import org.jeo.vector.VectorQuery;
 import org.jeo.vector.VectorQueryPlan;
 import org.jeo.vector.VectorDataset;
-import org.jeo.vector.Feature;
 import org.jeo.vector.Schema;
 import org.jeo.vector.SchemaBuilder;
 import org.jeo.geom.Envelopes;
@@ -66,32 +63,32 @@ public class OGRDataset implements VectorDataset, FileData {
     }
 
     @Override
-    public File getFile() {
-        return workspace.getFile();
+    public File file() {
+        return workspace.file();
     }
 
     @Override
-    public Driver<?> getDriver() {
-        return workspace.getDriver();
+    public Driver<?> driver() {
+        return workspace.driver();
     }
 
     @Override
-    public Map<Key<?>, Object> getDriverOptions() {
-        return workspace.getDriverOptions();
+    public Map<Key<?>, Object> driverOptions() {
+        return workspace.driverOptions();
     }
 
     @Override
-    public String getName() {
+    public String name() {
         return name;
     }
 
     @Override
-    public String getTitle() {
+    public String title() {
         return null;
     }
     
     @Override
-    public String getDescription() {
+    public String description() {
         return null;
     }
 
@@ -289,8 +286,8 @@ public class OGRDataset implements VectorDataset, FileData {
         try {
             Layer l = data.first;
 
-            if (!Envelopes.isNull(q.getBounds())) {
-                Envelope bb = q.getBounds();
+            if (!Envelopes.isNull(q.bounds())) {
+                Envelope bb = q.bounds();
                 l.SetSpatialFilterRect(bb.getMinX(), bb.getMinY(), bb.getMaxX(), bb.getMaxY());
             }
 
@@ -317,8 +314,8 @@ public class OGRDataset implements VectorDataset, FileData {
         Layer l = data.first;
 
         VectorQueryPlan qp = new VectorQueryPlan(q);
-        if (!Envelopes.isNull(q.getBounds())) {
-            Envelope bb = q.getBounds();
+        if (!Envelopes.isNull(q.bounds())) {
+            Envelope bb = q.bounds();
             l.SetSpatialFilterRect(bb.getMinX(), bb.getMinY(), bb.getMaxX(), bb.getMaxY());
             qp.bounded();
         }

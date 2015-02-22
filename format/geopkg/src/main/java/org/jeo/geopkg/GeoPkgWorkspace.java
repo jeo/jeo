@@ -26,7 +26,6 @@ import java.util.Map;
 import java.util.Set;
 
 import org.jeo.data.Cursor;
-import org.jeo.data.Cursors;
 import org.jeo.data.Dataset;
 import org.jeo.data.FileData;
 import org.jeo.data.Handle;
@@ -120,16 +119,16 @@ public class GeoPkgWorkspace implements Workspace, FileData {
     }
 
     @Override
-    public GeoPackage getDriver() {
+    public GeoPackage driver() {
         return new GeoPackage();
     }
 
     @Override
-    public Map<Key<?>, Object> getDriverOptions() {
+    public Map<Key<?>, Object> driverOptions() {
         return opts.toMap();
     }
 
-    public File getFile() {
+    public File file() {
         return opts.getFile();
     }
 
@@ -207,7 +206,7 @@ public class GeoPkgWorkspace implements Workspace, FileData {
     public long count(final FeatureEntry entry, final VectorQuery q) throws IOException {
         VectorQueryPlan qp = new VectorQueryPlan(q);
 
-        if (!Envelopes.isNull(q.getBounds())) {
+        if (!Envelopes.isNull(q.bounds())) {
             return cursor(entry, q).count();
         }
 
@@ -241,8 +240,8 @@ public class GeoPkgWorkspace implements Workspace, FileData {
         Session session = backend.session();
         // session for writing - if no transaction, the same session
         Session transaction;
-        if (q.getTransaction() != Transaction.NULL) {
-            transaction = ((GeoPkgTransaction) q.getTransaction()).session;
+        if (q.transaction() != Transaction.NULL) {
+            transaction = ((GeoPkgTransaction) q.transaction()).session;
         } else {
             transaction = session;
         }
@@ -250,7 +249,7 @@ public class GeoPkgWorkspace implements Workspace, FileData {
 
         Schema schema = schema(entry, session);
 
-        if (q.getMode() == Mode.APPEND) {
+        if (q.mode() == Mode.APPEND) {
             // if session != transaction, tell the cursor not to close the session
             return new GeoPkgFeatureAppendCursor(transaction, entry, this, schema, usingTransaction);
         }
@@ -259,7 +258,7 @@ public class GeoPkgWorkspace implements Workspace, FileData {
         PrimaryKey pk = primaryKey(entry, session);
         SQL sqlb = new SQL("SELECT ");
 
-        List<String> queryFields = q.getFields(schema);
+        List<String> queryFields = q.fieldsIn(schema);
         // working set of fields in query
         if (queryFields.isEmpty()) {
             sqlb.add(" * ");
@@ -297,11 +296,11 @@ public class GeoPkgWorkspace implements Workspace, FileData {
         }
 
         // if session != transaction, tell the cursor not to close the session
-        FeatureCursor c = new GeoPkgFeatureCursor(transaction, rs, q.getMode(), entry, this,
+        FeatureCursor c = new GeoPkgFeatureCursor(transaction, rs, q.mode(), entry, this,
             schema, pk, usingTransaction, queryFields);
 
-        if (!Envelopes.isNull(q.getBounds())) {
-            c = c.intersect(q.getBounds(), true);
+        if (!Envelopes.isNull(q.bounds())) {
+            c = c.intersect(q.bounds(), true);
         }
 
         return qp.apply(c);
@@ -312,27 +311,27 @@ public class GeoPkgWorkspace implements Workspace, FileData {
         sqlfe.setPrimaryKey(pk);
         sqlfe.setDbTypes(backend.dbTypes);
 
-        if (!Filters.isTrueOrNull(q.getFilter())) {
+        if (!Filters.isTrueOrNull(q.filter())) {
             try {
-                String where = sqlfe.encode(q.getFilter(), null);
+                String where = sqlfe.encode(q.filter(), null);
                 sql.add(" WHERE ").add(where);
                 qp.filtered();
             }
             catch(Exception e) {
-                LOG.debug("Unable to natively encode filter: " + q.getFilter(), e);
+                LOG.debug("Unable to natively encode filter: " + q.filter(), e);
             }
         }
 
-        if (q.getLimit() != null) {
-            sql.add(" LIMIT ").add(q.getLimit());
+        if (q.limit() != null) {
+            sql.add(" LIMIT ").add(q.limit());
             qp.limited();
         }
-        if (q.getOffset() != null) {
+        if (q.offset() != null) {
             //sqlite doesn't understand offset without limit
-            if (q.getLimit() == null) {
+            if (q.limit() == null) {
                 sql.add(" LIMIT -1");
             }
-            sql.add(" OFFSET ").add(q.getOffset());
+            sql.add(" OFFSET ").add(q.offset());
             qp.offsetted();
         }
 
@@ -353,9 +352,9 @@ public class GeoPkgWorkspace implements Workspace, FileData {
         List<Object> objs = new ArrayList<Object>();
 
         for (Field fld : f.schema()) {
-            Object o = f.get(fld.getName());
+            Object o = f.get(fld.name());
             if (o != null) {
-                sqlb.name(fld.getName()).add(", ");
+                sqlb.name(fld.name()).add(", ");
                 objs.add(o);
             }
         }
@@ -394,7 +393,7 @@ public class GeoPkgWorkspace implements Workspace, FileData {
 
         PrimaryKeyColumn pk = primaryKey(entry, session).getColumns().get(0);
         sqlb.add(" WHERE ").name(pk.getName()).add(" = ?");
-        objs.add(feature.getId());
+        objs.add(feature.id());
 
         session.executePrepared(sqlb.toString(), objs.toArray());
 
@@ -404,7 +403,7 @@ public class GeoPkgWorkspace implements Workspace, FileData {
     Session delete(final FeatureEntry entry, final Feature feature, Session session) throws IOException {
         String sql = new SQL("DELETE FROM ").name(entry.getTableName()).add(" WHERE ")
                 .name(primaryKeyCol(entry, session).getName()).add(" = ?").toString();
-        List objs = Arrays.asList(feature.getId());
+        List objs = Arrays.asList(feature.id());
 
         session.executePrepared(sql, objs.toArray());
 
@@ -487,11 +486,11 @@ public class GeoPkgWorkspace implements Workspace, FileData {
 
         sql.name(findPrimaryKeyColumnName(schema)).add(" INTEGER PRIMARY KEY, ");
         for (Field f : schema) {
-            sql.name(f.getName()).add(" ");
+            sql.name(f.name()).add(" ");
             if (f.isGeometry()) {
-                sql.add(Geom.Type.from(f.getType()).getSimpleName());
+                sql.add(Geom.Type.from(f.type()).getSimpleName());
             } else {
-                String t = backend.dbTypes.toName(f.getType());
+                String t = backend.dbTypes.toName(f.type());
                 sql.add(t != null ? t : "TEXT");
             }
 
@@ -579,12 +578,12 @@ public class GeoPkgWorkspace implements Workspace, FileData {
 
     Geom.Type findGeometryType(Schema schema) {
         Field geom = schema.geometry();
-        return geom != null ? Geom.Type.from(geom.getType()) : null;
+        return geom != null ? Geom.Type.from(geom.type()) : null;
     }
 
     String findGeometryName(Schema schema) {
         Field geom = schema.geometry();
-        return geom != null ? geom.getName() : null;
+        return geom != null ? geom.name() : null;
     }
 
     Schema schema(FeatureEntry entry, Session ignored) throws IOException {
@@ -783,8 +782,8 @@ public class GeoPkgWorkspace implements Workspace, FileData {
 
     boolean missingProperties(FeatureEntry entry, VectorQuery q, Session session) throws IOException {
         boolean hasMissing = false;
-        if (q.getFilter() != null) {
-            Set<String> properties = Filters.properties(q.getFilter());
+        if (q.filter() != null) {
+            Set<String> properties = Filters.properties(q.filter());
             // try to defer resolving the schema unless needed
             if (!properties.isEmpty()) {
                 hasMissing = !q.missingProperties(schema(entry, session)).isEmpty();

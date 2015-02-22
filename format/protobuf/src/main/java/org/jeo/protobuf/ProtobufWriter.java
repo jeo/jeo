@@ -249,9 +249,9 @@ public class ProtobufWriter implements Disposable {
         b.setName(schema.getName());
 
         for (org.jeo.vector.Field fld : schema) {
-            Field.Builder fb = Field.newBuilder().setKey(fld.getName());
+            Field.Builder fb = Field.newBuilder().setKey(fld.name());
 
-            Class<?> clazz = fld.getType();
+            Class<?> clazz = fld.type();
             if (clazz == Integer.class) {
                 fb.setType(Field.Type.INT);
             }
@@ -277,7 +277,7 @@ public class ProtobufWriter implements Disposable {
 
                 fb.setGeomType(gtype);
 
-                CoordinateReferenceSystem crs = fld.getCRS();
+                CoordinateReferenceSystem crs = fld.crs();
                 if (crs != null) {
                     fb.setCrs(Proj.toString(crs));
                 }

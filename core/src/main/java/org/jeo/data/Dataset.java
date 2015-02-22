@@ -41,12 +41,12 @@ public interface Dataset extends Disposable {
     /**
      * The driver used to open the dataset.
      */
-    Driver<?> getDriver();
+    Driver<?> driver();
 
     /**
      * The driver options for the dataset.
      */
-    Map<Key<?>,Object> getDriverOptions();
+    Map<Key<?>,Object> driverOptions();
 
     /**
      * Name of the layer.
@@ -54,17 +54,17 @@ public interface Dataset extends Disposable {
      * The value used to look up a layer in a workspace.
      * </p>
      */
-    String getName();
+    String name();
 
     /**
      * Human readable title of the layer, or <code>null</code>. 
      */
-    String getTitle();
+    String title();
 
     /**
      * Human readable description of the layer, or <code>null</code>. 
      */
-    String getDescription();
+    String description();
 
     /**
      * The native coordinate reference system of the layer, or <code>null</code> if unknown. 

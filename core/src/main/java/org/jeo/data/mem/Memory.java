@@ -52,22 +52,22 @@ public class Memory implements VectorDriver<MemWorkspace>, RasterDriver<MemWorks
     }
 
     @Override
-    public String getName() {
+    public String name() {
         return "Memory";
     }
 
     @Override
-    public List<String> getAliases() {
+    public List<String> aliases() {
         return Arrays.asList("mem");
     }
 
     @Override
-    public Class<MemWorkspace> getType() {
+    public Class<MemWorkspace> type() {
         return MemWorkspace.class;
     }
 
     @Override
-    public List<Key<?>> getKeys() {
+    public List<Key<?>> keys() {
         return (List) Arrays.asList(NAME);
     }
 

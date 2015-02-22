@@ -26,12 +26,9 @@ import org.osgeo.proj4j.CoordinateReferenceSystem;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
-import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.MultiLineString;
 import com.vividsolutions.jts.geom.MultiPoint;
 import com.vividsolutions.jts.geom.MultiPolygon;
-import com.vividsolutions.jts.geom.Point;
-import com.vividsolutions.jts.geom.Polygon;
 
 /**
  * Feature utility class.
@@ -83,7 +80,7 @@ public class Features {
             return null;
         }
 
-        return boundsReprojected(f, geo.getCRS());
+        return boundsReprojected(f, geo.crs());
     }
 
     /**
@@ -101,8 +98,8 @@ public class Features {
         Envelope e = new Envelope();
         for (Field fld : f.schema()) {
             if (fld.isGeometry()) {
-                CoordinateReferenceSystem c = fld.getCRS();
-                Geometry g = (Geometry) f.get(fld.getName());
+                CoordinateReferenceSystem c = fld.crs();
+                Geometry g = (Geometry) f.get(fld.name());
                 if (g == null) {
                     //ignore
                     continue;
@@ -136,10 +133,10 @@ public class Features {
     public static Feature retype(Feature feature, Schema schema) {
         List<Object> values = new ArrayList<Object>();
         for (Field f : schema) {
-            values.add(feature.get(f.getName()));
+            values.add(feature.get(f.name()));
         }
 
-        return new BasicFeature(feature.getId(), values, schema);
+        return new BasicFeature(feature.id(), values, schema);
     }
 
     /**
@@ -156,7 +153,7 @@ public class Features {
             String key = kv.getKey();
             Object val = kv.getValue();
 
-            if (geom != null && geom.getName().equals(key)) {
+            if (geom != null && geom.name().equals(key)) {
                 to.put((Geometry)val);
             }
             else {
@@ -176,8 +173,8 @@ public class Features {
     public static Schema multify(Schema schema) {
         SchemaBuilder b = Schema.build(schema.getName());
         for (Field fld : schema) {
-            if (Geometry.class.isAssignableFrom(fld.getType())) {
-                Class<? extends Geometry> t = (Class<? extends Geometry>) fld.getType();
+            if (Geometry.class.isAssignableFrom(fld.type())) {
+                Class<? extends Geometry> t = (Class<? extends Geometry>) fld.type();
                 switch(Geom.Type.from(t)) {
                 case POINT:
                     t = MultiPoint.class;
@@ -189,7 +186,7 @@ public class Features {
                     t = MultiPolygon.class;
                     break;
                 }
-                b.field(fld.getName(), t, fld.getCRS());
+                b.field(fld.name(), t, fld.crs());
             }
             else {
                 b.field(fld);

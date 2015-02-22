@@ -29,7 +29,7 @@ public class PointPath extends CoordinatePath {
     }
 
     @Override
-    public Geometry getGeometry() {
+    public Geometry geometry() {
         return p;
     }
 

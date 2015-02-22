@@ -152,7 +152,7 @@ public class GeoJSONReadWriteTest {
         assertEquals(1l, f.get("int"));
         assertEquals(1.1, (Double) f.get("double"), 0.1);
         assertEquals("one", f.get("string"));
-        assertEquals("feature.1", f.getId());
+        assertEquals("feature.1", f.id());
         assertNotNull(f.crs());
     }
 
@@ -165,7 +165,7 @@ public class GeoJSONReadWriteTest {
         assertEquals(1l, f.get("int"));
         assertEquals(1.1, (Double) f.get("double"), 0.1);
         assertEquals("one", f.get("string"));
-        assertEquals("feature.1", f.getId());
+        assertEquals("feature.1", f.id());
         assertNotNull(f.crs());
     }
 
@@ -211,11 +211,11 @@ public class GeoJSONReadWriteTest {
     public void testParseNoFeatureIds() throws Exception {
         Cursor<Feature> c = reader.features(featureCollectionText(true, true, true, false));
         assertTrue(c.hasNext());
-        assertEquals("0", c.next().getId());
+        assertEquals("0", c.next().id());
         assertTrue(c.hasNext());
-        assertEquals("1", c.next().getId());
+        assertEquals("1", c.next().id());
         assertTrue(c.hasNext());
-        assertEquals("2", c.next().getId());
+        assertEquals("2", c.next().id());
 
         c.close();
     }

@@ -39,7 +39,7 @@ public class LineStringPath extends CoordinatePath {
     }
 
     @Override
-    public Geometry getGeometry() {
+    public Geometry geometry() {
         return line;
     }
 

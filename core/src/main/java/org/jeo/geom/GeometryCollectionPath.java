@@ -31,7 +31,7 @@ public class GeometryCollectionPath extends CoordinatePath {
     }
 
     @Override
-    public Geometry getGeometry() {
+    public Geometry geometry() {
         return gcol;
     }
 
@@ -53,7 +53,7 @@ public class GeometryCollectionPath extends CoordinatePath {
         c.x = d.x;
         c.y = d.y;
 
-        return it.getStep();
+        return it.step();
     }
 
     @Override

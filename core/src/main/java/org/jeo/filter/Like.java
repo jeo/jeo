@@ -45,15 +45,15 @@ public class Like<T> extends Filter<T> {
         return not;
     }
 
-    public Property getProperty() {
+    public Property property() {
         return prop;
     }
 
-    public Expression getMatch() {
+    public Expression match() {
         return match;
     }
 
-    public Pattern getPattern() {
+    public Pattern pattern() {
         return pattern;
     }
 

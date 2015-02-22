@@ -27,7 +27,7 @@ import com.vividsolutions.jts.geom.Polygon;
 /**
  * A sequence or path of coordinates. 
  * <p>
- * As the path is traversed a {@link #getStep()} is maintained that describes how the current 
+ * As the path is traversed a {@link #step()} is maintained that describes how the current
  * coordinate relates to the previous coordinate.  
  * </p>
  * 
@@ -121,13 +121,13 @@ public abstract class CoordinatePath implements Iterator<Coordinate> {
         return this;
     }
 
-    public abstract Geometry getGeometry();
+    public abstract Geometry geometry();
 
-    public Coordinate getCoordinate() {
+    public Coordinate coordinate() {
         return curr;
     }
 
-    public PathStep getStep() {
+    public PathStep step() {
         return step;
     }
 

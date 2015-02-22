@@ -104,7 +104,7 @@ public class VectorQuery {
      * Set of Feature properties to query, an empty set means all properties.
      *
      */
-    public Set<String> getFields() {
+    public Set<String> fields() {
         return fields;
     }
 
@@ -115,13 +115,13 @@ public class VectorQuery {
      * @param schema the schema to evaluate ordering against
      * @return list of fields in schema ordering or empty list
      */
-    public List<String> getFields(Schema schema) {
+    public List<String> fieldsIn(Schema schema) {
         List<String> ordered = new ArrayList<String>(fields.size());
         if (fields.size() > 0) {
             List<Field> schemaFields = schema.getFields();
             for (Field f: schemaFields) {
                 for (String s: fields) {
-                    if (f.getName().equals(s)) {
+                    if (f.name().equals(s)) {
                         ordered.add(s);
                         break;
                     }
@@ -134,21 +134,21 @@ public class VectorQuery {
     /**
      * Bounds constraints on the query, may be <code>null</code> meaning no bounds constraint.
      */
-    public Envelope getBounds() {
+    public Envelope bounds() {
         return bounds;
     }
 
     /**
      * Constraint on the query, may be <code>null</code> meaning no constraint.
      */
-    public Filter<Feature> getFilter() {
+    public Filter<Feature> filter() {
         return filter;
     }
 
     /**
      * Limit on the number of features to return from the query, <code>null</code> meaning no limit.
      */
-    public Integer getLimit() {
+    public Integer limit() {
         return limit;
     }
 
@@ -156,7 +156,7 @@ public class VectorQuery {
      *  Offset into query result set from which to start returning features, <code>null</code> 
      *  meaning no offset.
      */
-    public Integer getOffset() {
+    public Integer offset() {
         return offset;
     }
 
@@ -168,7 +168,7 @@ public class VectorQuery {
      * (if available) should be used
      * </p>
      */
-    public Pair<CoordinateReferenceSystem, CoordinateReferenceSystem> getReproject() {
+    public Pair<CoordinateReferenceSystem, CoordinateReferenceSystem> reproject() {
         return reproject;
     }
 
@@ -176,28 +176,28 @@ public class VectorQuery {
      * Simplification tolerance to apply to feature geometries, <code>null</code> meaning no 
      * simplification.
      */
-    public Double getSimplify() {
+    public Double simplify() {
         return simplify;
     }
 
     /**
      * Sort criteria for the query, <code>null</code> meaning no sorting.
      */
-    public List<Sort> getSort() {
+    public List<Sort> sort() {
         return sort;
     }
 
     /**
      * The mode of cursor to return when handling this query.
      */
-    public Cursor.Mode getMode() {
+    public Cursor.Mode mode() {
         return mode;
     }
 
     /**
      * Transaction of the query, may be <code>null</code>.
      */
-    public Transaction getTransaction() {
+    public Transaction transaction() {
         return transaction;
     }
 
@@ -206,8 +206,11 @@ public class VectorQuery {
      * 
      * @return This object.
      */
-    public VectorQuery fields(String... properties) {
-        return fields(Arrays.asList(properties));
+    public VectorQuery fields(String field, String... fields) {
+        List<String> l = new ArrayList<>();
+        l.add(field);
+        l.addAll(Arrays.asList(fields));
+        return fields(l);
     }
 
     /**
@@ -435,7 +438,7 @@ public class VectorQuery {
                 Collections.emptySet() : Filters.properties(filter));
         List<Field> f = schema.getFields();
         for (int i = 0, ii = f.size(); i < ii && !queryProperties.isEmpty(); i++) {
-            queryProperties.remove(f.get(i).getName());
+            queryProperties.remove(f.get(i).name());
         }
         return queryProperties;
     }

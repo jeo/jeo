@@ -102,7 +102,7 @@ public class PostGISCursor extends FeatureCursor {
 
     @Override
     protected void doWrite() throws IOException {
-        dataset.doUpdate(next, ((DiffFeature) next).getChanged(), cx);
+        dataset.doUpdate(next, ((DiffFeature) next).changed(), cx);
     }
 
     @Override

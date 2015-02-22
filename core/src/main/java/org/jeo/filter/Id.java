@@ -40,7 +40,7 @@ public class Id<T> extends Filter<T> {
         this.ids = new ArrayList<Expression>(ids);
     }
 
-    public List<Expression> getIds() {
+    public List<Expression> ids() {
         return ids;
     }
 
@@ -49,7 +49,7 @@ public class Id<T> extends Filter<T> {
         if (obj instanceof Feature) {
             for (Expression e : ids) {
                 Object val = e.evaluate(obj);
-                if (val != null && val.toString().equals(((Feature) obj).getId())) {
+                if (val != null && val.toString().equals(((Feature) obj).id())) {
                     return true;
                 }
             }

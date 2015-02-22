@@ -33,7 +33,7 @@ public class Null<T> extends Filter<T> {
         this(new Property(prop), not);
     }
 
-    public Property getProp() {
+    public Property property() {
         return prop;
     }
 
@@ -43,7 +43,7 @@ public class Null<T> extends Filter<T> {
 
     @Override
     public boolean test(Object obj) {
-        return prop.hasProperty(obj) && (not != (prop.evaluate(obj) == null));
+        return prop.has(obj) && (not != (prop.evaluate(obj) == null));
     }
 
     @Override

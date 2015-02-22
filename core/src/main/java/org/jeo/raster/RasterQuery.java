@@ -59,8 +59,10 @@ public class RasterQuery {
      *
      * @return This object.
      */
-    public RasterQuery bands(int... bands) {
-        this.bands = bands;
+    public RasterQuery bands(int band, int... bands) {
+        this.bands = new int[1+bands.length];
+        this.bands[0] = band;
+        System.arraycopy(bands, 0, this.bands, 1, bands.length);
         return this;
     }
 
@@ -89,9 +91,9 @@ public class RasterQuery {
     /**
      * The bands to read from the raster dataset.
      *
-     * @see #bands(int...)
+     * @see #bands(int,int...)
      */
-    public int[] getBands() {
+    public int[] bands() {
         return bands;
     }
 
@@ -115,7 +117,7 @@ public class RasterQuery {
      *
      * @see #bounds(com.vividsolutions.jts.geom.Envelope)
      */
-    public Envelope getBounds() {
+    public Envelope bounds() {
         return bounds;
     }
 
@@ -165,7 +167,7 @@ public class RasterQuery {
      *
      * @see #size(org.jeo.util.Dimension)
      */
-    public Dimension getSize() {
+    public Dimension size() {
         return size;
     }
 
@@ -188,7 +190,7 @@ public class RasterQuery {
      * query into a single buffer element of this type.
      * </p>
      */
-    public DataType getDataType() {
+    public DataType datatype() {
         return datatype;
     }
 }

@@ -23,8 +23,6 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.Map;
 
-import org.jeo.data.Cursor;
-import org.jeo.data.Cursors;
 import org.jeo.data.Driver;
 import org.jeo.data.FileData;
 import org.jeo.data.Cursor.Mode;
@@ -32,7 +30,6 @@ import org.jeo.vector.FeatureCursor;
 import org.jeo.vector.VectorQuery;
 import org.jeo.vector.VectorQueryPlan;
 import org.jeo.vector.VectorDataset;
-import org.jeo.vector.Feature;
 import org.jeo.vector.Schema;
 import org.jeo.util.Key;
 import org.osgeo.proj4j.CoordinateReferenceSystem;
@@ -70,32 +67,32 @@ public class ProtobufDataset implements VectorDataset, FileData {
     }
 
     @Override
-    public Driver<?> getDriver() {
+    public Driver<?> driver() {
         return new Protobuf();
     }
 
     @Override
-    public Map<Key<?>, Object> getDriverOptions() {
+    public Map<Key<?>, Object> driverOptions() {
         return (Map) Collections.singletonMap(Protobuf.FILE, file);
     }
 
     @Override
-    public File getFile() {
+    public File file() {
         return file;
     }
 
     @Override
-    public String getName() {
+    public String name() {
         return schema.getName();
     }
 
     @Override
-    public String getTitle() {
+    public String title() {
         return null;
     }
 
     @Override
-    public String getDescription() {
+    public String description() {
         return null;
     }
 
@@ -116,10 +113,10 @@ public class ProtobufDataset implements VectorDataset, FileData {
 
     @Override
     public FeatureCursor cursor(VectorQuery q) throws IOException {
-        if (q.getMode() == Mode.UPDATE) {
+        if (q.mode() == Mode.UPDATE) {
             throw new IOException("Update cursor not supported");
         }
-        if (q.getMode() == Mode.APPEND) {
+        if (q.mode() == Mode.APPEND) {
             if (!fileIsEmpty()) {
                 throw new IOException("Can't append to non empty dataset");
             }

@@ -36,27 +36,27 @@ public class GeoPkgDataset<T extends Entry> implements Dataset {
     }
 
     @Override
-    public Driver<?> getDriver() {
-        return geopkg.getDriver();
+    public Driver<?> driver() {
+        return geopkg.driver();
     }
 
     @Override
-    public Map<Key<?>, Object> getDriverOptions() {
-        return geopkg.getDriverOptions();
+    public Map<Key<?>, Object> driverOptions() {
+        return geopkg.driverOptions();
     }
 
     @Override
-    public String getName() {
+    public String name() {
         return entry.getTableName();
     }
 
     @Override
-    public String getTitle() {
+    public String title() {
         return entry.getIdentifier();
     }
 
     @Override
-    public String getDescription() {
+    public String description() {
         return entry.getDescription();
     }
     

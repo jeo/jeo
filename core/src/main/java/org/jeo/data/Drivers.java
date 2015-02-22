@@ -126,12 +126,12 @@ public class Drivers {
      * 
      * @return The matching driver, or <code>null</code> if no match was found.
      * 
-     * @see Driver#getName()
+     * @see Driver#name()
      */
     public static Driver<?> find(String name, DriverRegistry registry) {
         for (Iterator<Driver<?>> it = list(registry); it.hasNext();) {
             Driver<?> d = it.next();
-            if (name.equalsIgnoreCase(d.getName()) || d.getAliases().contains(name)) {
+            if (name.equalsIgnoreCase(d.name()) || d.aliases().contains(name)) {
                 return d;
             }
         }
@@ -360,14 +360,14 @@ public class Drivers {
         }
 
         if (!(d instanceof VectorDriver)) {
-            throw new IllegalArgumentException(d.getName() + " not a vector driver");
+            throw new IllegalArgumentException(d.name() + " not a vector driver");
         }
 
         VectorDriver<?> vd = (VectorDriver<?>) d;
         Map<String,Object> opts = parseURI(uri, d);
 
         if (!vd.canCreate(opts, null)) {
-            throw new IllegalArgumentException(d.getName() + " driver can't open " + opts);
+            throw new IllegalArgumentException(d.name() + " driver can't open " + opts);
         }
 
         Object obj =  vd.create(opts, schema);
@@ -379,7 +379,7 @@ public class Drivers {
             return (T) ws.get(schema.getName());
         }
 
-        throw new IllegalArgumentException(d.getName() + " driver returned " + obj);
+        throw new IllegalArgumentException(d.name() + " driver returned " + obj);
     }
 
     static Map<String,Object> parseURI(URI uri, Driver<?> d) {
@@ -389,8 +389,8 @@ public class Drivers {
         String first = uri.getHost() != null ? uri.getHost() : uri.getPath();
         if (first != null) {
             //use the first key
-            if (!d.getKeys().isEmpty()) {
-                opts.put(d.getKeys().get(0).getName(), first);
+            if (!d.keys().isEmpty()) {
+                opts.put(d.keys().get(0).getName(), first);
             }
         }
 
@@ -415,7 +415,7 @@ public class Drivers {
 
         while (it.hasNext()) {
             Driver<?> drv = it.next();
-            if (clazz != null && !clazz.isAssignableFrom(drv.getType())) {
+            if (clazz != null && !clazz.isAssignableFrom(drv.type())) {
                 continue;
             }
 

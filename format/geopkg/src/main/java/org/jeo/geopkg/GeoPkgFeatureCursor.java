@@ -116,7 +116,7 @@ public class GeoPkgFeatureCursor extends FeatureCursor {
                     values.clear();
 
                     for (int i = 0; i < fields.size(); i++) {
-                        Class type = fields.get(i).getType();
+                        Class type = fields.get(i).type();
                         if (Geometry.class.isAssignableFrom(type)) {
                             byte[] bytes = results.getBytes(i);
                             values.add(bytes != null ? geomReader.read(bytes) : null);

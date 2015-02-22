@@ -125,7 +125,7 @@ public class BasicFeature implements Feature {
     }
 
     @Override
-    public String getId() {
+    public String id() {
         return id;
     }
     
@@ -172,7 +172,7 @@ public class BasicFeature implements Feature {
             throw new IllegalArgumentException("Feature schema has no geometry");
         }
 
-        return put(gf.getName(), g);
+        return put(gf.name(), g);
     }
 
     @Override
@@ -274,7 +274,7 @@ public class BasicFeature implements Feature {
             if (schema != null) {
                 Field f = schema.geometry();
                 if (f != null) {
-                    return (Geometry) get(f.getName());
+                    return (Geometry) get(f.name());
                 }
             }
         
@@ -406,7 +406,7 @@ public class BasicFeature implements Feature {
         protected Map<String, Object> map() {
             LinkedHashMap<String, Object> map = new LinkedHashMap<String, Object>();
             for (Field f : schema()) {
-                map.put(f.getName(), get(f.getName()));
+                map.put(f.name(), get(f.name()));
             }
             return map;
         }
@@ -476,7 +476,7 @@ public class BasicFeature implements Feature {
         protected List<Object> list() {
             List<Object> list = new ArrayList<Object>();
             for (Field f : schema()) {
-                list.add(get(f.getName()));
+                list.add(get(f.name()));
             }
             return list;
         }

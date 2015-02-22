@@ -35,7 +35,7 @@ public class Mixed implements Expression {
         this.exprs = new ArrayList<Expression>(exprs);
     }
 
-    public List<Expression> getExpressions() {
+    public List<Expression> expressions() {
         return exprs;
     }
 

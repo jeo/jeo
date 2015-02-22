@@ -40,10 +40,10 @@ public class CQLTest {
         assertTrue(f instanceof Comparison);
 
         Comparison c = (Comparison)f;
-        assertTrue(c.getLeft() instanceof Property);
-        assertTrue(c.getRight() instanceof Literal);
+        assertTrue(c.left() instanceof Property);
+        assertTrue(c.right() instanceof Literal);
 
-        Literal l = (Literal) c.getRight();
+        Literal l = (Literal) c.right();
         assertEquals("bar", l.evaluate(null));
     }
 
@@ -53,18 +53,18 @@ public class CQLTest {
         assertTrue(f instanceof Logic);
         
         Logic l = (Logic)f;
-        assertEquals(Logic.Type.AND, l.getType());
-        assertEquals(2, l.getParts().size());
+        assertEquals(Logic.Type.AND, l.type());
+        assertEquals(2, l.parts().size());
 
-        Comparison c = (Comparison)l.getParts().get(0);
-        assertEquals(Comparison.Type.GREATER_OR_EQUAL, c.getType());
-        assertEquals("foo", ((Property)c.getLeft()).getProperty());
-        assertEquals(1, c.getRight().evaluate(null));
+        Comparison c = (Comparison)l.parts().get(0);
+        assertEquals(Comparison.Type.GREATER_OR_EQUAL, c.type());
+        assertEquals("foo", ((Property)c.left()).property());
+        assertEquals(1, c.right().evaluate(null));
         
-        c = (Comparison)l.getParts().get(1);
-        assertEquals(Comparison.Type.LESS_OR_EQUAL, c.getType());
-        assertEquals("foo", ((Property)c.getLeft()).getProperty());
-        assertEquals(10, c.getRight().evaluate(null));
+        c = (Comparison)l.parts().get(1);
+        assertEquals(Comparison.Type.LESS_OR_EQUAL, c.type());
+        assertEquals("foo", ((Property)c.left()).property());
+        assertEquals(10, c.right().evaluate(null));
     }
     
     @Test
@@ -99,8 +99,8 @@ public class CQLTest {
     @Test
     public void testLike() throws ParseException {
         Like like = (Like) CQL.parse("name LIKE 'pattern'");
-        assertEquals("name", like.getProperty().getProperty());
-        assertEquals("pattern", like.getPattern().pattern());
+        assertEquals("name", like.property().property());
+        assertEquals("pattern", like.pattern().pattern());
     }
 
     @Test
@@ -113,8 +113,8 @@ public class CQLTest {
     public void testIn() throws ParseException {
         In f = (In) CQL.parse("STATE_NAME IN ('Virginia','Maryland')");
         assertTrue(!f.isNegated());
-        assertEquals("STATE_NAME", f.getProperty().getProperty());
-        List<Expression> values = f.getValues();
+        assertEquals("STATE_NAME", f.property().property());
+        List<Expression> values = f.values();
         assertEquals("Virginia", values.get(0).evaluate(null));
         assertEquals("Maryland", values.get(1).evaluate(null));
     }

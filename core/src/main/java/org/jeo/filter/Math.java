@@ -38,15 +38,15 @@ public class Math implements Expression {
         this.right = right;
     }
 
-    public char getOperator() {
+    public char operator() {
         return operator;
     }
 
-    public Expression getLeft() {
+    public Expression left() {
         return left;
     }
 
-    public Expression getRight() {
+    public Expression right() {
         return right;
     }
 

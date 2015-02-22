@@ -37,7 +37,7 @@ public class Property implements Expression {
         this.property = property;
     }
 
-    public String getProperty() {
+    public String property() {
         return property;
     }
 
@@ -49,7 +49,7 @@ public class Property implements Expression {
      * @param obj the object to evaluate
      * @return true if the property exists and false otherwise but does not check the value
      */
-    public boolean hasProperty(Object obj) {
+    public boolean has(Object obj) {
         boolean has;
         if (obj instanceof Feature) {
             has = ((Feature) obj).has(property);

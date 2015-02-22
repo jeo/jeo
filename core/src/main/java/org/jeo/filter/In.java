@@ -39,11 +39,11 @@ public class In<T> extends Filter<T> {
         return not;
     }
 
-    public Property getProperty() {
+    public Property property() {
         return prop;
     }
 
-    public List<Expression> getValues() {
+    public List<Expression> values() {
         return values;
     }
 

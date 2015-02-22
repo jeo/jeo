@@ -85,17 +85,17 @@ public class GDAL extends FileDriver<GDALDataset> implements RasterDriver<GDALDa
     }
 
     @Override
-    public String getName() {
+    public String name() {
         return gdalDrv != null ? gdalDrv.getShortName() : "GDAL";
     }
 
     @Override
-    public List<String> getAliases() {
+    public List<String> aliases() {
         return gdalDrv != null ? Arrays.asList(gdalDrv.getShortName()) : (List) Collections.emptyList();
     }
 
     @Override
-    public Class<GDALDataset> getType() {
+    public Class<GDALDataset> type() {
         return GDALDataset.class;
     }
 

@@ -25,7 +25,7 @@ public class VectorQueryTest {
     public void testGetOrderedFields() {
         Schema schema = new SchemaBuilder("widgets")
             .fields("sp:String,ip:Integer,pp:Point:srid=4326").schema();
-        List<String> fields = new VectorQuery().fields("pp","ip","blah").getFields(schema);
+        List<String> fields = new VectorQuery().fields("pp","ip","blah").fieldsIn(schema);
         assertEquals(2, fields.size());
         assertEquals("ip", fields.get(0));
         assertEquals("pp", fields.get(1));

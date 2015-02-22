@@ -24,7 +24,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.jeo.data.Cursor;
-import org.jeo.data.Cursors;
 import org.jeo.data.FileData;
 import org.jeo.vector.FeatureCursor;
 import org.jeo.vector.VectorQuery;
@@ -68,22 +67,22 @@ public class CSVDataset implements VectorDataset, FileData {
     }
 
     @Override
-    public CSV getDriver() {
+    public CSV driver() {
         return new CSV();
     }
 
     @Override
-    public Map<Key<?>, Object> getDriverOptions() {
+    public Map<Key<?>, Object> driverOptions() {
         return opts.toMap();
     }
 
     @Override
-    public File getFile() {
+    public File file() {
         return file;
     }
 
     void init() throws IOException {
-        SchemaBuilder sb = Schema.build(getName());
+        SchemaBuilder sb = Schema.build(name());
         sb.field("geometry", Geometry.class);
 
         if (opts.hasHeader()) {
@@ -107,17 +106,17 @@ public class CSVDataset implements VectorDataset, FileData {
     }
 
     @Override
-    public String getName() {
+    public String name() {
         return Util.base(file.getName());
     }
 
     @Override
-    public String getTitle() {
+    public String title() {
         return null;
     }
 
     @Override
-    public String getDescription() {
+    public String description() {
         return null;
     }
 
@@ -144,7 +143,7 @@ public class CSVDataset implements VectorDataset, FileData {
 
     @Override
     public FeatureCursor cursor(VectorQuery q) throws IOException {
-        if (q.getMode() != Cursor.READ) {
+        if (q.mode() != Cursor.READ) {
             throw new IllegalArgumentException("write cursors not supported");
         }
 

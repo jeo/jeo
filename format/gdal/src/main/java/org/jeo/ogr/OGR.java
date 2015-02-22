@@ -99,17 +99,17 @@ public class OGR extends FileVectorDriver<OGRWorkspace> implements Disposable {
     }
 
     @Override
-    public String getName() {
+    public String name() {
         return ogrDrv != null ? ogrDrv.GetName() : "OGR";
     }
 
     @Override
-    public Class<OGRWorkspace> getType() {
+    public Class<OGRWorkspace> type() {
         return OGRWorkspace.class;
     }
 
     @Override
-    public List<Key<?>> getKeys() {
+    public List<Key<?>> keys() {
         return (List) Arrays.asList(FILE, DRIVER);
     }
 

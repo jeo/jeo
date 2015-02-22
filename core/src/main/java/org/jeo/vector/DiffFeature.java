@@ -34,7 +34,7 @@ public class DiffFeature extends FeatureWrapper {
     /**
      * The diff map.
      */
-    public Map<String, Object> getChanged() {
+    public Map<String, Object> changed() {
         return changed;
     }
 

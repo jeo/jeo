@@ -33,7 +33,7 @@ public interface Feature {
     /**
      * Feature identifier.
      */
-    String getId();
+    String id();
 
     /**
      * The coordinate reference system for the feature.

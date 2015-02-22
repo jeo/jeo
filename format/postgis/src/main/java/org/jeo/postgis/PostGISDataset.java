@@ -30,7 +30,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.jeo.data.Cursor;
-import org.jeo.data.Cursors;
 import org.jeo.data.Driver;
 import org.jeo.vector.FeatureCursor;
 import org.jeo.vector.VectorQuery;
@@ -75,27 +74,27 @@ public class PostGISDataset implements VectorDataset {
     }
 
     @Override
-    public Driver<?> getDriver() {
-        return pg.getDriver();
+    public Driver<?> driver() {
+        return pg.driver();
     }
 
     @Override
-    public Map<Key<?>, Object> getDriverOptions() {
-        return pg.getDriverOptions();
+    public Map<Key<?>, Object> driverOptions() {
+        return pg.driverOptions();
     }
 
     @Override
-    public String getName() {
+    public String name() {
         return table.name();
     }
 
     @Override
-    public String getTitle() {
+    public String title() {
         return null;
     }
 
     @Override
-    public String getDescription() {
+    public String description() {
         return null;
     }
 
@@ -121,7 +120,7 @@ public class PostGISDataset implements VectorDataset {
                 Schema schema = schema();
 
                 String sql = new SQL("SELECT st_asbinary(st_force_2d(st_extent(")
-                    .name(schema.geometry().getName()).add(")))")
+                    .name(schema.geometry().name()).add(")))")
                     .add(" FROM ").name(table.schema(), table.name()).toString();
                 LOG.debug(sql);
 
@@ -146,7 +145,7 @@ public class PostGISDataset implements VectorDataset {
         if (!missingProperties(q)) {
             encodeQuery(sql, q, qp, args);
         }
-        if (!Filters.isTrueOrNull(q.getFilter()) && qp.isFiltered()) {
+        if (!Filters.isTrueOrNull(q.filter()) && qp.isFiltered()) {
             return pg.run(new DbOP<Long>() {
                 @Override
                 protected Long doRun(Connection cx) throws Exception {
@@ -172,7 +171,7 @@ public class PostGISDataset implements VectorDataset {
 
             Connection cx = pg.getDataSource().getConnection();
             
-            if (q.getMode() == Cursor.APPEND) {
+            if (q.mode() == Cursor.APPEND) {
                 return new PostGISAppendCursor(this, cx);
             }
     
@@ -180,7 +179,7 @@ public class PostGISDataset implements VectorDataset {
     
             SQL sql = new SQL("SELECT ");
             
-            if (q.getFields().isEmpty()) {
+            if (q.fields().isEmpty()) {
                 //grab all from the schema
                 for (Field f : schema()) {
                     encodeFieldForSelect(f, sql);
@@ -193,7 +192,7 @@ public class PostGISDataset implements VectorDataset {
                 // TODO: be smarter about this, only include geometry if we have a filter that requires
                 // it, etc...
                 boolean geom = false;
-                for (String prop : q.getFields()) {
+                for (String prop : q.fields()) {
                     Field f = schema().field(prop);
                     if (f == null) {
                         throw new IllegalArgumentException("No such field: " + prop);
@@ -224,7 +223,7 @@ public class PostGISDataset implements VectorDataset {
 
             try {
                 PreparedStatement st = pg.prepareStatement(sql, args, cx);
-                return qp.apply(new PostGISCursor(st.executeQuery(), cx, q.getMode(), this));
+                return qp.apply(new PostGISCursor(st.executeQuery(), cx, q.mode(), this));
             }
             catch(SQLException e) {
                 cx.close();
@@ -243,23 +242,23 @@ public class PostGISDataset implements VectorDataset {
         if (f.isGeometry()) {
             //TODO: force 2d
             //TODO: base64 encode
-            sql.add("ST_AsBinary(").name(f.getName()).add(") as ").name(f.getName());
+            sql.add("ST_AsBinary(").name(f.name()).add(") as ").name(f.name());
         }
         else {
-            sql.name(f.getName());
+            sql.name(f.name());
         }
     }
 
     void encodeQuery(SQL sql, VectorQuery q, VectorQueryPlan qp, List<Pair<Object,Integer>> args) {
         Schema schema = schema();
 
-        if (schema.geometry() != null && !Envelopes.isNull(q.getBounds())) {
+        if (schema.geometry() != null && !Envelopes.isNull(q.bounds())) {
             qp.bounded();
 
-            String geom = schema.geometry().getName();
+            String geom = schema.geometry().name();
             Integer srid = schema.geometry().property("srid", Integer.class);
             
-            Polygon poly = Envelopes.toPolygon(q.getBounds());
+            Polygon poly = Envelopes.toPolygon(q.bounds());
 
             sql.add(" WHERE ").name(geom).add(" && ST_GeomFromText(?, ?)");
                //.add(" AND ST_Intersects(").name(geom).add(", ST_GeomFromText(?, ?))");
@@ -271,7 +270,7 @@ public class PostGISDataset implements VectorDataset {
             //values.add(new Pair(srid ,Types.INTEGER));
         }
 
-        Filter<Feature> filter = q.getFilter();
+        Filter<Feature> filter = q.filter();
         if (!Filters.isTrueOrNull(filter)) {
             FilterSQLEncoder sqle = new PostGISFilterEncoder(this);
             try {
@@ -289,13 +288,13 @@ public class PostGISDataset implements VectorDataset {
             }
         }
 
-        Integer offset = q.getOffset();
+        Integer offset = q.offset();
         if (offset != null) {
             qp.offsetted();
             sql.add(" OFFSET ").add(offset);
             //values.add(new Pair(offset, Types.INTEGER));
         }
-        Integer limit = q.getLimit();
+        Integer limit = q.limit();
         if (limit != null) {
             qp.limited();
             sql.add(" LIMIT ").add(limit);
@@ -357,7 +356,7 @@ public class PostGISDataset implements VectorDataset {
                 SQL vals = new SQL("VALUES (");
 
                 for (Field fld : schema) {
-                    PrimaryKeyColumn pkcol = pkey.column(fld.getName());
+                    PrimaryKeyColumn pkcol = pkey.column(fld.name());
                     Object value = null;
                     if (pkcol != null) {
                         if (pkcol.isAutoIncrement()) {
@@ -369,14 +368,14 @@ public class PostGISDataset implements VectorDataset {
                         }
                         else {
                             //generate one
-                            value = nextval(pkcol, fld.getType(), cx);
+                            value = nextval(pkcol, fld.type(), cx);
                         }
                     }
                     else {
-                        value = f.get(fld.getName());
+                        value = f.get(fld.name());
                     }
 
-                    cols.name(fld.getName()).add(",");
+                    cols.name(fld.name()).add(",");
 
                     if (value instanceof Geometry) {
                         value = new WKTWriter().write((Geometry) value);
@@ -447,8 +446,8 @@ public class PostGISDataset implements VectorDataset {
 
     boolean missingProperties(VectorQuery q) throws IOException {
         boolean hasMissing = false;
-        if (q.getFilter() != null) {
-            Set<String> properties = Filters.properties(q.getFilter());
+        if (q.filter() != null) {
+            Set<String> properties = Filters.properties(q.filter());
             // try to defer resolving the schema unless needed
             if (!properties.isEmpty()) {
                 hasMissing = !q.missingProperties(schema()).isEmpty();

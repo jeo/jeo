@@ -55,7 +55,7 @@ public class Filters {
 
         @Override
         public Object visit(Property property, Object obj) {
-            ((Set) obj).add(property.getProperty());
+            ((Set) obj).add(property.property());
             return obj;
         }
 

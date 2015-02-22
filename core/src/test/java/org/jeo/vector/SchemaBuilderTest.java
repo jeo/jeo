@@ -30,10 +30,10 @@ public class SchemaBuilderTest {
             .fields("sp:String,ip:Integer,pp:Point:srid=4326").schema();
         assertEquals(3, schema.getFields().size());
 
-        assertEquals(String.class, schema.field("sp").getType());
-        assertEquals(Integer.class, schema.field("ip").getType());
-        assertEquals(Point.class, schema.field("pp").getType());
-        assertEquals(Proj.EPSG_4326, schema.field("pp").getCRS());
+        assertEquals(String.class, schema.field("sp").type());
+        assertEquals(Integer.class, schema.field("ip").type());
+        assertEquals(Point.class, schema.field("pp").type());
+        assertEquals(Proj.EPSG_4326, schema.field("pp").crs());
     }
 
     @Test

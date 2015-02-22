@@ -59,22 +59,22 @@ public abstract class GeoPkgBaseDriver extends FileVectorDriver<GeoPkgWorkspace>
     protected abstract Backend backend(GeoPkgOpts gpkgOpts) throws IOException;
 
     @Override
-    public final List<Key<?>> getKeys() {
+    public final List<Key<?>> keys() {
         return (List) Arrays.asList(FILE, USER, PASSWD);
     }
 
     @Override
-    public final String getName() {
+    public final String name() {
         return "GeoPackage";
     }
 
     @Override
-    public final List<String> getAliases() {
+    public final List<String> aliases() {
         return Arrays.asList("gpkg", "geopkg");
     }
 
     @Override
-    public final Class<GeoPkgWorkspace> getType() {
+    public final Class<GeoPkgWorkspace> type() {
         return GeoPkgWorkspace.class;
     }
 

@@ -53,6 +53,15 @@ public class Optional<T> {
     }
 
     /**
+     * Invokes the specified consumer if the optional is present.
+     */
+    public void ifPresent(Consumer<T> c) {
+        if (isPresent()) {
+            c.accept(get());
+        }
+    }
+
+    /**
      * Returns the value or throws {@link NoSuchElementException} if the value does not
      * exist.
      */

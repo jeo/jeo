@@ -49,22 +49,22 @@ public class MongoDB implements VectorDriver<MongoWorkspace> {
     }
 
     @Override
-    public String getName() {
+    public String name() {
         return "MongoDB";
     }
 
     @Override
-    public List<String> getAliases() {
+    public List<String> aliases() {
         return Arrays.asList("mongo");
     }
 
     @Override
-    public Class<MongoWorkspace> getType() {
+    public Class<MongoWorkspace> type() {
         return MongoWorkspace.class;
     }
 
     @Override
-    public List<Key<?>> getKeys() {
+    public List<Key<?>> keys() {
         return (List) Arrays.asList(DB, HOST, PORT, USER, PASSWD);
     }
 

@@ -43,12 +43,12 @@ public class MongoTestData {
             g = Geom.iterate((MultiPolygon) f.geometry()).iterator().next();
 
             DBObject obj = new BasicDBObject(f.map());
-            obj.put(schema.geometry().getName(), JSON.parse(GeoJSONWriter.toString(g)));
+            obj.put(schema.geometry().name(), JSON.parse(GeoJSONWriter.toString(g)));
             dbcol.insert(obj);
         }
 
         dbcol.ensureIndex(BasicDBObjectBuilder.start().add(
-            data.schema().geometry().getName(), "2dsphere").get());
+            data.schema().geometry().name(), "2dsphere").get());
 
         workspace.setMapper(new DefaultMapper(new Mapping().geometry("geometry")));
     }

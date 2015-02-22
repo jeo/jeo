@@ -8,17 +8,18 @@ message Field {
     DOUBLE = 2;
     STRING = 3;
     BINARY = 4;
+    GEOMETRY = 5;
   }
 
   required string key = 1;
   required Type type = 2;
+  optional Geometry.Type geomType = 3;
+  optional string crs = 4;
 }
 
 message Schema {
   required string name = 1;
-  optional string crs = 2;
-  optional Geometry.Type geomType = 3;
-  repeated Field field = 4;
+  repeated Field field = 2;
 }
 
 message Value {
@@ -26,10 +27,10 @@ message Value {
   optional double doubleVal = 2;
   optional string strVal = 3;
   optional bytes bytesVal = 4;
+  optional Geometry geom = 5;
 }
 
 message Feature {
-  optional Geometry geom = 1;
-  repeated Value value = 2;
-  optional bool last = 3;
+  repeated Value value = 1;
+  optional bool last = 2;
 }

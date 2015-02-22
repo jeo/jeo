@@ -215,16 +215,8 @@ public class ProtobufWriter implements Disposable {
         Feature.Builder b = Feature.newBuilder();
         last = b;
 
-        com.vividsolutions.jts.geom.Geometry g = f.geometry();
-        if (g != null) {
-            b.setGeom(encode(g));
-        }
-
         for (Map.Entry<String,Object> e : f.map().entrySet()) {
             if (e.getKey() == null || e.getValue() == null) {
-                continue;
-            }
-            if (e.getValue() instanceof com.vividsolutions.jts.geom.Geometry && e.getValue() == g) {
                 continue;
             }
 
@@ -238,7 +230,10 @@ public class ProtobufWriter implements Disposable {
                 vb.setDoubleVal((Double)val);
             }
             else if (val instanceof byte[]) {
-                vb.setBytesVal(ByteString.copyFrom((byte[])val));
+                vb.setBytesVal(ByteString.copyFrom((byte[]) val));
+            }
+            else if (val instanceof com.vividsolutions.jts.geom.Geometry) {
+                vb.setGeom(encode((com.vividsolutions.jts.geom.Geometry) val));
             }
             else {
                 vb.setStrVal(val.toString());
@@ -253,33 +248,7 @@ public class ProtobufWriter implements Disposable {
         Schema.Builder b = Schema.newBuilder();
         b.setName(schema.getName());
 
-        org.jeo.vector.Field geom = schema.geometry();
-        if (geom != null) {
-            Type gtype = null;
-            switch(Geom.Type.from(geom.getType())) {
-            case POINT: gtype = Type.POINT; break;
-            case LINESTRING: gtype = Type.LINESTRING; break;
-            case POLYGON: gtype = Type.POLYGON; break;
-            case MULTIPOINT: gtype = Type.MULTIPOINT; break;
-            case MULTILINESTRING: gtype = Type.MULTILINESTRING; break;
-            case MULTIPOLYGON: gtype = Type.MULTIPOLYGON; break;
-            case GEOMETRYCOLLECTION: gtype = Type.GEOMETRYCOLLECTION; break;
-            case GEOMETRY: gtype = Type.GEOMETRY;
-            }
-
-            b.setGeomType(gtype);
-
-            CoordinateReferenceSystem crs = geom.getCRS();
-            if (crs != null) {
-                b.setCrs(Proj.toString(crs));
-            }
-        }
-        
         for (org.jeo.vector.Field fld : schema) {
-            if (fld.getName().equals(geom.getName())) {
-                continue;
-            }
-
             Field.Builder fb = Field.newBuilder().setKey(fld.getName());
 
             Class<?> clazz = fld.getType();
@@ -291,6 +260,27 @@ public class ProtobufWriter implements Disposable {
             }
             else if (clazz == byte[].class) {
                 fb.setType(Field.Type.BINARY);
+            }
+            else if(com.vividsolutions.jts.geom.Geometry.class.isAssignableFrom(clazz)) {
+                fb.setType(Field.Type.GEOMETRY);
+                Type gtype = null;
+                switch(Geom.Type.from(clazz)) {
+                    case POINT: gtype = Type.POINT; break;
+                    case LINESTRING: gtype = Type.LINESTRING; break;
+                    case POLYGON: gtype = Type.POLYGON; break;
+                    case MULTIPOINT: gtype = Type.MULTIPOINT; break;
+                    case MULTILINESTRING: gtype = Type.MULTILINESTRING; break;
+                    case MULTIPOLYGON: gtype = Type.MULTIPOLYGON; break;
+                    case GEOMETRYCOLLECTION: gtype = Type.GEOMETRYCOLLECTION; break;
+                    case GEOMETRY: gtype = Type.GEOMETRY;
+                }
+
+                fb.setGeomType(gtype);
+
+                CoordinateReferenceSystem crs = fld.getCRS();
+                if (crs != null) {
+                    fb.setCrs(Proj.toString(crs));
+                }
             }
             else {
                 fb.setType(Field.Type.STRING);

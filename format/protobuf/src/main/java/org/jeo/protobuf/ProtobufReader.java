@@ -19,6 +19,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.jeo.protobuf.Feat.Field.Type;
 import org.jeo.vector.BasicFeature;
 import org.jeo.vector.SchemaBuilder;
 import org.jeo.geom.Geom;
@@ -219,7 +220,6 @@ public class ProtobufReader {
         b.mergeDelimitedFrom(in);
 
         List<Object> vals = new ArrayList<Object>();
-        vals.add(b.hasGeom() ? decode(b.getGeom()) : null);
 
         for (int i = 0; i < b.getValueCount(); i++) {
             Value val = b.getValue(i);
@@ -234,6 +234,9 @@ public class ProtobufReader {
             }
             else if (val.hasBytesVal()) {
                 vals.add(val.getBytesVal().toByteArray());
+            }
+            else if (val.hasGeom()) {
+                vals.add(decode(val.getGeom()));
             }
             else {
                 vals.add(null);
@@ -256,48 +259,49 @@ public class ProtobufReader {
 
         SchemaBuilder sb = org.jeo.vector.Schema.build(s.getName());
 
-        CoordinateReferenceSystem crs = null;
-        if (b.hasCrs()) {
-            crs = Proj.crs(b.getCrs());
-        }
-
-        Class<? extends com.vividsolutions.jts.geom.Geometry> gtype= null;
-        if (b.hasGeomType()) {
-            switch(b.getGeomType()) {
-            case POINT:
-                gtype = com.vividsolutions.jts.geom.Point.class; break;
-            case LINESTRING:
-                gtype = com.vividsolutions.jts.geom.LineString.class; break;
-            case POLYGON:
-                gtype = com.vividsolutions.jts.geom.Polygon.class; break;
-            case MULTIPOINT:
-                gtype = com.vividsolutions.jts.geom.MultiPoint.class; break;
-            case MULTILINESTRING:
-                gtype = com.vividsolutions.jts.geom.MultiLineString.class; break;
-            case MULTIPOLYGON:
-                gtype = com.vividsolutions.jts.geom.MultiPolygon.class; break;
-            case GEOMETRYCOLLECTION:
-                gtype = com.vividsolutions.jts.geom.GeometryCollection.class; break;
-            default:
-                gtype = com.vividsolutions.jts.geom.Geometry.class;
-            }
-        }
-
-        sb.field("geometry", gtype, crs);
         for (int i = 0; i < b.getFieldCount(); i++) {
             Field fld = b.getField(i);
             String key = fld.getKey();
             Class<?> clazz = null;
+            CoordinateReferenceSystem crs = null;
 
             switch(fld.getType()) {
             case INT: clazz = Integer.class; break;
             case DOUBLE: clazz = Double.class; break;
             case STRING: clazz = String.class; break;
             case BINARY: clazz = byte[].class; break;
+            case GEOMETRY:
+                switch(fld.getGeomType()) {
+                    case POINT:
+                        clazz = com.vividsolutions.jts.geom.Point.class; break;
+                    case LINESTRING:
+                        clazz = com.vividsolutions.jts.geom.LineString.class; break;
+                    case POLYGON:
+                        clazz = com.vividsolutions.jts.geom.Polygon.class; break;
+                    case MULTIPOINT:
+                        clazz = com.vividsolutions.jts.geom.MultiPoint.class; break;
+                    case MULTILINESTRING:
+                        clazz = com.vividsolutions.jts.geom.MultiLineString.class; break;
+                    case MULTIPOLYGON:
+                        clazz = com.vividsolutions.jts.geom.MultiPolygon.class; break;
+                    case GEOMETRYCOLLECTION:
+                        clazz = com.vividsolutions.jts.geom.GeometryCollection.class; break;
+                    default:
+                        clazz = com.vividsolutions.jts.geom.Geometry.class;
+                }
+                if (fld.hasCrs()) {
+                    crs = Proj.crs(fld.getCrs());
+                }
+                break;
             default: clazz = Object.class;
             }
 
-            sb.field(key, clazz);
+            if (fld.getType() == Type.GEOMETRY) {
+                sb.field(key, (Class<? extends com.vividsolutions.jts.geom.Geometry>) clazz, crs);
+            }
+            else {
+                sb.field(key, clazz);
+            }
         }
 
         return sb.schema();

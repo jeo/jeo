@@ -45,7 +45,12 @@ public class Memory implements VectorDriver<MemWorkspace>, RasterDriver<MemWorks
     public static MemWorkspace open(String name) {
         return new Memory().open((Map) Collections.singletonMap(NAME, name));
     }
-    
+
+    @Override
+    public boolean isEnabled(Messages messages) {
+        return true;
+    }
+
     @Override
     public String getName() {
         return "Memory";

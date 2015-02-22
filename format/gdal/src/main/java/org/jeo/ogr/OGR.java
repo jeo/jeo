@@ -79,6 +79,18 @@ public class OGR extends FileVectorDriver<OGRWorkspace> implements Disposable {
     }
 
     @Override
+    public boolean isEnabled(Messages messages) {
+        try {
+            init();
+            return true;
+        }
+        catch(Throwable t) {
+            Messages.of(messages).report(t);
+            return false;
+        }
+    }
+
+    @Override
     public void close() {
         if (ogrDrv != null) {
             ogrDrv.delete();

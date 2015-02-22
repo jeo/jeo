@@ -67,6 +67,15 @@ public interface Driver<T> {
     List<Key<?>> getKeys();
 
     /**
+     * Determines if the driver is enabled.
+     * <p>
+     * The <tt>messages</tt> argument is optionally used for the driver to report back any messages
+     * or exceptions that prevent the driver from being enabled.
+     * </p>
+     */
+    boolean isEnabled(Messages messages);
+
+    /**
      * Determines if this driver can open a connection to the data described by the specified
      * options.
      * <p>

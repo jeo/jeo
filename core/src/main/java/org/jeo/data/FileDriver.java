@@ -40,6 +40,11 @@ public abstract class FileDriver<T> implements Driver<T> {
     public static final Key<File> FILE = new Key<File>("file", File.class);
 
     @Override
+    public boolean isEnabled(Messages messages) {
+        return true;
+    }
+
+    @Override
     public List<String> getAliases() {
         return Collections.emptyList();
     }

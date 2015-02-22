@@ -44,6 +44,11 @@ public class MongoDB implements VectorDriver<MongoWorkspace> {
     }
 
     @Override
+    public boolean isEnabled(Messages messages) {
+        return true;
+    }
+
+    @Override
     public String getName() {
         return "MongoDB";
     }

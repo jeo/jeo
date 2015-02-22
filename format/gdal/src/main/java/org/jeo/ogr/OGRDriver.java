@@ -27,6 +27,11 @@ import org.jeo.util.Messages;
 public abstract class OGRDriver<T> extends FileVectorDriver<T> {
 
     @Override
+    public boolean isEnabled(Messages messages) {
+        return new OGR().isEnabled(messages);
+    }
+
+    @Override
     protected boolean canCreate(File file, Map<?, Object> opts, Messages msgs) {
         return false;
     }

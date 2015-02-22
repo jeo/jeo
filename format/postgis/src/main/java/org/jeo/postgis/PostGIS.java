@@ -64,6 +64,11 @@ public class PostGIS implements VectorDriver<PostGISWorkspace>{
     }
 
     @Override
+    public boolean isEnabled(Messages messages) {
+        return true;
+    }
+
+    @Override
     public String getName() {
         return "PostGIS";
     }

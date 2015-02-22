@@ -25,7 +25,10 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.EnumSet;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -41,6 +44,7 @@ public class GDAL extends FileDriver<GDALDataset> implements RasterDriver<GDALDa
         }
     }
 
+    static boolean INITIALIZED = false;
     static {
         try {
             init();
@@ -57,15 +61,37 @@ public class GDAL extends FileDriver<GDALDataset> implements RasterDriver<GDALDa
     Driver gdalDrv;
 
     public GDAL() {
+        if (INITIALIZED) {
+            String drvName = getGDALDriverName();
+            if (drvName != null) {
+                gdalDrv = gdal.GetDriverByName(drvName);
+            }
+        }
     }
 
-    protected GDAL(Driver gdalDrv) {
-        this.gdalDrv = gdalDrv;
+    @Override
+    public boolean isEnabled(Messages messages) {
+        try {
+            init();
+            return true;
+        } catch (Throwable t) {
+            Messages.of(messages).report(t);
+            return false;
+        }
+    }
+
+    public String getGDALDriverName() {
+        return null;
     }
 
     @Override
     public String getName() {
         return gdalDrv != null ? gdalDrv.getShortName() : "GDAL";
+    }
+
+    @Override
+    public List<String> getAliases() {
+        return gdalDrv != null ? Arrays.asList(gdalDrv.getShortName()) : (List) Collections.emptyList();
     }
 
     @Override

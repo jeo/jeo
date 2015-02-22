@@ -18,6 +18,7 @@ import org.gdal.gdal.gdal;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -40,7 +41,7 @@ public class GeoTIFF extends GDAL {
     }
 
     public GeoTIFF() {
-        super(gdal.GetDriverByName("GTiff"));
+        super();
     }
 
     @Override
@@ -49,7 +50,16 @@ public class GeoTIFF extends GDAL {
     }
 
     @Override
+    public String getGDALDriverName() {
+        return "GTiff";
+    }
+
+    @Override
     public List<String> getAliases() {
-        return Arrays.asList( gdalDrv.getShortName(), "tif", "tiff");
+        List<String> aliases = new ArrayList<>();
+        aliases.addAll(super.getAliases());
+        aliases.add("tif");
+        aliases.add("tiff");
+        return aliases;
     }
 }

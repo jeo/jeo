@@ -26,17 +26,17 @@ import org.jeo.map.Style;
 public class CartoCSS extends FileDriver<Style> {
 
     @Override
-    public String getName() {
+    public String name() {
         return "CartoCSS";
     }
 
     @Override
-    public List<String> getAliases() {
+    public List<String> aliases() {
         return Arrays.asList("carto", "css");
     }
 
     @Override
-    public Class<Style> getType() {
+    public Class<Style> type() {
         return Style.class;
     }
 

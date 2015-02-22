@@ -112,9 +112,9 @@ public class WMSHandler extends OWSHandler {
         public NanoHTTPD.Response handle(Request req, NanoServer server) throws Exception {
             Iterable<Handle<?>> list = server.getRegistry().list();
             for (Handle h : list) {
-                if (h.getType() == Workspace.class) {
+                if (h.type() == Workspace.class) {
                     workspaces.add(h);
-                } else if (h.getType() == Style.class) {
+                } else if (h.type() == Style.class) {
                     styles.add(h);
                 }
             }
@@ -199,11 +199,11 @@ public class WMSHandler extends OWSHandler {
                                 all.add(epsgCode);
                             }
                         } else {
-                            LOG.warn(w.getName() + ":" + entry.getName() + " is missing crs");
+                            LOG.warn(w.name() + ":" + entry.name() + " is missing crs");
                         }
                     }
                 } catch (IOException ex) {
-                    LOG.error("Error listing workspace " + w.getName(), ex);
+                    LOG.error("Error listing workspace " + w.name(), ex);
                 }
             }
             for (Integer code : all) {
@@ -223,7 +223,7 @@ public class WMSHandler extends OWSHandler {
                         writeLayer(w, entry);
                     }
                 } catch (IOException ex) {
-                    LOG.error("Error listing workspace " + w.getName(), ex);
+                    LOG.error("Error listing workspace " + w.name(), ex);
                 }
             }
         }
@@ -231,15 +231,15 @@ public class WMSHandler extends OWSHandler {
         private void writeStyles() {
             for (Handle<Style> style : styles) {
                 xml.start("Style");
-                xml.element("Name", style.getName());
+                xml.element("Name", style.name());
                 xml.end("Style");
             }
         }
 
         private void writeLayer(Handle<Workspace> ws, Handle<Dataset> lyr) throws IOException {
             xml.start("Layer", "queryable", "1");
-            xml.element("Name", ws.getName() + ":" + lyr.getName());
-            xml.element("Title", first(lyr.getTitle(), lyr.getName()));
+            xml.element("Name", ws.name() + ":" + lyr.name());
+            xml.element("Title", first(lyr.title(), lyr.name()));
             CoordinateReferenceSystem crs;
             try {
                 crs = lyr.crs();
@@ -248,7 +248,7 @@ public class WMSHandler extends OWSHandler {
             }
             if (crs == null) {
                 crs = Proj.EPSG_4326; // @todo better than nothing ?
-                LOG.warn(ws.getName() + ":" + lyr.getName() + " is missing crs");
+                LOG.warn(ws.name() + ":" + lyr.name() + " is missing crs");
             }
             String epsgCode = "EPSG:" + Proj.epsgCode(crs);
             xml.element("CRS", epsgCode);
@@ -257,7 +257,7 @@ public class WMSHandler extends OWSHandler {
             if (bbox == null) {
                 // @todo another good guess?
                 bbox = new Envelope(-180,180,-90,90);
-                LOG.warn(ws.getName() + ":" + lyr.getName() + " is missing bbox");
+                LOG.warn(ws.name() + ":" + lyr.name() + " is missing bbox");
             }
 
             Envelope lonLat =Proj.reproject(bbox, crs, Proj.EPSG_4326);

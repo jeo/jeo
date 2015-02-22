@@ -98,7 +98,7 @@ public class WMTSHandler extends OWSHandler {
             uri = "http://" + req.baseURL() + "/" + serviceName;
             Iterable<Handle<?>> list = server.getRegistry().list();
             for (Handle h : list) {
-                if (h.getType() == Workspace.class) {
+                if (h.type() == Workspace.class) {
                     workspaces.add(h);
                 }
             }
@@ -172,10 +172,10 @@ public class WMTSHandler extends OWSHandler {
                     for (Handle<Dataset> ds: w.resolve().list()) {
                         Dataset dataset = ds.resolve();
                         if (dataset instanceof TileDataset) {
-                            String id = w.getName() + ":" + ds.getName();
+                            String id = w.name() + ":" + ds.name();
                             Integer epsgCode = Proj.epsgCode(ds.crs());
                             if (epsgCode == null) {
-                                LOG.warn("Skipping " + w.getName() + ":" + ds.getName() + ", no epsgCode resolved");
+                                LOG.warn("Skipping " + w.name() + ":" + ds.name() + ", no epsgCode resolved");
                                 continue;
                             }
                             TileDataset tds = (TileDataset) dataset;
@@ -184,7 +184,7 @@ public class WMTSHandler extends OWSHandler {
                         }
                     }
                 } catch (IOException ex) {
-                    LOG.error("Error listing workspace " + w.getName(), ex);
+                    LOG.error("Error listing workspace " + w.name(), ex);
                 }
             }
             for (Object[] td: tileDatasets) {
@@ -200,8 +200,8 @@ public class WMTSHandler extends OWSHandler {
         private void writeLayer(String id, TileDataset ds) throws IOException {
             xml.start("Layer");
 
-            xml.element("ows:Title", ds.getTitle());
-            xml.element("ows:Abstract", ds.getDescription());
+            xml.element("ows:Title", ds.title());
+            xml.element("ows:Abstract", ds.description());
             Envelope bbox = Proj.reproject(ds.bounds(), ds.crs(), Proj.EPSG_4326);
             xml.start("ows:WGS84BoundingBox");
             xml.element("ows:LowerCorner", bbox.getMinX() + " " + bbox.getMinY());
@@ -224,7 +224,7 @@ public class WMTSHandler extends OWSHandler {
             xml.start("TileMatrixSetLink");
             xml.element("TileMatrixSet", id);
             xml.start("TileMatrixSetLimits");
-            for (TileGrid tileGrid : ds.pyramid().getGrids()) {
+            for (TileGrid tileGrid : ds.pyramid().grids()) {
                 writeLimit(tileGrid);
             }
             xml.end("TileMatrixSetLimits");
@@ -233,11 +233,11 @@ public class WMTSHandler extends OWSHandler {
 
         private void writeLimit(TileGrid tileGrid) {
             xml.start("TileMatrixLimits");
-            xml.element("TileMatrix", tileGrid.getZ());
+            xml.element("TileMatrix", tileGrid.z());
             xml.element("MinTileRow", 0);
-            xml.element("MaxTileRow", tileGrid.getHeight() - 1);
+            xml.element("MaxTileRow", tileGrid.height() - 1);
             xml.element("MinTileCol", 0);
-            xml.element("MaxTileCol", tileGrid.getWidth() - 1);
+            xml.element("MaxTileCol", tileGrid.width() - 1);
             xml.end("TileMatrixLimits");
         }
 
@@ -246,7 +246,7 @@ public class WMTSHandler extends OWSHandler {
             xml.element("ows:Identifier", key);
             xml.element("ows:SupportedCRS", "urn:ogc:def:crs:EPSG::" + epsgCode);
             TilePyramid pyramid = ds.pyramid();
-            for (TileGrid tileGrid : pyramid.getGrids()) {
+            for (TileGrid tileGrid : pyramid.grids()) {
                 writeTileMatrix(pyramid, tileGrid, ds.crs());
             }
             xml.end("TileMatrixSet");
@@ -254,15 +254,15 @@ public class WMTSHandler extends OWSHandler {
 
         private void writeTileMatrix(TilePyramid pyramid, TileGrid tileGrid, CoordinateReferenceSystem crs) {
             xml.start("TileMatrix");
-            xml.element("ows:Identifier", tileGrid.getZ());
-            double sd = computeScaleDenominator(tileGrid.getXRes(), crs);
+            xml.element("ows:Identifier", tileGrid.z());
+            double sd = computeScaleDenominator(tileGrid.xres(), crs);
             xml.element("ScaleDenominator", String.format("%f", sd));
 
             // @todo do we need to right TopLeftCorner?
-            xml.element("TileWidth", pyramid.getTileWidth());
-            xml.element("TileHeight", pyramid.getTileHeight());
-            xml.element("MatrixWidth", tileGrid.getWidth());
-            xml.element("MatrixHeight", tileGrid.getHeight());
+            xml.element("TileWidth", pyramid.tileWidth());
+            xml.element("TileHeight", pyramid.tileHeight());
+            xml.element("MatrixWidth", tileGrid.width());
+            xml.element("MatrixHeight", tileGrid.height());
             xml.end("TileMatrix");
         }
 
@@ -301,7 +301,7 @@ public class WMTSHandler extends OWSHandler {
 
             if (errors == null) {
                 // jeo tiles are from lower-left corner, not upper-right so invert the row number
-                resp = render(layer, format, tileCol, grid.getHeight() - tileRow - 1, tileMatrix);
+                resp = render(layer, format, tileCol, grid.height() - tileRow - 1, tileMatrix);
             } else {
                 StringBuilder sb = new StringBuilder();
                 for (String e : errors) {
@@ -319,7 +319,7 @@ public class WMTSHandler extends OWSHandler {
                     "No such tile z = %d, x = %d, y = %d", zoom, tileCol, tileRow));
             }
 
-            return new Response(HTTP_OK, t.getMimeType(), new ByteArrayInputStream(t.getData()));
+            return new Response(HTTP_OK, t.mimeType(), new ByteArrayInputStream(t.data()));
         }
     }
 

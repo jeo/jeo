@@ -70,7 +70,7 @@ public class GT {
     }
 
     public static SimpleFeature feature(Feature feature, SimpleFeatureType featureType) {
-        return new SimpleFeatureImpl(feature.list(), featureType, new FeatureIdImpl(feature.getId()));
+        return new SimpleFeatureImpl(feature.list(), featureType, new FeatureIdImpl(feature.id()));
     }
 
     public static Schema schema(SimpleFeatureType featureType) {
@@ -113,7 +113,7 @@ public class GT {
         }
 
         for (Field f : schema) {
-            b.add(f.getName(), f.getType());
+            b.add(f.name(), f.type());
         }
 
         return b.buildFeatureType();
@@ -161,13 +161,13 @@ public class GT {
 
             @Override
             public Object visit(Property property, Object obj) {
-                return filterFactory.property(property.getProperty());
+                return filterFactory.property(property.property());
             }
 
             @Override
             public Object visit(Mixed mixed, Object obj) {
                 List<Expression> l = new ArrayList<Expression>();
-                for (org.jeo.filter.Expression e : mixed.getExpressions()) {
+                for (org.jeo.filter.Expression e : mixed.expressions()) {
                     l.add(expr(e));
                 }
 
@@ -176,7 +176,7 @@ public class GT {
 
             @Override
             public Object visit(final Function function, Object obj) {
-                return new InternalVolatileFunction(function.getName()) {
+                return new InternalVolatileFunction(function.name()) {
                     @Override
                     public Object evaluate(Object object) {
                         if (object instanceof SimpleFeature) {

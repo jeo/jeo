@@ -189,11 +189,11 @@ public class Colorizer {
                     return null;
                 }
             };
-            f.getArgs().add(new Literal(stop.value));
-            f.getArgs().add(new Literal(stop.color));
-            f.getArgs().add(new Literal(stop.mode));
-            f.getArgs().add(new Literal(stop.epsilon));
-            mixed.getExpressions().add(f);
+            f.args().add(new Literal(stop.value));
+            f.args().add(new Literal(stop.color));
+            f.args().add(new Literal(stop.mode));
+            f.args().add(new Literal(stop.epsilon));
+            mixed.expressions().add(f);
         }
 
         rule.put("raster-colorizer-stops", mixed);
@@ -213,9 +213,9 @@ public class Colorizer {
         if (rule.has("raster-colorizer-stops")) {
             //TODO: make this routine more robust
             Mixed m = (Mixed) rule.get("raster-colorizer-stops");
-            for (Expression expr : m.getExpressions()) {
+            for (Expression expr : m.expressions()) {
                 Function stop = (Function) expr;
-                List<Expression> args = stop.getArgs();
+                List<Expression> args = stop.args();
                 Double value =  Convert.toNumber(args.get(0).evaluate(null)).get().doubleValue();
                 RGB color = RGB.convert(args.get(1).evaluate(null)).get();
                 if (args.size() > 2) {

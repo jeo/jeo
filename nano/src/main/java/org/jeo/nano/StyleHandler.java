@@ -25,7 +25,6 @@ import org.jeo.data.DataRepository;
 import org.jeo.data.DataRepositoryView;
 import org.jeo.data.Handle;
 import org.jeo.filter.Property;
-import org.jeo.filter.Self;
 import org.jeo.filter.TypeOf;
 import org.jeo.geojson.GeoJSONWriter;
 import org.jeo.map.Style;
@@ -66,9 +65,9 @@ public class StyleHandler extends Handler {
         w.object();
 
         for (Handle h : reg.query(new TypeOf<Handle<?>>(new Property("type"), Style.class))) {
-            w.key(h.getName()).object()
+            w.key(h.name()).object()
                 .key("type").value("style")
-                .key("driver").value(h.getDriver().getName())
+                .key("driver").value(h.driver().name())
                 .endObject();
         }
 

@@ -75,17 +75,17 @@ public class GeoGitWorkspace implements Workspace, FileData {
     }
 
     @Override
-    public GeoGit getDriver() {
+    public GeoGit driver() {
         return new GeoGit();
     }
 
     @Override
-    public Map<Key<?>, Object> getDriverOptions() {
+    public Map<Key<?>, Object> driverOptions() {
         return opts.toMap();
     }
 
     @Override
-    public File getFile() {
+    public File file() {
         return opts.getFile();
     }
 
@@ -117,7 +117,7 @@ public class GeoGitWorkspace implements Workspace, FileData {
             @Override
             public Handle<Dataset> apply(NodeRef input) {
                 return new Handle<Dataset>(NodeRef.nodeFromPath(input.path()), Dataset.class, 
-                    getDriver()) {
+                    driver()) {
                     @Override
                     protected Dataset doResolve() throws IOException {
                         return get(name);

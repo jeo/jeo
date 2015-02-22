@@ -30,14 +30,11 @@ import org.geogit.api.plumbing.RevObjectParse;
 import org.geogit.api.plumbing.TransactionBegin;
 import org.geogit.api.porcelain.CheckoutOp;
 import org.geogit.repository.WorkingTree;
-import org.jeo.data.Cursor;
 import org.jeo.data.Cursor.Mode;
-import org.jeo.data.Cursors;
 import org.jeo.data.Transaction;
 import org.jeo.data.Transactional;
 import org.jeo.vector.FeatureCursor;
 import org.jeo.vector.VectorDataset;
-import org.jeo.vector.Feature;
 import org.jeo.vector.Schema;
 import org.jeo.geom.Envelopes;
 import org.jeo.util.Key;
@@ -65,30 +62,30 @@ public class GeoGitDataset implements VectorDataset, Transactional {
     }
 
     @Override
-    public GeoGit getDriver() {
-        return geogit.getDriver();
+    public GeoGit driver() {
+        return geogit.driver();
     }
 
     @Override
-    public Map<Key<?>, Object> getDriverOptions() {
-        return geogit.getDriverOptions();
+    public Map<Key<?>, Object> driverOptions() {
+        return geogit.driverOptions();
     }
 
     public GeoGIT getGeoGIT() {
         return geogit.getGeoGIT();
     }
     @Override
-    public String getName() {
+    public String name() {
         return schema.getName();
     }
 
     @Override
-    public String getTitle() {
+    public String title() {
         return null;
     }
 
     @Override
-    public String getDescription() {
+    public String description() {
         return null;
     }
 
@@ -125,13 +122,13 @@ public class GeoGitDataset implements VectorDataset, Transactional {
     @Override
     public FeatureCursor cursor(VectorQuery q) throws IOException {
         //require a transaction for non read only 
-        if (q.getMode() != Mode.READ && q.getTransaction() == null) {
+        if (q.mode() != Mode.READ && q.transaction() == null) {
             throw new IllegalArgumentException("Writable cursor requires a transaction");
         }
 
-        Transaction tx =  (Transaction) q.getTransaction();
+        Transaction tx =  (Transaction) q.transaction();
 
-        if (q.getMode() == Mode.APPEND) {
+        if (q.mode() == Mode.APPEND) {
             return new GeoGitAppendCursor(this, tx);
         }
 
@@ -140,7 +137,7 @@ public class GeoGitDataset implements VectorDataset, Transactional {
 
         VectorQueryPlan qp = new VectorQueryPlan(q);
         
-        final Envelope bbox = q.getBounds();
+        final Envelope bbox = q.bounds();
         if (!Envelopes.isNull(bbox)) {
             qp.bounded();
             ls.setBoundsFilter(new Predicate<Bounded>() {
@@ -151,7 +148,7 @@ public class GeoGitDataset implements VectorDataset, Transactional {
             });
         }
 
-        return qp.apply(new GeoGitCursor(q.getMode(), ls.call(), this, tx));
+        return qp.apply(new GeoGitCursor(q.mode(), ls.call(), this, tx));
     }
 
     public GeoGitTransaction transaction(Map<String,Object> options) {

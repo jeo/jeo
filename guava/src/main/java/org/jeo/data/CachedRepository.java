@@ -105,13 +105,13 @@ public class CachedRepository implements DataRepository {
         }
 
         @Override
-        public Driver<?> getDriver() {
-            return ws.getDriver();
+        public Driver<?> driver() {
+            return ws.driver();
         }
 
         @Override
-        public Map<Key<?>, Object> getDriverOptions() {
-            return ws.getDriverOptions();
+        public Map<Key<?>, Object> driverOptions() {
+            return ws.driverOptions();
         }
 
         @Override

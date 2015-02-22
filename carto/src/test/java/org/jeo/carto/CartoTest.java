@@ -394,8 +394,8 @@ public class CartoTest {
         Mixed m = (Mixed) r.get("raster-colorizer-stops");
         assertNotNull(m);
 
-        assertEquals(3, m.getExpressions().size());
-        for (Expression expr : m.getExpressions()) {
+        assertEquals(3, m.expressions().size());
+        for (Expression expr : m.expressions()) {
             assertTrue(expr instanceof Function);
         }
     }

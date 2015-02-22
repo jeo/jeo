@@ -56,17 +56,17 @@ public class GeoGit extends FileVectorDriver<GeoGitWorkspace> {
     }
 
     @Override
-    public String getName() {
+    public String name() {
         return "GeoGIT";
     }
 
     @Override
-    public List<Key<?>> getKeys() {
+    public List<Key<?>> keys() {
         return (List) Arrays.asList(FILE, /*CREATE, */USER, EMAIL);
     }
 
     @Override
-    public Class<GeoGitWorkspace> getType() {
+    public Class<GeoGitWorkspace> type() {
         return GeoGitWorkspace.class;
     }
 

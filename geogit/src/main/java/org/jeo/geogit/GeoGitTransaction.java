@@ -79,7 +79,7 @@ public class GeoGitTransaction implements Transaction {
 
     String autoMessage() {
         Iterator<DiffEntry> indexDiffs = ggtx.command(DiffIndex.class)
-          .setFilter(Arrays.asList(dataset.getName())).call();
+          .setFilter(Arrays.asList(dataset.name())).call();
         int added = 0, removed = 0, modified = 0;
         StringBuilder msg = new StringBuilder();
         while (indexDiffs.hasNext()) {

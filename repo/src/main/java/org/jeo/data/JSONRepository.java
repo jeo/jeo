@@ -112,7 +112,7 @@ public class JSONRepository implements DataRepository {
                 return null;
             }
 
-            Handle<?> h = Handle.to(key, handleType(drv), drv, this);
+            Handle<?> h = RepoHandle.to(key, handleType(drv), drv, this);
             if (filter.test(h)) {
                 list.add(h);
             }
@@ -197,6 +197,6 @@ public class JSONRepository implements DataRepository {
     }
 
     Class<?> handleType(Driver<?> drv) {
-        return Style.class.isAssignableFrom(drv.getType()) ? Style.class : Workspace.class;
+        return Style.class.isAssignableFrom(drv.type()) ? Style.class : Workspace.class;
     }
 }

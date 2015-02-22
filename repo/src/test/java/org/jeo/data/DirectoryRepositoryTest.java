@@ -71,8 +71,8 @@ public class DirectoryRepositoryTest {
         Handle<?> found = Iterables.find(repo.query(Filters.all()), new Predicate<Handle<?>>() {
             @Override
             public boolean apply(Handle<?> input) {
-                return "foo".equals(input.getName())
-                        && Workspace.class.isAssignableFrom(input.getType());
+                return "foo".equals(input.name())
+                        && Workspace.class.isAssignableFrom(input.type());
             }
         });
         assertNotNull(found);
@@ -80,8 +80,8 @@ public class DirectoryRepositoryTest {
         found = Iterables.find(repo.query(Filters.all()), new Predicate<Handle<?>>() {
             @Override
             public boolean apply(Handle<?> input) {
-                return "bar".equals(input.getName())
-                    && Workspace.class.isAssignableFrom(input.getType());
+                return "bar".equals(input.name())
+                    && Workspace.class.isAssignableFrom(input.type());
             }
         });
         assertNotNull(found);
@@ -142,8 +142,8 @@ public class DirectoryRepositoryTest {
     @Test
     public void testStyles() throws Exception {
         final Driver<?> d = createNiceMock(Driver.class);
-        expect(d.getName()).andReturn("css").anyTimes();
-        expect(d.getType()).andReturn((Class)Style.class).anyTimes();
+        expect(d.name()).andReturn("css").anyTimes();
+        expect(d.type()).andReturn((Class)Style.class).anyTimes();
         replay(d);
 
         DirectoryRepository repo2 = new DirectoryRepository(repo.getDirectory(), 
@@ -160,8 +160,8 @@ public class DirectoryRepositoryTest {
         Iterables.find(repo2.query(Filters.all()), new Predicate<Handle<?>>() {
             @Override
             public boolean apply(Handle<?> input) {
-                return "baz".equals(input.getName()) 
-                    && Style.class.isAssignableFrom(input.getType());
+                return "baz".equals(input.name())
+                    && Style.class.isAssignableFrom(input.type());
             }
         });
         repo2.close();

@@ -206,7 +206,7 @@ public class SVGRenderer extends BaseRenderer implements Labeller {
         StringBuilder d = new StringBuilder();
         while(path.hasNext()) {
             Coordinate c = path.next();
-            switch(path.getStep()) {
+            switch(path.step()) {
             case MOVE_TO:
                 d.append("M ").append(c.x).append(" ").append(c.y).append(" ");
                 break;

@@ -46,13 +46,13 @@ public class GTTest {
         assertEquals(4, schema.getFields().size());
 
         assertNotNull(schema.field("geometry"));
-        assertEquals(Point.class, schema.field("geometry").getType());
+        assertEquals(Point.class, schema.field("geometry").type());
         assertNotNull(schema.field("name"));
-        assertEquals(String.class, schema.field("name").getType());
+        assertEquals(String.class, schema.field("name").type());
         assertNotNull(schema.field("id"));
-        assertEquals(Integer.class, schema.field("id").getType());
+        assertEquals(Integer.class, schema.field("id").type());
         assertNotNull(schema.field("price"));
-        assertEquals(Double.class, schema.field("price").getType());
+        assertEquals(Double.class, schema.field("price").type());
     }
 
     @Test

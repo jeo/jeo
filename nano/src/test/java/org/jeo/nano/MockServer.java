@@ -33,8 +33,6 @@ import static org.easymock.EasyMock.expectLastCall;
 import org.easymock.IAnswer;
 import org.easymock.IExpectationSetters;
 import org.easymock.classextension.EasyMock;
-import org.jeo.data.Cursor;
-import org.jeo.data.Cursors;
 import org.jeo.data.DataRepositoryView;
 import org.jeo.data.Dataset;
 import org.jeo.data.Driver;
@@ -125,7 +123,7 @@ public class MockServer {
     MockServer withPointGeometry() throws Exception {
         expect(vectorLayer.crs()).andReturn(Proj.EPSG_4326);
         expect(vectorLayer.bounds()).andReturn(null);
-        expect(vectorLayer.getName()).andReturn("emptylayer");
+        expect(vectorLayer.name()).andReturn("emptylayer");
         Schema schema = createMock(Schema.class);
         expect(vectorLayer.schema()).andReturn(schema);
         return this;
@@ -164,7 +162,7 @@ public class MockServer {
         expect(c.write()).andReturn(c);
 
         IExpectationSetters<FeatureCursor> cursor =
-                expect(vectorLayer.cursor(new VectorQuery().update().filter(new Id(new Literal(feature.getId()))))).andReturn(c);
+                expect(vectorLayer.cursor(new VectorQuery().update().filter(new Id(new Literal(feature.id()))))).andReturn(c);
         if (!expectSuccess) {
             cursor.anyTimes();
         }
@@ -196,12 +194,12 @@ public class MockServer {
         Dataset active = vectorLayer == null ? tileLayer : vectorLayer;
         assert active != null : "expected a tile or vector layer";
 
-        expect(active.getName()).andReturn("emptylayer").anyTimes();
+        expect(active.name()).andReturn("emptylayer").anyTimes();
         expect(active.bounds()).andReturn(new Envelope(-180, 180, -90, 90)).anyTimes();
         expect(active.crs()).andReturn(Proj.EPSG_4326).anyTimes();
         Driver driver = createMock(Driver.class);
-        expect(driver.getName()).andReturn("mockDriver").anyTimes();
-        expect(active.getDriver()).andReturn(driver).anyTimes();
+        expect(driver.name()).andReturn("mockDriver").anyTimes();
+        expect(active.driver()).andReturn(driver).anyTimes();
         if (vectorLayer != null) {
             expect(vectorLayer.count((VectorQuery) anyObject())).andReturn(42L).anyTimes();
             Schema schema = createMock(Schema.class);
@@ -244,18 +242,18 @@ public class MockServer {
     }
     
     Handle<Dataset> createVectorDataset(String name, String title, Envelope env, Schema schema) throws Exception {
-        CoordinateReferenceSystem crs = schema.geometry().getCRS();
+        CoordinateReferenceSystem crs = schema.geometry().crs();
         VectorDataset dataSet = createMock(VectorDataset.class);
         expect(dataSet.bounds()).andReturn(env).anyTimes();
-        expect(dataSet.getName()).andReturn(name).anyTimes();
-        expect(dataSet.getTitle()).andReturn(title).anyTimes();
+        expect(dataSet.name()).andReturn(name).anyTimes();
+        expect(dataSet.title()).andReturn(title).anyTimes();
         expect(dataSet.crs()).andReturn(crs).anyTimes();
         expect(dataSet.schema()).andReturn(schema).anyTimes();
         Handle handle = createMock(Handle.class);
-        expect(handle.getType()).andReturn(VectorDataset.class).anyTimes();
+        expect(handle.type()).andReturn(VectorDataset.class).anyTimes();
         expect(handle.bounds()).andReturn(env).anyTimes();
-        expect(handle.getName()).andReturn(name).anyTimes();
-        expect(handle.getTitle()).andReturn(title).anyTimes();
+        expect(handle.name()).andReturn(name).anyTimes();
+        expect(handle.title()).andReturn(title).anyTimes();
         expect(handle.crs()).andReturn(crs).anyTimes();
         expect(handle.resolve()).andReturn(dataSet).anyTimes();
         return handle;
@@ -263,8 +261,8 @@ public class MockServer {
 
     Handle<Workspace> createWorkspace(String name, final Handle<Dataset>... ds) throws Exception {
         Handle<Workspace> handle = createMock(Handle.class);
-        expect(handle.getName()).andReturn(name).anyTimes();
-        expect(handle.getType()).andReturn(Workspace.class).anyTimes();
+        expect(handle.name()).andReturn(name).anyTimes();
+        expect(handle.type()).andReturn(Workspace.class).anyTimes();
         Workspace ws = createMock(Workspace.class);
         workspaces.add(handle);
         expect(ws.list()).andReturn(Arrays.asList(ds)).anyTimes();
@@ -274,7 +272,7 @@ public class MockServer {
             public Dataset answer() throws Throwable {
                 String name = (String) EasyMock.getCurrentArguments()[0];
                 for (Handle<Dataset> d: ds) {
-                    if (name.equals(d.getName())) return d.resolve();
+                    if (name.equals(d.name())) return d.resolve();
                 }
                 return null;
             }
@@ -286,12 +284,12 @@ public class MockServer {
 
     Handle<Style> createStyle(String name) throws Exception {
         Handle<Style> handle = createMock(Handle.class);
-        expect(handle.getName()).andReturn(name).anyTimes();
-        expect(handle.getType()).andReturn(Style.class).anyTimes();
+        expect(handle.name()).andReturn(name).anyTimes();
+        expect(handle.type()).andReturn(Style.class).anyTimes();
 
         Driver drv = createNiceMock(Driver.class);
-        expect(drv.getName()).andReturn("mock").anyTimes();
-        expect(handle.getDriver()).andReturn(drv).anyTimes();
+        expect(drv.name()).andReturn("mock").anyTimes();
+        expect(handle.driver()).andReturn(drv).anyTimes();
 
         Style style = createMock(Style.class);
         expect(handle.resolve()).andReturn(style).anyTimes();
@@ -313,12 +311,12 @@ public class MockServer {
         withWorkspace();
 
         Driver driver = createMock(Driver.class);
-        expect(driver.getName()).andReturn("mockDriver");
+        expect(driver.name()).andReturn("mockDriver");
         
         Handle<Dataset> dataSet = createMock(Handle.class);
-        expect(dataSet.getName()).andReturn("mockDataSet");
+        expect(dataSet.name()).andReturn("mockDataSet");
 
-        expect(workspace.getDriver()).andReturn(driver);
+        expect(workspace.driver()).andReturn(driver);
         expect(workspace.list()).andReturn(Collections.singleton(dataSet));
 
         return this;

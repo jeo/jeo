@@ -21,7 +21,6 @@ import org.geogit.api.FeatureBuilder;
 import org.geogit.api.NodeRef;
 import org.geogit.api.RevFeature;
 import org.geogit.api.plumbing.RevObjectParse;
-import org.jeo.data.Cursor;
 import org.jeo.data.Transaction;
 import org.jeo.vector.Feature;
 import org.jeo.geotools.GT;
@@ -80,7 +79,7 @@ public class GeoGitCursor extends FeatureCursor {
     @Override
     protected void doRemove() throws IOException {
         Preconditions.checkNotNull(curr, "next() has not been called");
-        dataset.delete(curr.getId(), tx);
+        dataset.delete(curr.id(), tx);
     }
 
     @Override

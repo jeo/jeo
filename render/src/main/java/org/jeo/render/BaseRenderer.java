@@ -149,7 +149,7 @@ public abstract class BaseRenderer implements Renderer {
         }
         else {
             LOG.debug(
-                "Layer "+data.getName()+" specifies no projection, assuming map projection");
+                "Layer "+data.name()+" specifies no projection, assuming map projection");
         }
 
         return bbox;
@@ -173,11 +173,11 @@ public abstract class BaseRenderer implements Renderer {
 
         // compute query fields to reduce overhead
         // always want the geometry
-        q.fields(data.schema() == null ? "geometry" : data.schema().geometry().getName());
+        q.fields(data.schema() == null ? "geometry" : data.schema().geometry().name());
 
         // grab any referenced by the filter
-        q.appendFields(!Filters.isTrueOrNull(q.getFilter()) ?
-                Filters.properties(q.getFilter()) : Collections.EMPTY_LIST);
+        q.appendFields(!Filters.isTrueOrNull(q.filter()) ?
+                Filters.properties(q.filter()) : Collections.EMPTY_LIST);
 
         // grab any specified by the style
         q.appendFields(rules.fields());
@@ -260,7 +260,7 @@ public abstract class BaseRenderer implements Renderer {
         }
 
         // buffer data type
-        if (q.getBands().length > 1) {
+        if (q.bands().length > 1) {
             // pack the data into int pixels
             q.datatype(DataType.INT);
         }
@@ -273,8 +273,8 @@ public abstract class BaseRenderer implements Renderer {
 
         ByteBuffer raw = raster.data().buffer();
 
-        if (q.getBands().length == 1) {
-            Band band = data.bands().get(q.getBands()[0]);
+        if (q.bands().length == 1) {
+            Band band = data.bands().get(q.bands()[0]);
 
             final Function<Double,RGB> colormap;
             if (rule.has("raster-colorizer-stops")) {

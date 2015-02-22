@@ -168,10 +168,10 @@ public class WMSHandlerTest extends HandlerTestSupport {
 
         assertNotNull(handler.dataSet);
         assertEquals(4, handler.dataSet.size());
-        assertEquals("ds1", handler.dataSet.get(0).getName());
-        assertEquals("ds2", handler.dataSet.get(1).getName());
-        assertEquals("ds3", handler.dataSet.get(2).getName());
-        assertEquals("ds4", handler.dataSet.get(3).getName());
+        assertEquals("ds1", handler.dataSet.get(0).name());
+        assertEquals("ds2", handler.dataSet.get(1).name());
+        assertEquals("ds3", handler.dataSet.get(2).name());
+        assertEquals("ds4", handler.dataSet.get(3).name());
         assertEquals(1, handler.styles.size()); // generated style
         assertEquals(new Integer(4326), Proj.epsgCode(handler.crs));
         assertEquals(512, handler.width);

@@ -130,7 +130,7 @@ public class DirectoryRepository implements DataRepository {
             }
 
             if (drv != null) {
-                Handle<?> h = Handle.to(name, handleType(drv), drv, this);
+                Handle<?> h = RepoHandle.to(name, handleType(drv), drv, this);
                 if (filter.test(h)) {
                     items.add(h);
                 }
@@ -263,7 +263,7 @@ public class DirectoryRepository implements DataRepository {
     }
 
     Class<?> handleType(Driver<?> drv) {
-        return Style.class.isAssignableFrom(drv.getType()) ? Style.class : Workspace.class;
+        return Style.class.isAssignableFrom(drv.type()) ? Style.class : Workspace.class;
     }
 
     Map<String,FileGroup> listFiles(FilenameFilter filter) {

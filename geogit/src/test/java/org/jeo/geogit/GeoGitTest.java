@@ -99,7 +99,7 @@ public class GeoGitTest {
     }
 
     void addShp(VectorDataset data, Repository repo) throws IOException {
-        String name = data.getName();
+        String name = data.name();
         repo.getWorkingTree().insert(name, GT.iterator(data.cursor(new VectorQuery())),
             new NullProgressListener(), null, null);
         data.close();
@@ -133,13 +133,13 @@ public class GeoGitTest {
         Iterables.find(ws.list(), new Predicate<Handle<Dataset>>() {
             @Override
             public boolean apply(Handle<Dataset> input) {
-                return input.getName().equals("states");
+                return input.name().equals("states");
             }
         });
         Iterables.find(ws.list(), new Predicate<Handle<Dataset>>() {
             @Override
             public boolean apply(Handle<Dataset> input) {
-                return input.getName().equals("point");
+                return input.name().equals("point");
             }
         });
         //assertTrue(layers.contains("line"));

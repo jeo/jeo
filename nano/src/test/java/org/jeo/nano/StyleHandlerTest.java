@@ -1,24 +1,12 @@
 package org.jeo.nano;
 
-import com.google.common.base.Function;
-import com.google.common.base.Strings;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
-import com.google.common.io.ByteStreams;
-import org.easymock.IAnswer;
-import org.jeo.data.DataRepositoryView;
-import org.jeo.data.Handle;
-import org.jeo.filter.Filter;
-import org.jeo.geojson.GeoJSONReader;
 import org.jeo.json.JSONObject;
 import org.jeo.json.JSONValue;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.IOException;
 import java.io.InputStreamReader;
 
-import static org.easymock.EasyMock.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 

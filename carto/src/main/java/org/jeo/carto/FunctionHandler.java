@@ -61,7 +61,7 @@ public class FunctionHandler extends TokenHandler {
                 }
                 else if ("]".equals(d)) {
                     Property p = (Property) stack.pop();
-                    ((Function)stack.peek()).getArgs().add(p);
+                    ((Function)stack.peek()).args().add(p);
                 }
                 if (")".equals(d)) {
                     return null;
@@ -71,7 +71,7 @@ public class FunctionHandler extends TokenHandler {
             case String:
             case HashName:
             case Number:
-                ((Function)stack.peek()).getArgs().add(expr(tok));
+                ((Function)stack.peek()).args().add(expr(tok));
                 break;
             default:
                 throwUnexpectedToken(tok);

@@ -68,11 +68,11 @@ public class MapBuilder {
     }
 
     public MapBuilder layer(Dataset data) {
-        return layer(data.getName(), data);
+        return layer(data.name(), data);
     }
 
     public MapBuilder layer(Dataset data, Filter<Object> filter) {
-        return layer(data.getName(), data, filter);
+        return layer(data.name(), data, filter);
     }
 
     public MapBuilder layer(String name, Dataset data) {

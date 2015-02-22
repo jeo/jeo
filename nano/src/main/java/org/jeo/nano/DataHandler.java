@@ -79,10 +79,10 @@ public class DataHandler extends Handler {
         w.object();
         
         for (Handle<?> item : reg.list()) {
-            w.key(item.getName()).object();
+            w.key(item.name()).object();
 
             w.key("type");
-            Class<?> t = item.getType();
+            Class<?> t = item.type();
             if (Workspace.class.isAssignableFrom(t)) {
                 w.value("workspace");
             }
@@ -97,8 +97,8 @@ public class DataHandler extends Handler {
                 w.nul();
             }
 
-            Driver<?> drv = item.getDriver();
-            w.key("driver").value(drv.getName());
+            Driver<?> drv = item.driver();
+            w.key("driver").value(drv.name());
 
             w.endObject();
 

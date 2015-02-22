@@ -23,7 +23,6 @@ import java.util.Map;
 import org.jeo.data.DataRepository;
 import org.jeo.data.Disposable;
 import org.jeo.data.Handle;
-import org.jeo.data.Workspace;
 import org.jeo.filter.Filter;
 import org.jeo.util.Pair;
 import org.slf4j.Logger;
@@ -32,7 +31,7 @@ import org.slf4j.LoggerFactory;
 /**
  * A repository that stores workspace objects in a {@link Map} in memory.
  * <p>
- * The {@link #put(String, Workspace)} method is used to register workspaces.
+ * The {@link #put(String, org.jeo.data.Workspace)} method is used to register workspaces.
  * </p>
  * @author Justin Deoliveira, OpenGeo
  */

@@ -36,8 +36,8 @@ public class Layer {
 
     public Layer(Dataset data) {
         this.data = data;
-        this.name = data.getName();
-        this.title = data.getTitle() != null ? data.getTitle() : name;
+        this.name = data.name();
+        this.title = data.title() != null ? data.title() : name;
     }
 
     /**

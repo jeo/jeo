@@ -199,7 +199,7 @@ public class FeatureHandlerTest extends HandlerTestSupport {
                 NanoHTTPD.HTTP_OK,
                 NanoHTTPD.MIME_PLAINTEXT
         );
-        assertEquals("baz", feature.getId());
+        assertEquals("baz", feature.id());
         assertEquals("zero", feature.get("name"));
 
         mock.verify();

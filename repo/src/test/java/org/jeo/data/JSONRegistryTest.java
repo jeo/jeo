@@ -46,8 +46,8 @@ public class JSONRegistryTest {
         Iterator<Handle<?>> list = repo.query(Filters.all()).iterator();
         assertTrue(list.hasNext());
         Handle<?> next = list.next();
-        assertEquals("foo", next.getName());
-        assertTrue(Memory.class.isAssignableFrom(next.getDriver().getClass()));
+        assertEquals("foo", next.name());
+        assertTrue(Memory.class.isAssignableFrom(next.driver().getClass()));
     }
 
     @Test

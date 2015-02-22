@@ -78,7 +78,7 @@ public class TileHandler extends Handler {
                     Tile u = layer.pyramid().realign(t, origin);
                     if (u == null) {
                         return new Response(HTTP_INTERNALERROR, MIME_PLAINTEXT, 
-                            "No tile grid for zoom level " + t.getZ());
+                            "No tile grid for zoom level " + t.z());
                     }
                     t = u;
                 }
@@ -107,9 +107,9 @@ public class TileHandler extends Handler {
     
     Tile getFirstTile(TileDataset layer) throws IOException {
         TilePyramid pyr = layer.pyramid();
-        TileGrid grid = pyr.getGrids().get(0);
+        TileGrid grid = pyr.grids().get(0);
 
-        Cursor<Tile> c = layer.read(grid.getZ(), grid.getZ(), -1, -1, -1, -1);
+        Cursor<Tile> c = layer.read(grid.z(), grid.z(), -1, -1, -1, -1);
         try {
             if (c.hasNext()) {
                 return c.next();
@@ -126,7 +126,7 @@ public class TileHandler extends Handler {
         throws IOException {
 
         Map<String,String> vars = new HashMap<String, String>();
-        vars.put("name", layer.getName());
+        vars.put("name", layer.name());
         vars.put("path", createPath(request));
         vars.put("max_bbox", Envelopes.toString(layer.bounds()));
         
@@ -138,13 +138,13 @@ public class TileHandler extends Handler {
     public Response getAsImage(Tile tile, TileDataset layer, Request request, NanoServer server) {
         try {
            
-            Tile t = layer.read(tile.getZ(), tile.getX(), tile.getY());
+            Tile t = layer.read(tile.z(), tile.x(), tile.y());
             if (t == null) {
                 return new Response(HTTP_NOTFOUND, MIME_PLAINTEXT, String.format(
-                    "No such tile z = %d, x = %d, y = %d", tile.getZ(), tile.getX(), tile.getY()));
+                    "No such tile z = %d, x = %d, y = %d", tile.z(), tile.x(), tile.y()));
             }
     
-            return new Response(HTTP_OK, t.getMimeType(), new ByteArrayInputStream(t.getData()));
+            return new Response(HTTP_OK, t.mimeType(), new ByteArrayInputStream(t.data()));
         }
         catch(IOException e) {
             return new Response(HTTP_INTERNALERROR, MIME_PLAINTEXT, e.getLocalizedMessage());

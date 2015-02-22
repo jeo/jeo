@@ -45,7 +45,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.jeo.data.Cursor;
-import org.jeo.data.Cursors;
 import org.jeo.data.Dataset;
 import org.jeo.vector.VectorQuery;
 import org.jeo.data.Transaction;
@@ -151,9 +150,9 @@ public class FeatureHandler extends Handler {
             fields = fieldSpec.split(",");
             if (fields.length > 0) {
                 // reduce the query response to any fields specified
-                q.fields(fields);
+                q.fields(Arrays.asList(fields));
                 // and ensure the filter fields are included
-                q.appendFields(Filters.properties(q.getFilter()));
+                q.appendFields(Filters.properties(q.filter()));
             }
         }
 
@@ -256,7 +255,7 @@ public class FeatureHandler extends Handler {
         throws IOException {
 
         Map<String,String> vars = new HashMap<String, String>();
-        vars.put("name", layer.getName());
+        vars.put("name", layer.name());
         vars.put("path", createPath(request));
 
         Properties p = request.getParms();

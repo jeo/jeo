@@ -38,7 +38,7 @@ public class TileDataView implements Disposable {
     }
 
     public TileGrid gridr(int i) throws IOException {
-        List<TileGrid> grids = tiles.pyramid().getGrids(); 
+        List<TileGrid> grids = tiles.pyramid().grids();
         return i < grids.size() ? grids.get(i) : null;
     }
 

@@ -1,6 +1,14 @@
 before_install:
   - sudo apt-get update -qq
   - sudo apt-get install -y protobuf-compiler
+
+addons:
+  postgresql: "9.3"
+
+before_script:
+  - psql -c 'create database jeo' -U postgres
+  - psql -c 'create extension postgis' -U postgres jeo
+
 language: java
 script:
   - mvn clean install -Djava.awt.headless=true -P protobuf
@@ -10,3 +18,4 @@ notifications:
       - jeo-dev@googlegroups.com
     on_success: change
     on_failure: always
+

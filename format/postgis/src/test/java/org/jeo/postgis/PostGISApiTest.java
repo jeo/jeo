@@ -32,6 +32,11 @@ public class PostGISApiTest extends VectorApiTestBase {
         }
     }
 
+    @BeforeClass
+    public static void setUpData() throws Exception {
+        PostGISTests.setupStatesData();
+    }
+
     PostGISWorkspace pg;
 
     @Override

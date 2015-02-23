@@ -14,6 +14,7 @@
  */
 package org.jeo.postgis;
 
+import static java.lang.String.format;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -26,6 +27,7 @@ import java.sql.Statement;
 import java.util.NoSuchElementException;
 import java.util.Set;
 
+import org.jeo.TestData;
 import org.jeo.data.Cursor;
 import org.jeo.data.Dataset;
 import org.jeo.data.Handle;
@@ -70,18 +72,22 @@ public class PostGISTest {
         }
     }
 
+    @BeforeClass
+    public static void setUpData() throws Exception {
+        PostGISTests.setupStatesData();
+    }
+
     @Before
     public void rollback() throws Exception {
         PGPoolingDataSource ds = PostGISWorkspace.createDataSource(PostGISTests.OPTS); 
-        Connection cx = ds.getConnection();
-        Statement st = cx.createStatement();
-        st.executeUpdate(
-            "DELETE FROM states WHERE \"STATE_NAME\" = 'JEOLAND' OR \"STATE_NAME\" is null");
-        st.executeUpdate("UPDATE states set \"STATE_ABBR\" = upper(\"STATE_ABBR\")");
-        st.executeUpdate("DROP TABLE IF EXISTS widgets");
-        st.executeUpdate("DELETE FROM geometry_columns WHERE f_table_name = 'widgets'");
-        st.close();
-        cx.close();
+        try (Connection cx = ds.getConnection()) {
+            try (Statement st = cx.createStatement()) {
+                st.executeUpdate(
+                    "DELETE FROM states WHERE \"STATE_NAME\" = 'JEOLAND' OR \"STATE_NAME\" is null");
+                st.executeUpdate("UPDATE states set \"STATE_ABBR\" = upper(\"STATE_ABBR\")");
+                st.executeUpdate("DROP TABLE IF EXISTS widgets");
+            }
+        }
         ds.close();
     }
 

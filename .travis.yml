@@ -1,3 +1,6 @@
+before_install:
+  - sudo apt-get update -qq
+  - sudo apt-get install -y protobuf-compiler
 language: java
 script:
   - mvn clean install -Djava.awt.headless=true

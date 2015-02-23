@@ -3,7 +3,7 @@ before_install:
   - sudo apt-get install -y protobuf-compiler
 language: java
 script:
-  - mvn clean install -Djava.awt.headless=true
+  - mvn clean install -Djava.awt.headless=true -P protobuf
 notifications:
   email:
     recipients:

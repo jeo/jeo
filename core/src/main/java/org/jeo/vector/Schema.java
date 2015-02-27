@@ -36,6 +36,9 @@ public class Schema implements Iterable<Field> {
     /** schema namespace */
     String uri;
 
+    /** crs of the schema  */
+    CoordinateReferenceSystem crs;
+
     /** list of fields */
     List<Field> fields;
 
@@ -72,9 +75,24 @@ public class Schema implements Iterable<Field> {
     }
 
     /**
+     * Constructs a new Schema.
+     *
+     * @param name Name of the schema.
+     * @param uri Namespace of the schema.
+     * @param crs Projection of the schema.
+     * @param fields List of fields
+     */
+    public Schema(String name, String uri, CoordinateReferenceSystem crs, List<Field> fields) {
+        this.name = name;
+        this.uri = uri;
+        this.crs = crs;
+        this.fields = Collections.unmodifiableList(fields);
+    }
+
+    /**
      * Name of the schema.
      */
-    public String getName() {
+    public String name() {
         return name;
     }
 
@@ -84,7 +102,7 @@ public class Schema implements Iterable<Field> {
      * May be <code>null</code>
      * </p>
      */
-    public String getURI() {
+    public String uri() {
         return uri;
     }
 
@@ -108,12 +126,17 @@ public class Schema implements Iterable<Field> {
     /**
      * Derived coordinate reference system for the schema.
      * <p>
-     * This method delegates to <code>geometry().getCRS()</code>.
+     * If the schemas {@link #crs} field is set it is retunred, other this method delegates to
+     * <code>geometry().crs()</code>.
      * </p> 
      * @return The coordinate reference system object, or <code>null</code> if not available or 
      * no geometry field exists.
      */
     public CoordinateReferenceSystem crs() {
+        if (crs != null) {
+            return crs;
+        }
+
         Field g = geometry();
         return g != null ? g.crs() : null;
     }

@@ -440,7 +440,7 @@ public class PostGISDataset implements VectorDataset {
         }
         else {
             throw new IllegalArgumentException(String.format(
-                "Unable to generate value for %s.%s", schema().getName(), pkcol.getName()));
+                "Unable to generate value for %s.%s", schema().name(), pkcol.getName()));
         }
     }
 

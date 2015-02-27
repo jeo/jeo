@@ -24,7 +24,6 @@ import org.jeo.proj.Proj;
 import org.osgeo.proj4j.CoordinateReferenceSystem;
 
 import com.vividsolutions.jts.geom.Geometry;
-import java.util.Collection;
 
 /**
  * Builder for {@link Schema} objects.
@@ -42,6 +41,7 @@ public class SchemaBuilder {
 
     String name;
     String uri;
+    CoordinateReferenceSystem crs;
     List<Field> fields = new ArrayList<Field>();
     Map<String,Object> props;
 
@@ -67,6 +67,30 @@ public class SchemaBuilder {
     }
 
     /**
+     * Sets the projection of the schema.
+     *
+     * @param crs The projection.
+     *
+     * @return This builder.
+     */
+    public SchemaBuilder crs(CoordinateReferenceSystem crs) {
+        this.crs = crs;
+        return this;
+    }
+
+    /**
+     * Sets the projection of the schema.
+     *
+     * @param srs The projection specifier.
+     *
+     * @return This builder.
+     */
+    public SchemaBuilder crs(String srs) {
+        this.crs = Proj.crs(srs);
+        return this;
+    }
+
+    /**
      * Adds a field to the schema being built.
      *  
      * @param name The field name.
@@ -75,7 +99,7 @@ public class SchemaBuilder {
      * @return This builder.
      */
     public SchemaBuilder field(String name, Class<?> type) {
-        return field(name, (Class) type, (CoordinateReferenceSystem)null);
+        return field(name, (Class) type, Geometry.class.isAssignableFrom(type) ? crs : null);
     }
 
     /**
@@ -222,6 +246,23 @@ public class SchemaBuilder {
                 retain.add(field);
             }
         }
-        return new Schema(original.name, original.uri, retain);
+        return new Schema(original.name, original.uri, original.crs, retain);
+    }
+
+    /**
+     * Create a new Schema with the specified crs.
+     *
+     * @param original The original schema.
+     * @param crs The crs.
+     *
+     * @return The new schema.
+     */
+    public static Schema crs(Schema original, CoordinateReferenceSystem crs) {
+        if (Proj.equal(crs, original.crs())) {
+            return original;
+        }
+
+        //TODO: override crs on fields?
+        return new Schema(original.name, original.uri, crs, original.fields);
     }
 }

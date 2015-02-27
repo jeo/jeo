@@ -167,7 +167,7 @@ public class PostGISWorkspace implements Workspace {
 
                 List<Pair<Field, Integer>> gcols = new ArrayList<Pair<Field,Integer>>();
 
-                SQL sql = new SQL("CREATE TABLE ").name(schema().orElse(null), schema.getName())
+                SQL sql = new SQL("CREATE TABLE ").name(schema().orElse(null), schema.name())
                     .add(" (").name(findIdColumnName(schema)).add(" SERIAL PRIMARY KEY, ");
                 
                 for (Field fld : schema) {
@@ -224,7 +224,7 @@ public class PostGISWorkspace implements Workspace {
                         List<Pair<Object,Integer>> values = new ArrayList<Pair<Object,Integer>>();
                         values.add(new Pair("", Types.VARCHAR));
                         values.add(new Pair(schema().orElse("public"), Types.VARCHAR));
-                        values.add(new Pair(schema.getName(), Types.VARCHAR));
+                        values.add(new Pair(schema.name(), Types.VARCHAR));
                         values.add(new Pair(fld.name(), Types.VARCHAR));
                         values.add(new Pair(2, Types.INTEGER));
                         values.add(new Pair(p.second, Types.INTEGER));
@@ -241,7 +241,7 @@ public class PostGISWorkspace implements Workspace {
             }
         });
 
-        return get(schema.getName());
+        return get(schema.name());
     }
 
     String findIdColumnName(Schema schema) {

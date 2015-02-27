@@ -376,7 +376,7 @@ public class Drivers {
         }
         else if (obj instanceof Workspace) {
             Workspace ws = (Workspace) obj;
-            return (T) ws.get(schema.getName());
+            return (T) ws.get(schema.name());
         }
 
         throw new IllegalArgumentException(d.name() + " driver returned " + obj);

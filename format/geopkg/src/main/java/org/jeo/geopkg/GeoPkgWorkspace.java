@@ -412,14 +412,14 @@ public class GeoPkgWorkspace implements Workspace, FileData {
 
     public GeoPkgVector create(Schema schema) throws IOException {
         create(new FeatureEntry(), schema);
-        return (GeoPkgVector) get(schema.getName());
+        return (GeoPkgVector) get(schema.name());
     }
 
     public void create(FeatureEntry entry, Schema schema) throws IOException {
         //clone entry so we can work on it
         FeatureEntry e = new FeatureEntry();
         e.init(entry);
-        e.setTableName(schema.getName());
+        e.setTableName(schema.name());
 
         if (e.getGeometryColumn() != null) {
             //check it
@@ -433,7 +433,7 @@ public class GeoPkgWorkspace implements Workspace, FileData {
         }
 
         if (e.getIdentifier() == null) {
-            e.setIdentifier(schema.getName());
+            e.setIdentifier(schema.name());
         }
         if (e.getDescription() == null) {
             e.setDescription(e.getIdentifier());
@@ -482,7 +482,7 @@ public class GeoPkgWorkspace implements Workspace, FileData {
     }
 
     void createFeatureTable(Schema schema, FeatureEntry entry, Session session) throws IOException {
-        SQL sql = new SQL("CREATE TABLE ").name(schema.getName()).add("(");
+        SQL sql = new SQL("CREATE TABLE ").name(schema.name()).add("(");
 
         sql.name(findPrimaryKeyColumnName(schema)).add(" INTEGER PRIMARY KEY, ");
         for (Field f : schema) {

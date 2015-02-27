@@ -77,7 +77,7 @@ public class GeoPkgFeatureTest extends GeoPkgTestSupport {
         assertNotNull(entry);
 
         Schema schema = geopkg.createSchema(entry);
-        assertEquals("states", schema.getName());
+        assertEquals("states", schema.name());
 
         assertNotNull(schema.geometry());
         assertEquals(MultiPolygon.class, schema.geometry().type());

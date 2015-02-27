@@ -171,7 +171,7 @@ public class Features {
      * @return The transformed schema.
      */
     public static Schema multify(Schema schema) {
-        SchemaBuilder b = Schema.build(schema.getName());
+        SchemaBuilder b = Schema.build(schema.name());
         for (Field fld : schema) {
             if (Geometry.class.isAssignableFrom(fld.type())) {
                 Class<? extends Geometry> t = (Class<? extends Geometry>) fld.type();

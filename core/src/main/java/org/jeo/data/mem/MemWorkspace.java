@@ -80,7 +80,7 @@ public class MemWorkspace implements Workspace {
     @Override
     public MemVector create(Schema schema) throws IOException, UnsupportedOperationException {
         MemVector v = new MemVector(schema);
-        map.put(schema.getName(), v);
+        map.put(schema.name(), v);
         return v;
     }
 

@@ -246,7 +246,7 @@ public class ProtobufWriter implements Disposable {
 
     public ProtobufWriter schema(org.jeo.vector.Schema schema) throws IOException {
         Schema.Builder b = Schema.newBuilder();
-        b.setName(schema.getName());
+        b.setName(schema.name());
 
         for (org.jeo.vector.Field fld : schema) {
             Field.Builder fb = Field.newBuilder().setKey(fld.name());

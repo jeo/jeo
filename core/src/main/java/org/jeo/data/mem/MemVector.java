@@ -63,7 +63,7 @@ public class MemVector implements VectorDataset {
 
     @Override
     public String name() {
-        return schema.getName();
+        return schema.name();
     }
     
     @Override

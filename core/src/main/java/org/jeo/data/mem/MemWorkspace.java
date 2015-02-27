@@ -73,8 +73,9 @@ public class MemWorkspace implements Workspace {
         return map.get(layer);
     }
 
-    public void put(String layer, Dataset dataset) {
+    public MemWorkspace put(String layer, Dataset dataset) {
         map.put(layer, dataset);
+        return this;
     }
 
     @Override
@@ -84,11 +85,17 @@ public class MemWorkspace implements Workspace {
         return v;
     }
 
+    public MemWorkspace remove(String layer) {
+        map.remove(layer);
+        return this;
+    }
+
     /**
      * Clears the workspace.
      */
-    public void clear() {
+    public MemWorkspace clear() {
         map.clear();
+        return this;
     }
 
     @Override

@@ -258,10 +258,6 @@ public class SchemaBuilder {
      * @return The new schema.
      */
     public static Schema crs(Schema original, CoordinateReferenceSystem crs) {
-        if (Proj.equal(crs, original.crs())) {
-            return original;
-        }
-
         //TODO: override crs on fields?
         return new Schema(original.name, original.uri, crs, original.fields);
     }

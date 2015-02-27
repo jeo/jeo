@@ -20,6 +20,7 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
@@ -265,10 +266,10 @@ public abstract class Backend implements Closeable {
      */
     public abstract class Session implements Closeable {
 
-        private final LinkedList<Object> opened = new LinkedList<Object>();
+        private final ArrayDeque<Object> opened = new ArrayDeque<Object>();
 
         protected final <T> T open(T o) {
-            opened.add(o);
+            opened.push(o);
             return o;
         }
 
@@ -377,12 +378,12 @@ public abstract class Backend implements Closeable {
 
         @Override
         public final void close() {
-            closeSafe(session);
             try {
                 closeInternal();
             } catch (Exception ex) {
                 LOG.warn("Error closing Results", ex);
             }
+            closeSafe(session);
         }
 
         protected abstract Object getObject(int idx, Class clazz) throws IOException;

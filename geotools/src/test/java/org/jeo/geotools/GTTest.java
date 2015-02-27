@@ -41,7 +41,7 @@ public class GTTest {
         Schema schema = GT.schema(buildFeatureType());
         assertNotNull(schema);
 
-        assertEquals("widgets", schema.getName());
+        assertEquals("widgets", schema.name());
         assertEquals(Proj.crs(4326).getName(), schema.crs().getName());
         assertEquals(4, schema.getFields().size());
 

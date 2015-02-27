@@ -416,9 +416,9 @@ public class FeatureHandler extends Handler {
         Workspace ws = findWorkspace(m.group(1), server.getRegistry());
 
         try {
-            if (ws.get(schema.getName()) != null) {
+            if (ws.get(schema.name()) != null) {
                 String msg = String.format("dataset '%s' already exists in workspace %s",
-                        schema.getName(), m.group(1));
+                        schema.name(), m.group(1));
                 throw new HttpException(HTTP_BADREQUEST, msg);
             }
             ws.create(schema);

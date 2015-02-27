@@ -76,7 +76,7 @@ public class GeoGitDataset implements VectorDataset, Transactional {
     }
     @Override
     public String name() {
-        return schema.getName();
+        return schema.name();
     }
 
     @Override

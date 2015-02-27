@@ -250,7 +250,7 @@ public class GeoGitWorkspace implements Workspace, FileData {
         GeogitTransaction tx = gg.command(TransactionBegin.class).call();
         boolean abort = false;
         try {
-            String treePath = schema.getName();
+            String treePath = schema.name();
             String branch = branch();
             
             // check out the datastore branch on the transaction space
@@ -264,7 +264,7 @@ public class GeoGitWorkspace implements Workspace, FileData {
             tx.command(CommitOp.class).setMessage("Created type tree " + treePath).call();
             tx.commit();
 
-            return get(schema.getName());
+            return get(schema.name());
         } catch (IllegalArgumentException alreadyExists) {
             abort = true;
             throw new IOException(alreadyExists.getMessage(), alreadyExists);

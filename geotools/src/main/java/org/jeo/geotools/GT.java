@@ -99,7 +99,7 @@ public class GT {
 
     public static SimpleFeatureType featureType(Schema schema) {
         SimpleFeatureTypeBuilder b = new SimpleFeatureTypeBuilder();
-        b.setName(schema.getName());
+        b.setName(schema.name());
 
         Integer epsg = null;
         if (schema.crs() != null) {

@@ -261,4 +261,16 @@ public class SchemaBuilder {
         //TODO: override crs on fields?
         return new Schema(original.name, original.uri, crs, original.fields);
     }
+
+    /**
+     * Create a new Schema with the specified name.
+     *
+     * @param original The original schema.
+     * @param name The new name.
+     *
+     * @return The new schema.
+     */
+    public static Schema rename(Schema original, String name) {
+        return new Schema(name, original.uri, original.crs, original.fields);
+    }
 }

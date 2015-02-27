@@ -40,7 +40,6 @@ public class GeoPkgFeatureCursor extends FeatureCursor {
     final PrimaryKey primaryKey;
     final GeoPkgGeomReader geomReader;
     final Session session;
-    final Results results;
     final List<Field> fields;
     // whether an 'outer' Transaction is in use
     final boolean transaction;
@@ -51,6 +50,7 @@ public class GeoPkgFeatureCursor extends FeatureCursor {
     // reusable buffer for generating fid
     final StringBuilder buf = new StringBuilder();
 
+    Results results;
     Boolean next;
     Feature feature;
 
@@ -167,13 +167,17 @@ public class GeoPkgFeatureCursor extends FeatureCursor {
 
     @Override
     public void close() throws IOException {
-        results.close();
-        if (!transaction) {
-            // if not using an 'outer' Transaction, commit and close
-            if (mode != Mode.READ) {
-                session.endTransaction(true);
+        if (results != null) {
+            results.close();
+            if (!transaction) {
+                // if not using an 'outer' Transaction, commit and close
+                if (mode != Mode.READ) {
+                    session.endTransaction(true);
+                }
+                session.close();
             }
-            session.close();
+            results = null;
         }
+
     }
 }

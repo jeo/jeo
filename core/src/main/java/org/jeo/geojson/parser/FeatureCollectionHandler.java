@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.jeo.proj.Proj;
 import org.jeo.vector.BasicFeature;
 import org.jeo.vector.Feature;
 import org.jeo.json.parser.ParseException;
@@ -25,7 +26,7 @@ import org.osgeo.proj4j.CoordinateReferenceSystem;
 
 public class FeatureCollectionHandler extends BaseHandler {
 
-    CoordinateReferenceSystem crs;
+    CoordinateReferenceSystem crs = Proj.EPSG_4326;
     boolean streaming = true;
 
     public void setStreaming(boolean streaming) {

@@ -191,6 +191,46 @@ public abstract class FeatureCursor extends Cursor<Feature> {
     }
 
     /**
+     * Sets the projection of features in the cursor, overriding any projection that exists.
+     *
+     * @param crs The override projection.
+     *
+     * @return The wrapped cursor.
+     */
+    public FeatureCursor crs(CoordinateReferenceSystem crs) {
+        return new CrsOverrideCursor(this, crs);
+    }
+
+    private static class CrsOverrideCursor extends CursorWrapper {
+
+        CoordinateReferenceSystem crs;
+
+        CrsOverrideCursor(Cursor<Feature> delegate, CoordinateReferenceSystem crs) {
+            super(delegate);
+            this.crs = crs;
+        }
+
+        @Override
+        public Feature next() throws IOException {
+            Feature f = super.next();
+            return new FeatureWrapper(f) {
+                @Override
+                public Schema schema() {
+                    //TODO: optimize by checking whether the delegate feature
+                    // is schemaless (ie. delegate.schema(false) == null) and if not
+                    // then cache the crs overriden schemacr
+                    return SchemaBuilder.crs(super.schema(), crs);
+                }
+
+                @Override
+                public CoordinateReferenceSystem crs() {
+                    return crs;
+                }
+            };
+        }
+    }
+
+    /**
      * Returns a cursor with objects that intersect the specified bounding box.
      * <p>
      * The <tt>loose</tt> paremeter controls whether a full intersection

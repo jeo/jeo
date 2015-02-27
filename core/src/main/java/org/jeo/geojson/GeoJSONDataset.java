@@ -93,7 +93,7 @@ public class GeoJSONDataset implements VectorDataset, FileData {
         Optional<Feature> f = first();
         if (f.isPresent()) {
             Schema schema = f.get().schema();
-            SchemaBuilder sb = Schema.build(name());
+            SchemaBuilder sb = Schema.build(name()).crs(crs());
             for (Field fld : schema) {
                 if (fld.isGeometry() && fld.crs() == null) {
                     sb.field(fld.name(), (Class<Geometry>) fld.type(), crs());
@@ -109,6 +109,8 @@ public class GeoJSONDataset implements VectorDataset, FileData {
 
     @Override
     public CoordinateReferenceSystem crs() throws IOException {
+        //TODO: probably should cache this
+
         CoordinateReferenceSystem crs = null;
 
         //first scan for a crs property

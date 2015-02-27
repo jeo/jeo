@@ -88,8 +88,8 @@ public class MongoWorkspace implements Workspace {
 
     @Override
     public MongoDataset create(Schema schema) throws IOException {
-        db.createCollection(schema.getName(), new BasicDBObject());
-        return get(schema.getName());
+        db.createCollection(schema.name(), new BasicDBObject());
+        return get(schema.name());
     }
 
     @Override

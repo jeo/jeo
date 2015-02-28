@@ -44,6 +44,14 @@ public class SQL {
     }
 
     /**
+     * Creates an sql buffer initialized with the specified formatted string + arguments.
+     */
+    public SQL(String sql, Object arg1, Object... args) {
+        this();
+        add(sql, arg1, args);
+    }
+
+    /**
      * Appends an object to the buffer.
      */
     public SQL add(Object o) {

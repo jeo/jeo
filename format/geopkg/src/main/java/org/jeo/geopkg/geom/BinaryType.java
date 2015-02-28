@@ -1,4 +1,4 @@
-/* Copyright 2013 The jeo project. All rights reserved.
+/* Copyright 2015 The jeo project. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,37 +14,27 @@
  */
 package org.jeo.geopkg.geom;
 
-import com.vividsolutions.jts.geom.Envelope;
+public enum BinaryType {
 
-class Header {
-    Flags flags;
-    int srid;
-    Envelope envelope;
+    STANDARD((byte)0),
+    EXTENDED((byte)1);
 
-    public Flags flags() {
-        return flags;
+    byte value;
+
+    BinaryType(byte value) {
+        this.value = value;
     }
 
-    public Header flags(Flags flags) {
-        this.flags = flags;
-        return this;
+    public byte value() {
+        return value;
     }
 
-    public int srid() {
-        return srid;
-    }
-
-    public Header srid(int srid) {
-        this.srid = srid;
-        return this;
-    }
-
-    public Envelope envelope() {
-        return envelope;
-    }
-
-    public Header envelope(Envelope envelope) {
-        this.envelope = envelope;
-        return this;
+    public static BinaryType valueOf(byte b) {
+        for (BinaryType bt : values()) {
+            if (bt.value == b) {
+                return bt;
+            }
+        }
+        return null;
     }
 }

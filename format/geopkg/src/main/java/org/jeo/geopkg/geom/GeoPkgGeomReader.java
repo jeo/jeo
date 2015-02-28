@@ -91,25 +91,25 @@ public class GeoPkgGeomReader {
 
         // set endianness
         ByteOrderDataInStream din = new ByteOrderDataInStream(in);
-        din.setOrder(h.flags.getEndianess());
+        din.setOrder(h.flags.endianess());
 
         // read the srid
         h.srid = din.readInt();
 
         // read the envlope
-        if (h.flags.getEnvelopeIndicator() != EnvelopeType.NONE) {
+        if (h.flags.envelopeIndicator() != EnvelopeType.NONE) {
             double x1 = din.readDouble();
             double x2 = din.readDouble();
             double y1 = din.readDouble();
             double y2 = din.readDouble();
     
-            if (h.flags.getEnvelopeIndicator().value > 1) {
+            if (h.flags.envelopeIndicator().value > 1) {
                 // 2 = minz,maxz; 3 = minm,maxm - we ignore these for now 
                 din.readDouble();
                 din.readDouble();
             }
     
-            if (h.flags.getEnvelopeIndicator().value > 3) {
+            if (h.flags.envelopeIndicator().value > 3) {
                 // 4 = minz,maxz,minm,maxm - we ignore these for now
                 din.readDouble();
                 din.readDouble();

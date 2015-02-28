@@ -86,6 +86,9 @@ public class GeoPkgWorkspace implements Workspace, FileData {
     /** name of tile matrix set table */
     static final String TILE_MATRIX_SET = "gpkg_tile_matrix_set";
 
+    /** value of application_id pragma for geopackage */
+    static final Integer APP_ID = 1196437808;
+
     Backend backend;
 
     /** creation options */
@@ -106,6 +109,7 @@ public class GeoPkgWorkspace implements Workspace, FileData {
     }
 
     protected void init() throws IOException {
+        backend.exec("PRAGMA application_id = %d", APP_ID);
         if (backend.canRunScripts()) {
             backend.runScripts(
                 // create the necessary metadata tables
@@ -171,7 +175,7 @@ public class GeoPkgWorkspace implements Workspace, FileData {
                 + " WHERE a.table_name = b.table_name"
                 + " AND a.srs_id = c.srs_id"
                 + " AND a.data_type = '%s'",
-                GEOPACKAGE_CONTENTS, GEOMETRY_COLUMNS, SPATIAL_REF_SYS, DataType.Feature.value());
+            GEOPACKAGE_CONTENTS, GEOMETRY_COLUMNS, SPATIAL_REF_SYS, DataType.Feature.value());
         List<FeatureEntry> entries = new ArrayList<FeatureEntry>();
         try {
             while (rs.next()) {
@@ -467,6 +471,7 @@ public class GeoPkgWorkspace implements Workspace, FileData {
             boolean complete = false;
             try {
                 createFeatureTable(schema, e, session);
+                addSpatialRefSysEntry(schema, e, session);
                 addGeometryColumnsEntry(schema, e, session);
                 addGeopackageContentsEntry(e, session);
                 complete = true;
@@ -499,6 +504,32 @@ public class GeoPkgWorkspace implements Workspace, FileData {
         sql.trim(2).add(")");
 
         session.execute(sql.toString());
+    }
+
+    void addSpatialRefSysEntry(Schema schema, FeatureEntry entry, Session session) throws IOException {
+        Integer srid = entry.getSrid();
+
+        SQL sql = new SQL("SELECT 1 FROM ").name(SPATIAL_REF_SYS).add(" WHERE srs_id = %d", srid);
+        Results results = session.open(session.query(sql.toString()));
+        if (!results.next()) {
+            // add it
+            CoordinateReferenceSystem crs = Proj.crs(srid);
+            if (crs == null) {
+                LOG.debug("Unknown srid {}, unable to add {} entry", srid, SPATIAL_REF_SYS);
+                return;
+            }
+
+            sql = new SQL("INSERT INTO %s ", SPATIAL_REF_SYS)
+                .add(" (srs_name, srs_id, organization, organization_coordsys_id, definition)")
+                .add(" VALUES (?,?,?,?,?)");
+
+            try {
+                session.executePrepared(sql.toString(), crs.getName(), srid, "EPSG", srid, Proj.toWKT(crs, false));
+            }
+            catch(Exception e) {
+                LOG.debug(format("Error occurred adding srid %d to %s", srid, SPATIAL_REF_SYS), e);
+            }
+        }
     }
 
     void addGeopackageContentsEntry(FeatureEntry entry, Session session) throws IOException {

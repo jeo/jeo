@@ -17,35 +17,53 @@ package org.jeo.geopkg.geom;
 import com.vividsolutions.jts.io.ByteOrderValues;
 
 class Flags {
+
+    static final byte ENDIAN_MASK = (byte) 0x01;
+    static final byte ENVELOPE_MASK = (byte) 0x0e;
+    private static byte EMPTY_MASK = (byte) 0x10;
+    static final byte BINARY_MASK = (byte) 0x20;
+
     byte b;
 
     Flags(byte b) {
         this.b = b;
     }
 
-    byte getVersion() {
-        return (byte) ((b & 0xf0) >> 4);
+    int endianess() {
+        return (b & ENDIAN_MASK) == 1 ? ByteOrderValues.LITTLE_ENDIAN : ByteOrderValues.BIG_ENDIAN;
     }
 
-    void setVersion(byte ver) {
-        b |= ((ver << 4) & 0xf0);
-    }
-
-    EnvelopeType getEnvelopeIndicator() {
-        return EnvelopeType.valueOf((byte) ((b & 0x0e) >> 1));
-    }
-
-    void setEnvelopeIndicator(EnvelopeType e) {
-        b |= ((e.value << 1) & 0x0e);
-    }
-
-    int getEndianess() {
-        return (b & 0x01) == 1 ? ByteOrderValues.LITTLE_ENDIAN : ByteOrderValues.BIG_ENDIAN;
-    }
-
-    void setEndianess(int endian) {
+    Flags endianess(int endian) {
         byte e = (byte) (endian == ByteOrderValues.LITTLE_ENDIAN ? 1 : 0); 
-        b |= (e & 0x01);
+        b |= (e & ENDIAN_MASK);
+        return this;
+    }
+
+    EnvelopeType envelopeIndicator() {
+        return EnvelopeType.valueOf((byte) ((b & ENVELOPE_MASK) >> 1));
+    }
+
+    Flags envelopeIndicator(EnvelopeType e) {
+        b |= ((e.value << 1) & ENVELOPE_MASK);
+        return this;
+    }
+
+    boolean empty() {
+        return (b | EMPTY_MASK) == 1;
+    }
+
+    Flags empty(boolean empty) {
+        b |= ((byte) (empty ? 1 : 0) & EMPTY_MASK);
+        return this;
+    }
+
+    BinaryType binaryType() {
+        return BinaryType.valueOf((byte) ((b & BINARY_MASK) >> 1));
+    }
+
+    Flags binaryType(BinaryType bt) {
+        b |= ((bt.value << 1) & BINARY_MASK);
+        return this;
     }
 
     byte toByte() {

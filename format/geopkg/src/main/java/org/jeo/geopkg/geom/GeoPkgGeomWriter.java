@@ -45,29 +45,30 @@ public class GeoPkgGeomWriter {
         }
 
         Flags flags = new Flags((byte)0);
-        flags.setVersion((byte)0);
-        flags.setEndianess(ByteOrderValues.BIG_ENDIAN);
-        flags.setEnvelopeIndicator(g instanceof Point ? EnvelopeType.NONE : EnvelopeType.XY);
+        flags.binaryType(BinaryType.STANDARD);
+        flags.empty(g.isEmpty());
+        flags.endianess(ByteOrderValues.BIG_ENDIAN);
+        flags.envelopeIndicator(g instanceof Point ? EnvelopeType.NONE : EnvelopeType.XY);
 
         Header h = new Header();
-        h.setFlags(flags);
-        h.setEnvelope(g.getEnvelopeInternal());
-        h.setSrid(g.getSRID());
-        
+        h.flags(flags);
+        h.envelope(g.getEnvelopeInternal());
+        h.srid(g.getSRID());
+
         //write out magic + flags + srid + envelope
         byte[] buf = new byte[8];
         //byte[] buf = new byte[4 + 4 + flags.getEnvelopeIndicator().length];
         buf[0] = 0x47;
         buf[1] = 0x50;
-        buf[2] = 0x42;
+        buf[2] = 0x00;
         buf[3] = flags.toByte();
         out.write(buf, 4);
 
-        int order = flags.getEndianess();
+        int order = flags.endianess();
         ByteOrderValues.putInt(g.getSRID(), buf, order);
         out.write(buf, 4);
 
-        if (flags.getEnvelopeIndicator() != EnvelopeType.NONE) {
+        if (flags.envelopeIndicator() != EnvelopeType.NONE) {
             Envelope env = g.getEnvelopeInternal();
             ByteOrderValues.putDouble(env.getMinX(), buf, order);
             out.write(buf, 8);

@@ -17,6 +17,7 @@
     <module>csv</module>
     <module>gdal</module>
     <module>geopkg</module>
+    <module>mbtiles</module>
     <module>mongo</module>
     <module>postgis</module>
   </modules>

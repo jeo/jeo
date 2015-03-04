@@ -12,30 +12,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jeo.mbtiles;
+package org.jeo.sql;
 
-import java.io.BufferedReader;
-import java.io.Closeable;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.LinkedList;
-import java.util.List;
-import org.jeo.sql.DbTypes;
 import org.jeo.util.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.LinkedList;
+import java.util.List;
+
 /**
- * MBTiles DB abstraction layer.
+ * DB abstraction layer.
  *
  * @author Ian Schneider <ischneider@boundlessgeo.com>
  */
 public abstract class Backend implements Closeable {
 
-    protected static Logger LOG = LoggerFactory.getLogger(MBTiles.class);
+    protected static Logger LOG = LoggerFactory.getLogger(Backend.class);
 
     protected static String log(String sql, Object... params) {
         if (LOG.isDebugEnabled()) {
@@ -64,7 +60,7 @@ public abstract class Backend implements Closeable {
      *
      * @return
      */
-    protected boolean canRunScripts() {
+    public boolean canRunScripts() {
         return true;
     }
 
@@ -81,7 +77,7 @@ public abstract class Backend implements Closeable {
      * Close an object created by this Backend. Accepts null.
      * @param o object or null
      */
-    protected final void closeSafe(Object o) {
+    public final void closeSafe(Object o) {
         if (o != null) {
             try {
                 if (o instanceof Closeable) {
@@ -99,25 +95,25 @@ public abstract class Backend implements Closeable {
      * Get name and type information for the specified table.
      * @param table the name of the table
      * @return non-null list of column information
-     * @throws IOException if any errors occur
+     * @throws java.io.IOException if any errors occur
      */
-    protected abstract List<Pair<String, Class>> getColumnInfo(String table) throws IOException;
+    public abstract List<Pair<String, Class>> getColumnInfo(String table) throws IOException;
 
     /**
      * Open a new Session.
      * @return non-null Session ready for use
      * @throws java.io.IOException if an error occurs
      */
-    protected abstract Session session() throws IOException;
+    public abstract Session session() throws IOException;
 
     /**
      * Execute a SQL statement calling {@link String.format} with the provided query and
      * optional args.
      * @param sql SQL to execute
      * @param args optional arguments to use during formatting
-     * @throws IOException
+     * @throws java.io.IOException
      */
-    final void exec(String sql, Object... args) throws IOException {
+    public final void exec(String sql, Object... args) throws IOException {
         sql = String.format(sql, args);
         Session s = session();
         try {
@@ -131,9 +127,9 @@ public abstract class Backend implements Closeable {
      * Execute a SQL statement using the provided args.
      * @param sql the query to execute
      * @param args the arguments
-     * @throws IOException
+     * @throws java.io.IOException
      */
-    final void execPrepared(String sql, Object... args) throws IOException {
+    public final void execPrepared(String sql, Object... args) throws IOException {
         Session s = session();
         try {
             s.executePrepared(sql, args);
@@ -174,9 +170,9 @@ public abstract class Backend implements Closeable {
      * optional args.
      * @param query the query to execute
      * @param args the arguments
-     * @throws IOException
+     * @throws java.io.IOException
      */
-    Results query(String query, Object... args) throws IOException {
+    public Results query(String query, Object... args) throws IOException {
         String sql = String.format(query, args);
         Session s = session();
         // chain the session to the query so it's closed, too
@@ -187,9 +183,9 @@ public abstract class Backend implements Closeable {
      * Execute a prepared query using the provided args.
      * @param query the query to execute
      * @param args the arguments
-     * @throws IOException
+     * @throws java.io.IOException
      */
-    Results queryPrepared(String query, Object... args) throws IOException {
+    public Results queryPrepared(String query, Object... args) throws IOException {
         Session s = session();
         // chain the session to the query so it's closed, too
         return s.queryPrepared(query, args).closeSession(s);
@@ -210,7 +206,7 @@ public abstract class Backend implements Closeable {
         }
     }
 
-    void runScripts(String... files) throws IOException {
+    public void runScripts(String... files) throws IOException {
         Session session = session();
         try {
             StringBuilder buf = new StringBuilder();
@@ -226,9 +222,9 @@ public abstract class Backend implements Closeable {
     /**
      * Begin a Session using a transaction.
      * @return Session
-     * @throws IOException
+     * @throws java.io.IOException
      */
-    Session transaction() throws IOException {
+    public Session transaction() throws IOException {
         Session session = session();
         session.beginTransaction();
         return session;
@@ -241,7 +237,7 @@ public abstract class Backend implements Closeable {
 
         private final LinkedList<Object> opened = new LinkedList<Object>();
 
-        protected final <T> T open(T o) {
+        public final <T> T open(T o) {
             opened.add(o);
             return o;
         }
@@ -256,68 +252,69 @@ public abstract class Backend implements Closeable {
          * Add batch SQL to execute. Must use {@see #executeBatch} to execute.
          * An implementation may choose to execute here.
          * @param sql
-         * @throws IOException
+         * @throws java.io.IOException
          */
-        protected abstract void addBatch(String sql) throws IOException;
+        public abstract void addBatch(String sql) throws IOException;
 
         /**
          * Execute any batch SQL added via {@see #addBatch}. An implementation
          * may do nothing here if already executed.
-         * @throws IOException
+         * @throws java.io.IOException
          */
-        protected abstract void executeBatch() throws IOException;
+        public abstract void executeBatch() throws IOException;
 
         /**
          * Execute a query using placeholders.
          * @param sql the SQL with placeholders
          * @param args the arguments
          * @return non-null Results
-         * @throws IOException
+         * @throws java.io.IOException
          */
-        protected abstract Results queryPrepared(String sql, Object... args) throws IOException;
+        public abstract Results queryPrepared(String sql, Object... args) throws IOException;
 
         /**
          * Execute a query.
          * @param sql the SQL to execute
          * @return non-null Results
-         * @throws IOException
+         * @throws java.io.IOException
          */
-        protected abstract Results query(String sql) throws IOException;
+        public abstract Results query(String sql) throws IOException;
 
         /**
          * Execute a statement using placeholders.
          * @param sql the SQL with placeholders
          * @param args the arguments
-         * @throws IOException
+         * @throws java.io.IOException
          */
-        protected abstract void executePrepared(String sql, Object... args) throws IOException;
+        public abstract void executePrepared(String sql, Object... args) throws IOException;
+
         /**
          * Execute a query.
          * @param sql the SQL to execute
-         * @throws IOException
+         * @throws java.io.IOException
          */
-        protected abstract void execute(String sql) throws IOException;
+        public abstract void execute(String sql) throws IOException;
 
         /**
          * End a transaction.
          * @param complete true if success, false to rollback
-         * @throws IOException
+         * @throws java.io.IOException
          */
-        protected abstract void endTransaction(boolean complete) throws IOException;
+        public abstract void endTransaction(boolean complete) throws IOException;
 
         /**
          * Start a transaction.
-         * @throws IOException
+         * @throws java.io.IOException
          */
-        protected abstract void beginTransaction() throws IOException;
+        public abstract void beginTransaction() throws IOException;
 
         /**
          * Get the primary keys for the table.
          * @param tableName
          * @return non-null List of primary keys
-         * @throws IOException
+         * @throws java.io.IOException
          */
-        protected abstract List<String> getPrimaryKeys(String tableName) throws IOException;
+        public abstract List<String> getPrimaryKeys(String tableName) throws IOException;
 
     }
 
@@ -332,7 +329,7 @@ public abstract class Backend implements Closeable {
         /**
          * Returns the current exception, throwing an exception if none set.
          */
-        Session session() {
+        public Session session() {
             if (session == null) {
                 throw new IllegalStateException("No session set");
             }
@@ -344,7 +341,7 @@ public abstract class Backend implements Closeable {
          * @param session the session to close
          * @return this Results
          */
-        final Results closeSession(Session session) {
+        public final Results closeSession(Session session) {
             this.session = session;
             return this;
         }
@@ -359,28 +356,28 @@ public abstract class Backend implements Closeable {
             }
         }
 
-        protected abstract Object getObject(int idx, Class clazz) throws IOException;
+        public abstract Object getObject(int idx, Class clazz) throws IOException;
 
-        protected abstract String getString(int idx) throws IOException;
+        public abstract String getString(int idx) throws IOException;
 
-        protected abstract String getString(String col) throws IOException;
+        public abstract String getString(String col) throws IOException;
 
-        protected abstract int getInt(int idx) throws IOException;
+        public abstract int getInt(int idx) throws IOException;
 
-        protected abstract double getDouble(int idx) throws IOException;
+        public abstract double getDouble(int idx) throws IOException;
 
-        protected abstract long getLong(int idx) throws IOException;
+        public abstract long getLong(int idx) throws IOException;
 
-        protected abstract boolean getBoolean(int idx) throws IOException;
+        public abstract boolean getBoolean(int idx) throws IOException;
 
-        protected abstract byte[] getBytes(int idx) throws IOException;
+        public abstract byte[] getBytes(int idx) throws IOException;
 
         /**
          * Advance the current results row.
          * @return true if another row exists
-         * @throws IOException if an error occurs
+         * @throws java.io.IOException if an error occurs
          */
-        protected abstract boolean next() throws IOException;
+        public abstract boolean next() throws IOException;
 
         /**
          * Close underlying resources

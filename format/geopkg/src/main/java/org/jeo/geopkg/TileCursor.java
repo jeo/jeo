@@ -17,7 +17,7 @@ package org.jeo.geopkg;
 import java.io.IOException;
 
 import org.jeo.data.Cursor;
-import org.jeo.geopkg.Backend.Results;
+import org.jeo.sql.Backend.Results;
 import org.jeo.tile.Tile;
 
 public class TileCursor extends Cursor<Tile> {

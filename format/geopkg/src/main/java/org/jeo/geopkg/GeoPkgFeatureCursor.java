@@ -28,8 +28,8 @@ import org.jeo.sql.PrimaryKey;
 import org.jeo.sql.PrimaryKeyColumn;
 
 import com.vividsolutions.jts.geom.Geometry;
-import org.jeo.geopkg.Backend.Session;
-import org.jeo.geopkg.Backend.Results;
+import org.jeo.sql.Backend.Session;
+import org.jeo.sql.Backend.Results;
 import org.jeo.vector.SchemaBuilder;
 
 public class GeoPkgFeatureCursor extends FeatureCursor {

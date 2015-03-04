@@ -17,12 +17,11 @@ package org.jeo.geopkg;
 
 import java.io.IOException;
 
-import org.jeo.data.Cursor;
 import org.jeo.vector.BasicFeature;
 import org.jeo.vector.Feature;
 import org.jeo.vector.FeatureCursor;
 import org.jeo.vector.Schema;
-import org.jeo.geopkg.Backend.Session;
+import org.jeo.sql.Backend.Session;
 
 public class GeoPkgFeatureAppendCursor extends FeatureCursor {
 

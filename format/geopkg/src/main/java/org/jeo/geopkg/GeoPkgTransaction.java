@@ -16,7 +16,7 @@ package org.jeo.geopkg;
 
 import java.io.IOException;
 import org.jeo.data.Transaction;
-import org.jeo.geopkg.Backend.Session;
+import org.jeo.sql.Backend.Session;
 
 /**
  * A wrapper around a {@link Backend.Session}.

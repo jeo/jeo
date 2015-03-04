@@ -49,12 +49,12 @@ class JDBCBackend extends Backend {
     }
 
     @Override
-    protected JDBCSession session() throws IOException {
+    public JDBCSession session() throws IOException {
         return new JDBCSession();
     }
 
     @Override
-    protected List<Pair<String, Class>> getColumnInfo(String table) throws IOException {
+    public List<Pair<String, Class>> getColumnInfo(String table) throws IOException {
         String sql = String.format("SELECT * FROM %s LIMIT 1", table);
         JDBCResults results = (JDBCResults) query(sql);
         try {
@@ -110,7 +110,7 @@ class JDBCBackend extends Backend {
         }
 
         @Override
-        protected void addBatch(String sql) throws IOException {
+        public void addBatch(String sql) throws IOException {
             log(sql);
             try {
                 if (statement == null) {
@@ -124,7 +124,7 @@ class JDBCBackend extends Backend {
         }
 
         @Override
-        protected void execute(String sql) throws IOException {
+        public void execute(String sql) throws IOException {
             log(sql);
             try {
                 Statement statement = connection.createStatement();
@@ -155,7 +155,7 @@ class JDBCBackend extends Backend {
         }
 
         @Override
-        protected void executePrepared(String sql, Object[] args) throws IOException {
+        public void executePrepared(String sql, Object[] args) throws IOException {
             try {
                 prepare(sql, args).execute();
             } catch (SQLException ex) {
@@ -166,7 +166,7 @@ class JDBCBackend extends Backend {
         }
 
         @Override
-        protected Results queryPrepared(String sql, Object... args) throws IOException {
+        public Results queryPrepared(String sql, Object... args) throws IOException {
             try {
                 return new JDBCResults(prepare(sql, args).executeQuery());
             } catch (SQLException ex) {
@@ -175,7 +175,7 @@ class JDBCBackend extends Backend {
         }
 
         @Override
-        protected Results query(String sql) throws IOException {
+        public Results query(String sql) throws IOException {
             log(sql);
             try {
                 statement = open(connection.createStatement());
@@ -186,7 +186,7 @@ class JDBCBackend extends Backend {
         }
 
         @Override
-        protected void executeBatch() throws IOException {
+        public void executeBatch() throws IOException {
             try {
                 statement.executeBatch();
             } catch (SQLException ex) {
@@ -196,7 +196,7 @@ class JDBCBackend extends Backend {
 
 
         @Override
-        protected void endTransaction(boolean complete) throws IOException {
+        public void endTransaction(boolean complete) throws IOException {
             try {
                 if (complete) {
                     connection.commit();
@@ -209,7 +209,7 @@ class JDBCBackend extends Backend {
         }
 
         @Override
-        protected void beginTransaction() throws IOException {
+        public void beginTransaction() throws IOException {
             try {
                 connection.setAutoCommit(false);
             } catch (SQLException ex) {
@@ -218,7 +218,7 @@ class JDBCBackend extends Backend {
         }
 
         @Override
-        protected List<String> getPrimaryKeys(String tableName) throws IOException {
+        public List<String> getPrimaryKeys(String tableName) throws IOException {
             List<String> keys = new ArrayList<String>(3);
             ResultSet pk = null;
             try {

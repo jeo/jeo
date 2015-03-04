@@ -17,7 +17,7 @@ package org.jeo.mbtiles;
 import java.io.IOException;
 
 import org.jeo.data.Cursor;
-import org.jeo.mbtiles.Backend.Results;
+import org.jeo.sql.Backend.Results;
 import org.jeo.tile.Tile;
 
 public class TileCursor extends Cursor<Tile> {

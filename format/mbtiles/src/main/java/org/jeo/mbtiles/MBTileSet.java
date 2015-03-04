@@ -32,6 +32,7 @@ import org.jeo.geom.Envelopes;
 import org.jeo.proj.Proj;
 import org.jeo.util.Key;
 import org.jeo.util.Util;
+import org.jeo.sql.Backend;
 import org.osgeo.proj4j.CoordinateReferenceSystem;
 
 import com.vividsolutions.jts.geom.Envelope;

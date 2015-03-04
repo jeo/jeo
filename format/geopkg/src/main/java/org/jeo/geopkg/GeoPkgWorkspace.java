@@ -59,8 +59,8 @@ import com.vividsolutions.jts.geom.Envelope;
 import static java.lang.String.format;
 import org.jeo.data.Transaction;
 import org.jeo.vector.SchemaBuilder;
-import org.jeo.geopkg.Backend.Session;
-import org.jeo.geopkg.Backend.Results;
+import org.jeo.sql.Backend.Session;
+import org.jeo.sql.Backend.Results;
 
 /**
  * Provides access to a GeoPackage SQLite database.

@@ -165,7 +165,7 @@
       <artifactId>maven-javadoc-plugin</artifactId>
       <version>2.9</version>
       <configuration>
-        <stylesheetfile>assembly/doc/javadoc.css</stylesheetfile>
+        <!--stylesheetfile>assembly/doc/javadoc.css</stylesheetfile-->
         <links>
           <link>http://tsusiatsoftware.net/jts/javadoc</link>
         </links>

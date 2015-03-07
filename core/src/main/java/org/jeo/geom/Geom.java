@@ -298,7 +298,7 @@ public class Geom {
      * 
      * @see {@Link GeoJSONWriter}
      */
-    public String json(Geometry g) {
+    public static String json(Geometry g) {
         return GeoJSONWriter.toString(g);
     }
 

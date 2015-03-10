@@ -34,6 +34,7 @@ import org.jeo.data.Driver;
 import org.jeo.data.Handle;
 import org.jeo.data.Workspace;
 import org.jeo.util.Optional;
+import org.jeo.util.Password;
 import org.jeo.vector.Field;
 import org.jeo.vector.Schema;
 import org.jeo.vector.SchemaBuilder;
@@ -76,7 +77,7 @@ public class PostGISWorkspace implements Workspace {
         dataSource.setUser(pgopts.user());
 
         if (pgopts.passwd() != null) {
-            dataSource.setPassword(new String(pgopts.passwd().get()));
+            dataSource.setPassword(Password.toString(pgopts.passwd()));
         }
 
         return dataSource;

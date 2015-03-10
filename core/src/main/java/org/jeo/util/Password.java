@@ -27,6 +27,35 @@ import java.security.SecureRandom;
  */
 public class Password {
 
+    /**
+     * Returns the password contents as a string.
+     * <p>
+     * Note that this method defeats the purpose of this class since it returns a string which will then
+     * be stored and pooled in memory. Secure applications should avoid using this method and use {@link #get()}
+     * if possible.
+     * </p>
+     */
+    public static String toString(Password passwd) {
+        if (passwd == null) {
+            return null;
+        }
+        return new String(passwd.get());
+    }
+
+    /**
+     * Creates a new password from a string.
+     * <p>
+     * Note that this method defeats the purpose of this class since it requires a string, which will
+     * be pooled in memory. Secure applications should use the constructor of this class if possible.
+     * </p>
+     */
+    public static Password create(String passwd) {
+        if (passwd == null) {
+            return null;
+        }
+        return new Password(passwd.toCharArray());
+    }
+
     char[] passwd;
 
     public Password(char[] passwd) {

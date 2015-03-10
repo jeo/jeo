@@ -94,6 +94,13 @@ public class Util {
     }
 
     /**
+     * Returns true if the string is null, or is empty.
+     */
+    public static boolean isEmptyOrNull(String s) {
+        return s == null || s.isEmpty();
+    }
+
+    /**
      * Returns null if a string is null or empty.
      */
     public static String nullIfEmpty(String s) {

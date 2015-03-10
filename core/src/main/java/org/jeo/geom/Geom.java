@@ -313,7 +313,7 @@ public class Geom {
     }
 
     /**
-     * Convers a geometry object into the associated geometry collection. For
+     * Converts a geometry object into the associated geometry collection. For
      * example Polygon to MultiPolygon.
      * <p>
      *  If the input is already a collection it is returned as is.

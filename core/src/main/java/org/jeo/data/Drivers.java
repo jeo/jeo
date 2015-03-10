@@ -29,6 +29,8 @@ import org.jeo.vector.VectorDriver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static org.jeo.util.Util.isEmptyOrNull;
+
 /**
  * Driver utility class.
  * <p>
@@ -387,7 +389,7 @@ public class Drivers {
         
         // parse host / path
         String first = uri.getHost() != null ? uri.getHost() : uri.getPath();
-        if (first != null) {
+        if (!isEmptyOrNull(first)) {
             //use the first key
             if (!d.keys().isEmpty()) {
                 opts.put(d.keys().get(0).getName(), first);
@@ -395,7 +397,7 @@ public class Drivers {
         }
 
         // parse query string
-        if (uri.getQuery() != null) {
+        if (!isEmptyOrNull(uri.getQuery())) {
             String[] kvps = uri.getQuery().split("&");
             for (String kvp : kvps) {
                 String[] kv = kvp.split("=");

@@ -166,6 +166,15 @@ public class Envelopes {
     }
 
     /**
+     * Flips the x/y axis of the envelope.
+     *
+     * @return The new envelope.
+     */
+    public static Envelope flip(Envelope e) {
+        return new Envelope(e.getMinY(), e.getMaxY(), e.getMinX(), e.getMaxX());
+    }
+
+    /**
      * Generates a random envelope at the specified resolution and constrained by
      * the specified bounds.
      *

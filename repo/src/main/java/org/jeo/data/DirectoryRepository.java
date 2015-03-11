@@ -204,7 +204,7 @@ public class DirectoryRepository implements DataRepository {
             // process the options, and turn any relative file urls to absolute ones relative to 
             // the meta file
             for (Map.Entry<String, Object> e : opts.entrySet()) {
-               if (FileDriver.FILE.getName().equals(e.getKey())) {
+               if (FileDriver.FILE.name().equals(e.getKey())) {
                    File file = FileDriver.FILE.get(opts);
                    if (file != null && !file.isAbsolute()) {
                        file = new File(f.getParentFile(), file.getPath());
@@ -216,7 +216,7 @@ public class DirectoryRepository implements DataRepository {
             if (drv instanceof FileDriver && !FileDriver.FILE.in(opts) && !grp.files().isEmpty()) {
                 // TODO: instead of grab first perhaps we should figure out what the primary 
                 // file is
-                opts.put(FileDriver.FILE.getName(), grp.files().get(0));
+                opts.put(FileDriver.FILE.name(), grp.files().get(0));
             }
 
             return new Pair(drv, opts);

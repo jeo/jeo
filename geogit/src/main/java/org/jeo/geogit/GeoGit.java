@@ -49,7 +49,7 @@ public class GeoGit extends FileVectorDriver<GeoGitWorkspace> {
      * Email key, defaults to <tt>System.getProperty("user.name") + "@localhost"</tt>
      */
     public static final Key<String> EMAIL = 
-        new Key<String>("user.email", String.class, USER.getDefault() + "@localhost");
+        new Key<String>("user.email", String.class, USER.def() + "@localhost");
 
     public static GeoGitWorkspace open(GeoGitOpts opts) throws IOException {
         return new GeoGitWorkspace(newGeoGIT(opts), opts);

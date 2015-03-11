@@ -26,8 +26,8 @@ public class GeoGitOpts {
 
     File file;
     
-    String user = USER.getDefault();
-    String email = EMAIL.getDefault();
+    String user = USER.def();
+    String email = EMAIL.def();
     boolean emailIsSet = false;
 
     public static GeoGitOpts fromMap(Map<?,Object> map) {

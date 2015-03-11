@@ -30,6 +30,11 @@ import java.util.List;
 public class Envelopes {
 
     /**
+     * World bounds for the canonical EPSG:4326, longitude/latitude ordering.
+     */
+    public static final Envelope WORLD_BOUNDS_4326 = new Envelope(-180,180,-90,90);
+
+    /**
      * Scales an envelope around its center coordinate. 
      * <p>
      * A <tt>scale</tt> < 1 will shrink the envelope, a <tt>scale</tt> > 1 will grow the envelope.

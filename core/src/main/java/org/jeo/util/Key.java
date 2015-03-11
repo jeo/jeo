@@ -40,28 +40,28 @@ public class Key<T> {
     /**
      * The name of the key.
      */
-    public String getName() {
+    public String name() {
         return name;
     }
 
     /**
      * The class of value of the key.
      */
-    public Class<T> getType() {
+    public Class<T> type() {
         return type;
     }
 
     /**
      * The default value for the key value pair, may be <code>null</code>.
      */
-    public T getDefault() {
+    public T def() {
         return def;
     }
 
     /**
      * Loads the key from a map, converting the raw map value to the value of the key.
      * <p>
-     * If the map contains no matching key {@link #getDefault()} is returned.
+     * If the map contains no matching key {@link #def()} is returned.
      * </p>
      */
     public T get(Map<?,Object> map) {

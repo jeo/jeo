@@ -25,8 +25,8 @@ import org.jeo.util.Pair;
 
 public class CSVOpts {
 
-    Character delim = DELIM.getDefault();
-    boolean header = HEADER.getDefault();
+    Character delim = DELIM.def();
+    boolean header = HEADER.def();
 
     String xcol, ycol, wktcol;
     Integer x, y, wkt;

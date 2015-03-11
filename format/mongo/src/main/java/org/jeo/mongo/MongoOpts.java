@@ -29,9 +29,9 @@ import com.mongodb.ServerAddress;
 
 public class MongoOpts {
     String db; 
-    String host = HOST.getDefault();
-    Integer port = PORT.getDefault();
-    String user = USER.getDefault();
+    String host = HOST.def();
+    Integer port = PORT.def();
+    String user = USER.def();
     Password passwd;
 
     public static MongoOpts fromMap(Map<?,Object> map) {

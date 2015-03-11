@@ -392,7 +392,7 @@ public class Drivers {
         if (!isEmptyOrNull(first)) {
             //use the first key
             if (!d.keys().isEmpty()) {
-                opts.put(d.keys().get(0).getName(), first);
+                opts.put(d.keys().get(0).name(), first);
             }
         }
 

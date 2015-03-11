@@ -36,9 +36,9 @@ import static org.jeo.postgis.PostGIS.*;
 public class PostGISOpts {
 
     String db; 
-    String host = HOST.getDefault();
-    Integer port = PORT.getDefault();
-    String user = USER.getDefault();
+    String host = HOST.def();
+    Integer port = PORT.def();
+    String user = USER.def();
     String schema;
     Password passwd;
 

@@ -14,6 +14,7 @@
  */
 package org.jeo.filter;
 
+import java.util.Objects;
 import java.util.regex.Pattern;
 import org.jeo.vector.Feature;
 
@@ -33,6 +34,8 @@ public class Like<T> extends Filter<T> {
     final boolean not;
 
     public Like(Property prop, Expression match, boolean not) {
+        Objects.requireNonNull(prop, "property must not be null");
+        Objects.requireNonNull(match, "match must not be null");
         this.prop = prop;
         this.match = match;
         String value = (String) match.evaluate(null);

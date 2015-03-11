@@ -16,6 +16,7 @@ package org.jeo.filter;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * 'In' predicate filter. Returns true if the value of the property is
@@ -30,6 +31,8 @@ public class In<T> extends Filter<T> {
     final boolean not;
 
     public In(Property prop, List<? extends Expression> values, boolean not) {
+        Objects.requireNonNull(prop, "property must not be null");
+        Objects.requireNonNull(values, "values must not be null");
         this.prop = prop;
         this.values = Collections.unmodifiableList(values);
         this.not = not;

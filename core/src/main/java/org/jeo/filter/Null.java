@@ -14,6 +14,8 @@
  */
 package org.jeo.filter;
 
+import java.util.Objects;
+
 /**
  * Implementation of IS NULL and IS NOT NULL.
  *
@@ -25,6 +27,7 @@ public class Null<T> extends Filter<T> {
     final Property prop;
 
     public Null(Property prop, boolean not) {
+        Objects.requireNonNull(prop, "property must not be null");
         this.prop = prop;
         this.not = not;
     }

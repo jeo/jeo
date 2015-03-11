@@ -16,6 +16,7 @@ package org.jeo.filter;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Expression that evaluates to the result of a function.
@@ -29,6 +30,7 @@ public abstract class Function implements Expression {
     protected List<Expression> args;
 
     protected Function(String name) {
+        Objects.requireNonNull(name, "name must not be null");
         this.name = name;
         this.args = new ArrayList<Expression>();
     }

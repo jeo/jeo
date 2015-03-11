@@ -17,6 +17,7 @@ package org.jeo.filter;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Filter that applies a logical operator to a set of expressions.   
@@ -40,6 +41,8 @@ public class Logic<T> extends Filter<T> {
     }
     
     public Logic(Type type, List<Filter<T>> parts) {
+        Objects.requireNonNull(type, "type must not be null");
+        Objects.requireNonNull(parts, "parts must not be null");
         this.type = type;
         this.parts = parts;
 

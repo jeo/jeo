@@ -17,6 +17,8 @@ package org.jeo.filter;
 import org.jeo.util.Convert;
 import org.jeo.util.Optional;
 
+import java.util.Objects;
+
 /**
  * Filter that applies a binary comparison operator to two expression operands.  
  * 
@@ -51,9 +53,8 @@ public class Comparison<T> extends Filter<T> {
         this.left = left;
         this.right = right;
 
-        if (left == null || right == null) {
-            throw new NullPointerException("operands must not be null");
-        }
+        Objects.requireNonNull(left, "operands must not be null");
+        Objects.requireNonNull(right, "right operand must not be null");
     }
 
     public Type type() {

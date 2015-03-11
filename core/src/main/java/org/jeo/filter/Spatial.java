@@ -19,6 +19,10 @@ import org.jeo.geom.Envelopes;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 
+import java.util.Objects;
+
+import static java.lang.String.format;
+
 /**
  * Filter that applies a spatial comparison operator to two geometry expression operands.  
  * 
@@ -40,10 +44,14 @@ public class Spatial<T> extends Filter<T> {
     final Expression left, right, distance;
 
     public Spatial(Type type, Expression left, Expression right, Expression distance) {
+        Objects.requireNonNull(type, "type must not be null");
+        Objects.requireNonNull(left, "operands must not be null");
+        Objects.requireNonNull(right, "operands must not be null");
+
         switch (type) {
             case DWITHIN: case BEYOND:
                 if (distance == null) {
-                    throw new IllegalArgumentException("distance is null");
+                    throw new IllegalArgumentException(format("operator: %s, requires distance value", type));
                 }
         }
         this.type = type;

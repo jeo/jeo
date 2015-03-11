@@ -17,6 +17,7 @@ package org.jeo.filter;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.Objects;
 
 import org.jeo.vector.Feature;
 import org.slf4j.Logger;
@@ -34,6 +35,7 @@ public class Property implements Expression {
     String property;
 
     public Property(String property) {
+        Objects.requireNonNull("property must not be null");
         this.property = property;
     }
 

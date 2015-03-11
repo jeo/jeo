@@ -14,6 +14,8 @@
  */
 package org.jeo.filter;
 
+import java.util.Objects;
+
 /**
  *
  * @author Ian Schneider <ischneider@boundlessgeo.com>
@@ -30,8 +32,12 @@ public class Math implements Expression {
     final Expression right;
 
     public Math(char operator, Expression left, Expression right) {
+        Objects.requireNonNull(left, "operands must not be null");
+        Objects.requireNonNull(right, "operands must not be null");
+
         if ("+-*/".indexOf(operator) < 0) {
-            throw new IllegalArgumentException(Character.toString(operator));
+            throw new IllegalArgumentException(String.format("illegal operator: %s, must be one of: %s, %s, %s, %s",
+            Character.toString(operator), operator, ADD, SUBTRACT, MULTIPLY, DIVIDE));
         }
         this.operator = operator;
         this.left = left;

@@ -14,6 +14,8 @@
  */
 package org.jeo.filter;
 
+import java.util.Objects;
+
 /**
  * Filter that tests the type of an object.
  * 
@@ -25,6 +27,8 @@ public class TypeOf<T> extends Filter<T> {
     Class<?> type;
 
     public TypeOf(Expression expr, Class<?> type) {
+        Objects.requireNonNull(expr, "expression must not be null");
+        Objects.requireNonNull(type, "type must not be null");
         this.expr = expr;
         this.type = type;
     }

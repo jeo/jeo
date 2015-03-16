@@ -99,7 +99,7 @@ public class Logic<T> extends Filter<T> {
     }
 
     @Override
-    public Object accept(FilterVisitor v, Object obj) {
+    public <R> R accept(FilterVisitor<R> v, Object obj) {
         return v.visit(this, obj);
     }
 

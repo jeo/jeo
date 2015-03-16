@@ -14,113 +14,105 @@
  */
 package org.jeo.filter;
 
-import java.util.List;
-
 /**
  * Visitor for filter classes.
+ * <p>
+ * Each visit method takes an instance of either {@link Expression} or {@link Filter}, as well as a
+ * an additional object as a "hint" or "context". This object is usually used by the filter visitor
+ * itself to pass state around. It is often null.
+ * </p>
  * 
  * @author Justin Deoliveira, Boundless
  */
-public class FilterVisitor {
+public interface FilterVisitor<T> {
 
-    public Object visit(Self self, Object obj) {
-        return obj;
-    }
+    /**
+     * Visits a Self expression.
+     */
+    T visit(Self self, Object obj);
 
-    public Object visit(Literal literal, Object obj) {
-        return obj;
-    }
+    /**
+     * Visits a Literal expression.
+     */
+    T visit(Literal literal, Object obj);
 
-    public Object visit(Property property, Object obj) {
-        return obj;
-    }
+    /**
+     * Visits a Property expression.
+     */
+    T visit(Property property, Object obj);
 
-    public Object visit(Function function, Object obj) {
-        return obj;
-    }
+    /**
+     * Visits a Function expression.
+     */
+    T visit(Function function, Object obj);
 
-    public Object visit(Mixed mixed, Object obj) {
-        for (Expression e : mixed.expressions()) {
-            e.accept(this, obj);
-        }
-        return obj;
-    }
+    /**
+     * Visits a Mixed expression.
+     */
+    T visit(Mixed mixed, Object obj);
 
-    public Object visit(Expression expr, Object obj) {
-        return obj;
-    }
+    /**
+     * Visits a Math expression.
+     */
+    T visit(Math math, Object obj);
 
-    public Object visit(All<?> all, Object obj) {
-        return obj;
-    }
+    /**
+     * Visits an expression.
+     */
+    T visit(Expression expr, Object obj);
 
-    public Object visit(None<?> none, Object obj) {
-        return obj;
-    }
+    /**
+     * Visits an All filter.
+     */
+    T visit(All<?> all, Object obj);
 
-    public Object visit(Id<?> id, Object obj) {
-        return obj;
-    }
+    /**
+     * Visits a None filter.
+     */
+    T visit(None<?> none, Object obj);
 
-    public Object visit(Logic<?> logic, Object obj) {
-        for (Filter<?> f : logic.parts()) {
-            f.accept(this, obj);
-        }
-        return obj;
-    }
+    /**
+     * Visits a Id filter.
+     */
+    T visit(Id<?> id, Object obj);
 
-    public Object visit(Comparison<?> compare, Object obj) {
-        if (compare.left() != null) {
-            compare.left().accept(this, obj);
-        }
-        if (compare.right() != null) {
-            compare.right().accept(this, obj);
-        }
-        return obj;
-    }
+    /**
+     * Visits a Logic filter.
+     */
+    T visit(Logic<?> logic, Object obj);
 
-    public Object visit(Spatial<?> spatial, Object obj) {
-        if (spatial.left() != null) {
-            spatial.left().accept(this, obj);
-        }
-        if (spatial.right() != null) {
-            spatial.right().accept(this, obj);
-        }
-        
-        return obj;
-    }
+    /**
+     * Visits a Comparison filter.
+     */
+    T visit(Comparison<?> compare, Object obj);
 
-    public Object visit(TypeOf<?> inst, Object obj) {
-        inst.expression().accept(this, obj);
-        return obj;
-    }
+    /**
+     * Visits a Spatial filter.
+     */
+    T visit(Spatial<?> spatial, Object obj);
 
-    public Object visit(In<?> in, Object obj) {
-        in.property().accept(this, obj);
-        List<Expression> values = in.values();
-        for (Expression e: values) {
-            e.accept(this, obj);
-        }
-        return obj;
-    }
+    /**
+     * Visits a Logic filter.
+     */
+    T visit(TypeOf<?> inst, Object obj);
 
-    public Object visit(Like<?> like, Object obj) {
-        like.property().accept(this, obj);
-        return obj;
-    }
+    /**
+     * Visits an In filter.
+     */
+    T visit(In<?> in, Object obj);
 
-    public Object visit(Math math, Object obj) {
-        math.left().accept(this, obj);
-        math.right().accept(this, obj);
-        return obj;
-    }
+    /**
+     * Visits a Like filter.
+     */
+    T visit(Like<?> like, Object obj);
 
-    public Object visit(Null<?> isNull, Object obj) {
-        isNull.property().accept(this, obj);
-        return obj;
-    }
+    /**
+     * Visits a Null filter.
+     */
+    T visit(Null<?> isNull, Object obj);
 
-    public Object visit(Filter<?> filter, Object obj) {
-        return obj;
-    }
+    /**
+     * Visits a filter.
+     */
+    T visit(Filter<?> filter, Object obj);
 }

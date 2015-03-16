@@ -29,5 +29,5 @@ public interface Expression {
     /**
      * Applies a visitor to the expression.
      */
-    Object accept(FilterVisitor visitor, Object obj);
+    <R> R accept(FilterVisitor<R> visitor, Object obj);
 }

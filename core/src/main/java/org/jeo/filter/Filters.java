@@ -51,16 +51,6 @@ public class Filters {
         return new None<T>();
     }
 
-    static FilterVisitor propertyCollector = new FilterVisitor() {
-
-        @Override
-        public Object visit(Property property, Object obj) {
-            ((Set) obj).add(property.property());
-            return obj;
-        }
-
-    };
-
     /**
      * Add all property references in the provided Filter to the provided
      * Set.
@@ -69,7 +59,7 @@ public class Filters {
      * @return the provided set
      */
     public static Set<String> properties(Filter<?> f, Set<String> all) {
-        return (Set<String>) f.accept(propertyCollector, all);
+        return propertyCollector.collect(f, all);
     }
 
     /**
@@ -80,7 +70,7 @@ public class Filters {
      * @return the provided set
      */
     public static Set<String> properties(Expression e, Set<String> all) {
-        return (Set<String>) e.accept(propertyCollector, all);
+        return propertyCollector.collect(e, all);
     }
 
     /**
@@ -91,4 +81,24 @@ public class Filters {
     public static Set<String> properties(Filter<?> f) {
         return properties(f, new HashSet<String>());
     }
+
+    static class PropertyCollector extends FilterWalker {
+        public Set<String> collect(Filter f, Set<String> all) {
+            f.accept(this, all);
+            return all;
+        }
+
+        public Set<String> collect(Expression e, Set<String> all) {
+            e.accept(this, all);
+            return all;
+        }
+
+        @Override
+        public Object visit(Property property, Object obj) {
+            ((Set) obj).add(property.property());
+            return obj;
+        }
+    }
+
+    static PropertyCollector propertyCollector = new PropertyCollector();
 }

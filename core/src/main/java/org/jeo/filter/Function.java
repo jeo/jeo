@@ -50,7 +50,7 @@ public abstract class Function implements Expression {
     }
 
     @Override
-    public Object accept(FilterVisitor visitor, Object obj) {
+    public <R> R accept(FilterVisitor<R> visitor, Object obj) {
         return visitor.visit(this, obj);
     }
 

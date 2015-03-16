@@ -124,7 +124,7 @@ public class Property implements Expression {
     }
 
     @Override
-    public Object accept(FilterVisitor visitor, Object obj) {
+    public <R> R accept(FilterVisitor<R> visitor, Object obj) {
         return visitor.visit(this, obj);
     }
 

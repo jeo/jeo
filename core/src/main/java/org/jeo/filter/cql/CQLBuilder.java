@@ -331,9 +331,13 @@ public class CQLBuilder extends CQLParser {
             //return Filter.EXCLUDE;
 
         case JJTTRUENODE:
+            h.literal(true);
+            return;
             //return this.builder.buildTrueLiteral();
 
         case JJTFALSENODE:
+            h.literal(false);
+            return;
             //return this.builder.buildFalseLiteral(); 
         }
 

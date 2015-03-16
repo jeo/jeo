@@ -161,4 +161,13 @@ public class CQLTest {
         f = CQL.parse("X IS NOT NULL");
         assertEquals("[X] IS NOT NULL", f.toString());
     }
+
+    @Test
+    public void testBoolean() throws ParseException {
+        Comparison f = (Comparison) CQL.parse("X = TRUE");
+        assertEquals(true, f.right().evaluate(null));
+
+        f = (Comparison) CQL.parse("X = FALSE");
+        assertEquals(false, f.right().evaluate(null));
+    }
 }

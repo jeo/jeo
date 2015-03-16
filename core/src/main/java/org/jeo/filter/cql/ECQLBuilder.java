@@ -343,9 +343,13 @@ public class ECQLBuilder extends ECQLParser {
             //return Filter.EXCLUDE;
 
         case JJTTRUENODE:
+            h.literal(true);
+            return;
             //return this.builder.buildTrueLiteral();
 
         case JJTFALSENODE:
+            h.literal(false);
+            return;
             //return this.builder.buildFalseLiteral(); 
         }
 

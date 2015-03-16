@@ -29,10 +29,10 @@ import org.geotools.filter.expression.InternalVolatileFunction;
 import org.geotools.filter.identity.FeatureIdImpl;
 import org.geotools.referencing.CRS;
 import org.jeo.data.Cursor;
+import org.jeo.filter.FilterWalker;
 import org.jeo.vector.Feature;
 import org.jeo.vector.Field;
 import org.jeo.vector.Schema;
-import org.jeo.filter.FilterVisitor;
 import org.jeo.filter.Function;
 import org.jeo.filter.Literal;
 import org.jeo.filter.Mixed;
@@ -153,7 +153,7 @@ public class GT {
     }
 
     public static Expression expr(org.jeo.filter.Expression expr) {
-        Expression e = (Expression) expr.accept(new FilterVisitor() {
+        Expression e = (Expression) expr.accept(new FilterWalker<Object>() {
             @Override
             public Object visit(Literal literal, Object obj) {
                 return filterFactory.literal(literal.evaluate(null));

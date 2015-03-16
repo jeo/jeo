@@ -19,8 +19,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Deque;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -235,10 +237,10 @@ public abstract class Backend implements Closeable {
      */
     public abstract class Session implements Closeable {
 
-        private final LinkedList<Object> opened = new LinkedList<Object>();
+        private final Deque<Object> opened = new ArrayDeque<>();
 
         public final <T> T open(T o) {
-            opened.add(o);
+            opened.push(o);
             return o;
         }
 
@@ -348,12 +350,12 @@ public abstract class Backend implements Closeable {
 
         @Override
         public final void close() {
-            closeSafe(session);
             try {
                 closeInternal();
             } catch (Exception ex) {
                 LOG.warn("Error closing Results", ex);
             }
+            closeSafe(session);
         }
 
         public abstract Object getObject(int idx, Class clazz) throws IOException;

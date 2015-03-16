@@ -34,7 +34,13 @@ public abstract class Filter<T> extends Predicate<T> {
      * Creates a new filter that is a logical AND of this filter and the specified filter.
      */
     public Filter<T> and(Filter<T> other) {
+        if (this instanceof All) {
+            return other;
+        }
         if (other instanceof All) {
+            return this;
+        }
+        if (this instanceof None) {
             return this;
         }
         if (other instanceof None) {
@@ -48,7 +54,13 @@ public abstract class Filter<T> extends Predicate<T> {
      * Creates a new filter that is a logical OR of this filter and the specified filter.
      */
     public Filter<T> or(Filter<T> other) {
+        if (this instanceof All) {
+            return this;
+        }
         if (other instanceof All) {
+            return other;
+        }
+        if (this instanceof None) {
             return other;
         }
         if (other instanceof None) {

@@ -19,13 +19,13 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import org.jeo.filter.FilterWalker;
 import org.jeo.vector.Field;
 import org.jeo.vector.Schema;
 import org.jeo.filter.All;
 import org.jeo.filter.Comparison;
 import org.jeo.filter.Expression;
 import org.jeo.filter.Filter;
-import org.jeo.filter.FilterVisitor;
 import org.jeo.filter.Function;
 import org.jeo.filter.Id;
 import org.jeo.filter.Literal;
@@ -57,7 +57,7 @@ import org.jeo.filter.Null;
  * 
  * @author Justin Deoliveira, OpenGeo
  */
-public class FilterSQLEncoder extends FilterVisitor {
+public class FilterSQLEncoder extends FilterWalker<Object> {
 
     protected PrimaryKey pkey;
     protected DbTypes dbtypes = new DbTypes();

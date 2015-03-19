@@ -95,7 +95,7 @@ public class GeoJSONDataset implements VectorDataset, FileData {
             Schema schema = f.get().schema();
             SchemaBuilder sb = Schema.build(name()).crs(crs());
             for (Field fld : schema) {
-                if (fld.isGeometry() && fld.crs() == null) {
+                if (fld.geometry() && fld.crs() == null) {
                     sb.field(fld.name(), (Class<Geometry>) fld.type(), crs());
                 }
                 else {

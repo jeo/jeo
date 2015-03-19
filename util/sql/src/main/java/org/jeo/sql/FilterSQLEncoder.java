@@ -345,7 +345,7 @@ public class FilterSQLEncoder extends FilterWalker<Object> {
     public Object visit(Null isNull, Object obj) {
         isNull.property().accept(this, obj);
         sql.add(" IS");
-        if (isNull.isNegated()) {
+        if (isNull.negated()) {
             sql.add(" NOT");
         }
         sql.add(" NULL");

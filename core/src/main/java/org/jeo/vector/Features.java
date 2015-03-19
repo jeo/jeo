@@ -97,7 +97,7 @@ public class Features {
     public static Envelope boundsReprojected(Feature f, CoordinateReferenceSystem crs) {
         Envelope e = new Envelope();
         for (Field fld : f.schema()) {
-            if (fld.isGeometry()) {
+            if (fld.geometry()) {
                 CoordinateReferenceSystem c = fld.crs();
                 Geometry g = (Geometry) f.get(fld.name());
                 if (g == null) {

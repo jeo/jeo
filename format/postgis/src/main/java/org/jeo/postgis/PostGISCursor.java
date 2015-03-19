@@ -70,7 +70,7 @@ public class PostGISCursor extends FeatureCursor {
                     Object obj = rs.getObject(i+1);
                     String col = md.getColumnName(i+1);
 
-                    if (dataset.schema().field(col).isGeometry()) {
+                    if (dataset.schema().field(col).geometry()) {
                         obj = new WKBReader().read(rs.getBytes(i+1));
                     }
 

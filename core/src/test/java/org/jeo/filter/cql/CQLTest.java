@@ -112,7 +112,7 @@ public class CQLTest {
     @Test
     public void testIn() throws ParseException {
         In f = (In) CQL.parse("STATE_NAME IN ('Virginia','Maryland')");
-        assertTrue(!f.isNegated());
+        assertTrue(!f.negated());
         assertEquals("STATE_NAME", f.property().property());
         List<Expression> values = f.values();
         assertEquals("Virginia", values.get(0).evaluate(null));
@@ -122,7 +122,7 @@ public class CQLTest {
     @Test
     public void testNotIn() throws ParseException {
         In f = (In) CQL.parse("STATE_NAME NOT IN ('Virginia','Maryland')");
-        assertTrue(f.isNegated());
+        assertTrue(f.negated());
     }
 
     @Test

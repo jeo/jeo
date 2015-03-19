@@ -186,7 +186,7 @@ public class PostGISWorkspace implements Workspace {
                     }
 
                     sql.name(fld.name()).add(" ");
-                    if (fld.isGeometry()) {
+                    if (fld.geometry()) {
                         Integer srid = fld.crs() != null ? Proj.epsgCode(fld.crs()) : null;
                         srid = srid != null ? srid : -1;
 

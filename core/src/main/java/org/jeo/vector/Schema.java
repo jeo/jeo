@@ -109,14 +109,14 @@ public class Schema implements Iterable<Field> {
     /**
      * Derived geometry field of the schema.
      * <p>
-     * This method returns the first field that returns true from {@link Field#isGeometry()}. If 
+     * This method returns the first field that returns true from {@link Field#geometry()}. If
      * no such field is found <code>null</code> is returned.
      * </p>
      */
     public Field geometry() {
         //TODO: store the derived result
         for (Field f : this) {
-            if (f.isGeometry()) {
+            if (f.geometry()) {
                 return f;
             }
         }

@@ -82,14 +82,14 @@ public class Field {
      * 
      * @return The crs object, or <code>null</code>.
      */
-    public boolean isGeometry() {
+    public boolean geometry() {
         return Geometry.class.isAssignableFrom(type);
     }
 
     /**
      * Returns the coordinate reference system associated with the field, if set.
      * <p>
-     * This value is typically only set when {@link #isGeometry()} returns <code>true</code>.
+     * This value is typically only set when {@link #geometry()} returns <code>true</code>.
      * </p>
      */
     public CoordinateReferenceSystem crs() {

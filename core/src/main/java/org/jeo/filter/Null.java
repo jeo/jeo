@@ -40,7 +40,7 @@ public class Null<T> extends Filter<T> {
         return prop;
     }
 
-    public boolean isNegated() {
+    public boolean negated() {
         return not;
     }
 

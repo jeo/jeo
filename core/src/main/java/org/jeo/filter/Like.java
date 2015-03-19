@@ -44,7 +44,7 @@ public class Like<T> extends Filter<T> {
         this.not = not;
     }
 
-    public boolean isNegated() {
+    public boolean negated() {
         return not;
     }
 

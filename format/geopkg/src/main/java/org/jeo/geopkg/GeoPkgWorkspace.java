@@ -492,7 +492,7 @@ public class GeoPkgWorkspace implements Workspace, FileData {
         sql.name(findPrimaryKeyColumnName(schema)).add(" INTEGER PRIMARY KEY, ");
         for (Field f : schema) {
             sql.name(f.name()).add(" ");
-            if (f.isGeometry()) {
+            if (f.geometry()) {
                 sql.add(Geom.Type.from(f.type()).getSimpleName());
             } else {
                 String t = backend.dbTypes.toName(f.type());

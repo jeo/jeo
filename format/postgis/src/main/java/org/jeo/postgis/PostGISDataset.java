@@ -201,7 +201,7 @@ public class PostGISDataset implements VectorDataset {
                     encodeFieldForSelect(f, sql);
                     sql.add(", ");
     
-                    geom = geom || f.isGeometry();
+                    geom = geom || f.geometry();
                 }
                 sql.trim(2);
     
@@ -214,6 +214,7 @@ public class PostGISDataset implements VectorDataset {
             sql.add(" FROM ").name(table.schema(), table.name());
 
             List<Pair<Object,Integer>> args = new ArrayList<Pair<Object,Integer>>();
+
             // if filter refers to properties not in the schema, defer to CQL filter
             if (!missingProperties(q)) {
                 encodeQuery(sql, q, qp, args);
@@ -239,7 +240,7 @@ public class PostGISDataset implements VectorDataset {
     }
 
     void encodeFieldForSelect(Field f, SQL sql) {
-        if (f.isGeometry()) {
+        if (f.geometry()) {
             //TODO: force 2d
             //TODO: base64 encode
             sql.add("ST_AsBinary(").name(f.name()).add(") as ").name(f.name());

@@ -82,16 +82,6 @@ public class MongoDataset implements VectorDataset {
     }
 
     @Override
-    public String title() {
-        return null;
-    }
-
-    @Override
-    public String description() {
-        return null;
-    }
-
-    @Override
     public CoordinateReferenceSystem crs() {
         return Proj.EPSG_4326;
     }

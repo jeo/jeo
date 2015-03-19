@@ -50,12 +50,10 @@ public class GeoPkgDataset<T extends Entry> implements Dataset {
         return entry.getTableName();
     }
 
-    @Override
     public String title() {
         return entry.getIdentifier();
     }
 
-    @Override
     public String description() {
         return entry.getDescription();
     }

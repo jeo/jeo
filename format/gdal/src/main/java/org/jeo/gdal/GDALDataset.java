@@ -60,12 +60,6 @@ public class GDALDataset implements RasterDataset, FileData {
         return Util.base(file.getName());
     }
 
-    @Override
-    public String title() {
-        return null;
-    }
-
-    @Override
     public String description() {
         return dataset.GetDescription();
     }

@@ -79,16 +79,6 @@ public class GeoJSONDataset implements VectorDataset, FileData {
     }
 
     @Override
-    public String title() {
-        return null;
-    }
-
-    @Override
-    public String description() {
-        return null;
-    }
-
-    @Override
     public Schema schema() throws IOException {
         Optional<Feature> f = first();
         if (f.isPresent()) {

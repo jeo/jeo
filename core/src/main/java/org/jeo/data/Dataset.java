@@ -57,16 +57,6 @@ public interface Dataset extends Disposable {
     String name();
 
     /**
-     * Human readable title of the layer, or <code>null</code>. 
-     */
-    String title();
-
-    /**
-     * Human readable description of the layer, or <code>null</code>. 
-     */
-    String description();
-
-    /**
      * The native coordinate reference system of the layer, or <code>null</code> if unknown. 
      */
     CoordinateReferenceSystem crs() throws IOException;

@@ -113,83 +113,6 @@ public abstract class Handle<T> implements Disposable {
         return driver;
     }
 
-//    /**
-//     * Title of the data object.
-//     * <p>
-//     * This value may be <code>null</code>. Application code should use {@link #title()} to return
-//     * a value that may require resolving the underlying data object.
-//     * </p>
-//     */
-//    public String getTitle() {
-//        return title;
-//    }
-
-//    /**
-//     * Sets the title of the data object.
-//     */
-//    public void setTitle(String title) {
-//        this.title = title;
-//    }
-
-    /**
-     * Returns the title of the data object resolving the handle if necessary.
-     *
-     * @return The title, or <code>null</code>.
-     *
-     * @throws IOException I/O errors that occur interacting with the underlying data object.
-     */
-    public String title() throws IOException {
-        if (title == null) {
-            if (Dataset.class.isAssignableFrom(type)) {
-                Dataset data = (Dataset) resolve();
-                title = data.title();
-            }
-        }
-        return title;
-    }
-
-//    /**
-//     * Description of the data object.
-//     * <p>
-//     * This value may be <code>null</code>. Application code should use {@link #description()()} to
-//     * return a value that may require resolving the underlying data object.
-//     * </p>
-//     */
-//    public String getDescription() {
-//        return description;
-//    }
-//
-//    /**
-//     * Sets the description of the data object.
-//     */
-//    public void setDescription(String description) {
-//        this.description = description;
-//    }
-
-    /**
-     * Returns the description of the data object resolving the handle if necessary.
-     *
-     * @return The description, or <code>null</code>.
-     *
-     * @throws IOException I/O errors that occur interacting with the underlying data object.
-     */
-    public String description() throws IOException {
-        if (description == null) {
-            if (Dataset.class.isAssignableFrom(type)) {
-                description = ((Dataset) resolve()).description();
-            }
-        }
-        return description;
-    }
-
-//    public CoordinateReferenceSystem getCRS() {
-//        return crs;
-//    }
-//
-//    public void setCRS(CoordinateReferenceSystem crs) {
-//        this.crs = crs;
-//    }
-
     /**
      * Returns the crs of the data object resolving the handle if necessary.
      */
@@ -201,14 +124,6 @@ public abstract class Handle<T> implements Disposable {
         }
         return crs;
     }
-
-//    public Envelope getBounds() {
-//        return bounds;
-//    }
-//
-//    public void setBounds(Envelope bounds) {
-//        this.bounds = bounds;
-//    }
 
     /**
      * Returns the bounds of the data object resolving the handle if necessary.

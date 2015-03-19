@@ -89,16 +89,6 @@ public class PostGISDataset implements VectorDataset {
     }
 
     @Override
-    public String title() {
-        return null;
-    }
-
-    @Override
-    public String description() {
-        return null;
-    }
-
-    @Override
     public Schema schema() {
         return table.type();
     }

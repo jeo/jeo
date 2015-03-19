@@ -57,16 +57,6 @@ public class MemTileDataset implements TileDataset {
     }
     
     @Override
-    public String title() {
-        return null;
-    }
-    
-    @Override
-    public String description() {
-        return null;
-    }
-    
-    @Override
     public CoordinateReferenceSystem crs() throws IOException {
         return pyramid.crs();
     }

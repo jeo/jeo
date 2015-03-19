@@ -67,16 +67,6 @@ public class MemVector implements VectorDataset {
     }
     
     @Override
-    public String title() {
-        return name();
-    }
-    
-    @Override
-    public String description() {
-        return null;
-    }
-    
-    @Override
     public CoordinateReferenceSystem crs() {
         return schema.crs();
     }

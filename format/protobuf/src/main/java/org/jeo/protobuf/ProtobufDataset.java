@@ -87,16 +87,6 @@ public class ProtobufDataset implements VectorDataset, FileData {
     }
 
     @Override
-    public String title() {
-        return null;
-    }
-
-    @Override
-    public String description() {
-        return null;
-    }
-
-    @Override
     public CoordinateReferenceSystem crs() throws IOException {
         return schema.crs();
     }

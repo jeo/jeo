@@ -107,7 +107,6 @@ public class MBTileSet implements TileDataset, FileData {
         return Util.base(file().getName());
     }
 
-    @Override
     public String title() {
         try {
             String sql = String.format("SELECT value FROM %s WHERE name = ?", METADATA);
@@ -127,7 +126,6 @@ public class MBTileSet implements TileDataset, FileData {
 
     }
 
-    @Override
     public String description() {
         try {
             String sql = String.format("SELECT value FROM %s WHERE name = ?", METADATA);

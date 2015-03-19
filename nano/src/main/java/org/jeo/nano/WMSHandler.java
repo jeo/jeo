@@ -239,7 +239,7 @@ public class WMSHandler extends OWSHandler {
         private void writeLayer(Handle<Workspace> ws, Handle<Dataset> lyr) throws IOException {
             xml.start("Layer", "queryable", "1");
             xml.element("Name", ws.name() + ":" + lyr.name());
-            xml.element("Title", first(lyr.title(), lyr.name()));
+
             CoordinateReferenceSystem crs;
             try {
                 crs = lyr.crs();

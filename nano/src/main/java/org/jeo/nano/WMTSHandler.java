@@ -200,8 +200,8 @@ public class WMTSHandler extends OWSHandler {
         private void writeLayer(String id, TileDataset ds) throws IOException {
             xml.start("Layer");
 
-            xml.element("ows:Title", ds.title());
-            xml.element("ows:Abstract", ds.description());
+            //xml.element("ows:Title", ds.title());
+            //xml.element("ows:Abstract", ds.description());
             Envelope bbox = Proj.reproject(ds.bounds(), ds.crs(), Proj.EPSG_4326);
             xml.start("ows:WGS84BoundingBox");
             xml.element("ows:LowerCorner", bbox.getMinX() + " " + bbox.getMinY());

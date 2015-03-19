@@ -246,14 +246,14 @@ public class MockServer {
         VectorDataset dataSet = createMock(VectorDataset.class);
         expect(dataSet.bounds()).andReturn(env).anyTimes();
         expect(dataSet.name()).andReturn(name).anyTimes();
-        expect(dataSet.title()).andReturn(title).anyTimes();
+        //expect(dataSet.title()).andReturn(title).anyTimes();
         expect(dataSet.crs()).andReturn(crs).anyTimes();
         expect(dataSet.schema()).andReturn(schema).anyTimes();
         Handle handle = createMock(Handle.class);
         expect(handle.type()).andReturn(VectorDataset.class).anyTimes();
         expect(handle.bounds()).andReturn(env).anyTimes();
         expect(handle.name()).andReturn(name).anyTimes();
-        expect(handle.title()).andReturn(title).anyTimes();
+        //expect(handle.title()).andReturn(title).anyTimes();
         expect(handle.crs()).andReturn(crs).anyTimes();
         expect(handle.resolve()).andReturn(dataSet).anyTimes();
         return handle;

@@ -14,6 +14,10 @@
  */
 package org.jeo.util;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -26,15 +30,21 @@ public class Key<T> {
     String name;
     Class<T> type;
     T def;
+    boolean multi;
 
     public Key(String name, Class<T> type) {
         this(name, type, null);
     }
 
     public Key(String name, Class<T> type, T def) {
+        this(name, type, def, false);
+    }
+
+    public Key(String name, Class<T> type, T def, boolean multi) {
         this.name = name;
         this.type = type;
         this.def = def;
+        this.multi = multi;
     }
 
     /**
@@ -59,6 +69,13 @@ public class Key<T> {
     }
 
     /**
+     * Whether the key is multi valued.
+     */
+    public boolean multi() {
+        return multi;
+    }
+
+    /**
      * Loads the key from a map, converting the raw map value to the value of the key.
      * <p>
      * If the map contains no matching key {@link #def()} is returned.
@@ -74,11 +91,47 @@ public class Key<T> {
             return null;
         }
 
-        T obj = parse(raw);
-        if (obj == null) {
-            obj = Convert.to(raw, type).get("Unable to convert " + raw + " to " + type.getName());
+        return parseOrConvert(raw);
+    }
+
+    /**
+     * Loads the multi-valued key from a map, converting the raw map value to the value of the key.
+     * <p>
+     * If the map contains no matching key, a list containing {@link #def()} is returned. If no default
+     * was specified an empty list is returned.
+     * </p>
+     */
+    public List<T> all(Map<?,Object> map) {
+        if (!multi) {
+            throw new IllegalStateException("key is not multi valued");
         }
-        return obj;
+
+        if (!in(map)) {
+            return def != null ? Arrays.asList(def) : null;
+        }
+
+        Object raw = raw(map);
+        if (raw == null) {
+            return Arrays.asList();
+        }
+
+        if (multi) {
+            // if string, split on delimiter TODO: make delimiter configurable
+            if (raw instanceof String) {
+                raw = Arrays.asList(raw.toString().split("\\s*,\\s*"));
+            }
+
+            if (raw instanceof Collection) {
+                // process collection and parse elements
+                List<T> list = new ArrayList<>();
+                for (Object obj : ((Collection)raw)) {
+                    list.add(parseOrConvert(obj));
+                }
+                return list;
+            }
+        }
+
+        return Arrays.asList(parseOrConvert(raw));
     }
 
     /**
@@ -101,6 +154,11 @@ public class Key<T> {
      */
     protected T parse(Object raw) {
         return null;
+    }
+
+    T parseOrConvert(Object raw) {
+        T obj = parse(raw);
+        return obj != null ? obj : Convert.to(raw, type).get("Unable to convert " + raw + " to " + type.getName());
     }
 
     @Override

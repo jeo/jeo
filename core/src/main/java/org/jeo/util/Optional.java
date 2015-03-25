@@ -82,6 +82,24 @@ public class Optional<T> {
     }
 
     /**
+     * Converts the value (if set)  to the specified class.
+     * <p>
+     * This method calls {@link Convert#to(Object, Class)} to do the conversion. If no conversion can be done
+     * {@link Optional#empty()} is returned.
+     * </p>
+     *
+     * @param type The type to convert to.
+     *
+     */
+    public <X> Optional<X> to(Class<X> type) {
+        if (value == null) {
+            return (Optional<X>) this;
+        }
+
+        return Convert.to(value, type);
+    }
+
+    /**
      * Returns the underlying value if the optional is present, otherwise returns the
      * specified fallback.
      *

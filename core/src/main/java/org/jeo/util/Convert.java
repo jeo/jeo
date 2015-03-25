@@ -14,6 +14,13 @@
  */
 package org.jeo.util;
 
+import com.vividsolutions.jts.geom.Envelope;
+import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.io.ParseException;
+import com.vividsolutions.jts.io.WKTReader;
+import org.jeo.geojson.GeoJSONReader;
+import org.jeo.geom.Envelopes;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -202,5 +209,34 @@ public class Convert {
         }
 
         return null;
+    }
+
+    public static Optional<Geometry> toGeometry(Object obj) {
+        if (obj instanceof Geometry) {
+            return Optional.of((Geometry)obj);
+        }
+        if (obj instanceof Envelope) {
+            Envelope env = (Envelope) obj;
+            return Optional.of((Geometry) Envelopes.toPolygon(env));
+        }
+        if (obj instanceof String) {
+            String str = (String) obj;
+            Geometry g = null;
+            // wkt
+            try {
+                g = new WKTReader().read(str);
+            } catch (ParseException e1) {
+                // try geojson
+                try {
+                    g = new GeoJSONReader().geometry(str);
+                }
+                catch(Exception e2) {
+                }
+            }
+
+            return Optional.of(g);
+        }
+
+        return Optional.empty();
     }
 }

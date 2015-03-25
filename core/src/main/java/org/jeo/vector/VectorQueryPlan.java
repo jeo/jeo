@@ -39,7 +39,7 @@ public class VectorQueryPlan {
     VectorQuery q;
 
     boolean bounded;
-    boolean filtered;
+    Filter<Feature> filter;
     boolean offsetted;
     boolean limited;
     boolean reprojected;
@@ -49,6 +49,7 @@ public class VectorQueryPlan {
 
     public VectorQueryPlan(VectorQuery q) {
         this.q = q;
+        filter = q.filter();
     }
 
     /**
@@ -69,14 +70,22 @@ public class VectorQueryPlan {
      * Whether {@link VectorQuery#filter()} was handled natively.
      */
     public boolean isFiltered() {
-        return filtered;
+        return Filters.isTrueOrNull(filter);
     }
 
     /**
      * Marks {@link VectorQuery#filter()} as being handled natively.
      */
     public void filtered() {
-        filtered = true;
+        filter = Filters.all();
+    }
+
+    /**
+     * Marks {@link VectorQuery#filter()} as being handled natively with a left-over part of the filter that could not
+     * be handled.
+     */
+    public void filtered(Filter left) {
+        filter = left;
     }
 
     /**
@@ -182,8 +191,7 @@ public class VectorQueryPlan {
             cursor = cursor.intersect(bounds, true);
         }
 
-        Filter<Feature> filter = q.filter();
-        if (!isFiltered() && !Filters.isFalseOrNull(filter)) {
+        if (!Filters.isTrueOrNull(filter)) {
             cursor = cursor.filter(filter);
         }
 

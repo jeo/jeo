@@ -415,6 +415,7 @@ public class VectorQuery {
      * @return The adjusted count.
      */
     public long adjustCount(long count) {
+        // TODO: move this to QueryPlan?
         if (offset != null) {
             count = Math.max(0, count - offset);
         }

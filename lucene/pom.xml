@@ -4,21 +4,34 @@
 
   <parent>
     <groupId>org.jeo</groupId>
-    <artifactId>jeo-parent</artifactId>
+    <artifactId>contrib</artifactId>
     <version>0-SNAPSHOT</version>
   </parent>
 
-  <groupId>org.jeo</groupId>
-  <artifactId>contrib</artifactId>
-  <name>Contrib Modules</name>
-  <version>0-SNAPSHOT</version>
-  <packaging>pom</packaging>
+  <artifactId>jeo-lucene</artifactId>
+  <name>Lucene Driver</name>
+  <packaging>jar</packaging>
 
   <dependencies>
     <dependency>
       <groupId>org.jeo</groupId>
       <artifactId>jeo</artifactId>
       <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.lucene</groupId>
+      <artifactId>lucene-analyzers-common</artifactId>
+      <version>${lucene.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.lucene</groupId>
+      <artifactId>lucene-spatial</artifactId>
+      <version>${lucene.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.lucene</groupId>
+      <artifactId>lucene-queryparser</artifactId>
+      <version>${lucene.version}</version>
     </dependency>
     <dependency>
       <groupId>org.jeo</groupId>
@@ -29,16 +42,7 @@
     </dependency>
   </dependencies>
 
-  <modules>
-   <module>carto</module>
-   <module>geogit</module>
-   <module>geotools</module>
-   <module>guava</module>
-   <module>lucene</module>
-   <module>nano</module>
-   <module>render</module>
-   <module>repo</module>
-   <module>svg</module>
-  </modules>
-
+  <properties>
+    <lucene.version>5.0.0</lucene.version>
+  </properties>
 </project>

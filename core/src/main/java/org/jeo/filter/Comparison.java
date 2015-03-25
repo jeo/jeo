@@ -16,6 +16,7 @@ package org.jeo.filter;
 
 import org.jeo.util.Convert;
 import org.jeo.util.Optional;
+import org.jeo.util.Pair;
 
 import java.util.Objects;
 
@@ -30,13 +31,40 @@ public class Comparison<T> extends Filter<T> {
      * Comparison operator type.  
      */
     public static enum Type {
-        EQUAL("="), NOT_EQUAL("!="), LESS("<"), LESS_OR_EQUAL("<="), GREATER(">"), 
-        GREATER_OR_EQUAL(">=");
+        EQUAL("="), NOT_EQUAL("!="),
+        LESS("<") {
+            @Override
+            public Type invert() {
+                return GREATER_OR_EQUAL;
+            }
+        },
+        LESS_OR_EQUAL("<=") {
+            @Override
+            public Type invert() {
+                return GREATER;
+            }
+        },
+        GREATER(">") {
+            @Override
+            public Type invert() {
+                return LESS_OR_EQUAL;
+            }
+        },
+        GREATER_OR_EQUAL(">=") {
+            @Override
+            public Type invert() {
+                return LESS;
+            }
+        };
 
         String op;
 
         Type(String op) {
             this.op = op;
+        }
+
+        public Type invert() {
+          return this;
         }
 
         @Override
@@ -67,6 +95,25 @@ public class Comparison<T> extends Filter<T> {
 
     public Expression right() {
         return right;
+    }
+
+    /**
+     * Normalizes the filter.
+     * <p>
+     * A "normal" filter is one where a {@link Property} is compared to another expression.
+     * This method returns <code>null</code> if the filter is not normal.
+     * </p>
+     */
+    public Comparison<T> normalize() {
+        if (left instanceof Property) {
+            return this;
+        }
+        else if (right instanceof Property) {
+            return new Comparison<>(type.invert(), right, left);
+        }
+        else {
+            return null;
+        }
     }
 
     @Override

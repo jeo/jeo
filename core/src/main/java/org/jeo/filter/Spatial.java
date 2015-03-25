@@ -18,6 +18,7 @@ import org.jeo.geom.Envelopes;
 
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
+import org.jeo.util.Pair;
 
 import java.util.Objects;
 
@@ -36,8 +37,35 @@ public class Spatial<T> extends Filter<T> {
      * Spatial operator type.  
      */
     public static enum Type {
-        EQUALS, INTERSECTS, TOUCHES, DISJOINT, OVERLAPS, CROSSES, COVERS, WITHIN, CONTAINS, BBOX,
-        DWITHIN, BEYOND;
+        EQUALS, INTERSECTS, TOUCHES, DISJOINT, OVERLAPS, CROSSES, COVERS, BBOX,
+        WITHIN {
+            @Override
+            public Type invert() {
+                return CONTAINS;
+            }
+        },
+        CONTAINS {
+            @Override
+            public Type invert() {
+                return WITHIN;
+            }
+        },
+        DWITHIN {
+            @Override
+            public Type invert() {
+                return BEYOND;
+            }
+        },
+        BEYOND {
+            @Override
+            public Type invert() {
+                return DWITHIN;
+            }
+        };
+
+        public Type invert() {
+            return this;
+        }
     }
 
     final Type type;
@@ -74,6 +102,26 @@ public class Spatial<T> extends Filter<T> {
 
     public Expression right() {
         return right;
+    }
+
+    /**
+     * Normalizes the filter.
+     * <p>
+     * A "normal" filter is one where a {@link Property} is compared to another expression.
+     * This method returns <code>null</code> if the filter is not normal.
+     * </p>
+     */
+    public Spatial<T> normalize() {
+        if (left instanceof Property) {
+            return this;
+        }
+        else if (right instanceof Property) {
+            // flip
+            return new Spatial<>(type.invert(), right, left, distance);
+        }
+        else {
+            return null;
+        }
     }
 
     @Override

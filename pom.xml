@@ -251,6 +251,21 @@
       <id>assembly</id>
       <build>
         <plugins>
+          <!-- attach javadoc jars -->
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-javadoc-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>attach-javadocs</id>
+                <goals>
+                  <goal>jar</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+
+          <!-- copy over all dependencies -->
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-dependency-plugin</artifactId>
@@ -276,6 +291,7 @@
             </executions>
           </plugin>
 
+          <!-- assemble artifacts -->
           <plugin>
             <artifactId>maven-assembly-plugin</artifactId>
             <version>2.4</version>

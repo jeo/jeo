@@ -1,0 +1,232 @@
+body {
+    margin: 0px;
+    font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+    background-color: #fcfcfc;
+    font-size: 12px;
+}
+
+a {
+    color: #2980B9;
+}
+
+a:visited {
+    color: #9B59B6;
+}
+
+ul li {
+    list-style-type: none;
+}
+
+/** tables */
+table {
+    width: 100%;
+    text-align: left;
+    margin-bottom: 25px;
+}
+table caption {
+    display: inline-block;
+    text-align: left;
+    padding: 10px;
+    border-top-right-radius: 5px;
+    background-color: #2980B9;
+    color: #fcfcfc;
+}
+table .colFirst {
+    width: 25%;
+}
+table tr {
+    background-color: #ccc;
+}
+table tr.rowColor, table tr.altColor {
+    background-color: #eee;
+}
+table th, table td {
+    border-top: 1px solid #ccc;
+    border-left: 1px solid #ccc;
+}
+table th:last-child , table tr td:last-child {
+    border-right: 1px solid #ccc;
+}
+table tr:last-child td {
+    border-bottom: 1px solid #ccc;
+}
+
+/** general nav list */
+.navList {
+    margin: 0;
+}
+.navList li {
+    /*list-style-type: none;*/
+    display: inline-block;
+}
+
+/** top navigation */
+.topNav {
+    background-color: #333;
+    color: #eee;
+}
+.topNav .navList {
+    padding-top: 5px;
+}
+.topNav .navList li {
+    padding: 10px;
+}
+.topNav .navList li.navBarCell1Rev {
+    background-color: #2980B9;
+    color: #fcfcfc;
+    border-top-left-radius: 2px;
+    border-top-right-radius: 2px;
+}
+.topNav .navList li:not(.navBarCell1Rev):hover {
+    background-color: #555;
+    cursor: pointer;
+}
+.topNav .navList li a {
+    color: #eee;
+    text-decoration: none;
+}
+
+/** second level nav */
+.subNav {
+    background-color: #2980B9;
+    color: #fcfcfc;
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+
+.subNav li {
+    color: #eee;
+    font-weight: 200;
+}
+.subNav li a {
+    color: #fcfcfc;
+    font-weight: bold;
+    text-decoration: none;
+}
+.subNav li a:hover {
+    color: #eee;
+    text-decoration: underline;
+}
+
+.subNav .navList {
+    display: inline-block !important;
+    margin-right: 25px;
+}
+.subNav .navList li {
+    margin-right: 10px;
+}
+
+.subNavList {
+    text-align: left;
+    margin: 0px;
+    margin-top: 10px;
+    /*padding-left: 10px;*/
+    display: inline-block;
+    /*float: left;
+    margin-right: 25px;*/
+}
+.subNavList li {
+    display: inline-block;
+}
+.subNavList li a {
+    color: #fcfcfc;
+    text-decoration: none;
+}
+
+/** bottom nav */
+.bottomNav .navList {
+    text-align: center;
+}
+.bottomNav .navList li {
+    text-align: center;
+    padding: 10px;
+}
+
+/** body containers */
+.header, .contentContainer, .legalCopy {
+    padding-left: 15px;
+    padding-right: 15px;
+}
+.indexHeader {
+    padding: 10px;
+}
+.indexHeader a {
+    color: #fcfcfc;
+    text-decoration: none;
+}
+.indexHeader, h1.bar {
+    background-color: #333;
+    color: #fcfcfc;
+}
+
+h1.bar {
+    margin: 0;
+    padding: 10px;
+    font-size: 1.5em;
+}
+.indexHeader a:hover {
+    text-decoration: underline;
+}
+.indexContainer h2 {
+    margin: 0;
+    padding-left: 10px;
+    padding-bottom: 10px;
+    background-color: #333;
+    color: #fcfcfc;
+}
+.indexContainer ul {
+    padding-left: 15px;
+}
+
+.contentContainer ul {
+    padding-left: 5px;
+}
+.contentContainer .blockList div.block {
+    padding-top: 5px;
+}
+.contentContainer .details h3 {
+    margin: 0;
+    padding: 10px;
+    background-color: #2980B9;
+    color: #fcfcfc;
+    font-size: 12px;
+    display: inline-block;
+    border-top-right-radius: 5px;
+    font-weight: normal;
+}
+.contentContainer .details h4 {
+    margin: 0;
+    padding-top: 10px;
+}
+
+.contentContainer .details > ul > li > ul {
+    margin-bottom: 10px;
+}
+.contentContainer .details > ul > li > ul > li > ul {
+    border: 1px solid #ccc;
+    border-bottom: transparent;
+    background-color: #eee;
+}
+.contentContainer .details > ul > li > ul > li > ul:last-child {
+    border-bottom: 1px solid #ccc;
+}
+
+.contentContainer .details > ul > li > ul > li > ul h4 {
+    /*padding-bottom: 10px;*/
+}
+
+.contentContainer .details > ul > li > ul > li > ul {
+    padding-left: 5px;
+    padding-bottom: 5px;
+}
+
+.contentContainer .details > ul > li > ul > li > ul pre,
+.contentContainer .details > ul > li > ul > li > ul .block,
+.contentContainer .details > ul > li > ul > li > ul dl,
+.contentContainer .details > ul > li > ul > li > ul p  {
+    padding-left: 10px;
+}
+
+.subTitle {
+    margin-top: 5px;
+}

@@ -1,6 +1,7 @@
 jeo contributors:
 
-* Justin Deoliveira
-* Ian Schneider
-* Hannes Janetzek
-* Andreas Hocevar
+* Justin Deoliveira (jdeolive)
+* Ian Schneider     (ischneider)
+* Hannes Janetzek   (hjanetzek)
+* Andreas Hocevar   (ahocevar)
+* Jared Erickson    (jericks)

@@ -15,6 +15,10 @@ before_script:
 language: java
 script:
   - mvn clean install -Djava.awt.headless=true -P protobuf
+jdk:
+  - openjdk7
+  - oraclejdk7
+  - oraclejdk8
 notifications:
   email:
     recipients:

@@ -15,9 +15,8 @@
 package org.jeo.data.mem;
 
 import com.vividsolutions.jts.geom.Envelope;
+
 import org.jeo.data.Driver;
-import org.jeo.raster.RasterDataset;
-import org.jeo.raster.RasterQuery;
 import org.jeo.raster.*;
 import org.jeo.util.Dimension;
 import org.jeo.util.Key;
@@ -30,6 +29,7 @@ import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 public class MemRaster implements RasterDataset {
@@ -60,7 +60,7 @@ public class MemRaster implements RasterDataset {
         if (!bands.isEmpty()) {
             Array2D first = bands.get(0).data;
             if (first.length() != array.length() && first.length(0) != array.length(0)) {
-                throw new IllegalArgumentException(String.format(
+                throw new IllegalArgumentException(String.format(Locale.ROOT,
                     "data dimensions must match existing band: (%d,%d), was (%d,%d)", first.length(0), first.length(),
                     array.length(0), array.length()));
             }

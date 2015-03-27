@@ -18,6 +18,7 @@ import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 import org.jeo.filter.FilterWalker;
 import org.jeo.vector.Field;
@@ -37,6 +38,7 @@ import org.jeo.filter.Spatial;
 import org.jeo.util.Pair;
 
 import com.vividsolutions.jts.geom.Geometry;
+
 import org.jeo.filter.In;
 import org.jeo.filter.Like;
 import org.jeo.filter.Math;
@@ -111,7 +113,7 @@ public class FilterSQLEncoder extends FilterWalker<Object> {
 
     protected void abort(Object obj, String reason) {
         throw new FilterSQLException(
-            String.format("Unable to encode %s as sql, %s @ %s", obj, reason, sql.toString())); 
+            String.format(Locale.ROOT,"Unable to encode %s as sql, %s @ %s", obj, reason, sql.toString())); 
     }
 
     public Object visit(Literal literal, Object obj) {

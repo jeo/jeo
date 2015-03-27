@@ -16,6 +16,7 @@ package org.jeo.data.mem;
 
 import java.io.IOException;
 import java.util.Collections;
+import java.util.Locale;
 import java.util.Map;
 
 import org.jeo.data.Cursor;
@@ -75,18 +76,18 @@ public class MemTileDataset implements TileDataset {
     public Tile read(long z, long x, long y) throws IOException {
         TileGrid grid = pyramid.grid((int) z);
         if (grid == null) {
-            //throw new IOException(String.format("no grid for zoom level %d", z));
+            //throw new IOException(String.format(Locale.ROOT,"no grid for zoom level %d", z));
             return null;
         }
 
         if (y >= grid.height()) {
             return null;
-            //throw new IOException(String.format("y must be < %d", grid.getHeight()));
+            //throw new IOException(String.format(Locale.ROOT,"y must be < %d", grid.getHeight()));
         }
         
         if (x >= grid.width()) {
             return null;
-            //throw new IOException(String.format("x must be < %d", grid.getWidth()));
+            //throw new IOException(String.format(Locale.ROOT,"x must be < %d", grid.getWidth()));
         }
 
         return tiles[(int)z][(int)y][(int)x];
@@ -129,19 +130,19 @@ public class MemTileDataset implements TileDataset {
 
     public void put(int z, Tile[][] tiles) {
         if (z > this.tiles.length) {
-            throw new IndexOutOfBoundsException(String.format(
+            throw new IndexOutOfBoundsException(String.format(Locale.ROOT,
                 "zoom level %d greater than pyramid depth %d", z, this.tiles.length)); 
         }
 
         TileGrid grid = pyramid.grid(z);
         if (tiles.length != grid.height()) {
-            throw new IllegalArgumentException(String.format(
+            throw new IllegalArgumentException(String.format(Locale.ROOT,
                 "number of vertical tiles  %d != grid height %d", tiles.length, grid.height()));
         }
 
         for (Tile[] row : tiles) {
             if (row.length != grid.width()) {
-                throw new IndexOutOfBoundsException(String.format(
+                throw new IndexOutOfBoundsException(String.format(Locale.ROOT,
                     "number of horizontal tiles  %d != grid width %d", tiles.length, grid.width()));
             }
         }

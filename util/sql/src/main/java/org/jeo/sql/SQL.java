@@ -14,6 +14,8 @@
  */
 package org.jeo.sql;
 
+import java.util.Locale;
+
 /**
  * Helper class for generating SQL strings.
  * <p>
@@ -66,7 +68,7 @@ public class SQL {
      * </p>
      */
     public SQL add(String s, Object... args) {
-        buf.append(String.format(s, args));
+        buf.append(String.format(Locale.ROOT, s, args));
         return this;
     }
 

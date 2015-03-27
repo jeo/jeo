@@ -16,6 +16,7 @@ package org.jeo.csv;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Locale;
 
 import org.jeo.geom.GeomBuilder;
 import org.jeo.util.Convert;
@@ -53,7 +54,7 @@ public class XYHandler extends CSVHandler {
             }
 
             if (x == null || y == null) {
-                throw new IllegalStateException(String.format(
+                throw new IllegalStateException(String.format(Locale.ROOT,
                     "Unable to determine x, y columns from %s, %s", opts.getXcol(), opts.getYcol()));
             }
 

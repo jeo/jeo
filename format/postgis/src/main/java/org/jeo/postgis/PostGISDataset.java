@@ -27,6 +27,7 @@ import java.sql.Statement;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import org.jeo.data.Cursor;
@@ -57,6 +58,7 @@ import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Polygon;
 import com.vividsolutions.jts.io.WKBReader;
 import com.vividsolutions.jts.io.WKTWriter;
+
 import java.util.Set;
 
 public class PostGISDataset implements VectorDataset {
@@ -430,7 +432,7 @@ public class PostGISDataset implements VectorDataset {
             }, cx));
         }
         else {
-            throw new IllegalArgumentException(String.format(
+            throw new IllegalArgumentException(String.format(Locale.ROOT,
                 "Unable to generate value for %s.%s", schema().name(), pkcol.getName()));
         }
     }

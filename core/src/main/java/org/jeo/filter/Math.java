@@ -14,6 +14,7 @@
  */
 package org.jeo.filter;
 
+import java.util.Locale;
 import java.util.Objects;
 
 /**
@@ -36,7 +37,7 @@ public class Math implements Expression {
         Objects.requireNonNull(right, "operands must not be null");
 
         if ("+-*/".indexOf(operator) < 0) {
-            throw new IllegalArgumentException(String.format("illegal operator: %s, must be one of: %s, %s, %s, %s",
+            throw new IllegalArgumentException(String.format(Locale.ROOT,"illegal operator: %s, must be one of: %s, %s, %s, %s",
             Character.toString(operator), operator, ADD, SUBTRACT, MULTIPLY, DIVIDE));
         }
         this.operator = operator;

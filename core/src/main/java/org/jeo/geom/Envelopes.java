@@ -20,6 +20,7 @@ import com.vividsolutions.jts.geom.Polygon;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * Utility class for {@link Envelope}.
@@ -128,7 +129,7 @@ public class Envelopes {
      * </p>
      */
     public static String toString(Envelope e, String delim, boolean xyxy) {
-        return String.format("%f%s%f%s%f%s%f", e.getMinX(), delim, xyxy?e.getMinY():e.getMaxX(), delim,
+        return String.format(Locale.ROOT,"%f%s%f%s%f%s%f", e.getMinX(), delim, xyxy?e.getMinY():e.getMaxX(), delim,
             xyxy?e.getMaxX():e.getMinY(), delim, e.getMaxY());
     }
 
@@ -230,13 +231,13 @@ public class Envelopes {
     static void checkContains(Envelope e, Coordinate c) {
         if (!e.contains(c)) {
             throw new IllegalArgumentException(
-                String.format("Coordinate (%f, %f) not contained within %s", c.x, c.y, e));
+                String.format(Locale.ROOT,"Coordinate (%f, %f) not contained within %s", c.x, c.y, e));
         }
     }
 
     static void checkPositive(double scale) {
         if (scale < 0) {
-            throw new IllegalArgumentException(String.format("scale %f not positive", scale));
+            throw new IllegalArgumentException(String.format(Locale.ROOT,"scale %f not positive", scale));
         }
     }
 }

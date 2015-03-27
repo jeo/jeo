@@ -17,6 +17,7 @@ package org.jeo.geopkg;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Locale;
 import java.util.TimeZone;
 
 import com.vividsolutions.jts.geom.Envelope;
@@ -46,7 +47,7 @@ public class Entry {
     }
 
     static SimpleDateFormat dateFormat() {
-        SimpleDateFormat format = new SimpleDateFormat("yyyy-mm-dd'T'HH:MM:ss.SSS'Z'");
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-mm-dd'T'HH:MM:ss.SSS'Z'", Locale.ROOT);
         format.setTimeZone(TimeZone.getTimeZone("GMT"));
         return format;
     }

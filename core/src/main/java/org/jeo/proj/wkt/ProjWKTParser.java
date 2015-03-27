@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import org.jeo.proj.Proj;
@@ -81,7 +82,7 @@ public class ProjWKTParser {
             }
         }
         
-        throw e.parseFailed(null, String.format("Type \"%s\" is unknown in this context.", key));
+        throw e.parseFailed(null, String.format(Locale.ROOT,"Type \"%s\" is unknown in this context.", key));
     }
 
     CoordinateReferenceSystem parseGeoGCS(Element element)  throws ParseException {
@@ -170,7 +171,7 @@ public class ProjWKTParser {
         element.close();
 
         if (name != null) {
-            Unit u = Units.findUnits(name.toLowerCase());
+            Unit u = Units.findUnits(name.toLowerCase(Locale.ROOT));
             if (u != null) {
                 return u;
             }
@@ -322,7 +323,7 @@ public class ProjWKTParser {
                 throw new IllegalArgumentException("Unsupported projection parameter: " + key);
             }
 
-            params.add(String.format("%s=%f", param.proj4, val));
+            params.add(String.format(Locale.ROOT,"%s=%f", param.proj4, val));
             
         }
 

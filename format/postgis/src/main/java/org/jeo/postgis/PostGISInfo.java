@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
+import java.util.Locale;
 
 import org.jeo.sql.DbOP;
 import org.jeo.util.Pair;
@@ -37,7 +38,7 @@ public class PostGISInfo {
                 Version postgis = new Version(rs.getString(1));
 
                 DatabaseMetaData md = cx.getMetaData();
-                Version postgres = new Version(String.format(
+                Version postgres = new Version(String.format(Locale.ROOT,
                     "%s.%s", md.getDatabaseMajorVersion(), md.getDatabaseMinorVersion()));
                 return new Pair<Version,Version>(postgis, postgres);
             }

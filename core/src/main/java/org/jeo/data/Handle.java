@@ -15,6 +15,7 @@
 package org.jeo.data;
 
 import java.io.IOException;
+import java.util.Locale;
 
 import org.osgeo.proj4j.CoordinateReferenceSystem;
 
@@ -195,6 +196,6 @@ public abstract class Handle<T> implements Disposable {
 
     @Override
     public String toString() {
-        return String.format("%s[%s]", type.getSimpleName(), name);
+        return String.format(Locale.ROOT,"%s[%s]", type.getSimpleName(), name);
     }
 }

@@ -14,27 +14,25 @@
  */
 package org.jeo.csv;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 import org.jeo.data.Cursor;
 import org.jeo.data.FileData;
-import org.jeo.vector.FeatureCursor;
-import org.jeo.vector.VectorQuery;
-import org.jeo.vector.VectorQueryPlan;
-import org.jeo.vector.VectorDataset;
-import org.jeo.vector.BasicFeature;
-import org.jeo.vector.Feature;
-import org.jeo.vector.Schema;
-import org.jeo.vector.SchemaBuilder;
 import org.jeo.util.Key;
 import org.jeo.util.Util;
+import org.jeo.vector.BasicFeature;
+import org.jeo.vector.Feature;
+import org.jeo.vector.FeatureCursor;
+import org.jeo.vector.Schema;
+import org.jeo.vector.SchemaBuilder;
+import org.jeo.vector.VectorDataset;
+import org.jeo.vector.VectorQuery;
+import org.jeo.vector.VectorQueryPlan;
 import org.osgeo.proj4j.CoordinateReferenceSystem;
 
 import com.csvreader.CsvReader;
@@ -148,8 +146,8 @@ public class CSVDataset implements VectorDataset, FileData {
     public void close() {
     }
 
-    CsvReader reader() throws FileNotFoundException {
-        return new CsvReader(new BufferedReader(new FileReader(file)), opts.getDelimiter());
+    CsvReader reader() throws IOException {
+        return new CsvReader(Files.newBufferedReader(file.toPath(), Util.UTF_8), opts.getDelimiter());
     }
 
     Feature feature(int i, CsvReader r) throws IOException {

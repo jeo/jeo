@@ -18,6 +18,7 @@ import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.io.ParseException;
 import com.vividsolutions.jts.io.WKTReader;
+
 import org.jeo.geojson.GeoJSONReader;
 import org.jeo.geom.Envelopes;
 
@@ -30,6 +31,8 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringReader;
 import java.lang.reflect.Array;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -198,11 +201,14 @@ public class Convert {
         }
 
         if (obj instanceof InputStream) {
-            return Optional.of((Reader)new BufferedReader(new InputStreamReader((InputStream)obj)));
+            return Optional.of((Reader)new BufferedReader(new InputStreamReader((InputStream)obj, Util.UTF_8)));
         }
 
         if (obj instanceof File) {
-            return Optional.of((Reader)new BufferedReader(new FileReader((File)obj)));
+            return Optional.of((Reader)Files.newBufferedReader(((File)obj).toPath(), Util.UTF_8));
+        }
+        if (obj instanceof Path) {
+            return Optional.of((Reader)Files.newBufferedReader(((Path)obj), Util.UTF_8));
         }
         if (obj instanceof String) {
             return Optional.of((Reader) new StringReader((String) obj));

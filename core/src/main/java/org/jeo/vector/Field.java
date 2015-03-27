@@ -14,6 +14,7 @@
  */
 package org.jeo.vector;
 
+import java.util.Locale;
 import java.util.Map;
 
 import org.osgeo.proj4j.CoordinateReferenceSystem;
@@ -113,7 +114,7 @@ public class Field {
 
     @Override
     public String toString() {
-        return String.format("(%s,%s)", name, type().getSimpleName());
+        return String.format(Locale.ROOT,"(%s,%s)", name, type().getSimpleName());
     }
 
     @Override

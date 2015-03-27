@@ -15,6 +15,7 @@
 package org.jeo.tile;
 
 import java.util.Arrays;
+import java.util.Locale;
 
 /**
  * A map tile, as defined by {@linkplain http://wiki.osgeo.org/wiki/Tile_Map_Service_Specification}.
@@ -194,7 +195,7 @@ public class Tile {
 
     @Override
     public String toString() {
-        return String.format("(z=%d, x=%d, y=%d)", z, y, x);
+        return String.format(Locale.ROOT,"(z=%d, x=%d, y=%d)", z, y, x);
     }
     
     private boolean isMagic(int[] bytes) {

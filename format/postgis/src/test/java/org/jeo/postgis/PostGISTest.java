@@ -24,10 +24,10 @@ import static org.junit.Assert.fail;
 
 import java.sql.Connection;
 import java.sql.Statement;
+import java.util.Locale;
 import java.util.NoSuchElementException;
 import java.util.Set;
 
-import org.jeo.TestData;
 import org.jeo.data.Cursor;
 import org.jeo.data.Dataset;
 import org.jeo.data.Handle;
@@ -220,9 +220,9 @@ public class PostGISTest {
             Feature f = c.next();
 
             String abbr = f.get("STATE_ABBR").toString();
-            assertEquals(abbr, abbr.toUpperCase());
+            assertEquals(abbr, abbr.toUpperCase(Locale.ROOT));
 
-            f.put("STATE_ABBR", f.get("STATE_ABBR").toString().toLowerCase());
+            f.put("STATE_ABBR", f.get("STATE_ABBR").toString().toLowerCase(Locale.ROOT));
             c.write();
         }
         c.close();
@@ -230,7 +230,7 @@ public class PostGISTest {
         for (Feature f : states.cursor(new VectorQuery())) {
             String abbr = f.get("STATE_ABBR").toString();
 
-            assertEquals(abbr, abbr.toLowerCase());
+            assertEquals(abbr, abbr.toLowerCase(Locale.ROOT));
         }
 
         c.close();

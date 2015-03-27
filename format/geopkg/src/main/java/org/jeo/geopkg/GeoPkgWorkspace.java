@@ -22,6 +22,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
@@ -56,7 +57,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.vividsolutions.jts.geom.Envelope;
+
 import static java.lang.String.format;
+
 import org.jeo.data.Transaction;
 import org.jeo.vector.SchemaBuilder;
 import org.jeo.sql.Backend.Session;
@@ -188,7 +191,7 @@ public class GeoPkgWorkspace implements Workspace, FileData {
     }
 
     public FeatureEntry feature(final String name) throws IOException {
-        String sql = format(
+        String sql = format(Locale.ROOT,
                     "SELECT a.*, b.column_name, b.geometry_type_name, b.z, b.m" +
                      " FROM %s a, %s b" +
                     " WHERE a.table_name = b.table_name" +
@@ -429,7 +432,7 @@ public class GeoPkgWorkspace implements Workspace, FileData {
             //check it
             if (schema.field(e.getGeometryColumn()) == null) {
                 throw new IllegalArgumentException(
-                        format("Geometry column %s does not exist in schema", e.getGeometryColumn()));
+                        format(Locale.ROOT,"Geometry column %s does not exist in schema", e.getGeometryColumn()));
             }
         }
         else {
@@ -527,7 +530,7 @@ public class GeoPkgWorkspace implements Workspace, FileData {
                 session.executePrepared(sql.toString(), crs.getName(), srid, "EPSG", srid, Proj.toWKT(crs, false));
             }
             catch(Exception e) {
-                LOG.debug(format("Error occurred adding srid %d to %s", srid, SPATIAL_REF_SYS), e);
+                LOG.debug(format(Locale.ROOT,"Error occurred adding srid %d to %s", srid, SPATIAL_REF_SYS), e);
             }
         }
     }
@@ -579,7 +582,7 @@ public class GeoPkgWorkspace implements Workspace, FileData {
     void addGeometryColumnsEntry(final Schema schema, final FeatureEntry entry, Session cx)
         throws IOException {
 
-        String sql = format(
+        String sql = format(Locale.ROOT,
                     "INSERT INTO %s VALUES (?, ?, ?, ?, ?, ?);", GEOMETRY_COLUMNS);
 
         cx.executePrepared(sql,
@@ -595,7 +598,7 @@ public class GeoPkgWorkspace implements Workspace, FileData {
     String findPrimaryKeyColumnName(Schema schema) {
         String[] names = new String[]{"fid", "gid", "oid"};
         for (String name : names) {
-            if (schema.field(name) == null && schema.field(name.toUpperCase()) == null) {
+            if (schema.field(name) == null && schema.field(name.toUpperCase(Locale.ROOT)) == null) {
                 return name;
             }
         }
@@ -697,7 +700,7 @@ public class GeoPkgWorkspace implements Workspace, FileData {
      * Lists all the tile entries in the geopackage. 
      */
     public List<TileEntry> tiles() throws IOException {
-        String sql = format(
+        String sql = format(Locale.ROOT,
                 "SELECT a.*"
                 + " FROM %s a, %s b"
                 + " WHERE a.table_name = b.table_name"
@@ -717,7 +720,7 @@ public class GeoPkgWorkspace implements Workspace, FileData {
     }
 
     public TileEntry tile(final String name) throws IOException {
-        String sql = format(
+        String sql = format(Locale.ROOT,
                 "SELECT a.*"
                 + " FROM %s a, %s b"
                 + " WHERE a.table_name = ?"
@@ -786,7 +789,7 @@ public class GeoPkgWorkspace implements Workspace, FileData {
         backend.initEntry(e, rs);
 
         //load all the tile matrix entries
-        String sql = format(
+        String sql = format(Locale.ROOT,
                 "SELECT zoom_level,matrix_width,matrix_height,tile_width,tile_height,"
                 + "pixel_x_size, pixel_y_size FROM %s WHERE table_name = ? "
                 + " ORDER BY zoom_level", TILE_MATRIX);

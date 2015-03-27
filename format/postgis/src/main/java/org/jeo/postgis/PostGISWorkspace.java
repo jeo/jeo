@@ -25,6 +25,7 @@ import java.sql.Statement;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import javax.sql.DataSource;
@@ -345,7 +346,7 @@ public class PostGISWorkspace implements Workspace {
                     if (binding == null) {
                         if (LOG.isDebugEnabled()) {
                             String msg = "Unable to map %s (%s, %d), falling back on Object";
-                            LOG.debug(String.format(msg, name, typeName, sqlType));
+                            LOG.debug(String.format(Locale.ROOT,msg, name, typeName, sqlType));
                         }
                         binding = Object.class;
                     }
@@ -368,7 +369,7 @@ public class PostGISWorkspace implements Workspace {
                         else {
                             sb.property("srid", -1);
                             LOG.debug(
-                                String.format("Unable to determine srid for %s (%s)", t.qname(), name));
+                                String.format(Locale.ROOT,"Unable to determine srid for %s (%s)", t.qname(), name));
                         }
 
                         sb.field(name, type, crs);
@@ -403,7 +404,7 @@ public class PostGISWorkspace implements Workspace {
                             protected String doRun(Connection cx) throws Exception {
                                 SQL sql = new SQL("SELECT pg_get_serial_sequence(?,?)");
                                 LOG.debug(
-                                    String.format("%s; 1=%s, 2=%s", sql.toString(), t.name(), colName));
+                                    String.format(Locale.ROOT,"%s; 1=%s, 2=%s", sql.toString(), t.name(), colName));
                                 
                                 PreparedStatement ps = open(cx.prepareStatement(sql.toString()));
                                 ps.setString(1, t.name());
@@ -436,7 +437,7 @@ public class PostGISWorkspace implements Workspace {
                      .add(" AND f_table_name = ?")
                      .add(" AND f_geometry_column = ?").toString();
 
-                LOG.debug(String.format("%s; 1=%s, 2=%s, 3=%s", sql, tbl.schema(), tbl.name(), col));
+                LOG.debug(String.format(Locale.ROOT,"%s; 1=%s, 2=%s, 3=%s", sql, tbl.schema(), tbl.name(), col));
 
                 PreparedStatement st = open(cx.prepareStatement(sql));
                 st.setString(1, tbl.schema());
@@ -453,7 +454,7 @@ public class PostGISWorkspace implements Workspace {
                         .add(" AND f_table_name = ?")
                         .add(" AND f_geography_column = ?").toString();
 
-                    LOG.debug(String.format("%s; 1=%s, 2=%s, 3=%s", sql, tbl.schema(), tbl.name(), col));
+                    LOG.debug(String.format(Locale.ROOT,"%s; 1=%s, 2=%s, 3=%s", sql, tbl.schema(), tbl.name(), col));
                     
                     st = open(cx.prepareStatement(sql.toString()));
                     st.setString(1, tbl.schema());
@@ -489,7 +490,7 @@ public class PostGISWorkspace implements Workspace {
                     .add(" AND a.f_table_name = ?")
                     .add(" AND a.column = ?").toString();
 
-                LOG.debug(String.format("%s; 1=%s, 2=%s", sql, tbl.schema(), tbl.name(), col));
+                LOG.debug(String.format(Locale.ROOT,"%s; 1=%s, 2=%s", sql, tbl.schema(), tbl.name(), col));
 
                 PreparedStatement ps = open(cx.prepareStatement(sql));
                 ps.setString(1, tbl.schema());
@@ -511,7 +512,7 @@ public class PostGISWorkspace implements Workspace {
         if (LOG.isDebugEnabled()) {
             StringBuilder msg = new StringBuilder(sql.toString()).append("; ");
             for (int i = 0; i < values.size(); i++) {
-                msg.append(String.format("%d=%s", i+1, values.get(i).first))
+                msg.append(String.format(Locale.ROOT,"%d=%s", i+1, values.get(i).first))
                    .append(", ");
             }
             msg.setLength(msg.length()-2);

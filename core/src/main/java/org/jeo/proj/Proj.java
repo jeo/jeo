@@ -17,6 +17,7 @@ package org.jeo.proj;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.ParseException;
+import java.util.Locale;
 import java.util.regex.Pattern;
 
 import org.jeo.geom.GeomBuilder;
@@ -140,7 +141,7 @@ public class Proj {
             }
         }
         catch(IOException e) {
-            LOGGER.debug(String.format("Failure creating crs %s:%s from extra", auth, code));
+            LOGGER.debug(String.format(Locale.ROOT,"Failure creating crs %s:%s from extra", auth, code));
             return null;
         }
     }

@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import org.jeo.data.Cursor;
@@ -36,6 +37,7 @@ import org.jeo.sql.Backend;
 import org.osgeo.proj4j.CoordinateReferenceSystem;
 
 import com.vividsolutions.jts.geom.Envelope;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -70,7 +72,7 @@ public class MBTileSet implements TileDataset, FileData {
 
     String queryForTileFormat() {
         try {
-            String sql = String.format("SELECT value FROM %s WHERE name = ?", METADATA);
+            String sql = String.format(Locale.ROOT,"SELECT value FROM %s WHERE name = ?", METADATA);
             Backend.Results results = backend.queryPrepared(sql, "format");
             try {
                 if (results.next()) {
@@ -109,7 +111,7 @@ public class MBTileSet implements TileDataset, FileData {
 
     public String title() {
         try {
-            String sql = String.format("SELECT value FROM %s WHERE name = ?", METADATA);
+            String sql = String.format(Locale.ROOT,"SELECT value FROM %s WHERE name = ?", METADATA);
             Backend.Results results = backend.queryPrepared(sql, "name");
             try {
                 if (results.next()) {
@@ -128,7 +130,7 @@ public class MBTileSet implements TileDataset, FileData {
 
     public String description() {
         try {
-            String sql = String.format("SELECT value FROM %s WHERE name = ?", METADATA);
+            String sql = String.format(Locale.ROOT,"SELECT value FROM %s WHERE name = ?", METADATA);
             Backend.Results results = backend.queryPrepared(sql, "description");
             try {
                 if (results.next()) {
@@ -152,7 +154,7 @@ public class MBTileSet implements TileDataset, FileData {
     @Override
     public Envelope bounds() throws IOException {
         try {
-            String sql = String.format("SELECT value FROM %s WHERE name = ?", METADATA);
+            String sql = String.format(Locale.ROOT,"SELECT value FROM %s WHERE name = ?", METADATA);
             Backend.Results results = backend.queryPrepared(sql, "bounds");
             try {
                 if (results.next()) {
@@ -176,7 +178,7 @@ public class MBTileSet implements TileDataset, FileData {
         tpb.bounds(bounds());
 
         try {
-            String sql = String.format("SELECT DISTINCT(zoom_level) FROM %s", TILES);
+            String sql = String.format(Locale.ROOT,"SELECT DISTINCT(zoom_level) FROM %s", TILES);
             Backend.Results results = backend.queryPrepared(sql);
             try {
                 while(results.next()) {
@@ -197,7 +199,7 @@ public class MBTileSet implements TileDataset, FileData {
 
     @Override
     public Tile read(long z, long x, long y) throws IOException {
-        String sql = String.format("SELECT tile_data FROM %s WHERE zoom_level = %d " +
+        String sql = String.format(Locale.ROOT,"SELECT tile_data FROM %s WHERE zoom_level = %d " +
                 "AND tile_column = %d AND tile_row = %d", TILES, z, x, y);
         try {
             Backend.Results results = backend.queryPrepared(sql);
@@ -210,7 +212,7 @@ public class MBTileSet implements TileDataset, FileData {
             }
         }
         catch(IOException e) {
-            LOG.error(String.format("Error reading tile %s/%s/%s!", z, x, y), e);
+            LOG.error(String.format(Locale.ROOT,"Error reading tile %s/%s/%s!", z, x, y), e);
         }
 
         return null;
@@ -247,7 +249,7 @@ public class MBTileSet implements TileDataset, FileData {
             where.setLength(where.length()-5);
         }
 
-        String sql = String.format("SELECT zoom_level, tile_column, tile_row, tile_data FROM %s WHERE %s ORDER BY zoom_level", TILES, where);
+        String sql = String.format(Locale.ROOT,"SELECT zoom_level, tile_column, tile_row, tile_data FROM %s WHERE %s ORDER BY zoom_level", TILES, where);
         Backend.Results results = backend.query(sql);
         return new TileCursor(results);
     }

@@ -16,6 +16,7 @@ package org.jeo.geojson.parser;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Locale;
 
 import org.jeo.geom.Geom;
 import org.jeo.json.parser.ParseException;
@@ -191,7 +192,7 @@ public class GeometryHandler extends BaseHandler {
 
     List ensureSize(List list, int size) {
         if (list.size() < size) {
-            throw new IllegalArgumentException(String.format(
+            throw new IllegalArgumentException(String.format(Locale.ROOT,
                 "expected coordinate arary of size %d but is of size %d", size, list.size()));
         }
         return list;

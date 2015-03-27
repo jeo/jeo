@@ -15,6 +15,7 @@
 package org.jeo.csv;
 
 import java.io.IOException;
+import java.util.Locale;
 
 import com.csvreader.CsvReader;
 import com.vividsolutions.jts.geom.Geometry;
@@ -42,7 +43,7 @@ public class WKTHandler extends CSVHandler {
             }
 
             if (wkt == null) {
-                throw new IllegalStateException(String.format(
+                throw new IllegalStateException(String.format(Locale.ROOT,
                     "Unable to determine wkt column from %s", opts.getWktCol()));
             }
 

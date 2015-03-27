@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
 
@@ -156,7 +157,7 @@ public class OGRFeature extends BasicFeature {
 
             f.GetFieldAsDateTime(i, year, month, day, hour, minute, second, timeZone);
 
-            Calendar cal = Calendar.getInstance();
+            Calendar cal = Calendar.getInstance(TimeZone.getDefault(), Locale.ROOT);
 
             // from ogr_core.h 
             // 0=unknown, 1=localtime(ambiguous), 100=GMT, 104=GMT+1, 80=GMT-5, etc

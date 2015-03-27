@@ -21,10 +21,12 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
-
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
+
 import javax.sql.DataSource;
+
 import org.jeo.util.Pair;
 import org.jeo.sql.Backend;
 import org.sqlite.SQLiteDataSource;
@@ -54,7 +56,7 @@ class JDBCBackend extends Backend {
 
     @Override
     public List<Pair<String, Class>> getColumnInfo(String table) throws IOException {
-        String sql = String.format("SELECT * FROM %s LIMIT 1", table);
+        String sql = String.format(Locale.ROOT,"SELECT * FROM %s LIMIT 1", table);
         JDBCResults results = (JDBCResults) query(sql);
         try {
             List<Pair<String, Class>> info = new ArrayList<Pair<String, Class>>();

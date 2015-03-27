@@ -19,6 +19,7 @@ import static java.lang.Math.floor;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import org.jeo.proj.Proj;
 import org.jeo.util.Pair;
@@ -179,7 +180,7 @@ public class TilePyramid {
     public Envelope bounds(Tile t) {
         TileGrid grid = grid(t.z());
         if (grid == null) {
-            throw new IllegalArgumentException(String.format("no grid at zoom %d", t.z()));
+            throw new IllegalArgumentException(String.format(Locale.ROOT,"no grid at zoom %d", t.z()));
         }
 
         int w = grid.width();

@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import org.jeo.util.Util;
@@ -361,7 +362,7 @@ public class BasicFeature implements Feature {
                 }
                 else {
                     //regular field
-                    fields.add(new Field(String.format("field%d", i++), o != null ? o.getClass():null));
+                    fields.add(new Field(String.format(Locale.ROOT,"field%d", i++), o != null ? o.getClass():null));
                 }
             }
             return new Schema("feature", fields);

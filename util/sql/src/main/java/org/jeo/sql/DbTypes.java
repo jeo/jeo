@@ -20,6 +20,7 @@ import java.sql.Time;
 import java.sql.Timestamp;
 import java.sql.Types;
 import java.util.LinkedHashMap;
+import java.util.Locale;
 import java.util.Map;
 
 import com.vividsolutions.jts.geom.Geometry;
@@ -134,7 +135,7 @@ public class DbTypes {
      * @return The mapped class or <code>null</code> if no such mapping exists.
      */
     public Class<?> fromName(String typename) {
-        return name.get(typename.toUpperCase());
+        return name.get(typename.toUpperCase(Locale.ROOT));
     }
 
     /**

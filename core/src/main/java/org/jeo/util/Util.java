@@ -15,8 +15,10 @@
 package org.jeo.util;
 
 import java.io.File;
+import java.nio.charset.Charset;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 
@@ -26,6 +28,7 @@ import java.util.UUID;
  * @author Justin Deoliveira, OpenGeo
  */
 public class Util {
+    public static Charset UTF_8 = Charset.forName("UTF-8"); 
 
     /**
      * Generates a random UUID.
@@ -49,7 +52,7 @@ public class Util {
      */
     public static String extension(String filename) {
         int dot = filename.lastIndexOf('.');
-        return dot != -1 ? filename.substring(dot+1).toLowerCase() : null;
+        return dot != -1 ? filename.substring(dot+1).toLowerCase(Locale.ROOT) : null;
     }
 
     /**
@@ -78,7 +81,7 @@ public class Util {
     static void checkIndex(int index, Map<?,?> map) {
         if (index >= map.size()) {
             throw new IndexOutOfBoundsException(
-                String.format("index: %d, size: %d", index, map.size())); 
+                String.format(Locale.ROOT,"index: %d, size: %d", index, map.size())); 
         }
     }
 

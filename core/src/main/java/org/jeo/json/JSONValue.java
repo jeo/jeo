@@ -24,6 +24,7 @@ import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.util.Collection;
+import java.util.Locale;
 // import java.util.List;
 import java.util.Map;
 
@@ -318,7 +319,7 @@ public class JSONValue {
 					for(int k=0;k<4-ss.length();k++){
 						sb.append('0');
 					}
-					sb.append(ss.toUpperCase());
+					sb.append(ss.toUpperCase(Locale.ROOT));
 				}
 				else{
 					sb.append(ch);

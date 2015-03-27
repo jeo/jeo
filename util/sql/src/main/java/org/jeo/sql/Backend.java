@@ -15,6 +15,7 @@
 package org.jeo.sql;
 
 import org.jeo.util.Pair;
+import org.jeo.util.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,6 +26,7 @@ import java.util.Collection;
 import java.util.Deque;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * DB abstraction layer.
@@ -116,7 +118,7 @@ public abstract class Backend implements Closeable {
      * @throws java.io.IOException
      */
     public final void exec(String sql, Object... args) throws IOException {
-        sql = String.format(sql, args);
+        sql = String.format(Locale.ROOT, sql, args);
         Session s = session();
         try {
             s.execute(sql);
@@ -175,7 +177,7 @@ public abstract class Backend implements Closeable {
      * @throws java.io.IOException
      */
     public Results query(String query, Object... args) throws IOException {
-        String sql = String.format(query, args);
+        String sql = String.format(Locale.ROOT, query, args);
         Session s = session();
         // chain the session to the query so it's closed, too
         return s.query(sql).closeSession(s);
@@ -195,7 +197,7 @@ public abstract class Backend implements Closeable {
 
     List<String> readScript(String file) throws IOException {
         InputStream in = getClass().getResourceAsStream(file);
-        BufferedReader r = new BufferedReader(new InputStreamReader(in));
+        BufferedReader r = new BufferedReader(new InputStreamReader(in, Util.UTF_8));
         try {
             List<String> lines = new ArrayList<String>();
             String line = null;

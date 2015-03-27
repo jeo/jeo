@@ -14,6 +14,8 @@
  */
 package org.jeo.util;
 
+import java.util.Locale;
+
 import com.vividsolutions.jts.geom.Envelope;
 
 /**
@@ -169,6 +171,6 @@ public class Rect {
 
     @Override
     public String toString() {
-        return String.format("Rect(%d,%d,%d,%d)", left, top, right, bottom);
+        return String.format(Locale.ROOT,"Rect(%d,%d,%d,%d)", left, top, right, bottom);
     }
 }

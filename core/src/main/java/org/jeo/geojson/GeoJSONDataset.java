@@ -14,14 +14,12 @@
  */
 package org.jeo.geojson;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
 import java.util.Collections;
 import java.util.Map;
 
@@ -29,14 +27,6 @@ import org.jeo.data.Cursor;
 import org.jeo.data.Cursor.Mode;
 import org.jeo.data.Driver;
 import org.jeo.data.FileData;
-import org.jeo.vector.FeatureCursor;
-import org.jeo.vector.VectorQuery;
-import org.jeo.vector.VectorQueryPlan;
-import org.jeo.vector.VectorDataset;
-import org.jeo.vector.Feature;
-import org.jeo.vector.Field;
-import org.jeo.vector.Schema;
-import org.jeo.vector.SchemaBuilder;
 import org.jeo.geojson.parser.CRSFinder;
 import org.jeo.geojson.parser.RootHandler;
 import org.jeo.json.parser.JSONParser;
@@ -45,6 +35,14 @@ import org.jeo.proj.Proj;
 import org.jeo.util.Key;
 import org.jeo.util.Optional;
 import org.jeo.util.Util;
+import org.jeo.vector.Feature;
+import org.jeo.vector.FeatureCursor;
+import org.jeo.vector.Field;
+import org.jeo.vector.Schema;
+import org.jeo.vector.SchemaBuilder;
+import org.jeo.vector.VectorDataset;
+import org.jeo.vector.VectorQuery;
+import org.jeo.vector.VectorQueryPlan;
 import org.osgeo.proj4j.CoordinateReferenceSystem;
 
 import com.vividsolutions.jts.geom.Envelope;
@@ -166,10 +164,10 @@ public class GeoJSONDataset implements VectorDataset, FileData {
     }
 
     Reader reader() throws IOException {
-        return new BufferedReader(new FileReader(file));
+        return Files.newBufferedReader(file.toPath(), Charset.forName("UTF8"));
     }
 
     Writer writer() throws IOException {
-        return new BufferedWriter(new FileWriter(file));
+        return Files.newBufferedWriter(file.toPath(), Charset.forName("UTF8"));
     }
 }

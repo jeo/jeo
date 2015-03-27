@@ -20,6 +20,7 @@ import java.io.PrintStream;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Locale;
 import java.util.Properties;
 
 import org.slf4j.Logger;
@@ -73,11 +74,11 @@ public class Jeo {
     }
 
     static SimpleDateFormat dateFormatISO() {
-        return new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
+        return new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ", Locale.ROOT);
     }
 
     static SimpleDateFormat dateFormatHuman() {
-        return new SimpleDateFormat("MMM dd yyyy");
+        return new SimpleDateFormat("MMM dd yyyy", Locale.ROOT);
     }
     
     static String property(String key) {
@@ -109,7 +110,7 @@ public class Jeo {
      * Prints version info for the library.
      */
     public static void printVersionInfo(PrintStream out) {
-        out.println(String.format("jeo %s (%s, %s)", version(), revisionShort(), 
+        out.println(String.format(Locale.ROOT,"jeo %s (%s, %s)", version(), revisionShort(), 
             dateFormatHuman().format(buildDate())));
     }
 }

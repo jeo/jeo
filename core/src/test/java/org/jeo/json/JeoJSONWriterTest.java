@@ -15,8 +15,10 @@
 package org.jeo.json;
 
 import org.jeo.TestData;
+import org.jeo.util.Util;
 import org.junit.Before;
 import org.junit.Test;
+
 
 import java.io.*;
 
@@ -66,6 +68,6 @@ public class JeoJSONWriterTest {
     }
 
     Reader input() {
-        return new InputStreamReader(new ByteArrayInputStream(out.toByteArray()));
+        return new InputStreamReader(new ByteArrayInputStream(out.toByteArray()), Util.UTF_8);
     }
 }

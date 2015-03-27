@@ -17,6 +17,7 @@ package org.jeo.vector;
 import static org.junit.Assert.*;
 
 import java.io.IOException;
+import java.util.Locale;
 import java.util.NoSuchElementException;
 import java.util.Set;
 
@@ -107,7 +108,7 @@ public abstract class VectorApiTestBase {
         assertEquals(abbrs.size(), data.count(new VectorQuery().bounds(bbox)));
 
         // count with spatial filters
-        assertEquals(abbrs.size(), data.count(new VectorQuery().filter(String.format("INTERSECTS(%s, %s)",
+        assertEquals(abbrs.size(), data.count(new VectorQuery().filter(String.format(Locale.ROOT,"INTERSECTS(%s, %s)",
             data.schema().geometry().name(), Envelopes.toPolygon(bbox)))));
 
         // count with attribute filters
@@ -123,7 +124,7 @@ public abstract class VectorApiTestBase {
 
         // count with id filters
         String fid = fidFor(data, "STATE_NAME = 'Texas'");
-        assertEquals(1, data.count(new VectorQuery().filter(String.format("IN ('%s')", fid))));
+        assertEquals(1, data.count(new VectorQuery().filter(String.format(Locale.ROOT,"IN ('%s')", fid))));
     }
 
     @Test
@@ -140,7 +141,7 @@ public abstract class VectorApiTestBase {
         assertCovered(data.cursor(new VectorQuery().bounds(bbox)), "MO", "OK", "TX", "NM", "AR", "LA");
 
         // spatial filter
-        assertCovered(data.cursor(new VectorQuery().filter(String.format("INTERSECTS(%s, %s)",
+        assertCovered(data.cursor(new VectorQuery().filter(String.format(Locale.ROOT,"INTERSECTS(%s, %s)",
             data.schema().geometry().name(), Envelopes.toPolygon(bbox)))),
             "MO", "OK", "TX", "NM", "AR", "LA");
 
@@ -160,14 +161,14 @@ public abstract class VectorApiTestBase {
 
         // id filter
         String fid = fidFor(data, "STATE_NAME = 'Texas'");
-        assertCovered(data.cursor(new VectorQuery().filter(String.format("IN ('%s')", fid))), "TX");
+        assertCovered(data.cursor(new VectorQuery().filter(String.format(Locale.ROOT,"IN ('%s')", fid))), "TX");
 
         // in filter
         assertCovered(data.cursor(new VectorQuery().filter("STATE_NAME IN ('Texas','Iowa')")), "TX", "IA");
 
         // between
         assertCovered(
-             data.cursor(new VectorQuery().filter(String.format("SAMP_POP BETWEEN %s AND %s", 70000, 80000))), "DC");
+             data.cursor(new VectorQuery().filter(String.format(Locale.ROOT,"SAMP_POP BETWEEN %s AND %s", 70000, 80000))), "DC");
 
         // math
         assertCovered(data.cursor(new VectorQuery().filter("SAMP_POP / 2 = 36348")), "DC");

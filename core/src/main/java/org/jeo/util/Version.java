@@ -15,6 +15,7 @@
 package org.jeo.util;
 
 import java.io.Serializable;
+import java.util.Locale;
 
 /**
  * A major, minor, patch version number.
@@ -160,6 +161,6 @@ public class Version implements Serializable, Comparable<Version> {
 
     @Override
     public String toString() {
-        return String.format("%d.%d.%d", major, minor, patch);
+        return String.format(Locale.ROOT,"%d.%d.%d", major, minor, patch);
     }
 }

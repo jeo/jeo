@@ -20,6 +20,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Locale;
 import java.util.Map;
 
 import org.jeo.vector.Schema;
@@ -437,7 +438,7 @@ public class Drivers {
             String ext = Util.extension(uri.getPath());
             if (ext != null) {
                 try {
-                    uri = new URI(String.format("%s://?file=%s%s", ext, uri.getPath(), 
+                    uri = new URI(String.format(Locale.ROOT,"%s://?file=%s%s", ext, uri.getPath(), 
                         uri.getFragment() != null ? "#"+uri.getFragment() : ""));
                 } catch (URISyntaxException e) {
                 }

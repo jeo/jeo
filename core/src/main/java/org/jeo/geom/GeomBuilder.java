@@ -19,6 +19,7 @@ import java.util.ArrayDeque;
 import java.util.Arrays;
 import java.util.Deque;
 import java.util.Iterator;
+import java.util.Locale;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
@@ -357,7 +358,7 @@ public class GeomBuilder {
 
     Coordinate[] cpop(int n) {
         if (cstack.size() < n) {
-            throw new IllegalStateException(String.format("Expected %d values on coordinate stack, " 
+            throw new IllegalStateException(String.format(Locale.ROOT,"Expected %d values on coordinate stack, " 
                 + "but found %d", n, cstack.size()));
         }
 
@@ -382,7 +383,7 @@ public class GeomBuilder {
 
     <T extends Geometry> T[] gpop(int n, Class<T> clazz) {
         if (gstack.size() < n) {
-            throw new IllegalStateException(String.format("Expected %d values on geometry stack, "
+            throw new IllegalStateException(String.format(Locale.ROOT,"Expected %d values on geometry stack, "
                 + "but found %d", n, gstack.size()));
         }
 
@@ -390,7 +391,7 @@ public class GeomBuilder {
         for (int i = 0; i < n; i++) {
             Object g = gstack.pop();
             if (!clazz.isInstance(g)) {
-                throw new IllegalStateException(String.format("Expected %s on geometry stack, but "
+                throw new IllegalStateException(String.format(Locale.ROOT,"Expected %s on geometry stack, but "
                     + "found %s", clazz.getSimpleName(), g.getClass().getSimpleName()));
             }
 
@@ -412,7 +413,7 @@ public class GeomBuilder {
 
         if (n == 0) {
             throw new IllegalArgumentException(
-                String.format("Expected %s on geometry stack", clazz.getSimpleName())); 
+                String.format(Locale.ROOT,"Expected %s on geometry stack", clazz.getSimpleName())); 
         }
 
         return gpop(n, clazz);

@@ -37,6 +37,7 @@ import java.text.ParsePosition;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * An element in a <cite>Well Know Text</cite> (WKT). A {@code Element} is
@@ -334,7 +335,7 @@ public final class Element {
         final String error = text.substring(errorIndex, upper);
         text = text.substring(index);
         
-        return String.format("Can't parse \"%s\" because \"%s\" is unrecognized.", text, error);
+        return String.format(Locale.ROOT,"Can't parse \"%s\" because \"%s\" is unrecognized.", text, error);
     }
     
     /**
@@ -345,7 +346,7 @@ public final class Element {
      */
     private ParseException missingCharacter(final char c, final int position) {
         return trim("missingCharacter", new ParseException(complete(
-            String.format("Character '%s' was expected", c)), position));
+            String.format(Locale.ROOT,"Character '%s' was expected", c)), position));
     }
 
     /**
@@ -359,7 +360,7 @@ public final class Element {
             error += keyword.length();
         }
         return trim("missingParameter", new ParseException(complete(
-            String.format("Parameter \"%s\" is missing.", key )), error));
+            String.format(Locale.ROOT,"Parameter \"%s\" is missing.", key )), error));
     }
 
     /**
@@ -370,7 +371,7 @@ public final class Element {
      */
     private String complete(String message) {
         if (keyword != null) {
-            return String.format("Error in \"%s\": %s", keyword, message);
+            return String.format(Locale.ROOT,"Error in \"%s\": %s", keyword, message);
         }
         return message;
     }
@@ -455,7 +456,7 @@ public final class Element {
                 final Number number = (Number) object;
                 if (number instanceof Float || number instanceof Double) {
                     throw new ParseException(complete(
-                        String.format("Illegal argument: \"%s=%f\"", key, number)), offset);
+                        String.format(Locale.ROOT,"Illegal argument: \"%s=%f\"", key, number)), offset);
                 }
                 return number.intValue();
             }
@@ -521,7 +522,7 @@ public final class Element {
      *         or {@code null} if no more element is available.
      */
     public Element pullOptionalElement(String key) {
-        key = key.toUpperCase();
+        key = key.toUpperCase(Locale.ROOT);
         final Iterator iterator = list.iterator();
         while (iterator.hasNext()) {
             final Object object = iterator.next();
@@ -598,7 +599,7 @@ public final class Element {
      */
     public void close() throws ParseException {
         if (list!=null && !list.isEmpty()) {
-            String msg = String.format("Parameter \"%s\" was not expected.", list.get(0));
+            String msg = String.format(Locale.ROOT,"Parameter \"%s\" was not expected.", list.get(0));
             throw new ParseException(complete(msg), offset+keyword.length());
         }
     }

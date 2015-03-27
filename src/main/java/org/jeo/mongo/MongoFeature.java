@@ -17,6 +17,7 @@ package org.jeo.mongo;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import org.bson.types.ObjectId;
@@ -150,7 +151,7 @@ public class MongoFeature extends BasicFeature {
         protected void set(int index, Object value) {
             if (index >= obj.keySet().size()) {
                 throw new IndexOutOfBoundsException(
-                    String.format("index: %d, size: %d", index, obj.keySet().size()));
+                    String.format(Locale.ROOT,"index: %d, size: %d", index, obj.keySet().size()));
             }
 
             Iterator<String> it = obj.keySet().iterator();

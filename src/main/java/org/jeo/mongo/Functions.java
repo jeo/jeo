@@ -18,8 +18,10 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
+import org.jeo.util.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 
 /**
  * Server side javascript functions.
@@ -40,7 +42,7 @@ public class Functions {
 
     static String load(String filename) {
         BufferedReader r = 
-            new BufferedReader(new InputStreamReader(Functions.class.getResourceAsStream(filename)));
+            new BufferedReader(new InputStreamReader(Functions.class.getResourceAsStream(filename), Util.UTF_8));
         try {
             StringBuilder sb = new StringBuilder();
 

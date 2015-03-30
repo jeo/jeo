@@ -14,18 +14,22 @@
  */
 package org.jeo.lucene;
 
+import org.jeo.TestData;
 import org.jeo.vector.VectorApiTestBase;
 import org.jeo.vector.VectorDataset;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 
-public class LuceneApiTest extends VectorApiTestBase {
+import static com.spatial4j.core.context.jts.JtsSpatialContext.GEO;
+
+public class LuceneBBoxTest extends VectorApiTestBase {
 
     static LuceneDataset data;
 
     @BeforeClass
     public static void createTestData() throws Exception {
-        data = LuceneTests.setUpStatesData();
+        data = LuceneTests.setUpData(TestData.states(),
+            SpatialField.parse("geom:bbox:bbox:prefix=bbox", GEO));
     }
 
     @AfterClass

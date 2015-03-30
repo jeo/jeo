@@ -15,11 +15,14 @@
 package org.jeo.lucene;
 
 import com.spatial4j.core.context.jts.JtsSpatialContext;
+import com.spatial4j.core.shape.Point;
 import com.spatial4j.core.shape.Rectangle;
+import com.spatial4j.core.shape.Shape;
 import com.spatial4j.core.shape.jts.JtsGeometry;
+import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.io.WKTReader;
+import com.vividsolutions.jts.geom.GeometryFactory;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.DirectoryReader;
@@ -27,9 +30,6 @@ import org.apache.lucene.index.FieldInfo;
 import org.apache.lucene.index.IndexableField;
 import org.apache.lucene.index.LeafReader;
 import org.apache.lucene.index.LeafReaderContext;
-import org.apache.lucene.index.SlowCompositeReaderWrapper;
-import org.apache.lucene.queries.function.FunctionValues;
-import org.apache.lucene.queries.function.ValueSource;
 import org.apache.lucene.search.BooleanClause;
 import org.apache.lucene.search.BooleanClause.Occur;
 import org.apache.lucene.search.BooleanQuery;
@@ -39,7 +39,6 @@ import org.apache.lucene.search.Query;
 import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.spatial.query.SpatialArgs;
 import org.apache.lucene.spatial.query.SpatialOperation;
-import org.apache.lucene.spatial.serialized.SerializedDVStrategy;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 import org.jeo.data.Driver;
@@ -290,7 +289,7 @@ public class LuceneDataset implements VectorDataset, FileData {
         for (Field fld : schema) {
             if (fld.geometry()) {
                 SpatialField sfld = spatialField(fld);
-                values.add(sfld.storage.read(doc, docId, reader));
+                values.add(toGeometry(sfld.storage.read(doc, docId, reader)));
             }
             else {
                 IndexableField f = doc.getField(fld.name());
@@ -324,26 +323,26 @@ public class LuceneDataset implements VectorDataset, FileData {
         return Optional.of(fld.property(SPATIAL_FIELD, SpatialField.class)).get();
     }
 
-    Geometry readWKT(IndexableField fld) throws IOException {
-        try {
-            return new WKTReader().read(fld.stringValue());
-        } catch (com.vividsolutions.jts.io.ParseException e) {
-            throw new IOException(e);
-        }
-    }
-
-    Geometry readDocValues(int docId, SerializedDVStrategy strategy) throws IOException {
-        ValueSource source = strategy.makeShapeValueSource();
-        FunctionValues values = source.getValues(null, SlowCompositeReaderWrapper.wrap(reader).getContext());
-
-        return ((JtsGeometry)values.objectVal(docId)).getGeom();
-    }
-
     JtsSpatialContext ctx() {
         return opts.spatialContext();
     }
 
     Analyzer analyzer() {
         return opts.analyzer();
+    }
+
+    Geometry toGeometry(Shape shp) {
+        if (shp instanceof JtsGeometry) {
+            return ((JtsGeometry) shp).getGeom();
+        }
+
+        GeometryFactory gf = ctx().getGeometryFactory();
+        if (shp instanceof Point) {
+            Point p = (Point) shp;
+            return gf.createPoint(new Coordinate(p.getX(), p.getY()));
+        }
+
+        Rectangle box = shp.getBoundingBox();
+        return gf.toGeometry(new Envelope(box.getMinX(), box.getMaxX(), box.getMinY(), box.getMaxY()));
     }
 }

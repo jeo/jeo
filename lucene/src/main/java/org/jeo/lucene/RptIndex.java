@@ -1,4 +1,3 @@
-package org.jeo.lucene;
 /* Copyright 2015 The jeo project. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,6 +12,8 @@ package org.jeo.lucene;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.jeo.lucene;
+
 import com.spatial4j.core.context.jts.JtsSpatialContext;
 import org.apache.lucene.spatial.prefix.RecursivePrefixTreeStrategy;
 import org.apache.lucene.spatial.prefix.tree.GeohashPrefixTree;
@@ -23,6 +24,9 @@ import org.jeo.util.Optional;
 
 import java.util.Map;
 
+/**
+ * Spatial index based on the {@link org.apache.lucene.spatial.prefix.RecursivePrefixTreeStrategy}.
+ */
 public class RptIndex extends SpatialIndex<RecursivePrefixTreeStrategy> {
 
     public static final Key<String> FIELD = new Key<>("field", String.class);

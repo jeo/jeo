@@ -15,10 +15,12 @@
 package org.jeo.lucene;
 
 import com.spatial4j.core.context.jts.JtsSpatialContext;
+import com.spatial4j.core.shape.Shape;
 import com.spatial4j.core.shape.jts.JtsGeometry;
 import com.vividsolutions.jts.geom.Geometry;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.IndexReader;
+import org.apache.lucene.index.IndexableField;
 import org.apache.lucene.index.SlowCompositeReaderWrapper;
 import org.apache.lucene.queries.function.FunctionValues;
 import org.apache.lucene.queries.function.ValueSource;
@@ -38,10 +40,20 @@ public class SDVStorage extends SpatialStorage {
     }
 
     @Override
-    public Geometry read(Document doc, int docId, IndexReader reader)
+    public Shape read(Document doc, int docId, IndexReader reader)
         throws IOException {
         FunctionValues v = values.getValues(null, SlowCompositeReaderWrapper.wrap(reader).getContext());
-        JtsGeometry shp = (JtsGeometry) v.objectVal(docId);
-        return shp.getGeom();
+        return (Shape) v.objectVal(docId);
+    }
+
+    @Override
+    public void write(Shape shp, Document doc) {
+        if (shp == null) {
+            return;
+        }
+
+        for (IndexableField fld : strategy.createIndexableFields(shp)) {
+            doc.add(fld);
+        }
     }
 }

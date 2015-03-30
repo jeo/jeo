@@ -15,6 +15,7 @@
 package org.jeo.lucene;
 
 import com.spatial4j.core.context.jts.JtsSpatialContext;
+import com.spatial4j.core.shape.Shape;
 import com.vividsolutions.jts.geom.Geometry;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.IndexReader;
@@ -27,7 +28,7 @@ import java.io.IOException;
 public abstract class SpatialStorage {
 
     public static enum Type {
-        NONE, SDV, WKT
+        NONE, SDV, WKT, BBOX
     }
 
     public static SpatialStorage create(Type type, String field, JtsSpatialContext ctx) {
@@ -35,6 +36,7 @@ public abstract class SpatialStorage {
             case NONE: return new NoStorage(field, ctx);
             case SDV:  return new SDVStorage(field, ctx);
             case WKT:  return new WKTStorage(field, ctx);
+            case BBOX: return new BBoxStorage(field, ctx);
             default:
                 throw new IllegalArgumentException("unsupported type:" + type);
         }
@@ -50,6 +52,8 @@ public abstract class SpatialStorage {
         this.ctx = ctx;
     }
 
-    public abstract Geometry read(Document doc, int docId, IndexReader reader)
+    public abstract Shape read(Document doc, int docId, IndexReader reader)
         throws IOException;
+
+    public abstract void write(Shape shp, Document doc);
 }

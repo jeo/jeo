@@ -30,7 +30,7 @@ public class LuceneTest {
 
     @BeforeClass
     public static void setUp() throws Exception {
-        data = LuceneTests.setupStatesData();
+        data = LuceneTests.setUpStatesData();
     }
 
     @AfterClass

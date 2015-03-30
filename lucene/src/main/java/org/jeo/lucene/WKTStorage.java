@@ -15,14 +15,16 @@
 package org.jeo.lucene;
 
 import com.spatial4j.core.context.jts.JtsSpatialContext;
+import com.spatial4j.core.shape.Shape;
 import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.io.ParseException;
-import com.vividsolutions.jts.io.WKTReader;
 import org.apache.lucene.document.Document;
+import org.apache.lucene.document.Field.Store;
+import org.apache.lucene.document.StringField;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexableField;
 
 import java.io.IOException;
+import java.text.ParseException;
 
 public class WKTStorage extends SpatialStorage {
 
@@ -31,15 +33,23 @@ public class WKTStorage extends SpatialStorage {
     }
 
     @Override
-    public Geometry read(Document doc, int docId, IndexReader reader) throws IOException {
+    public Shape read(Document doc, int docId, IndexReader reader) throws IOException {
         IndexableField fld = doc.getField(field);
         if (fld == null) {
             return null;
         }
         try {
-            return new WKTReader().read(fld.stringValue());
+            return ctx.getWktShapeParser().parse(fld.stringValue());
         } catch (ParseException e) {
             throw new IOException(e);
         }
+    }
+
+    @Override
+    public void write(Shape shp, Document doc) {
+        if (shp == null) {
+            return;
+        }
+        doc.add(new StringField(field, ctx.toString(shp), Store.YES));
     }
 }

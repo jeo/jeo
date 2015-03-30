@@ -25,12 +25,13 @@ import java.util.Map;
 public abstract class SpatialIndex<T extends SpatialStrategy> {
 
     public static enum Type {
-        RPT
+        RPT, BBOX
     }
 
     public static SpatialIndex<?> create(Type type, JtsSpatialContext ctx, Map<String,Object> opts) {
         switch(type) {
-            case RPT: return new RptIndex(ctx, opts);
+            case RPT:  return new RptIndex(ctx, opts);
+            case BBOX: return new BBoxIndex(ctx, opts);
         }
         throw new IllegalArgumentException("No such type: " + type);
     }

@@ -39,7 +39,7 @@ public class LuceneCursor extends FeatureCursor  {
 
     @Override
     public boolean hasNext() throws IOException {
-        return count < results.totalHits;
+        return count < results.scoreDocs.length;
     }
 
     @Override

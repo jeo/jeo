@@ -15,25 +15,35 @@
 package org.jeo.lucene;
 
 import com.spatial4j.core.context.jts.JtsSpatialContext;
+import com.spatial4j.core.io.LegacyShapeReadWriterFormat;
+import com.spatial4j.core.shape.Rectangle;
 import com.spatial4j.core.shape.Shape;
-import com.vividsolutions.jts.geom.Geometry;
 import org.apache.lucene.document.Document;
+import org.apache.lucene.document.Field.Store;
+import org.apache.lucene.document.StringField;
 import org.apache.lucene.index.IndexReader;
 
 import java.io.IOException;
 
-public class NoStorage extends SpatialStorage {
+public class BBoxStorage extends SpatialStorage {
 
-    public NoStorage(String field, JtsSpatialContext ctx) {
-        super(Type.NONE, field, ctx);
+    public BBoxStorage(String field, JtsSpatialContext ctx) {
+        super(Type.BBOX, field, ctx);
     }
 
     @Override
     public Shape read(Document doc, int docId, IndexReader reader) throws IOException {
-        return null;
+        String bbox = doc.get(field);
+        return bbox != null ? LegacyShapeReadWriterFormat.readShapeOrNull(bbox, ctx) : null;
     }
 
     @Override
     public void write(Shape shp, Document doc) {
+        if (shp == null) {
+            return;
+        }
+
+        Rectangle box = shp.getBoundingBox();
+        doc.add(new StringField(field, LegacyShapeReadWriterFormat.writeShape(box), Store.YES));
     }
 }

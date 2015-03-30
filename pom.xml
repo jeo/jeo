@@ -273,6 +273,7 @@
 
           <!-- Uses System.out for printVersionInfo()-->
           <exclude>org/jeo/Jeo.class</exclude>
+          <exclude>${forbiddenapis.exclude}</exclude>
         </excludes>
       </configuration>
     </plugin>
@@ -352,6 +353,11 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+    <!-- config hook to allow modules to specify exclusions -->
+    <forbiddenapis.exclude>none</forbiddenapis.exclude>
+
+    <!-- versions -->
     <slf4j.version>1.7.2</slf4j.version>
     <gdal.version>1.11.1</gdal.version>
   </properties>

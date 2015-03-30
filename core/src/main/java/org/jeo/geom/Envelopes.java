@@ -124,13 +124,13 @@ public class Envelopes {
     /**
      * Encodes an envelope as a string with the specified delimiter and flag controlling order.
      * <p>
-     *     When <tt>xyxy</tt> is true the order is <tt>&lt;x1>,&lt;y1>,&lt;x2,&lt;y2></tt>, when false
+     *     When <tt>alt</tt> is true the order is <tt>&lt;x1>,&lt;y1>,&lt;x2,&lt;y2></tt>, when false
      *     the order is <tt>&lt;x1>,&lt;x2>,&lt;y1,&lt;y2></tt>
      * </p>
      */
-    public static String toString(Envelope e, String delim, boolean xyxy) {
-        return String.format(Locale.ROOT,"%f%s%f%s%f%s%f", e.getMinX(), delim, xyxy?e.getMinY():e.getMaxX(), delim,
-            xyxy?e.getMaxX():e.getMinY(), delim, e.getMaxY());
+    public static String toString(Envelope e, String delim, boolean alt) {
+        return String.format(Locale.ROOT, "%f%s%f%s%f%s%f", e.getMinX(), delim, alt?e.getMinY():e.getMaxX(), delim,
+            alt?e.getMaxX():e.getMinY(), delim, e.getMaxY());
     }
 
     /**
@@ -148,12 +148,25 @@ public class Envelopes {
      * Parses a string into an envelope.
      * 
      * @param str The envelope string.
-     * @param alt Whether x/y compontents alternate, if <tt>true</tt> the <tt>str</tt> argument must
+     * @param alt Whether x/y components alternate, if <tt>true</tt> the <tt>str</tt> argument must
      * be of the form <tt>&lt;x1>,&lt;y1>,&lt;x2,&lt;y2></tt>. If <tt>false</tt> the <tt>str</tt>
      * argument must be of the form tt>&lt;x1>,&lt;x2>,&lt;y1,&lt;y2>.
      */
     public static Envelope parse(String str, boolean alt) {
-        String[] split = str.split(",");
+        return parse(str, alt, "\\s*,\\s*");
+    }
+
+    /**
+     * Parses a string into an envelope.
+     *
+     * @param str The envelope string.
+     * @param alt Whether x/y components alternate, if <tt>true</tt> the <tt>str</tt> argument must
+     * be of the form <tt>&lt;x1>,&lt;y1>,&lt;x2,&lt;y2></tt>. If <tt>false</tt> the <tt>str</tt>
+     * argument must be of the form tt>&lt;x1>,&lt;x2>,&lt;y1,&lt;y2>.
+     * @param delim Delimiter for x/y components.
+     */
+    public static Envelope parse(String str, boolean alt, String delim) {
+        String[] split = str.split(delim);
         if (split.length != 4) {
             return null;
         }

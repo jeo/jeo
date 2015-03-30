@@ -61,4 +61,19 @@ public class EnvelopesTest {
         assertTrue(Envelopes.toString(e).matches("1\\.0+,3\\.0+,2\\.0+,4\\.0+"));
         assertTrue(Envelopes.toString(e, " ", false).matches("1\\.0+ 2\\.0+ 3\\.0+ 4\\.0+"));
     }
+
+    @Test
+    public void testParse() {
+        Envelope e = Envelopes.parse("1 2 3 4", true, " ");
+        assertEquals(e.getMinX(), 1d, 0.1);
+        assertEquals(e.getMinY(), 2d, 0.1);
+        assertEquals(e.getMaxX(), 3d, 0.1);
+        assertEquals(e.getMaxY(), 4d, 0.1);
+
+        e = Envelopes.parse("1.2.3.4", false, "\\.");
+        assertEquals(e.getMinX(), 1d, 0.1);
+        assertEquals(e.getMinY(), 3d, 0.1);
+        assertEquals(e.getMaxX(), 2d, 0.1);
+        assertEquals(e.getMaxY(), 4d, 0.1);
+    }
 }

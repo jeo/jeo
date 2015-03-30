@@ -6,15 +6,35 @@
   <artifactId>jeo-parent</artifactId>
   <version>0-SNAPSHOT</version>
   <packaging>pom</packaging>
-  <name>JEO</name>
 
-  <repositories>
-    <repository>
-      <id>boundless</id>
-      <name>Boundless Maven Repository</name>
-      <url>http://repo.boundlessgeo.com/main</url>
-    </repository>
-  </repositories>
+  <name>jeo</name>
+  <description>
+    Java Geospatial Library
+  </description>
+
+  <url>http://jeo.io</url>
+
+  <licenses>
+    <license>
+      <name>Apache License, Version 2.0</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0</url>
+    </license>
+  </licenses>
+
+  <developers>
+    <developer>
+      <name>Justin Deoliveira</name>
+      <email>jdeolive@gmail.com</email>
+      <organization>jeo</organization>
+      <organizationUrl>http://github.com/jeo</organizationUrl>
+    </developer>
+  </developers>
+
+  <scm>
+    <connection>scm:git:git@github.com:jeo/jeo.git</connection>
+    <developerConnection>scm:git:git@github.com:jeo/jeo.git</developerConnection>
+    <url>git@github.com:jeo/jeo.git</url>
+  </scm>
 
   <distributionManagement>
     <repository>
@@ -279,6 +299,14 @@
     </plugin>
    </plugins>
   </build>
+
+  <repositories>
+    <repository>
+      <id>boundless</id>
+      <name>Boundless Maven Repository</name>
+      <url>http://repo.boundlessgeo.com/main</url>
+    </repository>
+  </repositories>
 
   <profiles>
     <profile>

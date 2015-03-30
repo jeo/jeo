@@ -23,6 +23,7 @@ import static org.jeo.nano.NanoHTTPD.MIME_PLAINTEXT;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 import java.util.regex.Matcher;
@@ -68,7 +69,7 @@ public class TileHandler extends Handler {
                 //check for tile origin and map if necessary
                 Properties q = request.getParms();
                 if (q != null && q.containsKey("origin")) {
-                    String o = q.getProperty("origin").toUpperCase();
+                    String o = q.getProperty("origin").toUpperCase(Locale.ROOT);
                     Origin origin = Origin.valueOf(o);
                     if (origin == null) {
                         return new Response(HTTP_INTERNALERROR, MIME_PLAINTEXT, 
@@ -141,7 +142,7 @@ public class TileHandler extends Handler {
             Tile t = layer.read(tile.z(), tile.x(), tile.y());
             if (t == null) {
                 return new Response(HTTP_NOTFOUND, MIME_PLAINTEXT, String.format(
-                    "No such tile z = %d, x = %d, y = %d", tile.z(), tile.x(), tile.y()));
+                    Locale.ROOT, "No such tile z = %d, x = %d, y = %d", tile.z(), tile.x(), tile.y()));
             }
     
             return new Response(HTTP_OK, t.mimeType(), new ByteArrayInputStream(t.data()));

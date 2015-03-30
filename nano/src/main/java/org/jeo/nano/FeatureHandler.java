@@ -33,12 +33,14 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 import java.util.regex.Matcher;
@@ -179,7 +181,7 @@ public class FeatureHandler extends Handler {
 
             @Override
             public void write(OutputStream output) throws IOException {
-                w = new GeoJSONWriter(new OutputStreamWriter(output));
+                w = new GeoJSONWriter(new OutputStreamWriter(output, Charset.forName("UTF-8")));
                 w.featureCollection(c);
                 w.flush();
             }
@@ -317,7 +319,8 @@ public class FeatureHandler extends Handler {
 
         Iterator<RendererFactory<?>> it = Renderers.listForFormat(format, server.getRendererRegistry());
         if (!it.hasNext()) {
-            throw new HttpException(HTTP_BADREQUEST, String.format("No renderer for format '%s' found", format));
+            throw new HttpException(HTTP_BADREQUEST,
+                String.format(Locale.ROOT, "No renderer for format '%s' found", format));
         }
 
         RendererFactory<?> rf = it.next();
@@ -357,7 +360,7 @@ public class FeatureHandler extends Handler {
                 }
             }
             catch(ClassCastException e) {
-                throw new HttpException(HTTP_BADREQUEST, String.format(
+                throw new HttpException(HTTP_BADREQUEST, String.format(Locale.ROOT,
                     "Object %s is not a style", s));
             }
         }
@@ -417,7 +420,7 @@ public class FeatureHandler extends Handler {
 
         try {
             if (ws.get(schema.name()) != null) {
-                String msg = String.format("dataset '%s' already exists in workspace %s",
+                String msg = String.format(Locale.ROOT, "dataset '%s' already exists in workspace %s",
                         schema.name(), m.group(1));
                 throw new HttpException(HTTP_BADREQUEST, msg);
             }
@@ -561,12 +564,12 @@ public class FeatureHandler extends Handler {
     }
 
     JSONObject parseJSON(InputStream body) throws IOException {
-        return (JSONObject) JSONValue.parse(new InputStreamReader(body));
+        return (JSONObject) JSONValue.parse(new InputStreamReader(body, Charset.forName("UTF-8")));
     }
 
     Schema parseSchema(String name, InputStream body) {
 
-        JSONObject obj = (JSONObject) JSONValue.parse(new InputStreamReader(body));
+        JSONObject obj = (JSONObject) JSONValue.parse(new InputStreamReader(body, Charset.forName("UTF-8")));
 
         //not part of GeoJSON
         if (name == null) {
@@ -617,7 +620,7 @@ public class FeatureHandler extends Handler {
         String[] pairs = options.split(" *; *");
         for (String p : pairs) {
             String[] kvp = p.split(" *: *");
-            map.put(kvp[0].toLowerCase(), kvp.length > 1 ? kvp[1] : null);
+            map.put(kvp[0].toLowerCase(Locale.ROOT), kvp.length > 1 ? kvp[1] : null);
         }
         return map;
     }

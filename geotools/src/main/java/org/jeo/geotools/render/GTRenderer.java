@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Locale;
 
 import javax.imageio.ImageIO;
 
@@ -172,7 +173,7 @@ public class GTRenderer extends BaseRenderer {
         labelCache.end(g, rect(view.window()));
 
         if (output != null) {
-            ImageIO.write(img, IMAGE_FORMAT.get(opts).toUpperCase(), output);
+            ImageIO.write(img, IMAGE_FORMAT.get(opts).toUpperCase(Locale.ROOT), output);
         }
     }
 
@@ -414,7 +415,7 @@ public class GTRenderer extends BaseRenderer {
             return 1;
         }
         else {
-            LOG.debug(String.format("unsupported value for %s: %s", TEXT_HORIZONTAL_ALIGNMENT, val));
+            LOG.debug(String.format(Locale.ROOT, "unsupported value for %s: %s", TEXT_HORIZONTAL_ALIGNMENT, val));
             return 0.5;
         }
     }
@@ -432,7 +433,7 @@ public class GTRenderer extends BaseRenderer {
             return 1;
         }
         else {
-            LOG.debug(String.format("unsupported value for %s: %s", TEXT_VERTICAL_ALIGNMENT, val));
+            LOG.debug(String.format(Locale.ROOT, "unsupported value for %s: %s", TEXT_VERTICAL_ALIGNMENT, val));
             return 0.5;
         }
     }
@@ -495,13 +496,13 @@ public class GTRenderer extends BaseRenderer {
     }
 
     int cap(String cap) {
-        String c = cap.toLowerCase();
+        String c = cap.toLowerCase(Locale.ROOT);
         return "round".equals(c) ? BasicStroke.CAP_ROUND : 
             "square".equals(c) ? BasicStroke.CAP_SQUARE : BasicStroke.CAP_BUTT;
     }
 
     int join(String join) {
-        String j = join.toLowerCase();
+        String j = join.toLowerCase(Locale.ROOT);
         return "round".equals(j) ? BasicStroke.JOIN_ROUND : 
             "bevel".equals(j) ? BasicStroke.JOIN_BEVEL : BasicStroke.JOIN_MITER;
     }
@@ -532,7 +533,7 @@ public class GTRenderer extends BaseRenderer {
             }
         }
 
-        LOG.debug(String.format("unable to load mark '%s'", type));
+        LOG.debug(String.format(Locale.ROOT, "unable to load mark '%s'", type));
         try {
             return new WellKnownMarkFactory().getShape(g, FILTERS.literal(type), sf);
         } catch (Exception e) {
@@ -558,9 +559,9 @@ public class GTRenderer extends BaseRenderer {
     }
 
     Composite comp(String compOp, float alpha) {
-        String op = compOp.toLowerCase();
+        String op = compOp.toLowerCase(Locale.ROOT);
         if (!COMP_OPS.containsKey(op)) {
-            throw new IllegalArgumentException(String.format(
+            throw new IllegalArgumentException(String.format(Locale.ROOT,
                 "unsupported composition: %s, allowable values are %s", op, COMP_OPS.keySet())); 
         }
 

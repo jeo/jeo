@@ -17,6 +17,7 @@ package org.jeo.svg;
 import static org.jeo.map.CartoCSS.*;
 
 import java.io.IOException;
+import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -162,7 +163,7 @@ public class SVGRenderer extends BaseRenderer implements Labeller {
     void drawSimpleShape(Coordinate c, String type, float width, float height, RGB fill, RGB stroke) {
         Shape shape = shape(type);
 
-        type = shape.name().toLowerCase();
+        type = shape.name().toLowerCase(Locale.ROOT);
 
         if (fill != null) {
             xml.atts("fill", fill.rgbhex(), "fill-opacity", fill.getOpacity());
@@ -262,7 +263,7 @@ public class SVGRenderer extends BaseRenderer implements Labeller {
     Shape shape(String str) {
         if (str != null) {
             try {
-                return Shape.valueOf(str.toLowerCase());
+                return Shape.valueOf(str.toLowerCase(Locale.ROOT));
             }
             catch(IllegalArgumentException e) {
                 LOG.debug("unsupported shape: " + str + " falling back to 'circle'");
@@ -275,7 +276,7 @@ public class SVGRenderer extends BaseRenderer implements Labeller {
     Join join(String str) {
         if (str != null) {
             try {
-                return Join.valueOf(str.toLowerCase());
+                return Join.valueOf(str.toLowerCase(Locale.ROOT));
             }
             catch(IllegalArgumentException e) {
                 LOG.debug("unsupported join: " + str + " falling back to 'miter'");
@@ -287,7 +288,7 @@ public class SVGRenderer extends BaseRenderer implements Labeller {
     Cap cap(String str) {
         if (str != null) {
             try {
-                return Cap.valueOf(str.toLowerCase());
+                return Cap.valueOf(str.toLowerCase(Locale.ROOT));
             }
             catch(IllegalArgumentException e) {
                 LOG.debug("unsupported cap: " + str + " falling back to 'butt'");
@@ -299,7 +300,7 @@ public class SVGRenderer extends BaseRenderer implements Labeller {
     Font.Weight fontWeight(String str) {
         if (str != null) {
             try {
-                return Font.Weight.valueOf(str.toLowerCase());
+                return Font.Weight.valueOf(str.toLowerCase(Locale.ROOT));
             }
             catch(IllegalArgumentException e) {
                 LOG.debug("unsupported font-weight: " + str + " falling back to 'normal'");
@@ -311,7 +312,7 @@ public class SVGRenderer extends BaseRenderer implements Labeller {
     Font.Style fontStyle(String str) {
         if (str != null) {
             try {
-                return Font.Style.valueOf(str.toLowerCase());
+                return Font.Style.valueOf(str.toLowerCase(Locale.ROOT));
             }
             catch(IllegalArgumentException e) {
                 LOG.debug("unsupported font-weight: " + str + " falling back to 'normal'");
@@ -323,7 +324,7 @@ public class SVGRenderer extends BaseRenderer implements Labeller {
     Text.Direction textDirection(String str) {
         if (str != null) {
             try {
-                return Text.Direction.valueOf(str.toLowerCase());
+                return Text.Direction.valueOf(str.toLowerCase(Locale.ROOT));
             }
             catch(IllegalArgumentException e) {
                 LOG.debug("unsupported font-weight: " + str + " falling back to 'ltr'");
@@ -335,7 +336,7 @@ public class SVGRenderer extends BaseRenderer implements Labeller {
     Text.Anchor textAnchor(String str) {
         if (str != null) {
             try {
-                return Text.Anchor.valueOf(str.toLowerCase());
+                return Text.Anchor.valueOf(str.toLowerCase(Locale.ROOT));
             }
             catch(IllegalArgumentException e) {
                 LOG.debug("unsupported font-weight: " + str + " falling back to 'start'");
@@ -347,7 +348,7 @@ public class SVGRenderer extends BaseRenderer implements Labeller {
     Unit unit(String str) {
         if (str != null) {
             try {
-                return Unit.valueOf(str.toLowerCase());
+                return Unit.valueOf(str.toLowerCase(Locale.ROOT));
             }
             catch(IllegalArgumentException e) {
                 LOG.debug("unsupported unit: " + str + " falling back to 'pixel'");

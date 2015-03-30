@@ -15,10 +15,7 @@
 package org.jeo.data;
 
 import java.io.IOException;
-
-import org.osgeo.proj4j.CoordinateReferenceSystem;
-
-import com.vividsolutions.jts.geom.Envelope;
+import java.util.Locale;
 
 /**
  * Reference to a data object.
@@ -109,6 +106,6 @@ public abstract class RepoHandle<T> extends Handle {
 
     @Override
     public String toString() {
-        return String.format("%s[%s]", type.getSimpleName(), name);
+        return String.format(Locale.ROOT, "%s[%s]", type.getSimpleName(), name);
     }
 }

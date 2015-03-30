@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.Iterator;
+import java.util.Locale;
 
 import org.geogit.api.GeogitTransaction;
 import org.geogit.api.plumbing.DiffIndex;
@@ -96,7 +97,7 @@ public class GeoGitTransaction implements Transaction {
                 break;
             }
             if ((added + removed + modified) < 10) {
-                msg.append("\n ").append(entry.changeType().toString().toLowerCase()).append(" ")
+                msg.append("\n ").append(entry.changeType().toString().toLowerCase(Locale.ROOT)).append(" ")
                         .append(entry.newPath() == null ? entry.oldName() : entry.newPath());
             }
         }

@@ -18,6 +18,7 @@ import com.vividsolutions.jts.geom.Envelope;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -130,8 +131,8 @@ public abstract class Handler {
     }
 
     protected String renderTemplate(String template, Map<String,String> vars) throws IOException {
-        BufferedReader in = 
-            new BufferedReader(new InputStreamReader(getClass().getResourceAsStream(template)));
+        BufferedReader in = new BufferedReader(
+            new InputStreamReader(getClass().getResourceAsStream(template), Charset.forName("UTF-8")));
         try {
             StringBuilder sb = new StringBuilder();
 

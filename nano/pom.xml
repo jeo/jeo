@@ -107,4 +107,7 @@
       </profile>
     </profiles>
 
+  <properties>
+    <forbiddenapis.exclude>org/jeo/nano/Nano*.class</forbiddenapis.exclude>
+  </properties>
 </project>

@@ -20,6 +20,8 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
+
 import org.jeo.data.Dataset;
 import org.jeo.data.Handle;
 import org.jeo.tile.TileDataset;
@@ -256,7 +258,7 @@ public class WMTSHandler extends OWSHandler {
             xml.start("TileMatrix");
             xml.element("ows:Identifier", tileGrid.z());
             double sd = computeScaleDenominator(tileGrid.xres(), crs);
-            xml.element("ScaleDenominator", String.format("%f", sd));
+            xml.element("ScaleDenominator", String.format(Locale.ROOT, "%f", sd));
 
             // @todo do we need to right TopLeftCorner?
             xml.element("TileWidth", pyramid.tileWidth());
@@ -316,7 +318,7 @@ public class WMTSHandler extends OWSHandler {
             Tile t = layer.read(zoom, tileCol, tileRow);
             if (t == null) {
                 return new Response(HTTP_NOTFOUND, MIME_PLAINTEXT, String.format(
-                    "No such tile z = %d, x = %d, y = %d", zoom, tileCol, tileRow));
+                    Locale.ROOT, "No such tile z = %d, x = %d, y = %d", zoom, tileCol, tileRow));
             }
 
             return new Response(HTTP_OK, t.mimeType(), new ByteArrayInputStream(t.data()));

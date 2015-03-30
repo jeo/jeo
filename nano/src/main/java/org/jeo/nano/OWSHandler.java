@@ -16,6 +16,8 @@ package org.jeo.nano;
 
 import java.io.IOException;
 import java.io.StringWriter;
+import java.util.Locale;
+
 import org.jeo.data.DataRepositoryView;
 import org.jeo.data.Dataset;
 import org.jeo.data.Workspace;
@@ -34,7 +36,7 @@ public abstract class OWSHandler extends Handler {
 
     @Override
     public final boolean canHandle(Request request, NanoServer server) {
-        String uri = request.getUri().toLowerCase();
+        String uri = request.getUri().toLowerCase(Locale.ROOT);
         String match = "/" + serviceName;
         return uri.equals(match) || uri.equals(match + "/");
     }
@@ -50,7 +52,7 @@ public abstract class OWSHandler extends Handler {
             throw exception("MissingParameterValue", "request", "request parameter missing");
         }
 
-        DelegateHandler handler = resolveRequestHandler(request.toLowerCase(), req);
+        DelegateHandler handler = resolveRequestHandler(request.toLowerCase(Locale.ROOT), req);
         if (handler == null) {
             throw exception("OperationNotSupported", "request", "No operation : " + request);
         }

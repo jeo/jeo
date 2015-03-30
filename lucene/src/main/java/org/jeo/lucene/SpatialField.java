@@ -19,6 +19,7 @@ import org.jeo.util.Kvp;
 import org.jeo.util.Pair;
 
 import java.util.LinkedHashMap;
+import java.util.Locale;
 import java.util.Map;
 
 /**
@@ -37,7 +38,7 @@ public class SpatialField {
 
         // parse storage
         SpatialStorage storage = SpatialStorage.create(
-            SpatialStorage.Type.valueOf(split[1].toUpperCase()), name, ctx);
+            SpatialStorage.Type.valueOf(split[1].toUpperCase(Locale.ROOT)), name, ctx);
 
         // parse index
         Map<String,Object> opts = new LinkedHashMap<>();
@@ -46,7 +47,7 @@ public class SpatialField {
                 opts.put(kvp.first, kvp.second);
             }
         }
-        SpatialIndex index = SpatialIndex.create(SpatialIndex.Type.valueOf(split[2].toUpperCase()), ctx, opts);
+        SpatialIndex index = SpatialIndex.create(SpatialIndex.Type.valueOf(split[2].toUpperCase(Locale.ROOT)), ctx, opts);
 
 
         return new SpatialField(name, storage, index);

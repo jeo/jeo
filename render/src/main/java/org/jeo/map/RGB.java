@@ -19,6 +19,7 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 
 import org.jeo.util.Interpolate;
 import org.jeo.util.Optional;
@@ -433,7 +434,7 @@ public class RGB {
      * @return String of the format: <tt>#rrggbb</tt> 
      */
     public String rgbhex() {
-        return String.format("#%02x%02x%02x", r, g, b);
+        return String.format(Locale.ROOT, "#%02x%02x%02x", r, g, b);
     }
 
     /**
@@ -442,7 +443,7 @@ public class RGB {
      * @return String of the format: <tt>#rrggbbaa</tt> 
      */
     public String rgbahex() {
-        return String.format("#%02x%02x%02x%02x", r, g, b, a);
+        return String.format(Locale.ROOT, "#%02x%02x%02x%02x", r, g, b, a);
     }
 
     @Override

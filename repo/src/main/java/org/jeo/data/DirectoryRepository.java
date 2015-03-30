@@ -17,9 +17,10 @@ package org.jeo.data;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.FilenameFilter;
 import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -172,7 +173,7 @@ public class DirectoryRepository implements DataRepository {
     Pair<Driver<?>,Map<String,Object>> readMetaFile(FileGroup grp) {
         File f = grp.meta();
         try {
-            BufferedReader r = new BufferedReader(new FileReader(f));
+            BufferedReader r = Files.newBufferedReader(f.toPath(), Charset.forName("UTF-8"));
             JSONObject obj = (JSONObject) JSONValue.parseWithException(r);
 
             // get the driver

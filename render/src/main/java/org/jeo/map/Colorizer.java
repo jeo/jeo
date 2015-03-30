@@ -170,7 +170,7 @@ public class Colorizer {
 
         @Override
         public String toString() {
-            return String.format("stop(%.2f, %s, %s, %.2f)", value, color, mode, epsilon);
+            return String.format(Locale.ROOT, "stop(%.2f, %s, %s, %.2f)", value, color, mode, epsilon);
         }
     }
 
@@ -207,7 +207,7 @@ public class Colorizer {
         Colorizer.Builder cb = Colorizer.build();
 
         cb.mode(Colorizer.Mode.valueOf(
-                rule.string(null, "raster-colorizer-default-mode", "linear").toUpperCase()));
+                rule.string(null, "raster-colorizer-default-mode", "linear").toUpperCase(Locale.ROOT)));
         cb.color(rule.color(null, "raster-colorizer-default-color", RGB.black));
 
         if (rule.has("raster-colorizer-stops")) {
@@ -219,7 +219,7 @@ public class Colorizer {
                 Double value =  Convert.toNumber(args.get(0).evaluate(null)).get().doubleValue();
                 RGB color = RGB.convert(args.get(1).evaluate(null)).get();
                 if (args.size() > 2) {
-                    Mode mode = Mode.valueOf(args.get(2).evaluate(null).toString().toUpperCase());
+                    Mode mode = Mode.valueOf(args.get(2).evaluate(null).toString().toUpperCase(Locale.ROOT));
                     if (args.size() > 3) {
                         double epsilon = Convert.toNumber(args.get(3).evaluate(null), Double.class).get();
                         if (epsilon != 0d) {

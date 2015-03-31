@@ -3,51 +3,51 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <groupId>org.jeo</groupId>
+    <groupId>io.jeo</groupId>
     <artifactId>contrib</artifactId>
     <version>0-SNAPSHOT</version>
   </parent>
 
-  <groupId>org.jeo.contrib</groupId>
+  <groupId>io.jeo.contrib</groupId>
   <artifactId>jeo-nano</artifactId>
   <name>NanoHTTPD Server</name>
   <packaging>jar</packaging>
 
   <dependencies>
     <dependency>
-      <groupId>org.jeo</groupId>
+      <groupId>io.jeo</groupId>
       <artifactId>jeo</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>org.jeo</groupId>
+      <groupId>io.jeo</groupId>
       <artifactId>jeo-render</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>org.jeo</groupId>
+      <groupId>io.jeo</groupId>
       <artifactId>jeo-carto</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>org.jeo.contrib</groupId>
+      <groupId>io.jeo.contrib</groupId>
       <artifactId>jeo-repo</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>org.jeo</groupId>
+      <groupId>io.jeo</groupId>
       <artifactId>jeo-geopkg</artifactId>
       <version>${project.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>org.jeo</groupId>
+      <groupId>io.jeo</groupId>
       <artifactId>jeo-postgis</artifactId>
       <version>${project.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>org.jeo.contrib</groupId>
+      <groupId>io.jeo.contrib</groupId>
       <artifactId>jeo-guava</artifactId>
       <version>${project.version}</version>
       <scope>test</scope>
@@ -59,7 +59,7 @@
         <id>geogit</id>
         <dependencies>
          <dependency>
-           <groupId>org.jeo</groupId>
+           <groupId>io.jeo</groupId>
            <artifactId>jeo-geogit</artifactId>
            <version>${project.version}</version>
          </dependency>
@@ -69,7 +69,7 @@
         <id>geopkg</id>
         <dependencies>
           <dependency>
-            <groupId>org.jeo</groupId>
+            <groupId>io.jeo</groupId>
             <artifactId>jeo-geopkg</artifactId>
             <version>${project.version}</version>
           </dependency>
@@ -79,7 +79,7 @@
         <id>postgis</id>
         <dependencies>
           <dependency>
-            <groupId>org.jeo</groupId>
+            <groupId>io.jeo</groupId>
             <artifactId>jeo-postgis</artifactId>
             <version>${project.version}</version>
           </dependency>
@@ -89,7 +89,7 @@
         <id>gdal</id>
         <dependencies>
           <dependency>
-            <groupId>org.jeo</groupId>
+            <groupId>io.jeo</groupId>
             <artifactId>jeo-gdal</artifactId>
             <version>${project.version}</version>
           </dependency>
@@ -99,7 +99,7 @@
         <id>geotools</id>
         <dependencies>
           <dependency>
-            <groupId>org.jeo</groupId>
+            <groupId>io.jeo</groupId>
             <artifactId>jeo-geotools</artifactId>
             <version>${project.version}</version>
           </dependency>

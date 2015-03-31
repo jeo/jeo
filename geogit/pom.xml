@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <groupId>org.jeo</groupId>
+    <groupId>io.jeo</groupId>
     <artifactId>contrib</artifactId>
     <version>0-SNAPSHOT</version>
   </parent>
@@ -14,12 +14,12 @@
 
   <dependencies>
     <dependency>
-      <groupId>org.jeo</groupId>
+      <groupId>io.jeo</groupId>
       <artifactId>jeo</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>org.jeo</groupId>
+      <groupId>io.jeo</groupId>
       <artifactId>jeo-geotools</artifactId>
       <version>${project.version}</version>
     </dependency>
@@ -38,7 +38,7 @@
       <artifactId>guava</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.jeo</groupId>
+      <groupId>io.jeo</groupId>
       <artifactId>jeo</artifactId>
       <version>${project.version}</version>
       <scope>test</scope>

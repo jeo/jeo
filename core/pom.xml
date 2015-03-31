@@ -19,10 +19,9 @@
       <version>1.13</version>
     </dependency>
     <dependency>
-      <groupId>org.osgeo</groupId>
+      <groupId>io.jeo</groupId>
       <artifactId>proj4j</artifactId>
-      <version>0.1.0</version>
-      <classifier>jeo</classifier>
+      <version>0.1.1</version>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>

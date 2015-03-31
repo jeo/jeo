@@ -126,7 +126,7 @@ public class ProjWKTEncoder {
     }
 
     StringBuilder encodeProjection(Projection p, StringBuilder buf, int indent) {
-        String name = p.getWktName();
+        String name = null;/*p.getWktName();*/
         if (name == null) {
             name = p.getName();
         }

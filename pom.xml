@@ -302,6 +302,11 @@
       <name>Sonatype OSS Maven Repository</name>
       <url>https://oss.sonatype.org/content/repositories/releases/</url>
     </repository>
+    <repository>
+      <id>boundless</id>
+      <name>Boundless Maven Repository</name>
+      <url>http://repo.boundlessgeo.com/main</url>
+    </repository>
   </repositories>
 
   <profiles>

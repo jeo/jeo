@@ -37,18 +37,14 @@
   </scm>
 
   <distributionManagement>
-    <repository>
-      <id>boundless</id>
-      <name>Boundless Maven Repository</name>
-      <url>http://repo.boundlessgeo.com/main</url>
-      <uniqueVersion>false</uniqueVersion>
-    </repository>
     <snapshotRepository>
-      <id>boundless</id>
-      <name>Boundless Maven Repository</name>
-      <url>http://repo.boundlessgeo.com/main</url>
-      <uniqueVersion>false</uniqueVersion>
+      <id>ossrh</id>
+      <url>https://oss.sonatype.org/content/repositories/snapshots</url>
     </snapshotRepository>
+    <repository>
+      <id>ossrh</id>
+      <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+    </repository>
   </distributionManagement>
 
   <dependencyManagement>
@@ -302,9 +298,9 @@
 
   <repositories>
     <repository>
-      <id>boundless</id>
-      <name>Boundless Maven Repository</name>
-      <url>http://repo.boundlessgeo.com/main</url>
+      <id>ossrh</id>
+      <name>Sonatype OSS Maven Repository</name>
+      <url>https://oss.sonatype.org/content/repositories/releases/</url>
     </repository>
   </repositories>
 

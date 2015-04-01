@@ -300,7 +300,7 @@
     <repository>
       <id>ossrh</id>
       <name>Sonatype OSS Maven Repository</name>
-      <url>https://oss.sonatype.org/content/repositories/releases/</url>
+      <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
     </repository>
     <repository>
       <id>boundless</id>

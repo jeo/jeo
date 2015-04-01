@@ -40,7 +40,7 @@
         <configuration>
           <archive>
             <manifest>
-              <mainClass>org.jeo.Jeo</mainClass>
+              <mainClass>io.jeo.Jeo</mainClass>
               <addClasspath>true</addClasspath>
             </manifest>
           </archive>
@@ -53,7 +53,7 @@
         <artifactId>javacc-maven-plugin</artifactId>
         <version>2.6</version>
         <configuration>
-          <nodeClass>org.jeo.filter.cql.SimpleNode</nodeClass>
+          <nodeClass>io.jeo.filter.cql.SimpleNode</nodeClass>
         </configuration>
         <executions>
           <execution>

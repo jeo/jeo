@@ -284,11 +284,11 @@
         <targetVersion>1.7</targetVersion>
         <excludes>
           <!-- Generated Files -->
-          <exclude>org/jeo/json/parser/Yylex.class</exclude>
-          <exclude>org/jeo/filter/cql/**</exclude>
+          <exclude>io/jeo/json/parser/Yylex.class</exclude>
+          <exclude>io/jeo/filter/cql/**</exclude>
 
           <!-- Uses System.out for printVersionInfo()-->
-          <exclude>org/jeo/Jeo.class</exclude>
+          <exclude>io/jeo/Jeo.class</exclude>
           <exclude>${forbiddenapis.exclude}</exclude>
         </excludes>
       </configuration>

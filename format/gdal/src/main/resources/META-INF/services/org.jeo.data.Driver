@@ -1,5 +1,0 @@
-org.jeo.ogr.OGR
-org.jeo.ogr.Shapefile
-org.jeo.ogr.SpatiaLite
-org.jeo.gdal.GDAL
-org.jeo.gdal.GeoTIFF

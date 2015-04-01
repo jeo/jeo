@@ -1,4 +1,4 @@
-package org.jeo.protobuf;
+package io.jeo.protobuf;
 
 message Array {
   required int32 dim = 1 [default = 2];

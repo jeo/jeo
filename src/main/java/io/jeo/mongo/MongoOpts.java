@@ -12,20 +12,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jeo.mongo;
-
-import static org.jeo.mongo.MongoDB.*;
+package io.jeo.mongo;
 
 import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import org.jeo.util.Key;
-import org.jeo.util.Password;
+import io.jeo.util.Key;
+import io.jeo.util.Password;
 
 import com.mongodb.DB;
 import com.mongodb.Mongo;
 import com.mongodb.ServerAddress;
+
+import static io.jeo.mongo.MongoDB.*;
 
 public class MongoOpts {
     String db; 

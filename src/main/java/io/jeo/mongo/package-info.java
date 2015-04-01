@@ -15,4 +15,4 @@
 /**
  * MongoDB driver.
  */
-package org.jeo.mongo;
+package io.jeo.mongo;

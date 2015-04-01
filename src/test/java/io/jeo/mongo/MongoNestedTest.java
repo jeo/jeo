@@ -12,17 +12,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jeo.mongo;
+package io.jeo.mongo;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 
-import org.jeo.data.Cursor;
-import org.jeo.vector.VectorQuery;
-import org.jeo.vector.VectorDataset;
-import org.jeo.vector.Feature;
+import io.jeo.data.Cursor;
+import io.jeo.vector.VectorQuery;
+import io.jeo.vector.VectorDataset;
+import io.jeo.vector.Feature;
 import org.junit.Test;
 
 import com.mongodb.DBObject;

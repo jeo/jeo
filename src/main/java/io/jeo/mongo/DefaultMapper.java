@@ -12,10 +12,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jeo.mongo;
+package io.jeo.mongo;
 
-import org.jeo.vector.Feature;
-import org.jeo.geom.Envelopes;
+import io.jeo.vector.Feature;
+import io.jeo.geom.Envelopes;
 
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;

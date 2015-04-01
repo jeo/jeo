@@ -12,13 +12,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jeo.mongo;
+package io.jeo.mongo;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
-import org.jeo.util.Util;
+import io.jeo.util.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jeo.mongo;
+package io.jeo.mongo;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -21,12 +21,12 @@ import java.util.Locale;
 import java.util.Map;
 
 import org.bson.types.ObjectId;
-import org.jeo.vector.BasicFeature;
-import org.jeo.vector.Schema;
-import org.jeo.vector.SchemaBuilder;
-import org.jeo.geom.Geom;
-import org.jeo.proj.Proj;
-import org.jeo.util.Util;
+import io.jeo.vector.BasicFeature;
+import io.jeo.vector.Schema;
+import io.jeo.vector.SchemaBuilder;
+import io.jeo.geom.Geom;
+import io.jeo.proj.Proj;
+import io.jeo.util.Util;
 
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;

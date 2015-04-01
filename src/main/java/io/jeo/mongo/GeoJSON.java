@@ -12,9 +12,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jeo.mongo;
+package io.jeo.mongo;
 
-import org.jeo.geom.Geom;
+import io.jeo.geom.Geom;
 
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;

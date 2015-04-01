@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jeo.mongo;
+package io.jeo.mongo;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -20,11 +20,11 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
 
-import org.jeo.vector.VectorDriver;
-import org.jeo.vector.Schema;
-import org.jeo.util.Key;
-import org.jeo.util.Messages;
-import org.jeo.util.Password;
+import io.jeo.vector.VectorDriver;
+import io.jeo.vector.Schema;
+import io.jeo.util.Key;
+import io.jeo.util.Messages;
+import io.jeo.util.Password;
 
 public class MongoDB implements VectorDriver<MongoWorkspace> {
 

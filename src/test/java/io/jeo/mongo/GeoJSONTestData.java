@@ -12,44 +12,33 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jeo.mongo;
+package io.jeo.mongo;
 
 import java.io.IOException;
 
-import org.jeo.TestData;
-import org.jeo.vector.VectorQuery;
-import org.jeo.vector.VectorDataset;
-import org.jeo.vector.Feature;
-import org.jeo.vector.Schema;
-import org.jeo.geojson.GeoJSONWriter;
-import org.jeo.geom.Geom;
+import io.jeo.TestData;
+import io.jeo.vector.VectorQuery;
+import io.jeo.vector.VectorDataset;
+import io.jeo.vector.Feature;
+import io.jeo.geojson.GeoJSONWriter;
+import io.jeo.geom.Geom;
 
-import com.mongodb.BasicDBObject;
 import com.mongodb.BasicDBObjectBuilder;
 import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
 import com.mongodb.util.JSON;
-import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.MultiPolygon;
 
-public class MongoTestData {
+public class GeoJSONTestData extends MongoTestData {
 
     public void setUp(DBCollection dbcol, MongoWorkspace workspace) throws IOException {
         VectorDataset data = TestData.states();
-        Schema schema = data.schema();
-
         for (Feature f : data.cursor(new VectorQuery())) {
-            Geometry g = f.geometry();
-            g = Geom.iterate((MultiPolygon) f.geometry()).iterator().next();
-
-            DBObject obj = new BasicDBObject(f.map());
-            obj.put(schema.geometry().name(), JSON.parse(GeoJSONWriter.toString(g)));
-            dbcol.insert(obj);
+            f.put("geometry", Geom.iterate((MultiPolygon) f.geometry()).iterator().next());
+            dbcol.insert((DBObject) JSON.parse(GeoJSONWriter.toString(f)));
         }
-
-        dbcol.ensureIndex(BasicDBObjectBuilder.start().add(
-            data.schema().geometry().name(), "2dsphere").get());
-
-        workspace.setMapper(new DefaultMapper(new Mapping().geometry("geometry")));
+    
+        dbcol.ensureIndex(BasicDBObjectBuilder.start().add("geometry", "2dsphere").get());
+        workspace.setMapper(new GeoJSONMapper());
     }
 }

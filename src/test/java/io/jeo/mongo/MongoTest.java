@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jeo.mongo;
+package io.jeo.mongo;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -21,11 +21,11 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.Set;
 
-import org.jeo.data.Cursor;
-import org.jeo.vector.VectorQuery;
-import org.jeo.vector.Feature;
-import org.jeo.vector.Schema;
-import org.jeo.geom.GeomBuilder;
+import io.jeo.data.Cursor;
+import io.jeo.vector.VectorQuery;
+import io.jeo.vector.Feature;
+import io.jeo.vector.Schema;
+import io.jeo.geom.GeomBuilder;
 import org.junit.After;
 import org.junit.Assume;
 import org.junit.Before;

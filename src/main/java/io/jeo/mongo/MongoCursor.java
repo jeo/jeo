@@ -12,17 +12,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jeo.mongo;
+package io.jeo.mongo;
 
 import java.io.IOException;
 
-import org.jeo.data.Cursor;
-import org.jeo.vector.Feature;
+import io.jeo.vector.Feature;
 
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
-import org.jeo.vector.FeatureCursor;
+import io.jeo.vector.FeatureCursor;
 
 public class MongoCursor extends FeatureCursor {
 

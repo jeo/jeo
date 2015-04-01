@@ -12,15 +12,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jeo.mongo;
+package io.jeo.mongo;
 
 import java.io.IOException;
 
-import org.jeo.TestData;
-import org.jeo.vector.VectorQuery;
-import org.jeo.vector.VectorDataset;
-import org.jeo.vector.Feature;
-import org.jeo.geom.Geom;
+import io.jeo.TestData;
+import io.jeo.vector.VectorQuery;
+import io.jeo.vector.VectorDataset;
+import io.jeo.vector.Feature;
+import io.jeo.geom.Geom;
 
 import com.mongodb.BasicDBObject;
 import com.mongodb.BasicDBObjectBuilder;

@@ -12,23 +12,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jeo.mongo;
+package io.jeo.mongo;
 
 import java.io.IOException;
 import java.util.Map;
 
-import org.jeo.data.Cursor.Mode;
-import org.jeo.data.Driver;
-import org.jeo.vector.FeatureCursor;
-import org.jeo.vector.VectorQuery;
-import org.jeo.vector.VectorQueryPlan;
-import org.jeo.vector.VectorDataset;
-import org.jeo.vector.Schema;
-import org.jeo.vector.SchemaBuilder;
-import org.jeo.filter.Filters;
-import org.jeo.geom.Envelopes;
-import org.jeo.proj.Proj;
-import org.jeo.util.Key;
+import io.jeo.data.Cursor.Mode;
+import io.jeo.data.Driver;
+import io.jeo.vector.FeatureCursor;
+import io.jeo.vector.VectorQuery;
+import io.jeo.vector.VectorQueryPlan;
+import io.jeo.vector.VectorDataset;
+import io.jeo.vector.Schema;
+import io.jeo.vector.SchemaBuilder;
+import io.jeo.filter.Filters;
+import io.jeo.geom.Envelopes;
+import io.jeo.proj.Proj;
+import io.jeo.util.Key;
 import org.osgeo.proj4j.CoordinateReferenceSystem;
 
 import com.mongodb.DBCollection;

@@ -12,19 +12,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jeo.mongo;
+package io.jeo.mongo;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import org.jeo.data.Dataset;
-import org.jeo.data.Driver;
-import org.jeo.data.Handle;
-import org.jeo.data.Workspace;
-import org.jeo.vector.Schema;
-import org.jeo.util.Key;
+import io.jeo.data.Dataset;
+import io.jeo.data.Driver;
+import io.jeo.data.Handle;
+import io.jeo.data.Workspace;
+import io.jeo.vector.Schema;
+import io.jeo.util.Key;
 
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;

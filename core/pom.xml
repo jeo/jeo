@@ -9,7 +9,7 @@
   </parent>
 
   <artifactId>jeo</artifactId>
-  <name>JEO Core</name>
+  <name>Core</name>
   <packaging>jar</packaging>
 
   <dependencies>

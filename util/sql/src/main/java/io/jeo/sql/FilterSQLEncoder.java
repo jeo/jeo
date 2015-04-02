@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Locale;
 
 import io.jeo.filter.FilterWalker;
+import io.jeo.filter.Self;
 import io.jeo.vector.Field;
 import io.jeo.vector.Schema;
 import io.jeo.filter.All;
@@ -207,6 +208,18 @@ public class FilterSQLEncoder extends FilterWalker<Object> {
         return null;
     }
 
+    @Override
+    public Object visit(Self self, Object obj) {
+        abort(self, "Self expressions not supported");
+        return null;
+    }
+
+    @Override
+    public Object visit(Expression expr, Object obj) {
+        abort(expr, "Unknown expression not supported");
+        return null;
+    }
+
     public final Object visit(All<?> all, Object obj) {
         sql.add("1 = 1");
         return obj;
@@ -270,9 +283,13 @@ public class FilterSQLEncoder extends FilterWalker<Object> {
         Field fld = field(spatial.left(), spatial.right());
         
         String function = null;
+        boolean dist = false;
         switch(spatial.type()) {
         case INTERSECTS:
             function = "ST_Intersects";
+            break;
+        case CONTAINS:
+            function = "ST_Contains";
             break;
         case COVERS:
             function = "ST_Covers";
@@ -283,6 +300,9 @@ public class FilterSQLEncoder extends FilterWalker<Object> {
         case DISJOINT:
             function = "ST_Disjoint";
             break;
+        case EQUALS:
+            function = "ST_Equals";
+            break;
         case OVERLAPS:
             function = "ST_Overlaps";
             break;
@@ -292,14 +312,27 @@ public class FilterSQLEncoder extends FilterWalker<Object> {
         case WITHIN:
             function = "ST_Within";
             break;
+        case BEYOND:
+            function = "ST_Beyond";
+            dist = true;
+            break;
+        case DWITHIN:
+            function = "ST_DWithin";
+            dist = true;
+            break;
         default:
             abort(spatial, "unsupported spatial filter");
         }
+
 
         sql.add(function).add("(");
         spatial.left().accept(this, fld);
         sql.add(", ");
         spatial.right().accept(this, fld);
+        if (dist) {
+            sql.add(", ");
+            spatial.distance().accept(this, fld);
+        }
         sql.add(")");
         return obj;
     }

@@ -21,12 +21,15 @@ language: java
 
 script:
   - mvn clean install -Djava.awt.headless=true -P protobuf
-  - mvn deploy -DskipTests --settings target/travis/settings.xml
+
+after_success:
+  - mvn deploy --settings target/travis/settings.xml
 
 jdk:
   - openjdk7
   - oraclejdk7
   - oraclejdk8
+
 notifications:
   email:
     recipients:

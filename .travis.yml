@@ -23,7 +23,7 @@ script:
   - mvn install -Djava.awt.headless=true -P protobuf
 
 after_success:
-  - [ -f .deployed ] ||  mvn deploy --settings target/travis/settings.xml
+  - if [ ! -f .deployed ]; then mvn deploy --settings target/travis/settings.xml; fi
   - touch .deployed
 
 jdk:

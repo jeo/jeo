@@ -20,10 +20,11 @@ before_script:
 language: java
 
 script:
-  - mvn clean install -Djava.awt.headless=true -P protobuf
+  - mvn install -Djava.awt.headless=true -P protobuf
 
 after_success:
-  - mvn deploy --settings target/travis/settings.xml
+  - [ -f .deployed ] ||  mvn deploy --settings target/travis/settings.xml
+  - touch .deployed
 
 jdk:
   - openjdk7

@@ -1,6 +1,7 @@
 before_install:
   - sudo apt-get update -qq
   - sudo apt-get install -y protobuf-compiler
+  - git clone -b travis `git config --get remote.origin.url` target/travis
 
 branches:
   except:
@@ -17,8 +18,11 @@ before_script:
   - psql -c 'create extension postgis' -U postgres jeo
 
 language: java
+
 script:
   - mvn clean install -Djava.awt.headless=true -P protobuf
+  - mvn deploy -DskipTests --settings target/travis/settings.xml
+
 jdk:
   - openjdk7
   - oraclejdk7
@@ -30,3 +34,7 @@ notifications:
     on_success: change
     on_failure: always
 
+env:
+  global:
+    - secure: "V/bzSLcg07nvbUvHyDpoxo75SQpqblD3VYzHReyFPusPAzaO1fhNlAfvAgvhH8lo43VMiQI7rx7lw7/N/M7BnTPc/IuPh/ROZDG4PdAGOiYsmNuRwEVNWZ1M2iykEGTeXmPdI7Una0SRNGoo3kCYHEiYXxreSC3/Abnq3usnktw="
+    - secure: "ffmKckmzq/rsMiph2sUqVIExDG9EtRxVXFcJuJrfkNEodQEQs3SpXbLt7AnVtbu+fzz62kkWO4lrdWJadmH6ew4zHhGHAB0SauneaPgQwkwetM21U79VJkik/LPIdEABw00DFpsYrnYnpA1t8+2oTqhsAQiAed1GiLMz1hl3kiM="

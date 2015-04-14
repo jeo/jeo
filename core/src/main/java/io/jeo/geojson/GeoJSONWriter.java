@@ -380,7 +380,8 @@ public class GeoJSONWriter extends JSONEncoder {
             return this;
         }
 
-        object();
+        object()
+            .key("type").value("Feature");
 
         if (f.id() != null) {
             key("id").value(f.id());

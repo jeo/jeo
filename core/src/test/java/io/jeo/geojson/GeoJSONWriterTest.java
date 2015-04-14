@@ -18,11 +18,14 @@ import static org.junit.Assert.*;
 
 import java.io.IOException;
 import java.io.StringWriter;
+import java.util.HashMap;
+import java.util.Map;
 
 import io.jeo.geom.Geom;
 import io.jeo.json.JSONArray;
 import io.jeo.json.JSONObject;
 import io.jeo.json.JSONValue;
+import io.jeo.vector.BasicFeature;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -119,6 +122,20 @@ public class GeoJSONWriterTest {
 
         assertTrue(obj.get("bar") instanceof JSONObject);
         assertEquals(0, ((JSONObject)obj.get("bar")).size());
+    }
+
+    @Test
+    public void testFeature() throws Exception {
+        Map<String,Object> map = new HashMap<>();
+        map.put("geom", Geom.point(0, 0));
+        map.put("name", "zero");
+
+        w.feature(new BasicFeature(null, map));
+
+        JSONObject obj = (JSONObject) JSONValue.parse(string());
+        assertEquals("Feature", obj.get("type"));
+        assertNotNull(obj.get("geometry"));
+        assertNotNull(obj.get("properties"));
     }
 
     String string() {

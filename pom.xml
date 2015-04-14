@@ -31,7 +31,6 @@
 
   <modules>
    <module>carto</module>
-   <module>geogit</module>
    <module>geotools</module>
    <module>guava</module>
    <module>lucene</module>
@@ -40,5 +39,14 @@
    <module>repo</module>
    <module>svg</module>
   </modules>
+
+  <profiles>
+    <profile>
+      <id>geogit</id>
+      <modules>
+        <module>geogit</module>
+      </modules>
+    </profile>
+  </profiles>
 
 </project>

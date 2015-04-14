@@ -32,6 +32,11 @@
       <version>${geotools.version}</version>
     </dependency>
     <dependency>
+      <groupId>org.geotools</groupId>
+      <artifactId>gt-epsg-hsql</artifactId>
+      <version>${geotools.version}</version>
+    </dependency>
+    <dependency>
       <groupId>io.jeo</groupId>
       <artifactId>jeo</artifactId>
       <classifier>tests</classifier>
@@ -56,15 +61,9 @@
       <version>${project.version}</version>
       <scope>test</scope>
     </dependency>
-    <dependency>
-      <groupId>org.geotools</groupId>
-      <artifactId>gt-epsg-hsql</artifactId>
-      <version>${geotools.version}</version>
-      <scope>test</scope>
-    </dependency>
   </dependencies>
 
   <properties>
-    <geotools.version>9.0</geotools.version>
+    <geotools.version>13.0</geotools.version>
   </properties>
 </project>

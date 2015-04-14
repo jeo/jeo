@@ -477,6 +477,16 @@ public class GeoJSONWriter extends JSONEncoder {
     }
 
     @Override
+    public GeoJSONWriter value(double value) throws IOException {
+        return (GeoJSONWriter) super.value(value);
+    }
+
+    @Override
+    public GeoJSONWriter value(long value) throws IOException {
+        return (GeoJSONWriter) super.value(value);
+    }
+
+    @Override
     public GeoJSONWriter value(Object value) throws IOException {
         return (GeoJSONWriter) super.value(value);
     }

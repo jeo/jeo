@@ -23,6 +23,7 @@ import java.util.*;
 import java.util.List;
 
 import org.geotools.factory.CommonFactoryFinder;
+import org.geotools.factory.Hints;
 import org.geotools.feature.simple.SimpleFeatureImpl;
 import org.geotools.feature.simple.SimpleFeatureTypeBuilder;
 import org.geotools.filter.expression.InternalVolatileFunction;
@@ -56,6 +57,27 @@ public class GT {
     static Logger LOGGER = LoggerFactory.getLogger(GT.class);
 
     static FilterFactory filterFactory = CommonFactoryFinder.getFilterFactory();
+
+    static final String FORCE_XY = "org.geotools.referencing.forceXY";
+
+    /**
+     * Configures GeoTools referencing to force longitude/latitude (x/y) ordering.
+     */
+    public static void initLonLatAxisOrder() {
+        if (System.getProperty(FORCE_XY) == null) {
+            System.setProperty(FORCE_XY, "true");
+        }
+        Hints.putSystemDefault(Hints.FORCE_AXIS_ORDER_HONORING, "http");
+    }
+
+    /**
+     * Configures GeoTools referencing to use a more lax comparison tolerance. This
+     * improves the ability to do things like datum matching, which a direct match
+     * by name is not found.
+     */
+    public static void initLaxComparisonTolerance() {
+        Hints.putSystemDefault(Hints.COMPARISON_TOLERANCE, 1e-9);
+    }
 
     public static Feature feature(SimpleFeature feature) {
         return feature(feature, schema(feature.getType()));

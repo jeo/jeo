@@ -28,7 +28,7 @@ public class SchemaBuilderTest {
     public void testFieldSpec() {
         Schema schema = new SchemaBuilder("widgets")
             .fields("sp:String,ip:Integer,pp:Point:srid=4326").schema();
-        assertEquals(3, schema.getFields().size());
+        assertEquals(3, schema.fields().size());
 
         assertEquals(String.class, schema.field("sp").type());
         assertEquals(Integer.class, schema.field("ip").type());
@@ -42,7 +42,7 @@ public class SchemaBuilderTest {
             .fields("sp:String,ip:Integer,pp:Point:srid=4326").schema();
 
         Schema selected = SchemaBuilder.select(schema, Arrays.asList("sp","pp","blah"));
-        assertEquals(2, selected.getFields().size());
+        assertEquals(2, selected.fields().size());
         assertEquals(schema.field("sp"), selected.field("sp"));
         assertEquals(schema.field("pp"), selected.field("pp"));
         // ordering

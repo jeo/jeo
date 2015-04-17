@@ -118,7 +118,7 @@ public class VectorQuery {
     public List<String> fieldsIn(Schema schema) {
         List<String> ordered = new ArrayList<String>(fields.size());
         if (fields.size() > 0) {
-            List<Field> schemaFields = schema.getFields();
+            List<Field> schemaFields = schema.fields();
             for (Field f: schemaFields) {
                 for (String s: fields) {
                     if (f.name().equals(s)) {
@@ -437,7 +437,7 @@ public class VectorQuery {
     public Set<String> missingProperties(Schema schema) {
         Set<String> queryProperties = (Set<String>) (filter == null ?
                 Collections.emptySet() : Filters.properties(filter));
-        List<Field> f = schema.getFields();
+        List<Field> f = schema.fields();
         for (int i = 0, ii = f.size(); i < ii && !queryProperties.isEmpty(); i++) {
             queryProperties.remove(f.get(i).name());
         }

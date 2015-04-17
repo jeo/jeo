@@ -180,7 +180,7 @@ public class OGRFeature extends BasicFeature {
             cal.set(Calendar.MINUTE, minute[0]);
             cal.set(Calendar.SECOND, second[0]);
 
-            Field fld = schema().getFields().get(unmapIndex(i));
+            Field fld = schema().fields().get(unmapIndex(i));
             Class<?> clazz = fld.type();
             
             if (clazz.equals(java.sql.Date.class)) {
@@ -212,7 +212,7 @@ public class OGRFeature extends BasicFeature {
         @Override
         protected List<Object> list() {
             Schema schema = schema();
-            List<Object> list = new ArrayList<Object>(schema.getFields().size());
+            List<Object> list = new ArrayList<Object>(schema.fields().size());
 
             for (int i = 0; i < schema.size(); i++) {
                 list.add(get(i));

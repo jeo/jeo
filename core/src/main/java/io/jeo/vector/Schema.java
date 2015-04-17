@@ -144,7 +144,7 @@ public class Schema implements Iterable<Field> {
     /**
      * The immutable list of fields for the schema.
      */
-    public List<Field> getFields() {
+    public List<Field> fields() {
         return fields;
     }
 

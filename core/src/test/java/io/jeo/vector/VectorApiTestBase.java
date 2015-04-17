@@ -207,8 +207,8 @@ public abstract class VectorApiTestBase {
         cursor = data.cursor(new VectorQuery().filter("STATE_ABBR = 'CA'"));
         assertTrue(cursor.hasNext());
         Feature feature = cursor.next();
-        assertEquals(data.schema().getFields().size(), feature.schema().size());
-        for (Field f: data.schema().getFields()) {
+        assertEquals(data.schema().fields().size(), feature.schema().size());
+        for (Field f: data.schema().fields()) {
             assertNotNull(feature.schema().field(f.name()));
         }
     }

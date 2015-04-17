@@ -78,9 +78,9 @@ public class GeoPkgFeatureCursor extends FeatureCursor {
         } else {
             this.schema = schema;
         }
-        this.fields = this.schema.getFields();
+        this.fields = this.schema.fields();
 
-        values = new ArrayList<Object>(schema.getFields().size());
+        values = new ArrayList<Object>(schema.fields().size());
 
         pkColumns = new ArrayList<Integer>(primaryKey.getColumns().size());
         int end = fields.size();

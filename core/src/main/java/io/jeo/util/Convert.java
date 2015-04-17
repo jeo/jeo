@@ -30,6 +30,10 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringReader;
 import java.lang.reflect.Array;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -65,6 +69,12 @@ public class Convert {
         else if (File.class.isAssignableFrom(clazz)) {
             return (Optional<T>) toFile(obj);
         }
+        else if (URL.class.isAssignableFrom(clazz)) {
+            return (Optional<T>) toURL(obj);
+        }
+        else if (URI.class.isAssignableFrom(clazz)) {
+            return (Optional<T>) toURI(obj);
+        }
         else if (!safe && obj != null) {
             //constructor trick
             T converted = null;
@@ -98,10 +108,10 @@ public class Convert {
         }
 
         if (obj instanceof String) {
-            return Optional.of(Boolean.parseBoolean((String)obj));
+            return Optional.of(Boolean.parseBoolean((String) obj));
         }
 
-        return null;
+        return Optional.empty();
     }
 
     public static Optional<File> toFile(Object obj) {
@@ -113,7 +123,29 @@ public class Convert {
             return Optional.of(new File((String)obj));
         }
 
-        return null;
+        return Optional.empty();
+    }
+
+    public static Optional<URL> toURL(Object obj) {
+        if (obj instanceof String) {
+            try {
+                return Optional.of(new URL(obj.toString()));
+            } catch (MalformedURLException e) {
+            }
+        }
+
+        return Optional.empty();
+    }
+
+    public static Optional<URI> toURI(Object obj) {
+        if (obj instanceof String) {
+            try {
+                return Optional.of(new URI(obj.toString()));
+            } catch (URISyntaxException e) {
+            }
+        }
+
+        return Optional.empty();
     }
 
     public static <T extends Number> Optional<T> toNumber(Object obj, Class<T> clazz) {
@@ -243,5 +275,23 @@ public class Convert {
         }
 
         return Optional.empty();
+    }
+
+    public static Optional<Envelope> toEnvelope(Object obj) {
+        if(obj instanceof Envelope) {
+            return Optional.of((Envelope)obj);
+        }
+        if (obj instanceof String) {
+            Envelope env = Envelopes.parse(obj.toString());
+            if (env != null) {
+                return Optional.of(env);
+            }
+        }
+        return toGeometry(obj).map(new Function<Geometry, Envelope>() {
+            @Override
+            public Envelope apply(Geometry value) {
+                return value.getEnvelopeInternal();
+            }
+        });
     }
 }

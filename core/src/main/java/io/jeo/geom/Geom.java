@@ -242,6 +242,48 @@ public class Geom {
         return new GeometryIterable<Geometry>(gc);
     }
 
+    /**
+     * Returns the geometries of a geometry collection as an array.
+     */
+    public static <T extends Geometry> T[] array(GeometryCollection gc, T[] array) {
+        for (int i =0 ; i < gc.getNumGeometries(); i++) {
+            array[i] = (T) gc.getGeometryN(i);
+        }
+        return array;
+    }
+
+    /**
+     * Narrows a geometry collection (if possible) to a concrete subclass.
+     */
+    public static <T extends GeometryCollection> T narrow(GeometryCollection gc) {
+        if (gc.getNumGeometries() == 0) {
+            return (T) gc;
+        }
+
+        Class<? extends Geometry> gType = gc.getGeometryN(0).getClass();
+        boolean allSame = true;
+        int i = 1;
+        while(allSame && i < gc.getNumGeometries()) {
+            allSame = allSame && gType.isInstance(gc.getGeometryN(i++));
+        }
+
+        if (!allSame) {
+            return (T) gc;
+        }
+
+        GeometryFactory gf = gc.getFactory();
+        switch(Type.from(gType)) {
+            case POINT:
+                return (T) gf.createMultiPoint(array(gc, new Point[gc.getNumGeometries()]));
+            case LINESTRING:
+                return (T) gf.createMultiLineString(array(gc, new LineString[gc.getNumGeometries()]));
+            case POLYGON:
+                return (T) gf.createMultiPolygon(array(gc, new Polygon[gc.getNumGeometries()]));
+            default:
+                return (T) gc;
+        }
+    }
+
     /*
      * Private iterable class.
      */

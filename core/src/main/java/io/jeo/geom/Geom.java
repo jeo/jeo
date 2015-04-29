@@ -14,7 +14,10 @@
  */
 package io.jeo.geom;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.prep.PreparedGeometry;
@@ -253,35 +256,27 @@ public class Geom {
     }
 
     /**
-     * Narrows a geometry collection (if possible) to a concrete subclass.
+     * Retypes (ie. narrows) a geometry collection if possible.
+     * <p>
+     * If the geometry contains a single object it is narrowed to that object. If the geometry collection is
+     * homogeneous it is narrowed to the appropriate sub collection type. Otherwise the collection is returned
+     * as is.
+     * </p>
+     *
+     * @see {@link GeometryFactory#buildGeometry(Collection)}
      */
-    public static <T extends GeometryCollection> T narrow(GeometryCollection gc) {
+    public static <T extends Geometry> T narrow(GeometryCollection gc) {
+
         if (gc.getNumGeometries() == 0) {
             return (T) gc;
         }
 
-        Class<? extends Geometry> gType = gc.getGeometryN(0).getClass();
-        boolean allSame = true;
-        int i = 1;
-        while(allSame && i < gc.getNumGeometries()) {
-            allSame = allSame && gType.isInstance(gc.getGeometryN(i++));
+        List<Geometry> objects = new ArrayList<>(gc.getNumGeometries());
+        for (Geometry g : iterate(gc)) {
+            objects.add(g);
         }
 
-        if (!allSame) {
-            return (T) gc;
-        }
-
-        GeometryFactory gf = gc.getFactory();
-        switch(Type.from(gType)) {
-            case POINT:
-                return (T) gf.createMultiPoint(array(gc, new Point[gc.getNumGeometries()]));
-            case LINESTRING:
-                return (T) gf.createMultiLineString(array(gc, new LineString[gc.getNumGeometries()]));
-            case POLYGON:
-                return (T) gf.createMultiPolygon(array(gc, new Polygon[gc.getNumGeometries()]));
-            default:
-                return (T) gc;
-        }
+        return (T) gc.getFactory().buildGeometry(objects);
     }
 
     /*

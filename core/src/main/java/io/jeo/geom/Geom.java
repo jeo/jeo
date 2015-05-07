@@ -16,7 +16,9 @@ package io.jeo.geom;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 
 import com.vividsolutions.jts.geom.GeometryFactory;
@@ -277,6 +279,36 @@ public class Geom {
         }
 
         return (T) gc.getFactory().buildGeometry(objects);
+    }
+
+    /**
+     * Recursively flattens a geometry collection into it's constituent geometry objects.
+     */
+    public static <T extends Geometry> List<T> flatten(GeometryCollection gc) {
+        return flatten(Collections.singletonList((Geometry)gc));
+    }
+
+    /**
+     * Recursively flattens a list of geometries into it's constituent geometry objects.
+     */
+    public static <T extends Geometry> List<T> flatten(List<Geometry> gl) {
+        List<T> flat = new ArrayList<>();
+        LinkedList<Geometry> q = new LinkedList<>();
+        q.addAll(gl);
+
+        while (!q.isEmpty()) {
+            Geometry g = q.removeFirst();
+            if (g instanceof GeometryCollection) {
+                for (Geometry h : iterate((GeometryCollection)g)) {
+                    q.addLast(h);
+                }
+            }
+            else {
+                flat.add((T) g);
+            }
+        }
+
+        return flat;
     }
 
     /*

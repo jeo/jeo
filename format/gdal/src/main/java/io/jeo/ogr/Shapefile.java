@@ -17,8 +17,8 @@ package io.jeo.ogr;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -52,7 +52,7 @@ public class Shapefile extends OGRDriver<OGRDataset> {
     }
 
     @Override
-    public List<String> aliases() {
+    protected Collection<? extends String> getAliases() {
         return Arrays.asList("shp");
     }
 

@@ -16,7 +16,11 @@ package io.jeo.ogr;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import io.jeo.vector.FileVectorDriver;
@@ -29,6 +33,18 @@ public abstract class OGRDriver<T> extends FileVectorDriver<T> {
     @Override
     public boolean isEnabled(Messages messages) {
         return new OGR().isEnabled(messages);
+    }
+
+    @Override
+    public final List<String> aliases() {
+        List<String> aliases = new ArrayList<>();
+        aliases.addAll(getAliases());
+        aliases.add(getOGRDriverName());
+        return aliases;
+    }
+
+    protected Collection<? extends String> getAliases() {
+        return Collections.emptyList();
     }
 
     @Override

@@ -46,6 +46,13 @@ import java.util.HashSet;
  */
 public class VectorQuery {
 
+    /**
+     * Returns a vector query with no constraints.
+     */
+    public static VectorQuery all() {
+        return new VectorQuery();
+    }
+
     /** logger */
     static Logger LOGGER = LoggerFactory.getLogger(VectorQuery.class);
 

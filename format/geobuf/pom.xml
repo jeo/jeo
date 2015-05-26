@@ -34,7 +34,7 @@
 
   <build>
     <plugins>
-      <!-- <plugin>
+      <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>build-helper-maven-plugin</artifactId>
         <version>1.7</version>
@@ -51,23 +51,33 @@
             </configuration>
           </execution>
        </executions>
-      </plugin> -->
-      <plugin>
-        <groupId>com.github.igor-petruk.protobuf</groupId>
-        <artifactId>protobuf-maven-plugin</artifactId>
-        <version>0.6.5</version>
-        <!-- <configuration>
-          <outputDirectory>src/main/gen</outputDirectory>
-        </configuration> -->
-        <executions>
-         <execution>
-           <goals>
-             <goal>run</goal>
-           </goals>
-         </execution>
-        </executions>
-       </plugin>
+      </plugin>
     </plugins>
   </build>
+
+  <profiles>
+    <profile>
+      <id>compile-pbf</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>com.github.igor-petruk.protobuf</groupId>
+            <artifactId>protobuf-maven-plugin</artifactId>
+            <version>0.6.5</version>
+            <configuration>
+              <outputDirectory>src/main/gen</outputDirectory>
+            </configuration>
+            <executions>
+             <execution>
+               <goals>
+                 <goal>run</goal>
+               </goals>
+             </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
 
 </project>

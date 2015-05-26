@@ -1,6 +1,5 @@
 before_install:
   - sudo apt-get update -qq
-  - sudo apt-get install -y protobuf-compiler
   - git clone -b travis `git config --get remote.origin.url` target/travis
 
 branches:
@@ -20,7 +19,7 @@ before_script:
 language: java
 
 script:
-  - mvn install -Djava.awt.headless=true -P geobuf
+  - mvn install -Djava.awt.headless=true
 
 after_success:
   - if [[ "$JAVA_HOME" == *"java-7-openjdk"* ]]; then mvn deploy -DskipTests --settings target/travis/settings.xml; fi

@@ -16,19 +16,11 @@
   <modules>
     <module>csv</module>
     <module>gdal</module>
+    <module>geobuf</module>
     <module>geopkg</module>
     <module>mbtiles</module>
     <module>mongo</module>
     <module>postgis</module>
   </modules>
-
-  <profiles>
-    <profile>
-      <id>geobuf</id>
-      <modules>
-        <module>geobuf</module>
-      </modules>
-    </profile>
-  </profiles>
 
 </project>

@@ -1,16 +1,16 @@
-# jeo-protobuf
+# jeo-geobuf
 
-[Google Protocol Buffer](https://developers.google.com/protocol-buffers/) driver
-for the [jeo](http://github.com/jeo/jeo) library.
+Mapbox [Geobuf](https://github.com/mapbox/geobuf/) driver for the jeo library.
 
-# Building
+# Re-generating Geobuf Sources
 
-Building the protobuf module requires the `protoc` utility. Sources and 
-Windows binaries can be found 
+Generating sources from the `geobuf.proto` file reuqires requires the `protoc` 
+utility. Sources and Windows binaries can be found 
 [here](https://code.google.com/p/protobuf/downloads/list). Packages for OSX and
 Linux are available through most package managers. Once installed ensure 
 the `protoc` command is on the `PATH`. 
 
-To build the protobuf module run maven:
+To build the geobuf module and re-generate the geobuf sources build with the 
+`compile-pbf` profile.
 
-    mvn install
+    mvn -P compile-pbf install

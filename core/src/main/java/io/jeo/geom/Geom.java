@@ -249,6 +249,56 @@ public class Geom {
     }
 
     /**
+     * Returns an iterable over the interior rings of a polygon.
+     */
+    public static Iterable<LineString> holes(final Polygon p) {
+        return new Iterable<LineString>() {
+            int i = 0;
+
+            @Override
+            public Iterator<LineString> iterator() {
+                return new Iterator<LineString>() {
+                    @Override
+                    public boolean hasNext() {
+                        return i < p.getNumInteriorRing();
+                    }
+
+                    @Override
+                    public LineString next() {
+                        return p.getInteriorRingN(i++);
+                    }
+
+                    @Override
+                    public void remove() {
+                        throw new UnsupportedOperationException();
+                    }
+                };
+            }
+        };
+    }
+
+    /**
+     * Returns the first point in a multi point, or <code>null</code> if the multi point is empty.
+     */
+    public static Point first(MultiPoint mp) {
+        return mp.getNumGeometries() > 0 ? (Point) mp.getGeometryN(0) : null;
+    }
+
+    /**
+     * Returns the first line in a multi line, or <code>null</code> if the multi line is empty.
+     */
+    public static LineString first(MultiLineString ml) {
+        return ml.getNumGeometries() > 0 ? (LineString) ml.getGeometryN(0) : null;
+    }
+
+    /**
+     * Returns the first polygon in a multi polygon, or <code>null</code> if the multi polygon is empty.
+     */
+    public static Polygon first(MultiPolygon mp) {
+        return mp.getNumGeometries() > 0 ? (Polygon) mp.getGeometryN(0) : null;
+    }
+
+    /**
      * Returns the geometries of a geometry collection as an array.
      */
     public static <T extends Geometry> T[] array(GeometryCollection gc, T[] array) {

@@ -14,6 +14,7 @@
  */
 package io.jeo.geom;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -397,6 +398,81 @@ public class Geom {
                 return factory.createMultiPolygon(new Polygon[]{(Polygon)g});
             default:
                 return (GeometryCollection) g;
+        }
+    }
+
+    public static void visit(Geometry g, GeometryVisitor v) {
+        ArrayDeque<Geometry> stack = new ArrayDeque<>();
+        stack.push(g);
+
+        while (!stack.isEmpty()) {
+            g = stack.pop();
+            switch(Type.from(g)) {
+                case POINT:
+                    v.visit((Point)g);
+                    break;
+                case LINESTRING:
+                    v.visit((LineString)g);
+                    break;
+                case POLYGON: {
+                    Polygon p = (Polygon) g;
+                    v.visit(p);
+
+                    if (v.descend(p)) {
+                        stack.push(p.getExteriorRing());
+                        for (int i = 0; i < p.getNumInteriorRing(); i++) {
+                            stack.push(p.getInteriorRingN(i));
+                        }
+                    }
+                    break;
+                }
+                case MULTIPOINT: {
+                    MultiPoint mp = (MultiPoint) g;
+                    v.visit(mp);
+
+                    if (v.descend(mp)) {
+                        for (Point p : iterate(mp)) {
+                            stack.push(p);
+                        }
+                    }
+                    break;
+                }
+                case MULTILINESTRING: {
+                    MultiLineString ml = (MultiLineString) g;
+                    v.visit(ml);
+
+                    if (v.descend(ml)) {
+                        for (LineString l : iterate(ml)) {
+                            stack.push(l);
+                        }
+                    }
+                    break;
+                }
+                case MULTIPOLYGON: {
+                    MultiPolygon mp = (MultiPolygon) g;
+                    v.visit(mp);
+
+                    if (v.descend(mp)) {
+                        for (Polygon p : iterate(mp)) {
+                            stack.push(p);
+                        }
+                    }
+                    break;
+                }
+                case GEOMETRYCOLLECTION: {
+                    GeometryCollection gc = (GeometryCollection) g;
+                    v.visit(gc);
+
+                    if (v.descend(gc)) {
+                        for (Geometry obj : iterate(gc)) {
+                            stack.push(obj);
+                        }
+                    }
+                    break;
+                }
+                default:
+                    throw new IllegalArgumentException("Unknown geometry type: " + g);
+            }
         }
     }
 }

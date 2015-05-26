@@ -12,21 +12,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.jeo.protobuf;
+package io.jeo.geobuf;
 
-import io.jeo.Tests;
-import io.jeo.vector.VectorApiTestBase;
-import io.jeo.vector.VectorDataset;
+/**
+ * Keys for geobuf custom properties.
+ */
+class CustomKeys {
 
-import java.io.File;
-
-public class ProtobufApiTest extends VectorApiTestBase {
-
-    @Override
-    protected VectorDataset createVectorData() throws Exception {
-        File f = Tests.gunzip(getClass().getResourceAsStream("states.pbf.gz"), 
-            Tests.newTmpDir("states", "pbf"), "states.pbf");
-        return new ProtobufDataset(f);
-    }
+    public static final String CRS = "crs";
 
 }

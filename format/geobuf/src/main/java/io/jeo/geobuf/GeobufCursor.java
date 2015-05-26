@@ -12,54 +12,41 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.jeo.protobuf;
+package io.jeo.geobuf;
 
 import java.io.IOException;
+import java.util.Iterator;
 
+import io.jeo.geobuf.Geobuf.Data;
+import io.jeo.geobuf.Geobuf.Data.FeatureCollection;
 import io.jeo.vector.Feature;
 import io.jeo.vector.FeatureCursor;
-import io.jeo.vector.Schema;
 
-public class ProtobufCursor extends FeatureCursor {
+public class GeobufCursor extends FeatureCursor {
 
-    ProtobufReader pbr;
-    Schema schema;
-    Feature next;
+    Iterator<Data.Feature> it;
+    GeobufReader reader;
 
-    public ProtobufCursor(ProtobufDataset data) throws IOException {
-        this(data.reader());
-    }
-
-    public ProtobufCursor(ProtobufReader pbr) throws IOException {
-        this.pbr = pbr;
-
-        // skip over the schema
-        schema = pbr.schema();
+    public GeobufCursor(FeatureCollection fcol, GeobufReader reader) {
+        this.reader = reader;
+        this.it = fcol.getFeaturesList().iterator();
     }
 
     @Override
     public boolean hasNext() throws IOException {
-        if (next == null) {
-            next = pbr.feature(schema);
-        }
-        return next != null;
+        return it.hasNext();
     }
 
     @Override
     public Feature next() throws IOException {
-        try {
-            return next;
-        }
-        finally {
-            next = null;
-        }
+        return reader.decode(it.next());
     }
 
     @Override
     public void close() throws IOException {
-        if (pbr != null) {
-            pbr.close();
+        if (reader != null) {
+            reader.close();
+            reader = null;
         }
-        pbr = null;
     }
 }

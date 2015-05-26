@@ -12,54 +12,59 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.jeo.protobuf;
+package io.jeo.geobuf;
 
 import java.io.IOException;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
+import com.vividsolutions.jts.geom.Geometry;
+import io.jeo.vector.BasicFeature;
 import io.jeo.vector.Feature;
 import io.jeo.vector.FeatureCursor;
 import io.jeo.vector.Schema;
 
-public class ProtobufCursor extends FeatureCursor {
+public class GeobufAppendCursor extends FeatureCursor {
 
-    ProtobufReader pbr;
-    Schema schema;
+    GeobufWriter gbw;
+
+    //Schema schema;
     Feature next;
 
-    public ProtobufCursor(ProtobufDataset data) throws IOException {
-        this(data.reader());
-    }
+    public GeobufAppendCursor(GeobufDataset data) throws IOException {
+        super(Mode.APPEND);
 
-    public ProtobufCursor(ProtobufReader pbr) throws IOException {
-        this.pbr = pbr;
-
-        // skip over the schema
-        schema = pbr.schema();
+        gbw = data.writer();
+        //schema = data.schema();
     }
 
     @Override
     public boolean hasNext() throws IOException {
-        if (next == null) {
-            next = pbr.feature(schema);
-        }
-        return next != null;
+        return true;
     }
 
     @Override
     public Feature next() throws IOException {
-        try {
-            return next;
-        }
-        finally {
-            next = null;
-        }
+        return next = new BasicFeature(null, new LinkedHashMap<String,Object>()) {
+            @Override
+            public BasicFeature put(Geometry g) {
+                //hack
+                return put("geometry", g);
+            }
+        };
+    }
+
+    @Override
+    protected void doWrite() throws IOException {
+        gbw.append(next);
     }
 
     @Override
     public void close() throws IOException {
-        if (pbr != null) {
-            pbr.close();
+        if (gbw != null) {
+            gbw.write().close();
         }
-        pbr = null;
+        gbw = null;
     }
 }

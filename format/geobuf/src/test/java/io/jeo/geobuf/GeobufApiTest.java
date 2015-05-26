@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.jeo.protobuf;
+package io.jeo.geobuf;
 
 import io.jeo.Tests;
 import io.jeo.vector.VectorApiTestBase;
@@ -20,13 +20,13 @@ import io.jeo.vector.VectorDataset;
 
 import java.io.File;
 
-public class ProtobufApiTest extends VectorApiTestBase {
+public class GeobufApiTest extends VectorApiTestBase {
 
     @Override
     protected VectorDataset createVectorData() throws Exception {
         File f = Tests.gunzip(getClass().getResourceAsStream("states.pbf.gz"), 
             Tests.newTmpDir("states", "pbf"), "states.pbf");
-        return new ProtobufDataset(f);
+        return new GeobufDataset(f);
     }
 
 }

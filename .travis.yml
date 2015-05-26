@@ -20,7 +20,7 @@ before_script:
 language: java
 
 script:
-  - mvn install -Djava.awt.headless=true -P protobuf
+  - mvn install -Djava.awt.headless=true -P geobuf
 
 after_success:
   - if [[ "$JAVA_HOME" == *"java-7-openjdk"* ]]; then mvn deploy -DskipTests --settings target/travis/settings.xml; fi

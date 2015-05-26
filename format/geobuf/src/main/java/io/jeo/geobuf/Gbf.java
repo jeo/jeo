@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.jeo.protobuf;
+package io.jeo.geobuf;
 
 import java.io.File;
 import java.io.IOException;
@@ -26,39 +26,42 @@ import io.jeo.vector.VectorDriver;
 import io.jeo.vector.Schema;
 
 /**
- * Google Protocol Buffer (Protobuf) driver.
+ * Geobuf driver.
+ * <p>
+ * Based on {@link https://github.com/mapbox/geobuf}
+ * </p>
  * <p>
  * Usage:
  * <pre><code>
- * Protobuf.open(new File("states.pbf"));
+ * Geobuf.open(new File("states.pbf"));
  * </code></pre>
  * </p>
  * 
  * @author Justin Deoliveira, OpenGeo
  */
-public class Protobuf extends FileDriver<ProtobufDataset> implements VectorDriver<ProtobufDataset> {
+public class Gbf extends FileDriver<GeobufDataset> implements VectorDriver<GeobufDataset> {
 
-    public static ProtobufDataset open(File file) throws IOException {
-        return new ProtobufDataset(file);
+    public static GeobufDataset open(File file) throws IOException {
+        return new GeobufDataset(file);
     }
 
     @Override
     public String name() {
-        return "Protobuf";
+        return "Geobuf";
     }
 
     @Override
     public List<String> aliases() {
-        return Arrays.asList("pb", "pbf");
+        return Arrays.asList("gbf", "pbf");
     }
 
     @Override
-    public Class<ProtobufDataset> type() {
-        return ProtobufDataset.class;
+    public Class<GeobufDataset> type() {
+        return GeobufDataset.class;
     }
     
     @Override
-    public ProtobufDataset open(File file, Map opts) throws IOException {
+    public GeobufDataset open(File file, Map opts) throws IOException {
         return open(file);
     }
 
@@ -73,7 +76,7 @@ public class Protobuf extends FileDriver<ProtobufDataset> implements VectorDrive
     }
 
     @Override
-    public ProtobufDataset create(Map<?, Object> opts, Schema schema) throws IOException {
-        return new ProtobufDataset(FILE.get(opts), schema);
+    public GeobufDataset create(Map<?, Object> opts, Schema schema) throws IOException {
+        return new GeobufDataset(FILE.get(opts));
     }
 }

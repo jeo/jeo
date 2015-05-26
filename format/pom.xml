@@ -24,9 +24,9 @@
 
   <profiles>
     <profile>
-      <id>protobuf</id>
+      <id>geobuf</id>
       <modules>
-        <module>protobuf</module>
+        <module>geobuf</module>
       </modules>
     </profile>
   </profiles>

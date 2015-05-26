@@ -12,68 +12,51 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.jeo.protobuf;
+package io.jeo.geobuf;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.Collections;
 import java.util.Map;
 
+import io.jeo.data.Cursor.Mode;
 import io.jeo.data.Driver;
 import io.jeo.data.FileData;
-import io.jeo.data.Cursor.Mode;
+import io.jeo.geobuf.Geobuf.Data.DataTypeCase;
+import io.jeo.util.Util;
 import io.jeo.vector.FeatureCursor;
 import io.jeo.vector.VectorQuery;
-import io.jeo.vector.VectorQueryPlan;
 import io.jeo.vector.VectorDataset;
 import io.jeo.vector.Schema;
 import io.jeo.util.Key;
+import io.jeo.vector.VectorQueryPlan;
 import org.osgeo.proj4j.CoordinateReferenceSystem;
 
 import com.vividsolutions.jts.geom.Envelope;
 
-public class ProtobufDataset implements VectorDataset, FileData {
+public class GeobufDataset implements VectorDataset, FileData {
 
     File file;
-    Schema schema;
+    GeobufReader reader;
 
-    public ProtobufDataset(File file) throws IOException {
+    public GeobufDataset(File file) throws IOException {
         this.file = file;
-        this.schema = readSchema();
-    }
-
-    public ProtobufDataset(File file, Schema schema) throws IOException {
-        this.file = file;
-        this.schema = schema;
     }
 
     @Override
     public Schema schema() throws IOException {
-        return schema;
-    }
-
-    Schema readSchema() throws IOException {
-        ProtobufReader reader = reader();
-        try {
-            return reader.schema();
-        }
-        finally {
-            reader.close();
-        }
+        return reader().featureCollection().first().get().schema();
     }
 
     @Override
     public Driver<?> driver() {
-        return new Protobuf();
+        return new Gbf();
     }
 
     @Override
     public Map<Key<?>, Object> driverOptions() {
-        return (Map) Collections.singletonMap(Protobuf.FILE, file);
+        return (Map) Collections.singletonMap(Gbf.FILE, file);
     }
 
     @Override
@@ -83,12 +66,12 @@ public class ProtobufDataset implements VectorDataset, FileData {
 
     @Override
     public String name() {
-        return schema.name();
+        return Util.base(file.getName());
     }
 
     @Override
     public CoordinateReferenceSystem crs() throws IOException {
-        return schema.crs();
+        return reader().crs();
     }
 
     @Override
@@ -110,22 +93,33 @@ public class ProtobufDataset implements VectorDataset, FileData {
             if (!fileIsEmpty()) {
                 throw new IOException("Can't append to non empty dataset");
             }
-            return new ProtobufAppendCursor(this);
+            return new GeobufAppendCursor(this);
         }
 
-        return new VectorQueryPlan(q).apply(new ProtobufCursor(this));
+        return new VectorQueryPlan(q).apply(reader().featureCollection());
     }
 
     @Override
     public void close() {
+        if (reader != null) {
+            reader.close();
+            reader = null;
+        }
     }
 
-    ProtobufReader reader() throws IOException {
-        return new ProtobufReader(new BufferedInputStream(new FileInputStream(file)));
+    GeobufReader reader() throws IOException {
+        if (reader == null) {
+            reader = new GeobufReader(Files.newInputStream(file.toPath()));
+            if (reader.data.getDataTypeCase() != DataTypeCase.FEATURE_COLLECTION) {
+                // TODO: wrap geometry and feature?
+                throw new IOException("Geobuf not a feature collection");
+            }
+        }
+        return reader;
     }
 
-    ProtobufWriter writer() throws IOException {
-        return new ProtobufWriter(new BufferedOutputStream(new FileOutputStream(file)));
+    GeobufWriter writer() throws IOException {
+        return new GeobufWriter(Files.newOutputStream(file.toPath()));
     }
 
     boolean fileIsEmpty() {

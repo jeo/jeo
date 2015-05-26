@@ -168,7 +168,7 @@ public class GeobufTest {
         return new GeobufReader(new ByteArrayInputStream(out.toByteArray()));
     }
 
-    @Test
+    //@Test
     public void testData() throws Exception {
         GeobufWriter w = new GeobufWriter(Files.newOutputStream(Paths.get(
             "/Users/jdeolive/Projects/jeo/git/jeo/format/geobuf/src/test/resources/io/jeo/geobuf/states.pbf")));

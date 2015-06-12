@@ -37,6 +37,7 @@
    <module>nano</module>
    <module>render</module>
    <module>repo</module>
+   <module>solr</module>
    <module>svg</module>
   </modules>
 

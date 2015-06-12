@@ -249,22 +249,22 @@ public class GeobufWriter implements Disposable {
         return b.build();
     }
 
-    public GeobufWriter encode(Point p, Geometry.Builder b) {
+    GeobufWriter encode(Point p, Geometry.Builder b) {
         b.setType(Type.POINT);
         return coord(p.getCoordinate(), b);
     }
 
-    public GeobufWriter encode(LineString l, Geometry.Builder b) {
+    GeobufWriter encode(LineString l, Geometry.Builder b) {
         b.setType(Type.LINESTRING);
         return coords(l, b);
     }
 
-    public GeobufWriter encode(Polygon p, Geometry.Builder b) {
+    GeobufWriter encode(Polygon p, Geometry.Builder b) {
         b.setType(Type.POLYGON);
         return coords(p, b, false);
     }
 
-    public GeobufWriter encode(final MultiPoint mp, Geometry.Builder b) {
+    GeobufWriter encode(final MultiPoint mp, Geometry.Builder b) {
         b.setType(Type.MULTIPOINT);
         b.addAllCoords(new Iterable<Long>() {
             @Override
@@ -275,7 +275,7 @@ public class GeobufWriter implements Disposable {
         return this;
     }
 
-    public GeobufWriter encode(final MultiLineString ml, Geometry.Builder b) {
+    GeobufWriter encode(final MultiLineString ml, Geometry.Builder b) {
         b.setType(Type.MULTILINESTRING);
         if (ml.getNumGeometries() > 1) {
             for (LineString line : Geom.iterate(ml)) {
@@ -289,7 +289,7 @@ public class GeobufWriter implements Disposable {
         return this;
     }
 
-    public GeobufWriter encode(final MultiPolygon mp, Geometry.Builder b) {
+    GeobufWriter encode(final MultiPolygon mp, Geometry.Builder b) {
         b.setType(Type.MULTIPOLYGON);
         if (mp.getNumGeometries() != 1 || Geom.first(mp).getNumInteriorRing() > 0) {
             // encode with lengths
@@ -306,7 +306,7 @@ public class GeobufWriter implements Disposable {
         return this;
     }
 
-    public GeobufWriter encode(io.jeo.vector.Feature f) {
+    GeobufWriter encode(io.jeo.vector.Feature f) {
         data.setFeature(doEncode(f));
         return this;
     }
@@ -332,7 +332,7 @@ public class GeobufWriter implements Disposable {
         return fb.build();
     }
 
-    public GeobufWriter encode(FeatureCursor cursor) throws IOException {
+    GeobufWriter encode(FeatureCursor cursor) throws IOException {
         FeatureCollection.Builder b = FeatureCollection.newBuilder();
 
         if (crs != null) {

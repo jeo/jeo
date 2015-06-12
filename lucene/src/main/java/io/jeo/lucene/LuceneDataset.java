@@ -208,7 +208,7 @@ public class LuceneDataset implements VectorDataset, FileData {
             }
         }
 
-        if (!Filters.isFalseOrNull(q.filter())) {
+        if (!Filters.isTrueOrNull(q.filter())) {
             Pair<Filter,Filter> filters = new FilterSplitter(new LuceneQueryQualifier(this)).split(q.filter());
             if (!Filters.isTrueOrNull(filters.first)) {
                 try {

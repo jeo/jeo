@@ -21,6 +21,8 @@ import org.junit.Test;
 
 import com.vividsolutions.jts.geom.Point;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 public class SchemaBuilderTest {
 
@@ -48,5 +50,22 @@ public class SchemaBuilderTest {
         // ordering
         assertEquals(schema.field("sp"), selected.fields.get(0));
         assertEquals(schema.field("pp"), selected.fields.get(1));
+    }
+
+    @Test
+    public void testRenameFields() {
+        Schema schema = new SchemaBuilder("widgets")
+            .fields("sp:String,ip:Integer,pp:Point:srid=4326").schema();
+
+        Map<String,String> renames = new HashMap<>();
+        renames.put("sp", "ps");
+        renames.put("ip", "pi");
+
+        schema = SchemaBuilder.renameFields(schema, renames);
+        assertNotNull(schema.field("ps"));
+        assertNotNull(schema.field("pi"));
+        assertNotNull(schema.field("pp"));
+        assertNull(schema.field("sp"));
+        assertNull(schema.field("ip"));
     }
 }

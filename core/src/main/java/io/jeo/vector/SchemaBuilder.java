@@ -274,4 +274,23 @@ public class SchemaBuilder {
     public static Schema rename(Schema original, String name) {
         return new Schema(name, original.uri, original.crs, original.fields);
     }
+
+    /**
+     * Creates a new Schema with renamed fields.
+     *
+     * @param original The original schema.
+     * @param renames Set of fields to rename, key specifies original field name, value specifies new name.
+     *
+     * @return The new schema.
+     */
+    public static Schema renameFields(Schema original, Map<String,String> renames) {
+        List<Field> fields = new ArrayList<>();
+        for (Field f : original) {
+            if (renames.containsKey(f.name())) {
+                f = new Field(renames.get(f.name()), f.type, f.crs, f.props);
+            }
+            fields.add(f);
+        }
+        return new Schema(original.name(), fields);
+    }
 }

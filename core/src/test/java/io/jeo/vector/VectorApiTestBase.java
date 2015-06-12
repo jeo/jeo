@@ -267,6 +267,7 @@ public abstract class VectorApiTestBase {
             set.remove(cursor.next().get("STATE_ABBR"));
             count++;
         }
+        cursor.close();
         assertTrue("expected empty set, found " + set, set.isEmpty());
         assertEquals(abbrs.length, count);
     }

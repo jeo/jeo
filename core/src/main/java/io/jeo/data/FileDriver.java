@@ -54,6 +54,11 @@ public abstract class FileDriver<T> implements Driver<T> {
         return (List) Arrays.asList(FILE);
     }
 
+    @Override
+    public String family() {
+        return "jeo";
+    }
+
     /**
      * Checks for the existence of the {@link FileDriver#FILE} key and calls through to 
      * {@link #canOpen(File, Map)} 

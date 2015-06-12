@@ -100,6 +100,11 @@ public class GDAL extends FileDriver<GDALDataset> implements RasterDriver<GDALDa
     }
 
     @Override
+    public String family() {
+        return "gdal";
+    }
+
+    @Override
     public boolean canOpen(Map<?, Object> opts, Messages msgs) {
         try {
             init();

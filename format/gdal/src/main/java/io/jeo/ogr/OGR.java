@@ -114,6 +114,11 @@ public class OGR extends FileVectorDriver<OGRWorkspace> implements Disposable {
     }
 
     @Override
+    public String family() {
+        return "gdal";
+    }
+
+    @Override
     protected boolean canCreate(File file, Map<?, Object> opts, Messages msgs) {
         return false;
     }

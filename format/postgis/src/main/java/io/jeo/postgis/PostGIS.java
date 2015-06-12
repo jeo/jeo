@@ -89,6 +89,11 @@ public class PostGIS implements VectorDriver<PostGISWorkspace>{
     }
 
     @Override
+    public String family() {
+        return "jeo";
+    }
+
+    @Override
     public boolean canOpen(Map<?, Object> opts, Messages msgs) {
         if (!DB.in(opts)) {
             Messages.of(msgs).report("No " + DB + " option specified");

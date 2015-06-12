@@ -62,6 +62,15 @@ public interface Driver<T> {
     Class<T> type();
 
     /**
+     * The family of the driver.
+     * <p>
+     * This value is used to group drivers based on implementation. For example this value would indicate if the
+     * driver is based on another library that provides geo format support (GDAL, GeoTools, etc...)
+     * </p>
+     */
+    String family();
+
+    /**
      * Returns the keys supported by the driver.
      */
     List<Key<?>> keys();

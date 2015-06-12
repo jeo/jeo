@@ -67,6 +67,11 @@ public class Memory implements VectorDriver<MemWorkspace>, RasterDriver<MemWorks
     }
 
     @Override
+    public String family() {
+        return "jeo";
+    }
+
+    @Override
     public List<Key<?>> keys() {
         return (List) Arrays.asList(NAME);
     }

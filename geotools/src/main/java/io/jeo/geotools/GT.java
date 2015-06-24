@@ -22,12 +22,17 @@ import java.io.IOException;
 import java.util.*;
 import java.util.List;
 
+import com.vividsolutions.jts.geom.Envelope;
+import io.jeo.filter.All;
+import io.jeo.filter.None;
+import io.jeo.util.Supplier;
 import org.geotools.factory.CommonFactoryFinder;
 import org.geotools.factory.Hints;
 import org.geotools.feature.simple.SimpleFeatureImpl;
 import org.geotools.feature.simple.SimpleFeatureTypeBuilder;
 import org.geotools.filter.expression.InternalVolatileFunction;
 import org.geotools.filter.identity.FeatureIdImpl;
+import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.referencing.CRS;
 import io.jeo.data.Cursor;
 import io.jeo.filter.FilterWalker;
@@ -46,8 +51,11 @@ import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.feature.type.AttributeDescriptor;
 import org.opengis.feature.type.GeometryDescriptor;
+import org.opengis.filter.Filter;
 import org.opengis.filter.FilterFactory;
+import org.opengis.filter.FilterFactory2;
 import org.opengis.filter.expression.Expression;
+import org.opengis.referencing.FactoryException;
 import org.osgeo.proj4j.CoordinateReferenceSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,7 +64,7 @@ public class GT {
 
     static Logger LOGGER = LoggerFactory.getLogger(GT.class);
 
-    static FilterFactory filterFactory = CommonFactoryFinder.getFilterFactory();
+    static FilterFactory2 filterFactory = CommonFactoryFinder.getFilterFactory2();
 
     static final String FORCE_XY = "org.geotools.referencing.forceXY";
 
@@ -174,50 +182,35 @@ public class GT {
         };
     }
 
-    public static Expression expr(io.jeo.filter.Expression expr) {
-        Expression e = (Expression) expr.accept(new FilterWalker<Object>() {
-            @Override
-            public Object visit(Literal literal, Object obj) {
-                return filterFactory.literal(literal.evaluate(null));
-            }
-
-            @Override
-            public Object visit(Property property, Object obj) {
-                return filterFactory.property(property.property());
-            }
-
-            @Override
-            public Object visit(Mixed mixed, Object obj) {
-                List<Expression> l = new ArrayList<Expression>();
-                for (io.jeo.filter.Expression e : mixed.expressions()) {
-                    l.add(expr(e));
+    public static Expression expr(final io.jeo.filter.Expression expr) {
+        return new FilterConverter(filterFactory, null).convert(expr)
+            .orElseThrow(new Supplier<RuntimeException>() {
+                @Override
+                public RuntimeException get() {
+                    throw new IllegalArgumentException("Unable to convert expression: " + expr);
                 }
+            });
+    }
 
-                return filterFactory.function("strConcat", l.toArray(new Expression[l.size()]));
-            }
+    public static Filter filter(final io.jeo.filter.Filter filter, SimpleFeatureType featureType) {
+        return new FilterConverter(filterFactory, featureType).convert(filter)
+            .orElseThrow(new Supplier<RuntimeException>() {
+                @Override
+                public RuntimeException get() {
+                    throw new IllegalArgumentException("Unable to convert filter: " + filter);
+                }
+            });
+    }
 
-            @Override
-            public Object visit(final Function function, Object obj) {
-                return new InternalVolatileFunction(function.name()) {
-                    @Override
-                    public Object evaluate(Object object) {
-                        if (object instanceof SimpleFeature) {
-                            return function.evaluate(feature((SimpleFeature)object));
-                        }
-                        return function.evaluate(object);
-                        //throw new IllegalArgumentException(
-                        //    "unable to handle function input: " + object);
-                    }
-                };
-            }
-
-        }, null);
-
-        if (e == null) {
-            throw new IllegalArgumentException("unable to convert: " + expr);
+    public static CoordinateReferenceSystem crs(org.opengis.referencing.crs.CoordinateReferenceSystem crs) {
+        Integer epsg = null;
+        try {
+            epsg = CRS.lookupEpsgCode(crs, false);
+        } catch (Exception e) {
+            LOGGER.debug("Error looking up epsg code for {}", crs, e);
         }
 
-        return e;
+        return epsg != null ? Proj.crs(epsg) : Proj.crs(crs.toWKT());
     }
 
     /**

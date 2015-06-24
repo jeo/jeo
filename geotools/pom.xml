@@ -44,6 +44,12 @@
       <scope>test</scope>
     </dependency>
     <dependency>
+      <groupId>org.geotools</groupId>
+      <artifactId>gt-shapefile</artifactId>
+      <version>${geotools.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
       <groupId>org.gdal</groupId>
       <artifactId>gdal</artifactId>
       <scope>test</scope>

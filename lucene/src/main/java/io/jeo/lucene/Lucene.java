@@ -34,7 +34,7 @@ public class Lucene extends FileVectorDriver<LuceneDataset> {
     /**
      * List of spatial fields in the lucene index.
      */
-    public static Key<String> SPATIAL_FIELDS = new Key<>("spatial_fields", String.class, null, true);
+    public static Key<String> SPATIAL_FIELDS = new Key<>("spatial_fields", String.class).multi(true);
 
     /**
      * Spatial context.

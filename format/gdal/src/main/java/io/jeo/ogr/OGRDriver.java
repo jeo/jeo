@@ -48,6 +48,11 @@ public abstract class OGRDriver<T> extends FileVectorDriver<T> {
     }
 
     @Override
+    public String family() {
+        return "gdal";
+    }
+
+    @Override
     protected boolean canCreate(File file, Map<?, Object> opts, Messages msgs) {
         return false;
     }

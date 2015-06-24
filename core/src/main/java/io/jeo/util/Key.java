@@ -27,9 +27,24 @@ import java.util.Map;
  */
 public class Key<T> {
 
-    String name;
+    /**
+     * key names
+     */
+    List<String> names = new ArrayList<>();
+
+    /**
+     * type of the key
+     */
     Class<T> type;
+
+    /**
+     * default value
+     */
     T def;
+
+    /**
+     * multi-valued or not
+     */
     boolean multi;
 
     public Key(String name, Class<T> type) {
@@ -37,21 +52,16 @@ public class Key<T> {
     }
 
     public Key(String name, Class<T> type, T def) {
-        this(name, type, def, false);
-    }
-
-    public Key(String name, Class<T> type, T def, boolean multi) {
-        this.name = name;
+        this.names.add(name);
         this.type = type;
         this.def = def;
-        this.multi = multi;
     }
 
     /**
      * The name of the key.
      */
     public String name() {
-        return name;
+        return names.get(0);
     }
 
     /**
@@ -76,6 +86,24 @@ public class Key<T> {
     }
 
     /**
+     * Sets the key multi valued flag.
+     */
+    public Key multi(boolean multi) {
+        this.multi = multi;
+        return this;
+    }
+
+    /**
+     * Adds a key alias.
+     */
+    public Key alias(String... names) {
+        for (String n : names) {
+            this.names.add(n);
+        }
+        return this;
+    }
+
+    /**
      * Loads the key from a map, converting the raw map value to the value of the key.
      * <p>
      * If the map contains no matching key {@link #def()} is returned.
@@ -87,7 +115,7 @@ public class Key<T> {
         }
 
         Object raw = raw(map);
-        if (raw == null) {
+        if (raw == null || "".equals(raw)) {
             return null;
         }
 
@@ -138,14 +166,34 @@ public class Key<T> {
      * Returns the raw value in the map for the key, with no conversions.
      */
     public Object raw(Map<?,Object> map) {
-        return map.containsKey(this) ? map.get(this) : map.get(name);
+        if (map.containsKey(this)) {
+            return map.get(this);
+        }
+
+        for (String name : names) {
+            if (map.containsKey(name)) {
+                return map.get(name);
+            }
+        }
+        return null;
     }
 
     /**
      * Determines if the key exists in a map.
      */
     public boolean in(Map<?, Object> map) {
-        return map != null && (map.containsKey(this) || map.containsKey(name));
+        if (map == null) {
+            return false;
+        }
+        if (map.containsKey(this)) {
+            return true;
+        }
+        for (String name : names) {
+            if (map.containsKey(name)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -166,7 +214,7 @@ public class Key<T> {
         final int prime = 31;
         int result = 1;
         result = prime * result + ((def == null) ? 0 : def.hashCode());
-        result = prime * result + ((name == null) ? 0 : name.hashCode());
+        result = prime * result + ((names == null) ? 0 : names.hashCode());
         result = prime * result + ((type == null) ? 0 : type.hashCode());
         return result;
     }
@@ -185,10 +233,10 @@ public class Key<T> {
                 return false;
         } else if (!def.equals(other.def))
             return false;
-        if (name == null) {
-            if (other.name != null)
+        if (names == null) {
+            if (other.names != null)
                 return false;
-        } else if (!name.equals(other.name))
+        } else if (!names.equals(other.names))
             return false;
         if (type == null) {
             if (other.type != null)

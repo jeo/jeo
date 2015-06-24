@@ -21,12 +21,14 @@ import java.util.List;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 public class KeyTest {
 
     @Test
     public void testConvertMulti() {
-        Key<Integer> key = new Key("foo", Integer.class, null, true);
+        Key<Integer> key = new Key("foo", Integer.class).multi(true);
         Map<String,Object> map = (Map) Collections.singletonMap(key.name(), "1,2,3");
 
         List<Integer> list = key.all(map);
@@ -35,5 +37,19 @@ public class KeyTest {
         assertEquals(1, list.get(0).intValue());
         assertEquals(2, list.get(1).intValue());
         assertEquals(3, list.get(2).intValue());
+    }
+
+    @Test
+    public void testAliases() {
+        Key<Integer> key = new Key("foo", Integer.class).alias("bar");
+
+        assertTrue(key.in((Map) Collections.singletonMap(key, 1)));
+        assertTrue(key.in((Map) Collections.singletonMap("foo", 1)));
+        assertTrue(key.in((Map) Collections.singletonMap("bar", 1)));
+        assertFalse(key.in((Map) Collections.singletonMap("baz", 1)));
+
+        assertEquals(Integer.valueOf(1), key.get((Map) Collections.singletonMap(key, 1)));
+        assertEquals(Integer.valueOf(1), key.get((Map) Collections.singletonMap("foo", 1)));
+        assertEquals(Integer.valueOf(1), key.get((Map) Collections.singletonMap("bar", 1)));
     }
 }

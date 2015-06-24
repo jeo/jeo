@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jeo.lucene;
+package io.jeo.lucene;
 
 import com.spatial4j.core.context.jts.JtsSpatialContext;
 import com.spatial4j.core.shape.Point;
@@ -208,7 +208,7 @@ public class LuceneDataset implements VectorDataset, FileData {
             }
         }
 
-        if (!Filters.isFalseOrNull(q.filter())) {
+        if (!Filters.isTrueOrNull(q.filter())) {
             Pair<Filter,Filter> filters = new FilterSplitter(new LuceneQueryQualifier(this)).split(q.filter());
             if (!Filters.isTrueOrNull(filters.first)) {
                 try {

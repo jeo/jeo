@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jeo.lucene;
+package io.jeo.lucene;
 
 import com.spatial4j.core.context.jts.JtsSpatialContext;
 import org.apache.lucene.analysis.Analyzer;
@@ -26,7 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-import static org.jeo.lucene.Lucene.*;
+import static io.jeo.lucene.Lucene.*;
 
 /**
  * Lucene driver options.

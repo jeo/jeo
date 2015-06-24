@@ -1,4 +1,4 @@
 /**
  * Lucene driver.
  */
-package org.jeo.lucene;
+package io.jeo.lucene;

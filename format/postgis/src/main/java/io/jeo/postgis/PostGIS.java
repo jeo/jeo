@@ -31,7 +31,7 @@ public class PostGIS implements VectorDriver<PostGISWorkspace>{
     /**
      * Database key.
      */
-    public static final Key<String> DB = new Key<String>("db", String.class);
+    public static final Key<String> DB = new Key<>("db", String.class).alias("database");
 
     /**
      * Schema key.

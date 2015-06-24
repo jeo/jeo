@@ -16,6 +16,7 @@ package io.jeo.json;
 
 import com.vividsolutions.jts.geom.Envelope;
 import io.jeo.data.Dataset;
+import io.jeo.data.Driver;
 import io.jeo.data.Handle;
 import io.jeo.data.Workspace;
 import io.jeo.geom.Envelopes;
@@ -24,6 +25,8 @@ import io.jeo.raster.RasterDataset;
 import io.jeo.tile.TileDataset;
 import io.jeo.tile.TileGrid;
 import io.jeo.tile.TilePyramid;
+import io.jeo.util.Key;
+import io.jeo.util.Messages;
 import io.jeo.vector.Field;
 import io.jeo.geojson.GeoJSONWriter;
 import io.jeo.util.Dimension;
@@ -33,7 +36,10 @@ import org.osgeo.proj4j.CoordinateReferenceSystem;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import static java.lang.String.format;
 
 /**
  * Writes common jeo objects as JSON.
@@ -70,6 +76,61 @@ public class JeoJSONWriter extends GeoJSONWriter {
      */
     public JeoJSONWriter(Writer out, int indentSize) {
         super(out, indentSize);
+    }
+
+    /**
+     * Encodes a driver object.
+     */
+    public JeoJSONWriter driver(Driver<?> drv, Map<String,Object> extra) throws IOException {
+        object();
+
+        key("name").value(drv.name());
+
+        Messages msgs = new Messages();
+        key("enabled").value(drv.isEnabled(msgs));
+
+        key("aliases").array();
+        for (String s : drv.aliases()) {
+            value(s);
+        }
+        endArray();
+
+        List<Throwable> errors = msgs.list();
+        if (!errors.isEmpty()) {
+            key("messages").array();
+            for (Throwable t : errors) {
+                value(format(Locale.ROOT, "%s: %s", t.getClass().getName(), t.getMessage()));
+            }
+            endArray();
+        }
+
+        key("type");
+        Class<?> type = drv.type();
+        if (Workspace.class.isAssignableFrom(type)) {
+            value("workspace");
+        }
+        else if (Dataset.class.isAssignableFrom(type)) {
+            value("dataset");
+        }
+        else {
+            value(drv.type().getSimpleName());
+        }
+
+        key("keys").object();
+        for (Key<?> key : drv.keys()) {
+            key(key.name()).object();
+            key("type").value(key.type().getSimpleName());
+            if (key.def() != null) {
+                key("default").value(key.def());
+            }
+            endObject();
+        }
+        endObject(); // keys
+
+        encode(extra);
+        endObject(); // root
+
+        return this;
     }
 
     /**

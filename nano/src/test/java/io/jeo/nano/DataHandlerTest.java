@@ -62,7 +62,7 @@ public class DataHandlerTest extends HandlerTestSupport {
 
         assertJSONEquals(resp, "{'name':'emptylayer','type':'vector',"
                 + "'driver':'mockDriver','bbox':[-180.0,-90.0,180.0,90.0],"
-                + "'crs':['+proj=longlat','+datum=WGS84','+no_defs'],"
+                + "'crs':{'name':'EPSG:4326','params':{'proj':'longlat','datum':'WGS84','no_defs':'no_defs'}},"
                 + "'count':42,'schema':{'name':'String'},"
                 + "'features':'\\/features\\/foo\\/bar.json'}");
 

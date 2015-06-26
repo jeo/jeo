@@ -86,6 +86,11 @@ public class FilterSplitterTest {
                 String s = compare.right().evaluate(null).toString();
                 return Boolean.valueOf(s);
             }
+
+            @Override
+            public Boolean visit(Logic<?> logic, Object obj) {
+                return true;
+            }
         });
         return splitter.split(f);
     }

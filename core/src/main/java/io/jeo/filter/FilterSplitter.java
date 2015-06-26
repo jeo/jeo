@@ -147,6 +147,12 @@ public class FilterSplitter extends StrictFilterAdapter<Object> {
     @Override
     public Object visit(Logic<?> logic, Object obj) {
         FilterStack stack = (FilterStack) obj;
+
+        if (!qualify(logic, obj)) {
+            stack.fail.push(logic);
+            return obj;
+        }
+
         int pass = stack.pass.size();
         int fail = stack.fail.size();
 
@@ -175,14 +181,17 @@ public class FilterSplitter extends StrictFilterAdapter<Object> {
         return obj;
     }
 
+    boolean qualify(Filter f, Object obj) {
+        return (Boolean) f.accept(qualifier, obj);
+    }
+
     Object test(Filter f, Object obj) {
         FilterStack stack = (FilterStack) obj;
         if (f instanceof Logic) {
             f.accept(this, obj);
         }
         else {
-            Boolean handle = (Boolean) f.accept(qualifier, obj);
-            if (handle) {
+            if (qualify(f, obj)) {
                 stack.pass.push(f);
             }
             else{

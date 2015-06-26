@@ -107,7 +107,7 @@ public class MongoDataset implements VectorDataset {
         if (!Filters.isTrueOrNull(q.filter())) {
             // TODO: transform natively to filter 
             // we can't optimize
-            return qp.apply(cursor(q)).count();
+            return qp.apply(read(q)).count();
         }
 
         long count = 
@@ -117,7 +117,7 @@ public class MongoDataset implements VectorDataset {
     }
 
     @Override
-    public FeatureCursor cursor(VectorQuery q) throws IOException {
+    public FeatureCursor read(VectorQuery q) throws IOException {
         if (q.mode() == Mode.APPEND) {
             return new MongoCursor(q.mode(), null, this);
         }

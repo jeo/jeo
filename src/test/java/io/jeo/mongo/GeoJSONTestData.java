@@ -33,7 +33,7 @@ public class GeoJSONTestData extends MongoTestData {
 
     public void setUp(DBCollection dbcol, MongoWorkspace workspace) throws IOException {
         VectorDataset data = TestData.states();
-        for (Feature f : data.cursor(new VectorQuery())) {
+        for (Feature f : data.read(new VectorQuery())) {
             f.put("geometry", Geom.iterate((MultiPolygon) f.geometry()).iterator().next());
             dbcol.insert((DBObject) JSON.parse(GeoJSONWriter.toString(f)));
         }

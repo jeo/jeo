@@ -43,7 +43,7 @@ public class GTTest {
 
         assertEquals("widgets", schema.name());
         assertEquals(Proj.crs(4326).getName(), schema.crs().getName());
-        assertEquals(4, schema.getFields().size());
+        assertEquals(4, schema.fields().size());
 
         assertNotNull(schema.field("geometry"));
         assertEquals(Point.class, schema.field("geometry").type());

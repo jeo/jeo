@@ -24,12 +24,12 @@ import java.util.Objects;
  * 
  * @author Justin Deoliveira, OpenGeo
  */
-public class Comparison<T> extends Filter<T> {
+public class Comparison<T> extends BinaryFilter<T> {
 
     /**
      * Comparison operator type.  
      */
-    public static enum Type {
+    public enum Type {
         EQUAL("="), NOT_EQUAL("!="),
         LESS("<") {
             @Override
@@ -73,46 +73,14 @@ public class Comparison<T> extends Filter<T> {
     }
 
     Type type;
-    Expression left, right;
 
     public Comparison(Type type, Expression left, Expression right) {
+        super(left, right);
         this.type = type;
-        this.left = left;
-        this.right = right;
-
-        Objects.requireNonNull(left, "operands must not be null");
-        Objects.requireNonNull(right, "right operand must not be null");
     }
 
     public Type type() {
         return type;
-    }
-
-    public Expression left() {
-        return left;
-    }
-
-    public Expression right() {
-        return right;
-    }
-
-    /**
-     * Normalizes the filter.
-     * <p>
-     * A "normal" filter is one where a {@link Property} is compared to another expression.
-     * This method returns <code>null</code> if the filter is not normal.
-     * </p>
-     */
-    public Comparison<T> normalize() {
-        if (left instanceof Property) {
-            return this;
-        }
-        else if (right instanceof Property) {
-            return new Comparison<>(type.invert(), right, left);
-        }
-        else {
-            return null;
-        }
     }
 
     @Override
@@ -121,6 +89,16 @@ public class Comparison<T> extends Filter<T> {
         Object o2 = right.evaluate(obj);
 
         return compare(o1, o2);
+    }
+
+    @Override
+    public Comparison<T> normalize() {
+        return (Comparison<T>) super.normalize();
+    }
+
+    @Override
+    public Comparison<T> invert() {
+        return new Comparison<>(type.invert(), right, left);
     }
 
     protected boolean compare(Object o1, Object o2) {

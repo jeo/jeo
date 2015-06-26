@@ -29,12 +29,12 @@ import java.util.Objects;
  * 
  * TODO: use prepared geometries
  */
-public class Spatial<T> extends Filter<T> {
+public class Spatial<T> extends BinaryFilter<T> {
 
     /**
      * Spatial operator type.  
      */
-    public static enum Type {
+    public enum Type {
         EQUALS, INTERSECTS, TOUCHES, DISJOINT, OVERLAPS, CROSSES, COVERS, BBOX,
         WITHIN {
             @Override
@@ -67,12 +67,11 @@ public class Spatial<T> extends Filter<T> {
     }
 
     final Type type;
-    final Expression left, right, distance;
+    final Expression distance;
 
     public Spatial(Type type, Expression left, Expression right, Expression distance) {
+        super(left, right);
         Objects.requireNonNull(type, "type must not be null");
-        Objects.requireNonNull(left, "operands must not be null");
-        Objects.requireNonNull(right, "operands must not be null");
 
         switch (type) {
             case DWITHIN: case BEYOND:
@@ -81,8 +80,6 @@ public class Spatial<T> extends Filter<T> {
                 }
         }
         this.type = type;
-        this.left = left;
-        this.right = right;
         this.distance = distance;
     }
 
@@ -94,32 +91,14 @@ public class Spatial<T> extends Filter<T> {
         return distance;
     }
 
-    public Expression left() {
-        return left;
-    }
-
-    public Expression right() {
-        return right;
-    }
-
-    /**
-     * Normalizes the filter.
-     * <p>
-     * A "normal" filter is one where a {@link Property} is compared to another expression.
-     * This method returns <code>null</code> if the filter is not normal.
-     * </p>
-     */
+    @Override
     public Spatial<T> normalize() {
-        if (left instanceof Property) {
-            return this;
-        }
-        else if (right instanceof Property) {
-            // flip
-            return new Spatial<>(type.invert(), right, left, distance);
-        }
-        else {
-            return null;
-        }
+        return (Spatial<T>) super.normalize();
+    }
+
+    @Override
+    public Spatial<T> invert() {
+        return new Spatial<>(type.invert(), right, left, distance);
     }
 
     @Override

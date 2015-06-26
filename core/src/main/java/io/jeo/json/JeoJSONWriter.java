@@ -39,6 +39,9 @@ import java.io.Writer;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import static java.lang.String.format;
 
 /**
@@ -307,15 +310,7 @@ public class JeoJSONWriter extends GeoJSONWriter {
 
         CoordinateReferenceSystem crs = ds.crs();
         if (crs != null) {
-            key("crs");
-            array();
-
-            if (crs.getParameters() != null) {
-                for (String s : crs.getParameters()) {
-                    value(s);
-                }
-            }
-            endArray();
+            key("crs").proj(crs);
         }
 
         return this;
@@ -341,6 +336,42 @@ public class JeoJSONWriter extends GeoJSONWriter {
                 value(e.getValue());
             }
         }
+
+        return this;
+    }
+
+    static Pattern PROJ_PARAM_RE = Pattern.compile("([\\+-])?(\\w+)(?:=(\\w+))?");
+
+    public JeoJSONWriter proj(CoordinateReferenceSystem crs) throws IOException {
+        object();
+
+        key("name").value(crs.getName());
+
+        if (crs.getParameters() != null) {
+            key("params").object();
+            for (String s : crs.getParameters()) {
+                Matcher m = PROJ_PARAM_RE.matcher(s);
+                if (m.matches()) {
+                    String key = m.group(2);
+                    String val = m.group(3);
+
+                    if (val != null && !"".equals(val)) {
+                        key(key).value(val);
+                    }
+                    else {
+                        key(key).value(key);
+                    }
+                    //key(m.group(1)).value(m.group(2));
+                }
+                else {
+                    key(s).nul();
+                }
+                //value(s);
+            }
+            endObject();
+        }
+
+        endObject();
 
         return this;
     }

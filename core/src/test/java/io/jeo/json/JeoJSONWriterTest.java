@@ -15,6 +15,7 @@
 package io.jeo.json;
 
 import io.jeo.TestData;
+import io.jeo.proj.Proj;
 import io.jeo.util.Util;
 import org.junit.Before;
 import org.junit.Test;
@@ -61,6 +62,19 @@ public class JeoJSONWriterTest {
         JSONObject obj = (JSONObject) JSONValue.parseWithException(input());
         assertEquals("ne1", obj.get("name"));
         assertEquals("tile", obj.get("type"));
+    }
+
+    @Test
+    public void testProj() throws Exception {
+        JeoJSONWriter w = new JeoJSONWriter(output(), 2);
+        w.proj(Proj.EPSG_4326).flush();
+
+        JSONObject obj = (JSONObject) JSONValue.parseWithException(input());
+        assertEquals("EPSG:4326", obj.get("name"));
+
+        JSONObject params = (JSONObject) obj.get("params");
+        assertEquals("longlat", params.get("proj"));
+        assertEquals("WGS84", params.get("datum"));
     }
 
     Writer output() {

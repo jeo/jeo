@@ -16,13 +16,14 @@ package io.jeo.solr;
 
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.Point;
-import com.vividsolutions.jts.geom.Polygon;
 import io.jeo.data.Driver;
-import io.jeo.filter.Property;
+import io.jeo.filter.Filter;
+import io.jeo.filter.FilterSplitter;
+import io.jeo.filter.Filters;
 import io.jeo.geom.Envelopes;
 import io.jeo.proj.Proj;
 import io.jeo.util.Key;
+import io.jeo.util.Pair;
 import io.jeo.vector.FeatureCursor;
 import io.jeo.vector.Field;
 import io.jeo.vector.Schema;
@@ -51,6 +52,8 @@ import java.util.Map;
 import static java.lang.String.format;
 
 public class SolrDataset implements VectorDataset {
+
+    static String SPATIAL_TYPE = "spatialType";
 
     static Logger LOG = LoggerFactory.getLogger(SolrDataset.class);
 
@@ -91,7 +94,7 @@ public class SolrDataset implements VectorDataset {
     }
 
     Schema buildSchema() throws IOException {
-        LukeRequest req = initRequest(new LukeRequest());
+        LukeRequest req = runRequest(new LukeRequest());
         req.setShowSchema(true);
 
         LukeResponse rsp;
@@ -107,9 +110,13 @@ public class SolrDataset implements VectorDataset {
         SchemaBuilder sb = Schema.build(core);
         for (FieldInfo fld : rsp.getFieldInfo().values()) {
             FieldTypeInfo fldType = rsp.getFieldTypeInfo(fld.getType());
-            Class clazz = workspace.classForSolrType(fldType.getClassName());
+            Class clazz = workspace.classForSolrType(fldType);
 
-            sb.field(fld.getName(), clazz, Geometry.class.isAssignableFrom(clazz) ? crs() : null);
+            boolean isGeom = Geometry.class.isAssignableFrom(clazz);
+            if (isGeom) {
+                sb.property(SPATIAL_TYPE, workspace.spatialTypeForSolrType(fldType));
+            }
+            sb.field(fld.getName(), clazz, isGeom ? crs() : null);
         }
 
         return sb.schema();
@@ -128,13 +135,13 @@ public class SolrDataset implements VectorDataset {
 
     @Override
     public Envelope bounds() throws IOException {
-        return null;
+        return cursor(VectorQuery.all()).bounds();
     }
 
     @Override
     public long count(VectorQuery q) throws IOException {
         if (q.isAll()) {
-            LukeRequest req = initRequest(new LukeRequest());
+            LukeRequest req = runRequest(new LukeRequest());
             try {
                 LukeResponse rsp = req.process(solr);
                 return q.adjustCount(rsp.getNumDocs());
@@ -186,7 +193,7 @@ public class SolrDataset implements VectorDataset {
         LOG.debug("{}", sq);
 
         try {
-            return qp.apply(new SolrCursor(initRequest(new QueryRequest(sq)).process(solr), this));
+            return qp.apply(new SolrCursor(runRequest(new QueryRequest(sq)).process(solr), this));
         } catch (SolrServerException e) {
             throw new IOException(e);
         }
@@ -199,20 +206,35 @@ public class SolrDataset implements VectorDataset {
             for (Field fld : schema()) {
                 if (fld.geometry()) {
                     sq.addFilterQuery(format(Locale.ROOT, "%s:\"Intersects(ENVELOPE(%f, %f, %f, %f))\"",
-                        fld.name(), e.getMinX(), e.getMaxY(), e.getMaxY(), e.getMinY()));
+                        fld.name(), e.getMinX(), e.getMaxX(), e.getMaxY(), e.getMinY()));
                 }
             }
             qp.bounded();
         }
 
+        if (!Filters.isTrueOrNull(q.filter())) {
+            Pair<Filter,Filter> filters = new FilterSplitter(new SolrQueryQualifier(schema())).split(q.filter());
+            if (!Filters.isTrueOrNull(filters.first)) {
+                try {
+                    filters.first.accept(new SolrQueryEncoder(sq, this), null);
+                    qp.filtered(filters.second);
+                } catch (Exception e) {
+                    LOG.debug("Unable to encode solr query: {}", filters.first, e);
+                }
+            }
+        }
     }
 
     @Override
     public void close() {
     }
 
-    <T extends SolrRequest> T initRequest(T req) {
+
+    <T extends SolrRequest> T runRequest(T req) {
         req.setPath("/" + core + req.getPath());
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("{} {}", req.getPath(), req.getParams());
+        }
         return req;
     }
 }

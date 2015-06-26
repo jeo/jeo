@@ -34,7 +34,7 @@ public class SolrTests {
     }
 
     public static void setupStatesData() throws Exception {
-        SolrClient solr = new HttpSolrClient(URL+"/jeo");
+        SolrClient solr = new HttpSolrClient(URL+"/states");
         solr.deleteByQuery("*:*");
 
         for (Feature f : TestData.states().cursor(new VectorQuery())) {
@@ -43,11 +43,11 @@ public class SolrTests {
             doc.addField("id", f.id());
             copy("STATE_NAME", f, doc);
             copy("STATE_ABBR", f, doc);
-            copy("SAMPLE_POP", f, doc);
+            copy("SAMP_POP", f, doc);
             copy("P_MALE", f, doc);
             copy("P_FEMALE", f, doc);
 
-            doc.addField("geom", f.geometry().getCentroid().toText());
+            doc.addField("geom", f.geometry().toText());
             solr.add(doc);
         }
 

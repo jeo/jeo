@@ -18,12 +18,16 @@ import com.spatial4j.core.shape.Shape;
 import com.spatial4j.core.shape.jts.JtsGeometry;
 import com.spatial4j.core.shape.jts.JtsPoint;
 import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.io.ParseException;
+import com.vividsolutions.jts.io.WKTReader;
 import io.jeo.vector.BasicFeature;
 import io.jeo.vector.Feature;
 import io.jeo.vector.FeatureCursor;
 import io.jeo.vector.Field;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocument;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -31,6 +35,8 @@ import java.util.Iterator;
 import java.util.List;
 
 public class SolrCursor extends FeatureCursor {
+
+    static Logger LOG = LoggerFactory.getLogger(SolrCursor.class);
 
     Iterator<SolrDocument> it;
     SolrDataset dataset;
@@ -67,20 +73,36 @@ public class SolrCursor extends FeatureCursor {
 
     void convertToGeom(Field g, SolrDocument doc) {
         Object val = doc.get(g.name());
-        if (val != null) {
-            Shape shp = SolrWorkspace.SPATIAL.getFormats().read(val.toString());
-            if (shp != null) {
-                Geometry geom = null;
-                if (shp instanceof JtsPoint) {
-                    geom = ((JtsPoint)shp).getGeom();
-                }
-                else if (shp instanceof JtsGeometry) {
-                    geom = ((JtsGeometry)shp).getGeom();
-                }
 
-                if (geom != null) {
-                    doc.setField(g.name(), geom);
+        if (val != null) {
+            Geometry geom = null;
+            if (val instanceof String) {
+                // try to parse as wkt directly
+                try {
+                    geom = new WKTReader().read(val.toString());
+                } catch (ParseException e) {
+                    LOG.debug("Error parsing geometry field as wkt", e);
                 }
+            }
+
+            if (geom == null) {
+                // parse as a spatial4j shape
+                Shape shp = SolrWorkspace.SPATIAL.getFormats().read(val.toString());
+                if (shp != null) {
+                    if (shp instanceof JtsPoint) {
+                        geom = ((JtsPoint)shp).getGeom();
+                    }
+                    else if (shp instanceof JtsGeometry) {
+                        geom = ((JtsGeometry)shp).getGeom();
+                    }
+                }
+            }
+
+            if (geom != null) {
+                doc.setField(g.name(), geom);
+            }
+            else {
+                throw new IllegalArgumentException("Unable to create geometry from: " + val);
             }
         }
     }

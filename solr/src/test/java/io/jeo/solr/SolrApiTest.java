@@ -14,6 +14,7 @@
  */
 package io.jeo.solr;
 
+import io.jeo.Tests;
 import io.jeo.vector.VectorApiTestBase;
 import io.jeo.vector.VectorDataset;
 import org.junit.Assume;
@@ -34,10 +35,11 @@ public class SolrApiTest extends VectorApiTestBase {
     @BeforeClass
     public static void setupData() throws Exception {
         SolrTests.setupStatesData();
+//        Tests.debugLogging("io.jeo.solr");
     }
 
     @Override
     protected VectorDataset createVectorData() throws Exception {
-        return Solr.open(SolrTests.URL).get("jeo");
+        return Solr.open(SolrTests.URL).get("states");
     }
 }

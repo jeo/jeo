@@ -17,6 +17,10 @@ package io.jeo;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.logging.ConsoleHandler;
+import java.util.logging.Handler;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipException;
@@ -154,5 +158,30 @@ public class Tests {
         ByteStreams.copy(gzipin, Files.newOutputStreamSupplier(file).getOutput());
 
         return file;
+    }
+
+    /**
+     * Configures JDK logging to log at debug (FINE) level.
+     *
+     * @param id The id of the logger to configure.
+     */
+    public static void debugLogging(String id) {
+        Logger root = Logger.getLogger(id);
+        root.setLevel(Level.FINE);
+
+        ConsoleHandler console = null;
+        for (Handler h : root.getHandlers()) {
+            if (h instanceof ConsoleHandler) {
+                console = (ConsoleHandler) h;
+                break;
+            }
+        }
+
+        if (console == null) {
+            console = new ConsoleHandler();
+            root.addHandler(console);
+        }
+
+        console.setLevel(Level.FINE);
     }
 }

@@ -17,7 +17,6 @@ package io.jeo.data;
 import java.io.IOException;
 
 import io.jeo.Pending;
-import io.jeo.data.Cursor;
 import io.jeo.vector.Feature;
 import io.jeo.filter.Filter;
 import io.jeo.filter.cql.CQL;
@@ -51,7 +50,7 @@ public class VectorDataView {
     }
 
     public Feature find(VectorQuery query) throws IOException {
-        Cursor<Feature> c = data.cursor(query.limit(1));
+        Cursor<Feature> c = data.read(query.limit(1));
         try {
             if (c.hasNext()) {
                 return c.next();

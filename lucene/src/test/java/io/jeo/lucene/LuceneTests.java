@@ -51,7 +51,7 @@ public class LuceneTests {
 
         IndexWriter w = new IndexWriter(FSDirectory.open(idxDir), new IndexWriterConfig(new StandardAnalyzer()));
 
-        for (Feature f : dataset.cursor(new VectorQuery())) {
+        for (Feature f : dataset.read(new VectorQuery())) {
             Document doc = new Document();
             for (Map.Entry<String,Object> kvp : f.map().entrySet()) {
                 String key = kvp.getKey();

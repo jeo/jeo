@@ -135,7 +135,7 @@ public class SolrDataset implements VectorDataset {
 
     @Override
     public Envelope bounds() throws IOException {
-        return cursor(VectorQuery.all()).bounds();
+        return read(VectorQuery.all()).bounds();
     }
 
     @Override
@@ -151,11 +151,11 @@ public class SolrDataset implements VectorDataset {
         }
 
         VectorQueryPlan qp = new VectorQueryPlan(q);
-        return qp.apply(cursor(q)).count();
+        return qp.apply(read(q)).count();
     }
 
     @Override
-    public FeatureCursor cursor(VectorQuery q) throws IOException {
+    public FeatureCursor read(VectorQuery q) throws IOException {
         VectorQueryPlan qp = new VectorQueryPlan(q);
         SolrQuery sq = new SolrQuery("*:*");
 

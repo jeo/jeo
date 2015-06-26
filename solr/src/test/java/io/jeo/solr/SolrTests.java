@@ -37,7 +37,7 @@ public class SolrTests {
         SolrClient solr = new HttpSolrClient(URL+"/states");
         solr.deleteByQuery("*:*");
 
-        for (Feature f : TestData.states().cursor(new VectorQuery())) {
+        for (Feature f : TestData.states().read(new VectorQuery())) {
             SolrInputDocument doc = new SolrInputDocument();
 
             doc.addField("id", f.id());

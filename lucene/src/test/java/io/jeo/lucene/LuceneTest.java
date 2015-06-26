@@ -40,7 +40,7 @@ public class LuceneTest {
 
     @Test
     public void testFeatureGeometry() throws Exception {
-        Feature f = data.cursor(new VectorQuery()).first().get();
+        Feature f = data.read(new VectorQuery()).first().get();
 
         assertNotNull(f.geometry());
         assertTrue(f.geometry() instanceof Polygonal);

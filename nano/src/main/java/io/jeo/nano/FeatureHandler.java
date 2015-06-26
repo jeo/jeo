@@ -160,11 +160,11 @@ public class FeatureHandler extends Handler {
 
         final Cursor<Feature> c;
         if (fields == null) {
-            c = layer.cursor(q);
+            c = layer.read(q);
         } else {
             // if the request specifies fields, wrap the cursor to prevent
             // any fields referenced in the query from getting into the response
-            c = layer.cursor(q).select(Arrays.asList(fields));
+            c = layer.read(q).select(Arrays.asList(fields));
         }
 
         // if requesting a specific feature, fail if not found
@@ -450,7 +450,7 @@ public class FeatureHandler extends Handler {
             Transaction tx = buildTransaction(layer, request);
             query.transaction(tx);
 
-            Cursor<Feature> c = layer.cursor(query);
+            Cursor<Feature> c = layer.read(query);
             try {
                 if (shouldExist && ! c.hasNext()) {
                     throw new HttpException(HTTP_NOTFOUND, "requested feature does not exist : " + request.getUri());
@@ -500,7 +500,7 @@ public class FeatureHandler extends Handler {
         Transaction tx = buildTransaction(layer, request);
 
         VectorQuery query = new VectorQuery().update().filter(new Id(new Literal(fid))).transaction(tx);
-        Cursor<Feature> c = layer.cursor(query);
+        Cursor<Feature> c = layer.read(query);
         try {
             if (! c.hasNext()) {
                 throw new HttpException(HTTP_NOTFOUND, "requested feature does not exist : " + request.getUri());

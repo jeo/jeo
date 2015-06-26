@@ -195,7 +195,7 @@ public abstract class BaseRenderer implements Renderer {
         // grab any specified by the style
         q.appendFields(rules.fields());
 
-        for (Feature f : data.cursor(q)) {
+        for (Feature f : data.read(q)) {
             RuleList rs = rules.match(f);
             if (rs.isEmpty()) {
                 continue;

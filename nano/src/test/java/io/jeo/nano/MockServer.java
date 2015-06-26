@@ -45,7 +45,6 @@ import io.jeo.data.Driver;
 import io.jeo.data.Handle;
 import io.jeo.vector.FeatureCursor;
 import io.jeo.vector.VectorQuery;
-import io.jeo.filter.*;
 import io.jeo.map.Style;
 import io.jeo.map.View;
 import io.jeo.render.Renderer;
@@ -109,7 +108,7 @@ public class MockServer {
         Feature f = new BasicFeature(id, vals);
         MemVector v = new MemVector(null);
         v.add(f);
-        expect(vectorLayer.cursor((VectorQuery) anyObject())).andReturn(v.cursor(new VectorQuery())).once();
+        expect(vectorLayer.read((VectorQuery) anyObject())).andReturn(v.read(new VectorQuery())).once();
         
         return this;
     }
@@ -136,7 +135,7 @@ public class MockServer {
     }
 
     MockServer withNoFeatures() throws Exception {
-        expect(vectorLayer.cursor(new VectorQuery().bounds(new Envelope(-180, 180, -90, 90))))
+        expect(vectorLayer.read(new VectorQuery().bounds(new Envelope(-180, 180, -90, 90))))
                 .andReturn(FeatureCursor.empty()).once();
 
         return this;
@@ -150,12 +149,12 @@ public class MockServer {
         expect(c.iterator()).andReturn(Iterators.forArray(f));
         expect(c.hasNext()).andReturn(true);
         
-        expect(vectorLayer.cursor(new VectorQuery().filter(new Id(new Literal(id))))).andReturn(c);
-        expect(vectorLayer.cursor((VectorQuery) anyObject())).andReturn(FeatureCursor.empty()).anyTimes();
+        expect(vectorLayer.read(new VectorQuery().filter(new Id(new Literal(id))))).andReturn(c);
+        expect(vectorLayer.read((VectorQuery) anyObject())).andReturn(FeatureCursor.empty()).anyTimes();
         c.close();
         expectLastCall().once();
 
-        expect(vectorLayer.cursor(new VectorQuery().filter((Filter) anyObject())))
+        expect(vectorLayer.read(new VectorQuery().filter((Filter) anyObject())))
                 .andReturn(FeatureCursor.empty()).anyTimes();
 
         return this;
@@ -168,15 +167,15 @@ public class MockServer {
         expect(c.write()).andReturn(c);
 
         IExpectationSetters<FeatureCursor> cursor =
-                expect(vectorLayer.cursor(new VectorQuery().update().filter(new Id(new Literal(feature.id()))))).andReturn(c);
+                expect(vectorLayer.read(new VectorQuery().update().filter(new Id(new Literal(feature.id()))))).andReturn(c);
         if (!expectSuccess) {
             cursor.anyTimes();
         }
-        expect(vectorLayer.cursor((VectorQuery) anyObject())).andReturn(FeatureCursor.empty()).anyTimes();
+        expect(vectorLayer.read((VectorQuery) anyObject())).andReturn(FeatureCursor.empty()).anyTimes();
         c.close();
         expectLastCall().once();
 
-        expect(vectorLayer.cursor(new VectorQuery().filter((Filter) anyObject())))
+        expect(vectorLayer.read(new VectorQuery().filter((Filter) anyObject())))
                 .andReturn(FeatureCursor.empty()).anyTimes();
 
         return this;
@@ -191,7 +190,7 @@ public class MockServer {
         c.close();
         expectLastCall().once();
 
-        expect(vectorLayer.cursor((VectorQuery) anyObject())).andReturn(c).once();
+        expect(vectorLayer.read((VectorQuery) anyObject())).andReturn(c).once();
 
         return this;
     }
@@ -354,7 +353,7 @@ public class MockServer {
         expect(c.next()).andReturn(receiver);
         expect(c.write()).andReturn(c);
 
-        expect(vectorLayer.cursor(new VectorQuery().append())).andReturn(c);
+        expect(vectorLayer.read(new VectorQuery().append())).andReturn(c);
         c.close();
         expectLastCall().once();
 

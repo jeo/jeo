@@ -123,7 +123,7 @@ public class LuceneDataset implements VectorDataset, FileData {
 
     @Override
     public Envelope bounds() throws IOException {
-        return cursor(new VectorQuery()).bounds();
+        return read(new VectorQuery()).bounds();
     }
 
     @Override
@@ -153,7 +153,7 @@ public class LuceneDataset implements VectorDataset, FileData {
     }
 
     @Override
-    public FeatureCursor cursor(VectorQuery q) throws IOException {
+    public FeatureCursor read(VectorQuery q) throws IOException {
         VectorQueryPlan qp = new VectorQueryPlan(q);
         Query lq;
 

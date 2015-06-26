@@ -42,7 +42,7 @@ public class GeoPkgVector extends GeoPkgDataset<FeatureEntry> implements VectorD
     }
 
     @Override
-    public FeatureCursor cursor(VectorQuery q) throws IOException {
+    public FeatureCursor read(VectorQuery q) throws IOException {
         return geopkg.cursor(entry, q);
     }
 

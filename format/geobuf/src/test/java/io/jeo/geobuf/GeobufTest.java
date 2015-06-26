@@ -144,7 +144,7 @@ public class GeobufTest {
 
     @Test
     public void testFeature2() throws Exception {
-        Feature f1 = TestData.states().cursor(all()).first().get();
+        Feature f1 = TestData.states().read(all()).first().get();
         try (GeobufWriter w = writer()) {
             w.write(f1);
         }
@@ -154,10 +154,10 @@ public class GeobufTest {
 
     @Test
     public void testFeatureCollection() throws Exception {
-        writer().write(TestData.states().cursor(all()));
+        writer().write(TestData.states().read(all()));
 
         FeatureCursor fc = reader().featureCollection();
-        assertEquals(TestData.states().cursor(all()).count(), fc.count());
+        assertEquals(TestData.states().read(all()).count(), fc.count());
     }
 
     GeobufWriter writer() throws IOException {
@@ -172,7 +172,7 @@ public class GeobufTest {
     public void testData() throws Exception {
         GeobufWriter w = new GeobufWriter(Files.newOutputStream(Paths.get(
             "/Users/jdeolive/Projects/jeo/git/jeo/format/geobuf/src/test/resources/io/jeo/geobuf/states.pbf")));
-        w.write(TestData.states().cursor(all())).close();
+        w.write(TestData.states().read(all())).close();
     }
 }
 

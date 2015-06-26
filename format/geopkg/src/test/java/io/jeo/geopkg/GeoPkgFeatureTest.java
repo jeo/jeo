@@ -152,7 +152,7 @@ public class GeoPkgFeatureTest extends GeoPkgTestSupport {
         assertEquals(1, states.count(new VectorQuery().filter("STATE_ABBR = 'TX'")));
         assertEquals(0, states.count(new VectorQuery().filter("STATE_ABBR = 'XT'")));
 
-        Cursor<Feature> c = states.cursor(new VectorQuery().filter("STATE_NAME = 'Texas'").update());
+        Cursor<Feature> c = states.read(new VectorQuery().filter("STATE_NAME = 'Texas'").update());
         assertTrue(c.hasNext());
 
         Feature f = c.next();
@@ -168,7 +168,7 @@ public class GeoPkgFeatureTest extends GeoPkgTestSupport {
         VectorDataset states = (VectorDataset) geopkg.get("states");
         assertEquals(49, states.count(new VectorQuery()));
 
-        Cursor<Feature> c = states.cursor(new VectorQuery().filter("STATE_ABBR = 'TX'").update());
+        Cursor<Feature> c = states.read(new VectorQuery().filter("STATE_ABBR = 'TX'").update());
         assertTrue(c.hasNext());
         c.next();
         c.remove().close();
@@ -231,20 +231,20 @@ public class GeoPkgFeatureTest extends GeoPkgTestSupport {
         Transaction tx = ((Transactional) states).transaction(null);
 
         // update one
-        Cursor<Feature> c = states.cursor(new VectorQuery().filter("STATE_NAME = 'Texas'").update().transaction(tx));
+        Cursor<Feature> c = states.read(new VectorQuery().filter("STATE_NAME = 'Texas'").update().transaction(tx));
         assertTrue(c.hasNext());
         Feature f = c.next();
         f.put("STATE_ABBR", "XT");
         c.write().close();
 
         // remove one
-        c = states.cursor(new VectorQuery().filter("STATE_ABBR = 'WV'").update().transaction(tx));
+        c = states.read(new VectorQuery().filter("STATE_ABBR = 'WV'").update().transaction(tx));
         assertTrue(c.hasNext());
         c.next();
         c.remove().close();
 
         // add one
-        c = states.cursor(new VectorQuery().append().transaction(tx));
+        c = states.read(new VectorQuery().append().transaction(tx));
         assertTrue(c.hasNext());
         f = c.next();
         f.put("STATE_ABBR", "XX");

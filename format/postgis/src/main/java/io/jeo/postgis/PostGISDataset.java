@@ -152,12 +152,12 @@ public class PostGISDataset implements VectorDataset {
             });
         }
         else {
-            return cursor(q).count();
+            return read(q).count();
         }
     }
 
     @Override
-    public FeatureCursor cursor(VectorQuery q) throws IOException {
+    public FeatureCursor read(VectorQuery q) throws IOException {
         try {
             VectorQueryPlan qp = new VectorQueryPlan(q);
 

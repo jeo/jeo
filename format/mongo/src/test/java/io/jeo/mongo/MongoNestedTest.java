@@ -37,7 +37,7 @@ public class MongoNestedTest extends MongoTest {
     @Test
     public void testNestedProperties() throws IOException {
         VectorDataset data = mongo.get("states");
-        Cursor<Feature> c = data.cursor(new VectorQuery());
+        Cursor<Feature> c = data.read(new VectorQuery());
         assertTrue(c.hasNext());
 
         Feature f = c.next();

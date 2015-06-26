@@ -38,7 +38,7 @@ public class MongoTestData {
         VectorDataset data = TestData.states();
         Schema schema = data.schema();
 
-        for (Feature f : data.cursor(new VectorQuery())) {
+        for (Feature f : data.read(new VectorQuery())) {
             Geometry g = f.geometry();
             g = Geom.iterate((MultiPolygon) f.geometry()).iterator().next();
 

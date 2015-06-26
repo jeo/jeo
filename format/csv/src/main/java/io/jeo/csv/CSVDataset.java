@@ -121,16 +121,16 @@ public class CSVDataset implements VectorDataset, FileData {
 
     @Override
     public Envelope bounds() throws IOException {
-        return cursor(new VectorQuery()).bounds();
+        return read(new VectorQuery()).bounds();
     }
 
     @Override
     public long count(VectorQuery q) throws IOException {
-        return cursor(q).count();
+        return read(q).count();
     }
 
     @Override
-    public FeatureCursor cursor(VectorQuery q) throws IOException {
+    public FeatureCursor read(VectorQuery q) throws IOException {
         if (q.mode() != Cursor.READ) {
             throw new IllegalArgumentException("write cursors not supported");
         }

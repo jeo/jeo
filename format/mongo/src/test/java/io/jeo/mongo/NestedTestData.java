@@ -35,7 +35,7 @@ public class NestedTestData extends MongoTestData {
     public void setUp(DBCollection dbcol, MongoWorkspace workspace) throws IOException {
         VectorDataset data = TestData.states();
         
-        for (Feature f : data.cursor(new VectorQuery())) {
+        for (Feature f : data.read(new VectorQuery())) {
             Geometry g = f.geometry();
             g = Geom.iterate((MultiPolygon) f.geometry()).iterator().next();
 

@@ -53,7 +53,7 @@ public class GeoPkgTest extends GeoPkgTestSupport {
         VectorDataset widgets = gpkg.create(schema);
         assertNotNull(widgets);
 
-        Cursor<Feature> c = widgets.cursor(new VectorQuery().append());
+        Cursor<Feature> c = widgets.read(new VectorQuery().append());
 
         Feature f = c.next();
         f.put(Geom.point(0, 0));

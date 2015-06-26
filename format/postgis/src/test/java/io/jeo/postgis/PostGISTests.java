@@ -59,7 +59,7 @@ public class PostGISTests {
                     "CREATE TABLE states(id serial PRIMARY KEY, \"STATE_NAME\" VARCHAR, \"STATE_ABBR\" VARCHAR, " +
                      "\"SAMP_POP\" NUMERIC, \"P_MALE\" NUMERIC, \"P_FEMALE\" NUMERIC, geom Geometry(MultiPolygon,4326))"
                 );
-                for (Feature f : TestData.states().cursor(new VectorQuery())) {
+                for (Feature f : TestData.states().read(new VectorQuery())) {
                     String sql = format(
                         "INSERT INTO states (\"STATE_NAME\", \"STATE_ABBR\", \"SAMP_POP\", \"P_MALE\", " +
                             "\"P_FEMALE\", geom) VALUES ('%s', '%s', %d, %f, %f, ST_GeomFromText('%s',4326))",

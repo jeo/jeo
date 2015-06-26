@@ -286,7 +286,7 @@ public class OGRDataset implements VectorDataset, FileData {
             }
 
             //TODO: convert attribute filter to ogr sql
-            return cursor(q).count();
+            return read(q).count();
 
         }
         catch(Exception e) {
@@ -298,7 +298,7 @@ public class OGRDataset implements VectorDataset, FileData {
     }
 
     @Override
-    public FeatureCursor cursor(VectorQuery q) throws IOException {
+    public FeatureCursor read(VectorQuery q) throws IOException {
         Pair<Layer,DataSource> data = open();
 
         Layer l = data.first;

@@ -51,7 +51,7 @@ public class DirWorkspaceTest {
     void writeTo(VectorDataset data, File dir) throws IOException {
         try (Writer w = Files.newWriter(new File(dir, data.name()+".json"), Charsets.UTF_8)){
             new GeoJSONWriter(w)
-                .featureCollection(data.cursor(VectorQuery.all()))
+                .featureCollection(data.read(VectorQuery.all()))
                 .flush();
         }
     }

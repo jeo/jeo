@@ -83,11 +83,11 @@ public class MemoryTest {
     @Test
     public void testCursorRead() throws IOException {
         MemVector widgets = (MemVector) mem.get("widgets");
-        assertCovered(widgets.cursor(new VectorQuery()), 1, 2, 3);
-        assertCovered(widgets.cursor(new VectorQuery().limit(2)), 1, 2);
-        assertCovered(widgets.cursor(new VectorQuery().bounds(new Envelope(-1,1,-1,1))), 1);
-        assertCovered(widgets.cursor(new VectorQuery().filter("cost < 12.0")), 1, 2);
-        assertCovered(widgets.cursor(new VectorQuery().filter("cost < 12.0").offset(1)), 2);
+        assertCovered(widgets.read(new VectorQuery()), 1, 2, 3);
+        assertCovered(widgets.read(new VectorQuery().limit(2)), 1, 2);
+        assertCovered(widgets.read(new VectorQuery().bounds(new Envelope(-1, 1, -1, 1))), 1);
+        assertCovered(widgets.read(new VectorQuery().filter("cost < 12.0")), 1, 2);
+        assertCovered(widgets.read(new VectorQuery().filter("cost < 12.0").offset(1)), 2);
     }
 
     void assertCovered(Cursor<Feature> c, Integer... ids) {
@@ -103,7 +103,7 @@ public class MemoryTest {
         MemVector widgets = (MemVector) mem.get("widgets");
         assertEquals(0, widgets.count(new VectorQuery().filter("cost  > 13.0")));
 
-        Cursor<Feature> c = widgets.cursor(new VectorQuery().update());
+        Cursor<Feature> c = widgets.read(new VectorQuery().update());
         for (Feature f : c) {
             f.put("cost", ((Double)f.get("cost"))*2);
             c.write();
@@ -111,7 +111,7 @@ public class MemoryTest {
 
         assertEquals(3, widgets.count(new VectorQuery().filter("cost  > 13.0")));
         
-        c = widgets.cursor(new VectorQuery().append());
+        c = widgets.read(new VectorQuery().append());
         assertTrue(c.hasNext());
 
         Feature f = c.next();
@@ -127,6 +127,6 @@ public class MemoryTest {
         c.write();
 
         assertEquals(5, widgets.count(new VectorQuery()));
-        assertCovered(widgets.cursor(new VectorQuery().filter("cost < 3.0")), 4, 5);
+        assertCovered(widgets.read(new VectorQuery().filter("cost < 3.0")), 4, 5);
     }
 }

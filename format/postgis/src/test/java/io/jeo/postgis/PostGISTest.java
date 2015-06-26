@@ -186,7 +186,7 @@ public class PostGISTest {
     public void testCursorRead() throws Exception {
         VectorDataset states = pg.get("states");
 
-        Cursor<Feature> c = states.cursor(new VectorQuery());
+        Cursor<Feature> c = states.read(new VectorQuery());
         
         assertNotNull(c);
         for (int i = 0; i < 49; i++) {
@@ -208,14 +208,14 @@ public class PostGISTest {
     @Test
     public void testCursorFilter() throws Exception {
         VectorDataset states = pg.get("states");
-        assertEquals(1, states.cursor(new VectorQuery().filter("STATE_NAME = 'Texas'")).count());
+        assertEquals(1, states.read(new VectorQuery().filter("STATE_NAME = 'Texas'")).count());
     }
 
     @Test
     public void testCursorUpdate() throws Exception {
         VectorDataset states = pg.get("states");
         
-        Cursor<Feature> c = states.cursor(new VectorQuery().update());
+        Cursor<Feature> c = states.read(new VectorQuery().update());
         while(c.hasNext()) {
             Feature f = c.next();
 
@@ -227,7 +227,7 @@ public class PostGISTest {
         }
         c.close();
 
-        for (Feature f : states.cursor(new VectorQuery())) {
+        for (Feature f : states.read(new VectorQuery())) {
             String abbr = f.get("STATE_ABBR").toString();
 
             assertEquals(abbr, abbr.toLowerCase(Locale.ROOT));
@@ -241,7 +241,7 @@ public class PostGISTest {
         VectorDataset states = pg.get("states");
         Schema schema = states.schema();
 
-        Cursor<Feature> c = states.cursor(new VectorQuery().append());
+        Cursor<Feature> c = states.read(new VectorQuery().append());
         Feature f = c.next();
 
         GeomBuilder gb = new GeomBuilder();
@@ -253,7 +253,7 @@ public class PostGISTest {
 
         assertEquals(50, states.count(new VectorQuery()));
 
-        c = states.cursor(new VectorQuery().bounds(g.getEnvelopeInternal()));
+        c = states.read(new VectorQuery().bounds(g.getEnvelopeInternal()));
         assertTrue(c.hasNext());
 
         assertEquals("JEOLAND", c.next().get("STATE_NAME"));
@@ -269,7 +269,7 @@ public class PostGISTest {
         assertEquals(0, data.count(new VectorQuery()));
 
         GeomBuilder gb = new GeomBuilder();
-        Cursor<Feature> c = data.cursor(new VectorQuery().append());
+        Cursor<Feature> c = data.read(new VectorQuery().append());
 
         Feature f = c.next();
         f.put("shape", gb.point(0,0).point().buffer(10).get());
@@ -293,7 +293,7 @@ public class PostGISTest {
         data = pg.get("widgets");
         assertEquals(3, data.count(new VectorQuery()));
 
-        c = data.cursor(new VectorQuery().filter("name = 'bomb'"));
+        c = data.read(new VectorQuery().filter("name = 'bomb'"));
         assertTrue(c.hasNext());
         assertEquals(1.99, c.next().get("cost"));
     }

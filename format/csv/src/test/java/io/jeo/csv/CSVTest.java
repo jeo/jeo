@@ -48,7 +48,7 @@ public class CSVTest {
 
     @Test
     public void testChunks() throws Exception {
-        assertEquals(1, csv.cursor(new VectorQuery().filter("name = 'fire,cracker'")).count());
+        assertEquals(1, csv.read(new VectorQuery().filter("name = 'fire,cracker'")).count());
     }
 
     InputStream csv() {

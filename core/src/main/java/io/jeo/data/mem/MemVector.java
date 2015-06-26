@@ -101,11 +101,11 @@ public class MemVector implements VectorDataset {
     
     @Override
     public long count(VectorQuery q) throws IOException {
-        return cursor(q).count();
+        return read(q).count();
     }
 
     @Override
-    public FeatureCursor cursor(VectorQuery q) throws IOException {
+    public FeatureCursor read(VectorQuery q) throws IOException {
         VectorQueryPlan qp = new VectorQueryPlan(q);
 
         List<Feature> features = this.features;

@@ -123,16 +123,16 @@ public class GeoJSONDataset implements VectorDataset, FileData {
 
     @Override
     public Envelope bounds() throws IOException {
-        return cursor(new VectorQuery()).bounds();
+        return read(new VectorQuery()).bounds();
     }
 
     @Override
     public long count(VectorQuery q) throws IOException {
-        return cursor(q).count();
+        return read(q).count();
     }
 
     @Override
-    public FeatureCursor cursor(VectorQuery q) throws IOException {
+    public FeatureCursor read(VectorQuery q) throws IOException {
         if (q.mode() == Mode.UPDATE) {
             throw new IOException("Update cursor not supported");
         }
@@ -151,7 +151,7 @@ public class GeoJSONDataset implements VectorDataset, FileData {
     }
 
     Optional<Feature> first() throws IOException {
-        Cursor<Feature> c = cursor(new VectorQuery());
+        Cursor<Feature> c = read(new VectorQuery());
         try {
             if (c.hasNext()) {
                 return Optional.of(c.next());

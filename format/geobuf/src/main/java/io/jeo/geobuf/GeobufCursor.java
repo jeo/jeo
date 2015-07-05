@@ -43,7 +43,7 @@ public class GeobufCursor extends FeatureCursor {
     }
 
     @Override
-    public void close() throws IOException {
+    public void close() {
         if (reader != null) {
             reader.close();
             reader = null;

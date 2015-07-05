@@ -17,9 +17,10 @@ package io.jeo.mongo;
 import java.io.IOException;
 import java.util.Map;
 
-import io.jeo.data.Cursor.Mode;
 import io.jeo.data.Driver;
+import io.jeo.vector.FeatureAppendCursor;
 import io.jeo.vector.FeatureCursor;
+import io.jeo.vector.FeatureWriteCursor;
 import io.jeo.vector.VectorQuery;
 import io.jeo.vector.VectorQueryPlan;
 import io.jeo.vector.VectorDataset;
@@ -47,7 +48,7 @@ public class MongoDataset implements VectorDataset {
     MongoDataset(DBCollection dbcol, MongoWorkspace mongo) {
         this.dbcol = dbcol;
         this.mongo = mongo;
-        this.schema = new SchemaBuilder(dbcol.getName()).field("geometry", Geometry.class).schema();
+        this.schema = new SchemaBuilder(dbcol.getName()).schema();
     }
 
     public MongoMapper getMapper() {
@@ -118,10 +119,6 @@ public class MongoDataset implements VectorDataset {
 
     @Override
     public FeatureCursor read(VectorQuery q) throws IOException {
-        if (q.mode() == Mode.APPEND) {
-            return new MongoCursor(q.mode(), null, this);
-        }
-
         VectorQueryPlan qp = new VectorQueryPlan(q);
 
         //TODO: sorting
@@ -141,11 +138,21 @@ public class MongoDataset implements VectorDataset {
             qp.limited();
         }
 
-        return qp.apply(new MongoCursor(q.mode(), dbCursor, this));
+        return qp.apply(new MongoCursor(dbCursor, this));
     }
 
     DBObject encodeBboxQuery(Envelope bbox) {
         return mapper().query(bbox, this);
+    }
+
+    @Override
+    public FeatureWriteCursor update(VectorQuery q) throws IOException {
+        return new MongoUpdateCursor(read(q), this);
+    }
+
+    @Override
+    public FeatureAppendCursor append(VectorQuery q) throws IOException {
+        return new MongoAppendCursor(this);
     }
 
     @Override

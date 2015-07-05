@@ -37,7 +37,6 @@ import io.jeo.tile.Tile;
 import io.jeo.tile.TilePyramid;
 import io.jeo.tile.TilePyramidBuilder;
 import io.jeo.data.Workspace;
-import io.jeo.data.Cursor.Mode;
 import io.jeo.vector.Feature;
 import io.jeo.vector.Features;
 import io.jeo.vector.Field;
@@ -100,7 +99,7 @@ public class GeoPkgWorkspace implements Workspace, FileData {
     /**
      * Creates a GeoPackage from an existing file.
      *  
-     * @param dbFile The database file.
+     * @param opts Geopackage connection options.
      * 
      * @throws Exception Any error occurring opening the database file. 
      */
@@ -214,7 +213,7 @@ public class GeoPkgWorkspace implements Workspace, FileData {
         VectorQueryPlan qp = new VectorQueryPlan(q);
 
         if (!Envelopes.isNull(q.bounds())) {
-            return cursor(entry, q).count();
+            return read(entry, q).count();
         }
 
         final SQL sql = new SQL("SELECT count(*) FROM ").name(entry.getTableName());
@@ -224,7 +223,7 @@ public class GeoPkgWorkspace implements Workspace, FileData {
                 Collections.EMPTY_LIST : encodeQuery(sql, q, qp, primaryKey(entry, session));
 
         if (q.isFiltered() && !qp.isFiltered()) {
-            return cursor(entry, q).count();
+            return read(entry, q).count();
         }
 
         Results rs = session.queryPrepared(sql.toString(), args.toArray());
@@ -241,25 +240,17 @@ public class GeoPkgWorkspace implements Workspace, FileData {
         return count;
     }
 
-    public FeatureCursor cursor(FeatureEntry entry, VectorQuery q) throws IOException {
-        // session to use for read queries. db seems to lock things up when
-        // using our transaction session for reads
-        Session session = backend.session();
-        // session for writing - if no transaction, the same session
-        Session transaction;
-        if (q.transaction() != Transaction.NULL) {
-            transaction = ((GeoPkgTransaction) q.transaction()).session;
-        } else {
-            transaction = session;
-        }
-        boolean usingTransaction = session != transaction;
+    public FeatureCursor read(FeatureEntry entry, VectorQuery q) throws IOException {
+        return read(null, entry, q);
+    }
 
-        Schema schema = schema(entry, session);
-
-        if (q.mode() == Mode.APPEND) {
-            // if session != transaction, tell the cursor not to close the session
-            return new GeoPkgFeatureAppendCursor(transaction, entry, this, schema, usingTransaction);
+    FeatureCursor read(Session session, FeatureEntry entry, VectorQuery q) throws IOException {
+        boolean closeSession = session == null;
+        if (session == null) {
+            session = backend.session();
         }
+
+        Schema schema = schema(entry);
 
         VectorQueryPlan qp = new VectorQueryPlan(q);
         PrimaryKey pk = primaryKey(entry, session);
@@ -296,21 +287,41 @@ public class GeoPkgWorkspace implements Workspace, FileData {
             qp.fields();
         }
 
-        Results rs = transaction.queryPrepared(sqlb.toString(), args.toArray());
-        // if under a transaction, close the session since we're done with it
-        if (usingTransaction) {
-            session.close();
-        }
+        Results rs = session.queryPrepared(sqlb.toString(), args.toArray());
 
         // if session != transaction, tell the cursor not to close the session
-        FeatureCursor c = new GeoPkgFeatureCursor(transaction, rs, q.mode(), entry, this,
-            schema, pk, usingTransaction, queryFields);
+        FeatureCursor c = new GeoPkgFeatureCursor(session, rs, entry, this, schema, pk, queryFields)
+            .closeSession(closeSession);
 
         if (!Envelopes.isNull(q.bounds())) {
             c = c.intersect(q.bounds(), true);
         }
 
         return qp.apply(c);
+    }
+
+    public GeoPkgFeatureUpdateCursor update(FeatureEntry entry, VectorQuery q) throws IOException {
+
+        Session session;
+
+        // check for a transaction, if there is one use it's session/connection
+        if (q.transaction() != Transaction.NULL) {
+            session = ((GeoPkgTransaction) q.transaction()).session;
+        }
+        else {
+            session = backend.session();
+        }
+
+        // create a delegate cursor to read to
+        FeatureCursor cursor = read(session, entry, q);
+
+        // wrap in update cursor
+        return new GeoPkgFeatureUpdateCursor(cursor, session, q.transaction(), entry, this);
+    }
+
+    public GeoPkgFeatureAppendCursor append(FeatureEntry entry, VectorQuery q) throws IOException {
+        Session session = q.transaction() != Transaction.NULL ? ((GeoPkgTransaction)q.transaction()).session : backend.session();
+        return new GeoPkgFeatureAppendCursor(session, q.transaction(), entry, schema(entry), this);
     }
 
     List<Object> encodeQuery(SQL sql, VectorQuery q, VectorQueryPlan qp, PrimaryKey pk) {
@@ -353,12 +364,13 @@ public class GeoPkgWorkspace implements Workspace, FileData {
         if (session == null) {
             session = backend.session();
         }
-        Feature f = Features.retype(feature, schema(entry, session));
+        Schema schema = schema(entry);
+        Feature f = Features.retype(feature, schema);
 
         SQL sqlb = new SQL("INSERT INTO ").name(entry.getTableName()).add(" (");
         List<Object> objs = new ArrayList<Object>();
 
-        for (Field fld : f.schema()) {
+        for (Field fld : schema) {
             Object o = f.get(fld.name());
             if (o != null) {
                 sqlb.name(fld.name()).add(", ");
@@ -620,10 +632,6 @@ public class GeoPkgWorkspace implements Workspace, FileData {
         return geom != null ? geom.name() : null;
     }
 
-    Schema schema(FeatureEntry entry, Session ignored) throws IOException {
-        return schema(entry);
-    }
-
     public Schema schema(FeatureEntry entry) throws IOException {
         if (entry.getSchema() == null) {
             try {
@@ -676,7 +684,7 @@ public class GeoPkgWorkspace implements Workspace, FileData {
 
     PrimaryKey createPrimaryKey(final FeatureEntry entry, Session cx) throws Exception {
         List<PrimaryKeyColumn> cols = new ArrayList<PrimaryKeyColumn>();
-        Schema schema = schema(entry, cx);
+        Schema schema = schema(entry);
 
         List<String> names = cx.getPrimaryKeys(entry.getTableName());
         for (int i = 0; i < names.size(); i++) {
@@ -820,7 +828,7 @@ public class GeoPkgWorkspace implements Workspace, FileData {
             Set<String> properties = Filters.properties(q.filter());
             // try to defer resolving the schema unless needed
             if (!properties.isEmpty()) {
-                hasMissing = !q.missingProperties(schema(entry, session)).isEmpty();
+                hasMissing = !q.missingProperties(schema(entry)).isEmpty();
             }
         }
         return hasMissing;

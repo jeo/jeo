@@ -16,10 +16,10 @@ package io.jeo.ogr;
 
 import java.io.IOException;
 
+import io.jeo.vector.FeatureCursor;
 import org.gdal.ogr.DataSource;
 import org.gdal.ogr.Layer;
 import io.jeo.vector.Feature;
-import io.jeo.vector.FeatureCursor;
 import io.jeo.vector.Schema;
 import io.jeo.util.Pair;
 
@@ -75,7 +75,7 @@ public class OGRCursor extends FeatureCursor {
     }
 
     @Override
-    public void close() throws IOException {
+    public void close() {
         dataset.close(Pair.of(layer,dataSource));
     }
 }

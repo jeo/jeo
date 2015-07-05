@@ -18,12 +18,12 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 
-import io.jeo.data.Cursor;
-import io.jeo.vector.BasicFeature;
 import io.jeo.vector.Feature;
-import io.jeo.vector.FeatureCursor;
+import io.jeo.vector.FeatureAppendCursor;
+import io.jeo.vector.FeatureWriteCursor;
+import io.jeo.vector.ListFeature;
 
-public class PostGISAppendCursor extends FeatureCursor {
+public class PostGISAppendCursor extends FeatureAppendCursor {
 
     PostGISDataset dataset;
     Connection cx;
@@ -31,24 +31,19 @@ public class PostGISAppendCursor extends FeatureCursor {
     Feature next;
 
     PostGISAppendCursor(PostGISDataset dataset, Connection cx) {
-        super(Cursor.APPEND);
         this.dataset = dataset;
         this.cx = cx;
     }
 
     @Override
-    public boolean hasNext() throws IOException {
-        return true;
-    }
-    
-    @Override
     public Feature next() throws IOException {
-        return next = new BasicFeature(null, dataset.schema());
+        return next = new ListFeature(dataset.schema());
     }
 
     @Override
-    protected void doWrite() throws IOException {
+    public FeatureWriteCursor write() throws IOException {
         dataset.doInsert(next, cx);
+        return this;
     }
 
     @Override

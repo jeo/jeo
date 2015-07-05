@@ -27,9 +27,9 @@ import java.util.Map;
 
 import io.jeo.TestData;
 import io.jeo.geom.Geom;
-import io.jeo.vector.BasicFeature;
 import io.jeo.vector.Feature;
 import io.jeo.vector.FeatureCursor;
+import io.jeo.vector.MapFeature;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -130,7 +130,7 @@ public class GeobufTest {
         map.put("prop1", 1);
         map.put("prop2", 2.2);
 
-        Feature f1 = new BasicFeature(null, map);
+        Feature f1 = new MapFeature(map);
         try (GeobufWriter w = writer()) {
             w.write(f1);
         }

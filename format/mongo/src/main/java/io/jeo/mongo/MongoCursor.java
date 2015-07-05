@@ -18,9 +18,7 @@ import java.io.IOException;
 
 import io.jeo.vector.Feature;
 
-import com.mongodb.BasicDBObject;
 import com.mongodb.DBCursor;
-import com.mongodb.DBObject;
 import io.jeo.vector.FeatureCursor;
 
 public class MongoCursor extends FeatureCursor {
@@ -29,10 +27,9 @@ public class MongoCursor extends FeatureCursor {
     MongoMapper mapper;
     MongoDataset dataset;
 
-    Feature next;
+    Feature current;
 
-    MongoCursor(Mode mode, DBCursor dbCursor, MongoDataset dataset) {
-        super(mode);
+    MongoCursor(DBCursor dbCursor, MongoDataset dataset) {
         this.dbCursor = dbCursor;
         this.dataset = dataset;
         this.mapper = dataset.mapper();
@@ -40,39 +37,19 @@ public class MongoCursor extends FeatureCursor {
 
     @Override
     public boolean hasNext() throws IOException {
-        return mode == APPEND || dbCursor.hasNext();
+        return dbCursor.hasNext();
     }
 
     @Override
     public Feature next() throws IOException {
-        return next = mapper.feature(mode==APPEND ? new BasicDBObject() : dbCursor.next(), dataset);
+        return current = mapper.feature(dbCursor.next(), dataset);
     }
 
     @Override
-    protected void doRemove() throws IOException {
-        dbCursor.getCollection().remove(mapper.object(next, dataset));
-    }
-
-    @Override
-    protected void doWrite() throws IOException {
-        //TODO: check write result
-        if (getMode() == APPEND) {
-            DBObject obj = mapper.object(next, dataset);
-            dataset.getCollection().insert(obj);
-        }
-        else {
-            DBObject obj = mapper.object(next, dataset);
-            dataset.getCollection().update(new BasicDBObject("_id", obj.get("_id")), obj);
-        }
-    }
-
-    @Override
-    public void close() throws IOException {
+    public void close() {
         if (dbCursor != null) {
             dbCursor.close();
             dbCursor = null;
         }
     }
-
-    
 }

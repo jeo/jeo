@@ -18,10 +18,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import io.jeo.vector.BasicFeature;
 import io.jeo.vector.Feature;
 import io.jeo.vector.FeatureCursor;
 import io.jeo.vector.Field;
+import io.jeo.vector.ListFeature;
 import io.jeo.vector.Schema;
 import io.jeo.geopkg.geom.GeoPkgGeomReader;
 import io.jeo.sql.PrimaryKey;
@@ -39,10 +39,8 @@ public class GeoPkgFeatureCursor extends FeatureCursor {
     final Schema schema;
     final PrimaryKey primaryKey;
     final GeoPkgGeomReader geomReader;
-    final Session session;
+
     final List<Field> fields;
-    // whether an 'outer' Transaction is in use
-    final boolean transaction;
     // index of primary key columns in result set
     final List<Integer> pkColumns;
     // reusable holder for values as BasicFeature will copy these out
@@ -50,27 +48,23 @@ public class GeoPkgFeatureCursor extends FeatureCursor {
     // reusable buffer for generating fid
     final StringBuilder buf = new StringBuilder();
 
+    Session session;
+    boolean closeSession = true;
     Results results;
     Boolean next;
     Feature feature;
 
-    GeoPkgFeatureCursor(Session session, Results results, Mode mode, FeatureEntry entry, GeoPkgWorkspace workspace,
-            Schema schema, PrimaryKey primaryKey, boolean usingTransaction, List<String> fields)
+    GeoPkgFeatureCursor(Session session, Results results, FeatureEntry entry, GeoPkgWorkspace workspace,
+            Schema schema, PrimaryKey primaryKey, List<String> fields)
         throws IOException {
-        super(mode);
 
         this.session = session;
         this.results = results;
         this.entry = entry;
         this.workspace = workspace;
         this.primaryKey = primaryKey;
-        this.transaction = usingTransaction;
-        geomReader = new GeoPkgGeomReader();
 
-        // without a transaction, performance is miserable
-        if (!transaction && mode != READ) {
-            session.beginTransaction();
-        }
+        geomReader = new GeoPkgGeomReader();
 
         if (!fields.isEmpty()) {
             // requested fields in schema require rebuilding schema
@@ -93,6 +87,11 @@ public class GeoPkgFeatureCursor extends FeatureCursor {
                 pkColumns.add(end++);
             }
         }
+    }
+
+    public GeoPkgFeatureCursor closeSession(boolean closeSession) {
+        this.closeSession = closeSession;
+        return this;
     }
 
     @Override
@@ -144,7 +143,7 @@ public class GeoPkgFeatureCursor extends FeatureCursor {
                         fid = buf.toString();
                     }
 
-                    return feature = new BasicFeature(fid, values, schema);
+                    return feature = new ListFeature(fid, schema, values);
                 } finally {
                     next = null;
                 }
@@ -156,28 +155,14 @@ public class GeoPkgFeatureCursor extends FeatureCursor {
     }
 
     @Override
-    protected void doWrite() throws IOException {
-        workspace.update(entry, feature, session);
-    }
-
-    @Override
-    protected void doRemove() throws IOException {
-        workspace.delete(entry, feature, session);
-    }
-
-    @Override
     public void close() throws IOException {
         if (results != null) {
             results.close();
-            if (!transaction) {
-                // if not using an 'outer' Transaction, commit and close
-                if (mode != Mode.READ) {
-                    session.endTransaction(true);
-                }
-                session.close();
-            }
             results = null;
         }
-
+        if (session != null) {
+            if (closeSession) session.close();
+            session = null;
+        }
     }
 }

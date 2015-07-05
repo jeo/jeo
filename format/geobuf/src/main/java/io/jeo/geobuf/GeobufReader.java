@@ -34,8 +34,8 @@ import io.jeo.geobuf.Geobuf.Data.Geometry;
 import io.jeo.geobuf.Geobuf.Data.Value;
 import io.jeo.geobuf.Geobuf.Data.Value.ValueTypeCase;
 import io.jeo.proj.Proj;
-import io.jeo.vector.BasicFeature;
 import io.jeo.vector.FeatureCursor;
+import io.jeo.vector.MapFeature;
 import org.osgeo.proj4j.CoordinateReferenceSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,7 +43,6 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -313,7 +312,7 @@ public class GeobufReader implements Disposable {
         // id
         String id = f.getIdTypeCase() == IdTypeCase.INT_ID ? String.valueOf(f.getIntId()) : f.getId();
 
-        return new BasicFeature(id, values);
+        return new MapFeature(id, values);
     }
 
     Object decode(Value val) {

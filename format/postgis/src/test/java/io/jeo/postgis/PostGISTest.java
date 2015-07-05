@@ -31,6 +31,8 @@ import java.util.Set;
 import io.jeo.data.Cursor;
 import io.jeo.data.Dataset;
 import io.jeo.data.Handle;
+import io.jeo.vector.FeatureCursor;
+import io.jeo.vector.FeatureWriteCursor;
 import io.jeo.vector.VectorQuery;
 import io.jeo.vector.VectorDataset;
 import io.jeo.vector.Feature;
@@ -215,7 +217,7 @@ public class PostGISTest {
     public void testCursorUpdate() throws Exception {
         VectorDataset states = pg.get("states");
         
-        Cursor<Feature> c = states.read(new VectorQuery().update());
+        FeatureWriteCursor c = states.update(new VectorQuery());
         while(c.hasNext()) {
             Feature f = c.next();
 
@@ -241,7 +243,7 @@ public class PostGISTest {
         VectorDataset states = pg.get("states");
         Schema schema = states.schema();
 
-        Cursor<Feature> c = states.read(new VectorQuery().append());
+        FeatureWriteCursor c = states.append(new VectorQuery());
         Feature f = c.next();
 
         GeomBuilder gb = new GeomBuilder();
@@ -253,11 +255,11 @@ public class PostGISTest {
 
         assertEquals(50, states.count(new VectorQuery()));
 
-        c = states.read(new VectorQuery().bounds(g.getEnvelopeInternal()));
-        assertTrue(c.hasNext());
+        FeatureCursor d = states.read(new VectorQuery().bounds(g.getEnvelopeInternal()));
+        assertTrue(d.hasNext());
 
-        assertEquals("JEOLAND", c.next().get("STATE_NAME"));
-        c.close();
+        assertEquals("JEOLAND", d.next().get("STATE_NAME"));
+        d.close();
     }
 
     @Test
@@ -269,7 +271,7 @@ public class PostGISTest {
         assertEquals(0, data.count(new VectorQuery()));
 
         GeomBuilder gb = new GeomBuilder();
-        Cursor<Feature> c = data.read(new VectorQuery().append());
+        FeatureWriteCursor c = data.append(new VectorQuery());
 
         Feature f = c.next();
         f.put("shape", gb.point(0,0).point().buffer(10).get());
@@ -289,13 +291,15 @@ public class PostGISTest {
         f.put("cost", 3.99);
 
         c.write();
+        c.close();
 
         data = pg.get("widgets");
         assertEquals(3, data.count(new VectorQuery()));
 
-        c = data.read(new VectorQuery().filter("name = 'bomb'"));
-        assertTrue(c.hasNext());
-        assertEquals(1.99, c.next().get("cost"));
+        FeatureCursor d = data.read(new VectorQuery().filter("name = 'bomb'"));
+        assertTrue(d.hasNext());
+        assertEquals(1.99, d.next().get("cost"));
+        d.close();
     }
 
 }

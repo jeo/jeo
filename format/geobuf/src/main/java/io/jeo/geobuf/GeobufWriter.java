@@ -36,6 +36,7 @@ import io.jeo.geom.GeometryAdapter;
 import io.jeo.proj.Proj;
 import io.jeo.util.Function;
 import io.jeo.vector.FeatureCursor;
+import io.jeo.vector.Features;
 import io.jeo.vector.Field;
 import org.osgeo.proj4j.CoordinateReferenceSystem;
 import org.slf4j.Logger;
@@ -176,10 +177,7 @@ public class GeobufWriter implements Disposable {
 
             // crs
             if (crs == null) {
-                Field geom = f.schema().geometry();
-                if (geom != null) {
-                    crs = geom.crs();
-                }
+                crs = Features.crs(f);
             }
         }
         else if (obj instanceof FeatureCursor) {

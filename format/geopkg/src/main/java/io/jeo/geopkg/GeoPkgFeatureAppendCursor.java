@@ -17,58 +17,57 @@ package io.jeo.geopkg;
 
 import java.io.IOException;
 
-import io.jeo.vector.BasicFeature;
+import io.jeo.data.Transaction;
 import io.jeo.vector.Feature;
-import io.jeo.vector.FeatureCursor;
+import io.jeo.vector.FeatureAppendCursor;
+import io.jeo.vector.ListFeature;
 import io.jeo.vector.Schema;
 import io.jeo.sql.Backend.Session;
 
-public class GeoPkgFeatureAppendCursor extends FeatureCursor {
+public class GeoPkgFeatureAppendCursor extends FeatureAppendCursor {
 
-    final Session session;
-    final FeatureEntry entry;
-    final GeoPkgWorkspace ws;
-    final Schema schema;
-    // whether an 'outer' Transaction is in use
-    final boolean transaction;
+    Session session;
+    Transaction tx;
+
+    FeatureEntry entry;
+    GeoPkgWorkspace ws;
+    Schema schema;
 
     Feature next;
 
-    GeoPkgFeatureAppendCursor(Session session, FeatureEntry entry, GeoPkgWorkspace ws,
-                              Schema schema, boolean usingTransaction) throws IOException {
-        super(Mode.APPEND);
+    GeoPkgFeatureAppendCursor(Session session, Transaction tx, FeatureEntry entry, Schema schema, GeoPkgWorkspace ws) throws IOException {
         this.session = session;
+        this.tx = tx;
         this.entry = entry;
         this.ws = ws;
         this.schema = schema;
-        this.transaction = usingTransaction;
-        // without a transaction, performance is miserable
-        if (! usingTransaction) {
+
+        if (tx == Transaction.NULL) {
+            // without a transaction, performance is miserable
             session.beginTransaction();
         }
     }
 
     @Override
-    public boolean hasNext() throws IOException {
-        return true;
-    }
-
-    @Override
     public Feature next() throws IOException {
-        return next = new BasicFeature(null, schema);
+        return next = new ListFeature(schema);
     }
 
     @Override
-    protected void doWrite() throws IOException {
+    public GeoPkgFeatureAppendCursor write() throws IOException {
         ws.insert(entry, next, session);
+        return this;
     }
 
     @Override
     public void close() throws IOException {
-        // if not using an 'outer' Transaction, commit and close
-        if (!transaction) {
-            session.endTransaction(true);
-            session.close();
+        if (session != null) {
+            // if not using an "outer" transaction, close the one we created
+            if (tx == Transaction.NULL) {
+                session.endTransaction(true);
+                session.close();
+            }
+            session = null;
         }
     }
 }

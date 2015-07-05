@@ -18,7 +18,9 @@ import java.io.IOException;
 
 import java.util.Map;
 
+import io.jeo.vector.FeatureAppendCursor;
 import io.jeo.vector.FeatureCursor;
+import io.jeo.vector.FeatureWriteCursor;
 import io.jeo.vector.VectorQuery;
 import io.jeo.data.Transaction;
 import io.jeo.data.Transactional;
@@ -43,7 +45,17 @@ public class GeoPkgVector extends GeoPkgDataset<FeatureEntry> implements VectorD
 
     @Override
     public FeatureCursor read(VectorQuery q) throws IOException {
-        return geopkg.cursor(entry, q);
+        return geopkg.read(entry, q);
+    }
+
+    @Override
+    public FeatureWriteCursor update(VectorQuery q) throws IOException {
+        return geopkg.update(entry, q);
+    }
+
+    @Override
+    public FeatureAppendCursor append(VectorQuery q) throws IOException {
+        return geopkg.append(entry, q);
     }
 
     @Override

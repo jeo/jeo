@@ -56,8 +56,11 @@ public class CSVCursor extends FeatureCursor {
     }
 
     @Override
-    public void close() throws IOException {
-        reader.close();
+    public void close() {
+        if (reader != null) {
+            reader.close();
+        }
+        reader = null;
     }
 
 }

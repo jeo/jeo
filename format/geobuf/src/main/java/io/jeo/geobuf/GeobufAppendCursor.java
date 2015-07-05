@@ -16,39 +16,30 @@ package io.jeo.geobuf;
 
 import java.io.IOException;
 import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
 
 import com.vividsolutions.jts.geom.Geometry;
-import io.jeo.vector.BasicFeature;
 import io.jeo.vector.Feature;
-import io.jeo.vector.FeatureCursor;
-import io.jeo.vector.Schema;
+import io.jeo.vector.FeatureAppendCursor;
+import io.jeo.vector.MapFeature;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-public class GeobufAppendCursor extends FeatureCursor {
+public class GeobufAppendCursor extends FeatureAppendCursor {
+
+    static Logger LOG = LoggerFactory.getLogger(GeobufAppendCursor.class);
 
     GeobufWriter gbw;
-
-    //Schema schema;
     Feature next;
 
     public GeobufAppendCursor(GeobufDataset data) throws IOException {
-        super(Mode.APPEND);
-
         gbw = data.writer();
-        //schema = data.schema();
-    }
-
-    @Override
-    public boolean hasNext() throws IOException {
-        return true;
     }
 
     @Override
     public Feature next() throws IOException {
-        return next = new BasicFeature(null, new LinkedHashMap<String,Object>()) {
+        return next = new MapFeature(null, new LinkedHashMap<String,Object>()) {
             @Override
-            public BasicFeature put(Geometry g) {
+            public Feature put(Geometry g) {
                 //hack
                 return put("geometry", g);
             }
@@ -56,14 +47,19 @@ public class GeobufAppendCursor extends FeatureCursor {
     }
 
     @Override
-    protected void doWrite() throws IOException {
+    public GeobufAppendCursor write() throws IOException {
         gbw.append(next);
+        return this;
     }
 
     @Override
-    public void close() throws IOException {
+    public void close() {
         if (gbw != null) {
-            gbw.write().close();
+            try {
+                gbw.write().close();
+            } catch (IOException e) {
+                LOG.debug("Error closing geobuf writer", e);
+            }
         }
         gbw = null;
     }

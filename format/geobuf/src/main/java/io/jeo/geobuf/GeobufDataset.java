@@ -20,12 +20,14 @@ import java.nio.file.Files;
 import java.util.Collections;
 import java.util.Map;
 
-import io.jeo.data.Cursor.Mode;
 import io.jeo.data.Driver;
 import io.jeo.data.FileData;
 import io.jeo.geobuf.Geobuf.Data.DataTypeCase;
 import io.jeo.util.Util;
+import io.jeo.vector.FeatureAppendCursor;
 import io.jeo.vector.FeatureCursor;
+import io.jeo.vector.FeatureWriteCursor;
+import io.jeo.vector.Features;
 import io.jeo.vector.VectorQuery;
 import io.jeo.vector.VectorDataset;
 import io.jeo.vector.Schema;
@@ -46,7 +48,7 @@ public class GeobufDataset implements VectorDataset, FileData {
 
     @Override
     public Schema schema() throws IOException {
-        return reader().featureCollection().first().get().schema();
+        return Features.schema(this).orElse(null);
     }
 
     @Override
@@ -86,17 +88,20 @@ public class GeobufDataset implements VectorDataset, FileData {
 
     @Override
     public FeatureCursor read(VectorQuery q) throws IOException {
-        if (q.mode() == Mode.UPDATE) {
-            throw new IOException("Update cursor not supported");
-        }
-        if (q.mode() == Mode.APPEND) {
-            if (!fileIsEmpty()) {
-                throw new IOException("Can't append to non empty dataset");
-            }
-            return new GeobufAppendCursor(this);
-        }
-
         return new VectorQueryPlan(q).apply(reader().featureCollection());
+    }
+
+    @Override
+    public FeatureWriteCursor update(VectorQuery q) throws IOException {
+        throw new IOException("Update cursor not supported");
+    }
+
+    @Override
+    public FeatureAppendCursor append(VectorQuery q) throws IOException {
+        if (!fileIsEmpty()) {
+            throw new IOException("Can't append to non empty dataset");
+        }
+        return new GeobufAppendCursor(this);
     }
 
     @Override

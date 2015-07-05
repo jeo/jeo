@@ -14,24 +14,24 @@
  */
 package io.jeo.postgis;
 
+import com.vividsolutions.jts.io.WKBReader;
+import io.jeo.sql.PrimaryKey;
+import io.jeo.sql.PrimaryKeyColumn;
+import io.jeo.vector.Feature;
+import io.jeo.vector.FeatureCursor;
+import io.jeo.vector.ListFeature;
+import io.jeo.vector.MapFeature;
+
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
-
-import io.jeo.data.Cursor;
-import io.jeo.vector.BasicFeature;
-import io.jeo.vector.DiffFeature;
-import io.jeo.vector.Feature;
-import io.jeo.sql.PrimaryKey;
-import io.jeo.sql.PrimaryKeyColumn;
-
-import com.vividsolutions.jts.io.WKBReader;
-import io.jeo.vector.FeatureCursor;
 
 public class PostGISCursor extends FeatureCursor {
 
@@ -41,8 +41,7 @@ public class PostGISCursor extends FeatureCursor {
     Boolean hasNext;
     Feature next;
 
-    PostGISCursor(ResultSet rs, Connection cx, Mode mode, PostGISDataset dataset) {
-        super(mode);
+    PostGISCursor(ResultSet rs, Connection cx, PostGISDataset dataset) {
         this.rs = rs;
         this.cx = cx;
         this.dataset = dataset;
@@ -64,8 +63,9 @@ public class PostGISCursor extends FeatureCursor {
     public Feature next() throws IOException {
         if (hasNext != null && hasNext.booleanValue()) {
             try {
-                Map<String,Object> map = new LinkedHashMap<String, Object>();
                 ResultSetMetaData md = rs.getMetaData();
+                Map<String,Object> map = new LinkedHashMap<>();
+
                 for (int i = 0; i < md.getColumnCount(); i++) {
                     Object obj = rs.getObject(i+1);
                     String col = md.getColumnName(i+1);
@@ -80,14 +80,14 @@ public class PostGISCursor extends FeatureCursor {
                 PrimaryKey key = dataset.getTable().primaryKey();
                 StringBuilder sb = new StringBuilder();
                 for (PrimaryKeyColumn pkcol : key.getColumns()) {
-                    sb.append(map.get(pkcol.getName())).append(".");
+                    sb.append(rs.getObject(pkcol.getName())).append(".");
                 }
                 if (!key.getColumns().isEmpty()) {
                     sb.setLength(sb.length()-1);
                 }
 
-                next = new BasicFeature(sb.toString(), map, dataset.schema());
-                return next = mode == Cursor.UPDATE ? new DiffFeature(next) : next;
+                next = new MapFeature(sb.toString(), map);
+                return next;
             }
             catch(Exception e) {
                 handle(e);
@@ -98,11 +98,6 @@ public class PostGISCursor extends FeatureCursor {
         }
 
         return null;
-    }
-
-    @Override
-    protected void doWrite() throws IOException {
-        dataset.doUpdate(next, ((DiffFeature) next).changed(), cx);
     }
 
     @Override

@@ -21,13 +21,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import io.jeo.data.Cursor;
 import io.jeo.data.FileData;
 import io.jeo.util.Key;
 import io.jeo.util.Util;
-import io.jeo.vector.BasicFeature;
 import io.jeo.vector.Feature;
+import io.jeo.vector.FeatureAppendCursor;
 import io.jeo.vector.FeatureCursor;
+import io.jeo.vector.FeatureWriteCursor;
+import io.jeo.vector.ListFeature;
 import io.jeo.vector.Schema;
 import io.jeo.vector.SchemaBuilder;
 import io.jeo.vector.VectorDataset;
@@ -131,16 +132,22 @@ public class CSVDataset implements VectorDataset, FileData {
 
     @Override
     public FeatureCursor read(VectorQuery q) throws IOException {
-        if (q.mode() != Cursor.READ) {
-            throw new IllegalArgumentException("write cursors not supported");
-        }
-
         CsvReader reader = reader();
         if (opts.hasHeader()) {
             reader.readHeaders();
         }
 
         return new VectorQueryPlan(q).apply(new CSVCursor(reader, this));
+    }
+
+    @Override
+    public FeatureWriteCursor update(VectorQuery q) throws IOException {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public FeatureAppendCursor append(VectorQuery q) throws IOException {
+        throw new UnsupportedOperationException();
     }
 
     public void close() {
@@ -170,6 +177,6 @@ public class CSVDataset implements VectorDataset, FileData {
             values.add(parsed);
         }
 
-        return new BasicFeature(String.valueOf(i), values, schema);
+        return new ListFeature(String.valueOf(i), schema, values);
     }
 }

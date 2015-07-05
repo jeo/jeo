@@ -19,6 +19,9 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.Map;
 
+import io.jeo.vector.FeatureAppendCursor;
+import io.jeo.vector.FeatureCursor;
+import io.jeo.vector.FeatureWriteCursor;
 import org.gdal.ogr.DataSource;
 import org.gdal.ogr.FeatureDefn;
 import org.gdal.ogr.FieldDefn;
@@ -26,7 +29,6 @@ import org.gdal.ogr.Layer;
 import org.gdal.osr.SpatialReference;
 import io.jeo.data.Driver;
 import io.jeo.data.FileData;
-import io.jeo.vector.FeatureCursor;
 import io.jeo.vector.VectorQuery;
 import io.jeo.vector.VectorQueryPlan;
 import io.jeo.vector.VectorDataset;
@@ -311,6 +313,16 @@ public class OGRDataset implements VectorDataset, FileData {
         }
 
         return qp.apply(new OGRCursor(l, data.second, this));
+    }
+
+    @Override
+    public FeatureWriteCursor update(VectorQuery q) throws IOException {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public FeatureAppendCursor append(VectorQuery q) throws IOException {
+        throw new UnsupportedOperationException();
     }
 
     Pair<Layer,DataSource> open() throws IOException {

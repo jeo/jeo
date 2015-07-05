@@ -32,7 +32,9 @@ import java.util.Map;
 
 import io.jeo.data.Cursor;
 import io.jeo.data.Driver;
+import io.jeo.vector.FeatureAppendCursor;
 import io.jeo.vector.FeatureCursor;
+import io.jeo.vector.FeatureWriteCursor;
 import io.jeo.vector.VectorQuery;
 import io.jeo.vector.VectorQueryPlan;
 import io.jeo.vector.VectorDataset;
@@ -158,19 +160,23 @@ public class PostGISDataset implements VectorDataset {
 
     @Override
     public FeatureCursor read(VectorQuery q) throws IOException {
+        return read(q, connect());
+    }
+
+    FeatureCursor read(VectorQuery q, Connection cx) throws IOException {
         try {
             VectorQueryPlan qp = new VectorQueryPlan(q);
 
-            Connection cx = pg.getDataSource().getConnection();
-            
-            if (q.mode() == Cursor.APPEND) {
-                return new PostGISAppendCursor(this, cx);
-            }
-    
             Schema schema = schema();
-    
+            PrimaryKey pk = getTable().primaryKey();
+
             SQL sql = new SQL("SELECT ");
-            
+
+            // primary key fields
+            for (PrimaryKeyColumn pkCol : pk.getColumns()) {
+                sql.name(pkCol.getName()).add(", ");
+            }
+
             if (q.fields().isEmpty()) {
                 //grab all from the schema
                 for (Field f : schema()) {
@@ -216,7 +222,7 @@ public class PostGISDataset implements VectorDataset {
 
             try {
                 PreparedStatement st = pg.prepareStatement(sql, args, cx);
-                return qp.apply(new PostGISCursor(st.executeQuery(), cx, q.mode(), this));
+                return qp.apply(new PostGISCursor(st.executeQuery(), cx, this));
             }
             catch(SQLException e) {
                 cx.close();
@@ -225,6 +231,17 @@ public class PostGISDataset implements VectorDataset {
         } catch (SQLException e) {
             throw new IOException(e);
         }
+    }
+
+    @Override
+    public FeatureWriteCursor update(VectorQuery q) throws IOException {
+        Connection cx = connect();
+        return new PostGISUpdateCursor(read(q, cx), cx, this);
+    }
+
+    @Override
+    public FeatureAppendCursor append(VectorQuery q) throws IOException {
+        return new PostGISAppendCursor(this, connect());
     }
 
     @Override
@@ -447,5 +464,13 @@ public class PostGISDataset implements VectorDataset {
             }
         }
         return hasMissing;
+    }
+
+    Connection connect() throws IOException {
+        try {
+            return pg.getDataSource().getConnection();
+        } catch (SQLException e) {
+            throw new IOException(e);
+        }
     }
 }

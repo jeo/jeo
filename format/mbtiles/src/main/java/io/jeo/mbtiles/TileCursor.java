@@ -63,7 +63,7 @@ public class TileCursor extends Cursor<Tile> {
     }
 
     @Override
-    public void close() throws IOException {
+    public void close() {
         rs.close();
     }
 

@@ -70,7 +70,7 @@ public class GeoJSON extends FileVectorDriver<GeoJSONDataset> {
         return new GeoJSONDataset(file);
     }
 
-    static final EnumSet<Capability> CAPABILITIES = EnumSet.noneOf(Capability.class);
+    static final EnumSet<Capability> CAPABILITIES = EnumSet.of(Capability.APPEND);
 
     @Override
     public boolean supports(Capability cap) {

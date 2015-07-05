@@ -39,8 +39,7 @@ public class MongoTestData {
         Schema schema = data.schema();
 
         for (Feature f : data.read(new VectorQuery())) {
-            Geometry g = f.geometry();
-            g = Geom.iterate((MultiPolygon) f.geometry()).iterator().next();
+            Geometry g = Geom.iterate((MultiPolygon) f.geometry()).iterator().next();
 
             DBObject obj = new BasicDBObject(f.map());
             obj.put(schema.geometry().name(), JSON.parse(GeoJSONWriter.toString(g)));

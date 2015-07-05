@@ -22,6 +22,9 @@ import static org.junit.Assert.assertTrue;
 import java.util.Set;
 
 import io.jeo.data.Cursor;
+import io.jeo.vector.FeatureAppendCursor;
+import io.jeo.vector.FeatureCursor;
+import io.jeo.vector.FeatureWriteCursor;
 import io.jeo.vector.VectorQuery;
 import io.jeo.vector.Feature;
 import io.jeo.vector.Schema;
@@ -127,7 +130,7 @@ public class MongoTest {
             count++;
             assertNotNull(f.geometry());
             assertNotNull(f.get("STATE_NAME"));
-            assertTrue(f.has(f.schema().geometry().name()));
+            //assertTrue(f.has(states.schema().geometry().name()));
             assertTrue(f.has("STATE_NAME"));
             assertFalse(f.has("NOT THERE AT ALL"));
         }
@@ -159,7 +162,7 @@ public class MongoTest {
     @Test
     public void testAppend() throws Exception {
         MongoDataset states = mongo.get("states");
-        Cursor<Feature> c = states.read(new VectorQuery().append());
+        FeatureAppendCursor c = states.append(new VectorQuery());
 
         Geometry g = new GeomBuilder().point(0,0).toPoint().buffer(1);
         
@@ -171,9 +174,9 @@ public class MongoTest {
 
         assertEquals(50, states.count(new VectorQuery()));
 
-        c = states.read(new VectorQuery().bounds(g.getEnvelopeInternal()));
-        assertTrue(c.hasNext());
-        f = c.next();
+        FeatureCursor d = states.read(new VectorQuery().bounds(g.getEnvelopeInternal()));
+        assertTrue(d.hasNext());
+        f = d.next();
 
         assertTrue(g.equals(f.geometry()));
         assertEquals("Nowhere", f.get("STATE_NAME"));
@@ -187,7 +190,7 @@ public class MongoTest {
         assertEquals(0, states.count(new VectorQuery().bounds(g.getEnvelopeInternal())));
         assertEquals(0, states.count(new VectorQuery().filter("STATE_NAME = 'foo'")));
 
-        Cursor<Feature> c = states.read(new VectorQuery().filter("STATE_ABBR = 'NY'").update());
+        FeatureWriteCursor c = states.update(new VectorQuery().filter("STATE_ABBR = 'NY'"));
         assertTrue(c.hasNext());
 
         Feature f = c.next();
@@ -200,8 +203,9 @@ public class MongoTest {
         assertEquals(1, states.count(new VectorQuery().bounds(g.getEnvelopeInternal())));
         assertEquals(1, states.count(new VectorQuery().filter("STATE_NAME = 'foo'")));
 
-        c = states.read(new VectorQuery().filter("STATE_NAME = 'foo'").update());
+        c = states.update(new VectorQuery().filter("STATE_NAME = 'foo'"));
         assertTrue(c.hasNext());
+        c.next();
         c.remove();
         c.close();
 

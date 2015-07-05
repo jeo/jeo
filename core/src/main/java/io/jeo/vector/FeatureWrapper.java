@@ -14,10 +14,7 @@
  */
 package io.jeo.vector;
 
-import java.util.List;
 import java.util.Map;
-
-import org.osgeo.proj4j.CoordinateReferenceSystem;
 
 import com.vividsolutions.jts.geom.Geometry;
 
@@ -26,11 +23,11 @@ import com.vividsolutions.jts.geom.Geometry;
  * 
  * @author Justin Deoliveira, Boundless
  */
-public class FeatureWrapper implements Feature {
+public class FeatureWrapper<T extends Feature> implements Feature {
 
-    protected Feature delegate;
+    protected T delegate;
 
-    protected FeatureWrapper(Feature delegate) {
+    protected FeatureWrapper(T delegate) {
         this.delegate = delegate;
     }
 
@@ -44,11 +41,6 @@ public class FeatureWrapper implements Feature {
     }
 
     @Override
-    public CoordinateReferenceSystem crs() {
-        return delegate.crs();
-    }
-
-    @Override
     public boolean has(String key) {
         return delegate.has(key);
     }
@@ -59,43 +51,8 @@ public class FeatureWrapper implements Feature {
     }
 
     @Override
-    public Object get(int index) {
-        return delegate.get(index);
-    }
-
-    @Override
-    public Feature put(String key, Object val) {
-        return delegate.put(key, val);
-    }
-
-    @Override
-    public Feature put(Geometry g) {
-        return delegate.put(g);
-    }
-
-    @Override
-    public Feature set(int index, Object val) {
-        return delegate.set(index, val);
-    }
-
-    @Override
     public Geometry geometry() {
         return delegate.geometry();
-    }
-
-    @Override
-    public Schema schema(boolean derive) {
-        return delegate.schema(derive);
-    }
-
-    @Override
-    public Schema schema() {
-        return delegate.schema();
-    }
-
-    @Override
-    public List<Object> list() {
-        return delegate.list();
     }
 
     @Override
@@ -103,4 +60,15 @@ public class FeatureWrapper implements Feature {
         return delegate.map();
     }
 
+    @Override
+    public Feature put(String key, Object val) {
+        delegate.put(key, val);
+        return this;
+    }
+
+    @Override
+    public Feature put(Geometry g) {
+        delegate.put(g);
+        return this;
+    }
 }

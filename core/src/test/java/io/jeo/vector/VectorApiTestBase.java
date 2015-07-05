@@ -21,6 +21,7 @@ import java.util.Locale;
 import java.util.NoSuchElementException;
 import java.util.Set;
 
+import com.google.common.collect.Iterators;
 import io.jeo.TestData;
 import io.jeo.data.Cursor;
 import io.jeo.geom.Envelopes;
@@ -198,7 +199,7 @@ public abstract class VectorApiTestBase {
         } finally {
             cursor.close();
         }
-        assertTrue(next.has(next.schema().geometry().name()));
+        assertTrue(next.has(data.schema().geometry().name()));
         assertTrue(next.has("STATE_NAME"));
         assertFalse(next.has("NOT THERE AT ALL"));
 
@@ -207,9 +208,9 @@ public abstract class VectorApiTestBase {
         cursor = data.read(new VectorQuery().filter("STATE_ABBR = 'CA'"));
         assertTrue(cursor.hasNext());
         Feature feature = cursor.next();
-        assertEquals(data.schema().fields().size(), feature.schema().size());
+        assertEquals(data.schema().fields().size(), feature.map().size());
         for (Field f: data.schema().fields()) {
-            assertNotNull(feature.schema().field(f.name()));
+            assertTrue(feature.has(f.name()));
         }
     }
 
@@ -249,7 +250,7 @@ public abstract class VectorApiTestBase {
     void assertNotCovered(Cursor<Feature> cursor, String... abbrs) throws IOException {
         final Set<String> set = Sets.newHashSet(abbrs);
         try {
-            Iterables.find(cursor, new Predicate<Feature>() {
+            Iterators.find(cursor.iterator(), new Predicate<Feature>() {
                 @Override
                 public boolean apply(Feature input) {
                     return set.contains(input.get("STATE_ABBR"));

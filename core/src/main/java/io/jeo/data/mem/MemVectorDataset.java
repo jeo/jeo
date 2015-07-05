@@ -15,15 +15,17 @@
 package io.jeo.data.mem;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 import io.jeo.geom.Envelopes;
 import io.jeo.vector.DiffFeature;
+import io.jeo.vector.FeatureAppendCursor;
 import io.jeo.vector.FeatureCursor;
+import io.jeo.vector.FeatureWriteCursor;
 import io.jeo.vector.Field;
 import io.jeo.vector.VectorQueryPlan;
 import io.jeo.vector.VectorQuery;
@@ -38,13 +40,13 @@ import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.index.SpatialIndex;
 import com.vividsolutions.jts.index.quadtree.Quadtree;
 
-public class MemVector implements VectorDataset {
+public class MemVectorDataset implements VectorDataset {
 
     Schema schema;
-    List<Feature> features = new ArrayList<Feature>();
+    Map<String,Feature> features = new LinkedHashMap<>();
     SpatialIndex index;
 
-    public MemVector(Schema schema) {
+    public MemVectorDataset(Schema schema) {
         this.schema = schema;
         index = new Quadtree();
     }
@@ -57,8 +59,8 @@ public class MemVector implements VectorDataset {
         return Collections.emptyMap();
     }
     
-    List<Feature> getFeatures() {
-        return features;
+    Iterable<Feature> features() {
+        return features.values();
     }
 
     @Override
@@ -84,7 +86,7 @@ public class MemVector implements VectorDataset {
             return e;
         }
     
-        for (Feature f : features) {
+        for (Feature f : features()) {
             Geometry g = f.geometry();
             if (g != null) {
                 e.expandToInclude(g.getEnvelopeInternal());
@@ -108,13 +110,23 @@ public class MemVector implements VectorDataset {
     public FeatureCursor read(VectorQuery q) throws IOException {
         VectorQueryPlan qp = new VectorQueryPlan(q);
 
-        List<Feature> features = this.features;
+        Iterable<Feature> features = features();
         if (!Envelopes.isNull(q.bounds())) {
             features = query(q.bounds());
             qp.bounded();
         }
 
-        return qp.apply(new MemCursor(q.mode(), features, this));
+        return qp.apply(new MemFeatureCursor(features));
+    }
+
+    @Override
+    public FeatureWriteCursor update(VectorQuery q) throws IOException {
+        return new MemFeatureWriteCursor(read(q).iterator(), this);
+    }
+
+    @Override
+    public FeatureAppendCursor append(VectorQuery q) throws IOException {
+        return new MemFeatureAppendCursor(this);
     }
 
     List<Feature> query(Envelope bounds) {
@@ -130,7 +142,7 @@ public class MemVector implements VectorDataset {
     }
 
     public void add(Feature f) {
-        features.add(f);
+        features.put(f.id(), f);
 
         Geometry g = f.geometry();
         if (g != null) {
@@ -165,6 +177,7 @@ public class MemVector implements VectorDataset {
         }
 
         f.apply();
+        add(f.getDelegate());
     }
 
     @Override

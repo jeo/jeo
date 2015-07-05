@@ -39,7 +39,7 @@ public class Cursors {
                 return null;
             }
             @Override
-            public void close() throws IOException {
+            public void close() {
             }
         };
     }
@@ -75,7 +75,7 @@ public class Cursors {
         }
 
         @Override
-        public void close() throws IOException {
+        public void close() {
         }
     }
 
@@ -116,7 +116,7 @@ public class Cursors {
         }
 
         @Override
-        public void close() throws IOException {
+        public void close() {
         }
     }
 }

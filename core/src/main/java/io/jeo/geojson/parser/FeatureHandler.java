@@ -19,7 +19,10 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import io.jeo.json.parser.ParseException;
-import io.jeo.vector.BasicFeature;
+import io.jeo.proj.Proj;
+import io.jeo.util.Consumer;
+import io.jeo.vector.Feature;
+import io.jeo.vector.MapFeature;
 import org.osgeo.proj4j.CoordinateReferenceSystem;
 
 import com.vividsolutions.jts.geom.Geometry;
@@ -70,7 +73,15 @@ public class FeatureHandler extends BaseHandler {
 
     @Override
     public boolean endObject() throws ParseException, IOException {
-        Geometry geom = node.consume("geometry", Geometry.class).orElse(null);
+        final Geometry geom = node.consume("geometry", Geometry.class).orElse(null);
+        if (geom != null && Proj.crs(geom) == null) {
+            node.consume("crs", CoordinateReferenceSystem.class).ifPresent(new Consumer<CoordinateReferenceSystem>() {
+                @Override
+                public void accept(CoordinateReferenceSystem val) {
+                    Proj.crs(geom, val);
+                }
+            });
+        }
 
         Map<String,Object> props = node.consume("properties", Map.class)
             .orElse(new LinkedHashMap<String, Object>());
@@ -79,10 +90,7 @@ public class FeatureHandler extends BaseHandler {
 
         String fid = node.consume("id", String.class).orElse(id != null ? String.valueOf(id) : null);
 
-        BasicFeature f = new BasicFeature(fid, props);
-        f.crs(node.consume("crs", CoordinateReferenceSystem.class).orElse(null));
-
-        node.setValue(f);
+        node.setValue(new MapFeature(fid, props));
 
         pop();
         return true;

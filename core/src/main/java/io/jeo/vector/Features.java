@@ -14,13 +14,17 @@
  */
 package io.jeo.vector;
 
+import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import io.jeo.geom.Geom;
 import io.jeo.proj.Proj;
+import io.jeo.util.Function;
+import io.jeo.util.Optional;
+import io.jeo.util.Util;
 import org.osgeo.proj4j.CoordinateReferenceSystem;
 
 import com.vividsolutions.jts.geom.Envelope;
@@ -29,6 +33,8 @@ import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.MultiLineString;
 import com.vividsolutions.jts.geom.MultiPoint;
 import com.vividsolutions.jts.geom.MultiPolygon;
+
+import static io.jeo.vector.VectorQuery.all;
 
 /**
  * Feature utility class.
@@ -53,7 +59,7 @@ public class Features {
      */
     public static Envelope bounds(Feature f) {
         Envelope e = new Envelope();
-        for (Object obj : f.list()) {
+        for (Object obj : f.map().values()) {
             if (obj instanceof Geometry) {
                 e.expandToInclude(((Geometry) obj).getEnvelopeInternal());
             }
@@ -65,22 +71,20 @@ public class Features {
      * Returns the bounds of the feature object, reprojecting geometries of the feature if required.
      * <p>
      * The bounds is computed by computing the aggregated bounds of all geometries of the feature 
-     * object. All geometries are reprojected to the crs returned from 
-     * <tt>f.schema().geometry().getCRS()</tt>. Therefore this method requires that the features 
-     * schema accurately represent the feature.
+     * object. All geometries are reprojected to the crs returned from * <tt>f.geometry()</tt>. Therefore this method
+     * requires that the features default geometry has a crs object.
      * </p>
      * @param f The feature.
      * 
      * @return The bounds, or a bounds object in which {@link Envelope#isNull()} returns true.
      */
     public static Envelope boundsReprojected(Feature f) {
-        Schema schema = f.schema();
-        Field geo = schema.geometry();
-        if (geo == null) {
-            return null;
+        Geometry geom = f.geometry();
+        CoordinateReferenceSystem crs = Proj.crs(geom);
+        if (crs == null) {
+            throw new IllegalArgumentException("Feature default geometry has no crs");
         }
-
-        return boundsReprojected(f, geo.crs());
+        return boundsReprojected(f, crs);
     }
 
     /**
@@ -95,16 +99,19 @@ public class Features {
      * @return The bounds, or a bounds object in which {@link Envelope#isNull()} returns true.
      */
     public static Envelope boundsReprojected(Feature f, CoordinateReferenceSystem crs) {
+        if (crs == null) {
+            throw new IllegalArgumentException("crs must not be null");
+        }
         Envelope e = new Envelope();
-        for (Field fld : f.schema()) {
-            if (fld.geometry()) {
-                CoordinateReferenceSystem c = fld.crs();
-                Geometry g = (Geometry) f.get(fld.name());
+        for (Object val : f.map().values()) {
+            if (val instanceof Geometry) {
+                Geometry g = (Geometry) val;
                 if (g == null) {
                     //ignore
                     continue;
                 }
 
+                CoordinateReferenceSystem c = Proj.crs(g);
                 if (c != null) {
                     g = Proj.reproject(g, c, crs);
                 }
@@ -136,7 +143,7 @@ public class Features {
             values.add(feature.get(f.name()));
         }
 
-        return new BasicFeature(feature.id(), values, schema);
+        return new ListFeature(feature.id(), schema, values);
     }
 
     /**
@@ -148,17 +155,11 @@ public class Features {
      * @return The target feature.
      */
     public static Feature copy(Feature from, Feature to) {
-        Field geom = from.schema().geometry();
         for (Map.Entry<String, Object> kv : from.map().entrySet()) {
             String key = kv.getKey();
             Object val = kv.getValue();
 
-            if (geom != null && geom.name().equals(key)) {
-                to.put((Geometry)val);
-            }
-            else {
-                to.put(kv.getKey(), val);
-            }
+            to.put(key, val);
         }
         return to;
     }
@@ -204,7 +205,7 @@ public class Features {
      * @return The transformed feature.
      */
     public static Feature multify(Feature feature) {
-        return new GeometryTransformWrapper(feature) {
+        return new GeometryTransformFeature(feature) {
             @Override
             protected Geometry wrap(Geometry g) {
                 return Geom.multi(g);
@@ -213,16 +214,86 @@ public class Features {
     }
 
     /**
-     * Creates a feature object from a map with an explicit schema.
+     * Returns the crs of a feature.
+     * <p>
+     *  The crs of a feature is a crs associated with it's default geometry.
+     * </p>
+     *
+     * @see Feature#geometry()
+     * @see Proj#crs(Geometry)
      */
-    public static Feature create(String id, Schema schema, Map<String, Object> map) {
-        return new BasicFeature(id, map, schema);
+    public static CoordinateReferenceSystem crs(Feature f) {
+        return Proj.crs(f.geometry());
     }
 
     /**
-     * Creates a feature object from a list with an explicit schema.
+     * Returns a new feature id if the specified id is null.
      */
-    public static Feature create(String id, Schema schema, Object... values) {
-        return new BasicFeature(id, Arrays.asList(values), schema);
+    public static String id(String id) {
+        return id != null ? id : Util.uuid();
+    }
+
+    /**
+     * Derives a schema for a vector dataset.
+     * <p>
+     * This method computes the schema by inspecting the first feature.
+     * </p>
+     * @param data The dataset.
+     *
+     * @return The optional schema.
+     */
+    public static Optional<Schema> schema(final VectorDataset data) throws IOException {
+        return data.read(all().limit(1)).first().map(new Function<Feature, Schema>() {
+            @Override
+            public Schema apply(Feature f) {
+                return schema(data.name(), f);
+            }
+        });
+    }
+
+    /**
+     * Creates a schema from a feature object.
+     *
+     * @param name Name of the schema.
+     * @param f The feature.
+     *
+     * @return The new schema.
+     *
+     * @see {@link SchemaBuilder#fields(Feature)}
+     */
+    public static Schema schema(String name, Feature f) {
+        return Schema.build(name).fields(f).schema();
+    }
+
+    /**
+     * Compares two feature objects for equality.
+     * <p>
+     *  Equality is based on {@link Feature#id()} and contents obtained from {@link Feature#map()}.
+     * </p>
+     * @param f1 The first feature.
+     * @param f2 The second feature.
+     *
+     * @return True if the two features are equal.
+     */
+    public static boolean equals(Feature f1, Feature f2) {
+        if (!Objects.equals(f1.id(), f2.id())) {
+            return false;
+        }
+
+        return Objects.equals(f1.map(), f2.map());
+    }
+
+    /**
+     * Computes the hashcode for a feature.
+     * <p>
+     *  To remain consistent with {@link #equals(Feature, Feature)} the hash code is computed based on
+     *  {@link Feature#id()} and {@link Feature#map()}
+     * </p>
+     * @param f The feature.
+     *
+     * @return A hashcode.
+     */
+    public static int hashCode(Feature f) {
+        return Objects.hash(f.id(), f.map());
     }
 }

@@ -14,33 +14,30 @@
  */
 package io.jeo.vector;
 
-import static org.junit.Assert.*;
-
-import java.util.List;
 import java.util.Map;
 
 import io.jeo.geom.Geom;
 import org.junit.Test;
 
-import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
-public class BasicFeatureTest {
+import static org.junit.Assert.assertEquals;
+
+public class FeatureTest {
 
     @Test
     public void testEquals() throws Exception {
         Schema s1 = Schema.build("widgets").fields("name:String,cost:Double,geom:Point").schema();
-        BasicFeature f1 = 
-            new BasicFeature("1", (List)Lists.newArrayList("bomb", 1.99, Geom.point(0, 0)), s1);
+        ListFeature f1 = new ListFeature("1", s1, "bomb", 1.99, Geom.point(0, 0));
 
-        Schema s2 = Schema.build("widgets").fields("name:String,cost:Double,geom:Point").schema();
+        //Schema s2 = Schema.build("widgets").fields("name:String,cost:Double,geom:Point").schema();
 
         Map<String,Object> map = Maps.newLinkedHashMap();
         map.put("name", "bomb");
         map.put("cost", 1.99);
         map.put("geom", Geom.point(0,0));
         
-        BasicFeature f2 = new BasicFeature("1", map, s2);
+        MapFeature f2 = new MapFeature("1", map);
 
         assertEquals(f1, f2);
     }

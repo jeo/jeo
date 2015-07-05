@@ -18,33 +18,31 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.HashMap;
 
-import io.jeo.vector.FeatureCursor;
-import io.jeo.vector.BasicFeature;
 import io.jeo.vector.Feature;
+import io.jeo.vector.FeatureAppendCursor;
 
 import com.vividsolutions.jts.geom.Geometry;
+import io.jeo.vector.MapFeature;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-public class GeoJSONAppendCursor extends FeatureCursor {
+public class GeoJSONAppendCursor extends FeatureAppendCursor {
+
+    static Logger LOG = LoggerFactory.getLogger(GeoJSONAppendCursor.class);
 
     GeoJSONWriter writer;
     Feature next;
 
     public GeoJSONAppendCursor(Writer out) throws IOException {
-        super(Mode.APPEND);
         writer = new GeoJSONWriter(out);
         writer.featureCollection();
     }
 
     @Override
-    public boolean hasNext() throws IOException {
-        return true;
-    }
-    
-    @Override
     public Feature next() throws IOException {
-        return next = new BasicFeature(null, new HashMap<String, Object>()) {
+        return next = new MapFeature(null, new HashMap<String, Object>()) {
             @Override
-            public BasicFeature put(Geometry g) {
+            public Feature put(Geometry g) {
                 //hack
                 return put("geometry", g);
             }
@@ -52,15 +50,26 @@ public class GeoJSONAppendCursor extends FeatureCursor {
     }
 
     @Override
-    protected void doWrite() throws IOException {
+    public GeoJSONAppendCursor write() throws IOException {
         writer.feature(next);
+        return this;
     }
 
     @Override
-    public void close() throws IOException {
+    public void close() {
         if (writer != null) {
-            writer.endFeatureCollection();
-            writer.flush();
+            try {
+                writer.endFeatureCollection();
+            } catch (IOException e) {
+                throw new RuntimeException("Error closing feature collection object", e);
+            }
+
+            try {
+                writer.flush();
+            }
+            catch(IOException e) {
+                LOG.debug("Error flushing writer");
+            }
         }
         writer = null;
     }

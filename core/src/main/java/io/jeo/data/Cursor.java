@@ -28,6 +28,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * An iterator like object used to read contents of {@link Dataset} objects. 
@@ -53,50 +54,17 @@ import java.util.List;
  *   doSomethingWith(next);
  * }
  * </pre>
- * When used in this form the {@link #close()} method need not be called.
+ * However unless the cursor supports being {@link #rewind()} it is a one-time pass through the data so can only be used
+ * for a single loop.
  * </p>
  * <p>
- * Applications must always call the {link #close()} method when the cursor is no longer needed, 
- * except when using the cursor in a for-each loop unless the for-each loop is exited prematurely.
+ * When used in for-each form the {@link #close()} method will be automatically called when the iterator has been
+ * exhausted. However if the loop exists prematurely it will not be so to be safe the loop should be wrapped in a try
+ * finally close block.
  * </p>
- * <p>
- * Implementors should ensure that the iterator returned from {@link #iterator()} closes itself
- * when the iterator is exhausted. Implementors should also ensure that the {@link #close()} method
- * can be called multiple times safely.   
- * </p>
+ *
  */
 public abstract class Cursor<T> implements Closeable, Iterable<T> {
-
-    public static final Mode READ = Mode.READ;
-    public static final Mode UPDATE = Mode.UPDATE;
-    public static final Mode APPEND = Mode.APPEND;
-
-    public static enum Mode {
-        READ, UPDATE, APPEND;
-    }
-
-    /**
-     * cursor mode
-     */
-    protected Mode mode;
-
-    protected Cursor() {
-        this(Mode.READ);
-    }
-
-    protected Cursor(Mode mode) {
-        if (mode == null) {
-            throw new NullPointerException("mode must not be null");
-        }
-        this.mode = mode;
-    }
-
-    /**
-     * The mode of the cursor.
-     */
-    public Mode getMode() {
-        return mode;
-    }
 
     /**
      * Returns <true> if the cursor has more elements.
@@ -110,63 +78,17 @@ public abstract class Cursor<T> implements Closeable, Iterable<T> {
      * </p>
      * <p>
      * Implementations should safely return <code>null</code> from this method when the cursor
-     * has been exhausted. 
+     * has been exhausted.
      * </p>
      */
     public abstract T next() throws IOException;
 
     /**
-     * Writes modifications made to the last object returned by the cursor.
+     * Returns an iterator view of the cursor.
      * <p>
-     * This method works in {@link Mode#UPDATE} and {@link Mode#APPEND} modes. It will throw 
-     * {@link IllegalStateException} in {@link Mode#READ} mode. 
+     * This iterator implementation closes the cursor upon exhaustion.
      * </p>
      */
-    public Cursor<T> write() throws IOException {
-        if (mode == Mode.READ) {
-            throw new IllegalStateException("Cursor is read only");
-        }
-
-        doWrite();
-        return this;
-    }
-
-    protected void doWrite() throws IOException {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * Removes the last object returned by the cursor from the underlying collection.
-     * <p>
-     * This method works in {@link Mode#UPDATE} mode. It will throw {@link IllegalStateException} 
-     * in other modes. 
-     * </p>
-     */
-    public Cursor<T> remove() throws IOException {
-        if (mode != Mode.UPDATE) {
-            throw new IllegalStateException("Cursor not in update mode");
-        }
-
-        doRemove();
-        return this;
-    }
-
-    protected void doRemove() throws IOException {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * Rewinds the cursor to it's original state, if supported.
-     * <p>
-     *
-     * </p>
-     * @return
-     * @throws IOException
-     */
-    public boolean rewind() throws IOException {
-        return false;
-    }
-
     @Override
     public Iterator<T> iterator() {
         final Cursor<T> c = this;
@@ -209,34 +131,18 @@ public abstract class Cursor<T> implements Closeable, Iterable<T> {
     }
 
     /**
-     * Consumes all the values of the cursor.
+     * Consumes all the values of the stream.
      */
     public void each(Consumer<T> consumer) throws IOException {
         try (Cursor<T> c = this) {
-            for (T obj : c) {
-                consumer.accept(obj);
+            while (c.hasNext()) {
+                consumer.accept(c.next());
             }
         }
     }
 
     /**
-     * Applies a mapping function to the cursor.
-     *
-     * @param mapper the mapping function.
-     *
-     * @return The new cursor.
-     */
-    public <R> Cursor<R> map(final Function<T,R> mapper) throws IOException {
-        return new CursorWrapper<R>(this) {
-            @Override
-            public R next() throws IOException {
-                return mapper.apply((T)delegate.next());
-            }
-        };
-    }
-
-    /**
-     * Returns the first element of a cursor, returning empty if the cursor has no more objects.
+     * Returns the next element of the stream, returning empty if the stream has no more objects.
      */
     public Optional<T> first() throws IOException {
         if (hasNext()) {
@@ -247,30 +153,28 @@ public abstract class Cursor<T> implements Closeable, Iterable<T> {
     }
 
     /**
-     * Returns the number of results in the cursor.
+     * Returns the number of results in the stream.
      */
     public long count() throws IOException {
-        try {
-            int count = 0;
-            while(hasNext()) {
-                next();
+        long count = 0;
+        try (Cursor<T> c = this) {
+            while (c.hasNext()) {
                 count++;
+                c.next();
             }
-            return count;
         }
-        finally {
-            close();
-        }
+
+        return count;
     }
 
     /**
-     * Returns the aggregated spatial extent of results in the cursor.
+     * Returns the aggregated spatial extent of results in the stream.
      * <p>
      * This method works on cursors containing {@link Feature} or {@link Geometry} objects.
      * Use {@link #bounds(Function)} to provide an explicit bounds provider.
      * </p>
      *
-     * TODO: move this to FeatureCursor
+     * TODO: move this to FeatureStream
      */
     public Envelope bounds() throws IOException {
         return bounds(new Function<T, Envelope>() {
@@ -291,40 +195,37 @@ public abstract class Cursor<T> implements Closeable, Iterable<T> {
     }
 
     /**
-     * Returns the aggregated spatial extent of results in the cursor.
+     * Returns the aggregated spatial extent of results in the stream.
      *
-     * @param env Function providing envelopes for objects in the cursor.
+     * @param env Function providing envelopes for objects in the stream.
      */
     public Envelope bounds(Function<T, Envelope> env) throws IOException {
-        try {
+        try (Cursor<T> c = this) {
             Envelope extent = new Envelope();
             extent.setToNull();
 
-            for (T obj : this) {
-                Envelope e = env.apply(obj);
+            while (c.hasNext()) {
+                Envelope e = env.apply(c.next());
                 if (!Envelopes.isNull(e)) {
                     extent.expandToInclude(e);
                 }
             }
             return extent;
         }
-        finally {
-            close();
-        }
     }
 
     /**
-     * Limits the number of results given back by the cursor to a fixed size.
+     * Limits the number of results given back by the stream to a fixed size.
      *
      * @param limit The maximum number of objects to return.
      *
      * @return The limited cursor.
      */
     public Cursor<T> limit(Integer limit) {
-        return new LimitCursor<T>(this, limit);
+        return new LimitCursor<>(this, limit);
     }
 
-    static class LimitCursor<T> extends CursorWrapper<T> {
+    static class LimitCursor<T> extends CursorWrapper<T,T> {
 
         Integer limit;
         Integer count;
@@ -332,16 +233,12 @@ public abstract class Cursor<T> implements Closeable, Iterable<T> {
         LimitCursor(Cursor<T> delegate, Integer limit) {
             super(delegate);
 
-            if (limit == null) {
-                throw new NullPointerException("limit must not be null");
-            }
-
-            this.limit = limit;
+            this.limit = Objects.requireNonNull(limit, "limit must not be null");
             this.count = 0;
         }
 
         @Override
-        public boolean hasNext() throws IOException {
+        public boolean hasNext() throws IOException  {
             if (count < limit) {
                 return delegate.hasNext();
             }
@@ -356,28 +253,24 @@ public abstract class Cursor<T> implements Closeable, Iterable<T> {
     }
 
     /**
-     * Returns a cursor that will skip over the specified number of objects.
+     * Returns a stream that will skip over the specified number of objects.
      *
      * @param offset The number of objects to skip over.
      *
      * @return The skipped cursor.
      */
     public Cursor<T> skip(Integer offset) {
-        return new OffsetCursor<T>(this, offset);
+        return new OffsetCursor<>(this, offset);
     }
 
-    static class OffsetCursor<T> extends CursorWrapper<T> {
+    static class OffsetCursor<T> extends CursorWrapper<T,T> {
 
         Integer offset;
 
         OffsetCursor(Cursor<T> delegate, Integer offset) {
             super(delegate);
 
-            if (offset == null) {
-                throw new NullPointerException("limit must not be null");
-            }
-
-            this.offset = offset;
+            this.offset = Objects.requireNonNull(offset, "offset must not be null");
         }
 
         @Override
@@ -393,24 +286,24 @@ public abstract class Cursor<T> implements Closeable, Iterable<T> {
     }
 
     /**
-     * Wraps a cursor returning objects that pass a predicate.
+     * Wraps a stream returning objects that pass a predicate.
      *
      * @param filter The predicate used to filter objects.
      *
      * @return The filtered cursor.
      */
     public Cursor<T> filter(Predicate<T> filter) {
-        return new FilterCursor<T>(this, filter);
+        return new FilterCursor<>(this, filter);
     }
 
-    private static class FilterCursor<T> extends CursorWrapper<T> {
+    private static class FilterCursor<T> extends CursorWrapper<T,T> {
 
         Predicate<T> filter;
         T next;
 
         FilterCursor(Cursor<T> delegate, Predicate<T> filter) {
             super(delegate);
-            this.filter = filter;
+            this.filter = Objects.requireNonNull(filter, "filter must not be null");
         }
 
         @Override
@@ -446,7 +339,19 @@ public abstract class Cursor<T> implements Closeable, Iterable<T> {
         return new BufferedCursor(this, n);
     }
 
-    static class BufferedCursor<T> extends CursorWrapper<T> {
+    /**
+     * Rewinds the cursor to it's initial state.
+     * <p>
+     * Whether a cursor is rewindable or not depends on the implementation. The {@link #buffer(int)} method can be
+     * used to create a rewindable cursor.
+     * </p>
+     * <p>
+     */
+    public void rewind() {
+        throw new UnsupportedOperationException("cursor not rewindable");
+    }
+
+    static class BufferedCursor<T> extends CursorWrapper<T,T> {
 
         int bufferSize;
         List<T> buffer;
@@ -459,7 +364,7 @@ public abstract class Cursor<T> implements Closeable, Iterable<T> {
 
         BufferedCursor(Cursor delegate, int bufferSize) {
             super(delegate);
-            this.bufferSize = bufferSize;
+            this.bufferSize = Objects.requireNonNull(bufferSize, "bufferSize must not be null");
             this.buffer = new ArrayList<>(bufferSize);
         }
 
@@ -489,21 +394,38 @@ public abstract class Cursor<T> implements Closeable, Iterable<T> {
         }
 
         @Override
-        public boolean rewind() throws IOException {
+        public void rewind() {
             if (total > bufferSize) {
                 // past the buffer, can't rewind
-                return delegate.rewind();
+                delegate.rewind();
             }
 
             i = total = 0;
-            return true;
         }
     }
 
-    static class CursorWrapper<T> extends Cursor<T> {
+    /**
+     * Applies a mapping function to the stream.
+     *
+     * @param mapper the mapping function.
+     *
+     * @return The new cursor.
+     */
+    public <R> Cursor<R> map(final Function<T,R> mapper) {
+        Objects.requireNonNull(mapper, "mapper must not be null");
+        return new CursorWrapper<T,R>(this) {
+            @Override
+            public R next() throws IOException {
+                return mapper.apply(delegate.next());
+            }
+        };
+    }
+
+    protected static class CursorWrapper<T,R> extends Cursor<R> {
+
         protected Cursor<T> delegate;
 
-        CursorWrapper(Cursor delegate) {
+        protected CursorWrapper(Cursor<T> delegate) {
             this.delegate = delegate;
         }
 
@@ -513,31 +435,18 @@ public abstract class Cursor<T> implements Closeable, Iterable<T> {
         }
 
         @Override
-        public T next() throws IOException {
-            return delegate.next();
+        public R next() throws IOException {
+            return (R) delegate.next();
         }
 
         @Override
-        public Cursor<T> write() throws IOException {
-            return delegate.write();
-        }
-
-        @Override
-        public Cursor<T> remove() throws IOException {
-            return delegate.remove();
-        }
-
-        @Override
-        public boolean rewind() throws IOException {
-            return delegate.rewind();
+        public void rewind() {
+            delegate.rewind();
         }
 
         @Override
         public void close() throws IOException {
             delegate.close();
         }
-
-
     }
-
 }

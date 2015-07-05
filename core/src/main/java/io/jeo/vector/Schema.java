@@ -126,7 +126,7 @@ public class Schema implements Iterable<Field> {
     /**
      * Derived coordinate reference system for the schema.
      * <p>
-     * If the schemas {@link #crs} field is set it is retunred, other this method delegates to
+     * If the schemas {@link #crs} field is set it is returned, other this method delegates to
      * <code>geometry().crs()</code>.
      * </p> 
      * @return The coordinate reference system object, or <code>null</code> if not available or 

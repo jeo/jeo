@@ -39,7 +39,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-public class MemRaster implements RasterDataset {
+public class MemRasterDataset implements RasterDataset {
 
     String name;
     Envelope bounds;
@@ -47,7 +47,7 @@ public class MemRaster implements RasterDataset {
 
     List<MemBand> bands = new ArrayList<MemBand>();
 
-    public MemRaster(String name, Envelope bounds, CoordinateReferenceSystem crs) {
+    public MemRasterDataset(String name, Envelope bounds, CoordinateReferenceSystem crs) {
         this.name = name;
         this.bounds = bounds;
         this.crs = crs;

@@ -20,7 +20,6 @@ import java.util.List;
 
 import io.jeo.json.parser.ParseException;
 import io.jeo.proj.Proj;
-import io.jeo.vector.BasicFeature;
 import io.jeo.vector.Feature;
 import org.osgeo.proj4j.CoordinateReferenceSystem;
 
@@ -94,9 +93,9 @@ public class FeatureCollectionHandler extends BaseHandler {
                    super.endObject();
 
                    //consume the feature node
-                   BasicFeature f = FeaturesHandler.this.node.consume("feature", BasicFeature.class).get();
-                   if (f != null && f.crs() == null) {
-                       f.crs(crs);
+                   Feature f = FeaturesHandler.this.node.consume("feature", Feature.class).get();
+                   if (f != null && crs != null) {
+                       Proj.crs(f.geometry(), crs, false);
                    }
                    if (!streaming) {
                        features.add(f);

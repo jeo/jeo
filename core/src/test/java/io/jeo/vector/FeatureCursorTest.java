@@ -20,8 +20,6 @@ import io.jeo.data.Cursors;
 import io.jeo.proj.Proj;
 import org.junit.Test;
 
-import java.util.Collections;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
@@ -29,15 +27,14 @@ public class FeatureCursorTest {
 
     @Test
     public void testCrs() throws Exception {
-        Feature f = Features.create(null, Schema.build("test").field("geo", Point.class).schema(),
-            Collections.singletonMap("geo", Geom.point(0, 0)));
-        assertNull(f.crs());
-        assertNull(f.schema().crs());
+        Feature f = new ListFeature(Schema.build("test").field("geo", Point.class).schema(), Geom.point(0, 0));
 
-        FeatureCursor cursor = FeatureCursor.wrap(Cursors.single(f)).crs(Proj.EPSG_900913);
-        f = cursor.first().get();
+        assertNull(Features.crs(f));
+        assertNull(Features.schema("feature", f).crs());
 
-        assertEquals(Proj.EPSG_900913, f.crs());
-        assertEquals(Proj.EPSG_900913, f.schema().crs());
+        f = FeatureCursor.wrap(Cursors.single(f)).crs(Proj.EPSG_900913).first().get();
+
+        assertEquals(Proj.EPSG_900913, Features.crs(f));
+        assertEquals(Proj.EPSG_900913, Features.schema("feature", f).crs());
     }
 }

@@ -16,6 +16,7 @@ package io.jeo.util;
 
 import java.io.File;
 import java.nio.charset.Charset;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Locale;
@@ -108,5 +109,22 @@ public class Util {
      */
     public static String nullIfEmpty(String s) {
         return "".equals(s) ? null : s;
+    }
+
+    /**
+     * Appends an object and a variable list of additional objects to an existing collection.
+     *
+     * @param col The collection.
+     * @param first The first object to add.
+     * @param rest The remaining object to add.
+     *
+     * @return The collection.
+     */
+    public static <T extends Collection> T addAll(T col, Object first, Object... rest) {
+        col.add(first);
+        for (Object o : rest) {
+            col.add(o);
+        }
+        return col;
     }
 }

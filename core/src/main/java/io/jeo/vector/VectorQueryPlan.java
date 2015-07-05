@@ -14,7 +14,6 @@
  */
 package io.jeo.vector;
 
-import io.jeo.data.Cursor;
 import io.jeo.filter.Filters;
 import io.jeo.util.Pair;
 import io.jeo.filter.Filter;
@@ -30,7 +29,7 @@ import java.util.Set;
  * <p>
  * This class is typically only used by format implementers. As a {@link VectorQuery} object is processed
  * the query plan is updated at aspects of the query such as bounds, filtering, limit/offset, etc..
- * are handled natively. Finally {@link #apply(Cursor)} should be called to augment a cursor with
+ * are handled natively. Finally {@link #apply(FeatureCursor)} should be called to augment a cursor with
  * wrappers that handle the parts of the query that could not be handled natively.
  * </p>
  * @author Justin Deoliveira, OpenGeo
@@ -179,7 +178,7 @@ public class VectorQueryPlan {
      * <p>
      * For example, if a format is unable to process {@link VectorQuery#filter()} objects natively
      * then {@link #isFiltered()} should return <tt>false</tt> and this method should transform the
-     * cursor with {@link Cursor#filter(Predicate)}.
+     * cursor with {@link FeatureCursor#filter(Predicate)}.
      * </p>
      * @param cursor Cursor to augment.
      * 

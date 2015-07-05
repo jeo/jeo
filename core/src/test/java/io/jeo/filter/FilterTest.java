@@ -22,9 +22,9 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-import io.jeo.vector.BasicFeature;
 import io.jeo.vector.Feature;
 import io.jeo.filter.cql.CQL;
+import io.jeo.vector.MapFeature;
 import org.junit.Test;
 
 public class FilterTest {
@@ -41,7 +41,7 @@ public class FilterTest {
         map.put("foo", "bar");
 
         Property p = new Property("foo");
-        assertEquals("bar", p.evaluate(new BasicFeature(null, map)));
+        assertEquals("bar", p.evaluate(new MapFeature(map)));
     }
 
     @Test
@@ -50,7 +50,7 @@ public class FilterTest {
         map.put("str", "one");
         map.put("int", 1);
 
-        Feature f = new BasicFeature(null, map);
+        Feature f = new MapFeature(map);
 
         Comparison c = new Comparison(Comparison.Type.EQUAL, 
             new Property("str"), new Literal("one"));
@@ -93,7 +93,7 @@ public class FilterTest {
         map.put("str", "one");
         map.put("int", 1);
 
-        Feature f = new BasicFeature(null, map);
+        Feature f = new MapFeature(map);
 
         Comparison c1 = new Comparison(Comparison.Type.EQUAL, 
                 new Property("str"), new Literal("one"));
@@ -110,7 +110,7 @@ public class FilterTest {
         map.put("str", "one");
         map.put("int", 1);
 
-        Feature f = new BasicFeature(null, map);
+        Feature f = new MapFeature(map);
 
         assertTrue(new In(new Property("str"), Arrays.asList(new Literal("one")), false).test(f));
         assertTrue(new In(new Property("str"), Arrays.asList(new Literal("two"), new Literal("one")), false).test(f));
@@ -125,7 +125,7 @@ public class FilterTest {
         map.put("name", "abcdef");
         map.put("num", 123456);
 
-        Feature f = new BasicFeature(null, map);
+        Feature f = new MapFeature(map);
         assertTrue(new Like(new Property("name"), new Literal("%cd%"), false).test(f));
         assertFalse(new Like(new Property("name"), new Literal("%cd"), false).test(f));
         assertFalse(new Like(new Property("name"), new Literal("cd%"), false).test(f));
@@ -140,7 +140,7 @@ public class FilterTest {
         map.put("x", null);
         map.put("y", 1);
 
-        Feature f = new BasicFeature(null, map);
+        Feature f = new MapFeature(map);
         assertTrue(new Null("x", false).test(f));
         assertFalse(new Null("y", false).test(f));
         assertFalse(new Null("x", true).test(f));
@@ -157,7 +157,7 @@ public class FilterTest {
         Map<String,Object> map = new HashMap<String, Object>();
         map.put("x", 5);
 
-        Feature f = new BasicFeature(null, map);
+        Feature f = new MapFeature(map);
 
         // comparison
         assertFalse(CQL.parse("y < 5").test(f));

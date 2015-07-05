@@ -79,8 +79,8 @@ public class MemWorkspace implements Workspace {
     }
 
     @Override
-    public MemVector create(Schema schema) throws IOException, UnsupportedOperationException {
-        MemVector v = new MemVector(schema);
+    public MemVectorDataset create(Schema schema) throws IOException, UnsupportedOperationException {
+        MemVectorDataset v = new MemVectorDataset(schema);
         map.put(schema.name(), v);
         return v;
     }

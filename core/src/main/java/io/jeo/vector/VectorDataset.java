@@ -16,8 +16,8 @@ package io.jeo.vector;
 
 import java.io.IOException;
 
-import io.jeo.data.Cursor.Mode;
 import io.jeo.data.Dataset;
+import io.jeo.vector.VectorDriver.Capability;
 
 /**
  * A data set consisting of objects with a vector geometry, known as {@link Feature} objects.
@@ -40,12 +40,29 @@ public interface VectorDataset extends Dataset {
 
     /**
      * Returns a feature cursor for the data set.
-     * <p>
-     * {@link VectorQuery#mode()} is used to control whether the cursor is read or write. All
-     * implementations must support {@link Mode#READ}.
-     * </p>
-     * @param q A query used to constrain results, must not be <code>null</code>.
+     *
+     * @param q A query used to constrain results, must not be <code>null</code>. Use {@link VectorQuery#all()} to
+     *          read all features.
      */
     FeatureCursor read(VectorQuery q) throws IOException;
 
+    /**
+     * Returns an updatable feature cursor for the dataset.
+     * <p>
+     * If the dataset does not support update this method should throw {@link UnsupportedOperationException}.
+     * Application code can check {@link VectorDriver#supports(Capability)}.
+     * </p>
+     * @param q Query used to define the results to be updated.
+     */
+    FeatureWriteCursor update(VectorQuery q) throws IOException;
+
+    /**
+     * Returns a feature cursor for appending the dataset.
+     * <p>
+     * If the dataset does not support apend this method should throw {@link UnsupportedOperationException}.
+     * Application code can check {@link VectorDriver#supports(Capability)}.
+     * </p>
+     * @param q
+     */
+    FeatureAppendCursor append(VectorQuery q) throws IOException;
 }

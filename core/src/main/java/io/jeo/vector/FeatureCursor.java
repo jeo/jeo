@@ -4,8 +4,8 @@ import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.prep.PreparedGeometry;
 import io.jeo.data.Cursor;
-import io.jeo.geom.Geom;
 import io.jeo.geom.Envelopes;
+import io.jeo.geom.Geom;
 import io.jeo.proj.Proj;
 import io.jeo.util.Function;
 import io.jeo.util.Predicate;
@@ -18,52 +18,16 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
- * Extension of Cursor for Feature objects.
+ * Extension of Cursor for {@link Feature} objects.
+ *
  */
 public abstract class FeatureCursor extends Cursor<Feature> {
 
     /**
-     * Returns an empty feature cursor.
-     */
-    public static FeatureCursor empty() {
-        return new FeatureCursor() {
-            @Override
-            public boolean hasNext() throws IOException {
-                return false;
-            }
-
-            @Override
-            public Feature next() throws IOException {
-                return null;
-            }
-
-            @Override
-            public void close() throws IOException {
-            }
-        };
-    }
-
-    public FeatureCursor() {
-    }
-
-    public FeatureCursor(Mode mode) {
-        super(mode);
-    }
-
-    @Override
-    public FeatureCursor write() throws IOException {
-        return (FeatureCursor) super.write();
-    }
-
-    @Override
-    public FeatureCursor remove() throws IOException {
-        return (FeatureCursor) super.remove();
-    }
-
-    /**
-     * Reprojects features in the cursor to a specified coordinate reference system.
+     * Reprojects features in the stream to a specified coordinate reference system.
      * <p>
      * This method determines the source crs from objects in the underlying cursor. Use
      * {@link #reproject(org.osgeo.proj4j.CoordinateReferenceSystem, org.osgeo.proj4j.CoordinateReferenceSystem)} to
@@ -86,49 +50,15 @@ public abstract class FeatureCursor extends Cursor<Feature> {
      * @return The wrapped cursor.
      */
     public FeatureCursor reproject(CoordinateReferenceSystem from, CoordinateReferenceSystem to) {
-
         return from != null ?
             new TransformCursor(this, from, to) : new ReprojectCursor(this, to);
     }
 
-    private static class ReprojectCursor extends CursorWrapper {
-
-        Map<String, CoordinateTransform> transforms;
-        CoordinateReferenceSystem target;
-
-        ReprojectCursor(FeatureCursor delegate, CoordinateReferenceSystem target) {
-            super(delegate);
-            if (delegate.getMode() != READ) {
-                throw new IllegalArgumentException(
-                    "Reproject cursor can only be applied to read only cursor");
-            }
-
-            this.target = target;
-            transforms = new HashMap<String, CoordinateTransform>();
-        }
-
-        @Override
-        public Feature next() throws IOException {
-            Feature next = delegate.next();
-            CoordinateReferenceSystem crs = next.crs();
-            if (crs != null) {
-                CoordinateTransform tx = transforms.get(crs.getName());
-                if (tx == null) {
-                    tx = Proj.transform(crs, target);
-                    transforms.put(crs.getName(), tx);
-                }
-                return new TransformFeature(next, tx);
-            }
-
-            return next;
-        }
-    }
-
-    private static class TransformCursor extends CursorWrapper {
+    private static class TransformCursor extends FeatureCursorWrapper {
 
         CoordinateTransform tx;
 
-        TransformCursor(FeatureCursor delegate, CoordinateReferenceSystem from, CoordinateReferenceSystem to) {
+        TransformCursor(Cursor<Feature> delegate, CoordinateReferenceSystem from, CoordinateReferenceSystem to) {
             super(delegate);
             tx = Proj.transform(from, to);
         }
@@ -139,7 +69,7 @@ public abstract class FeatureCursor extends Cursor<Feature> {
         }
     }
 
-    private static class TransformFeature extends FeatureWrapper {
+    private static class TransformFeature extends GeometryTransformFeature {
 
         CoordinateTransform transform;
 
@@ -149,44 +79,53 @@ public abstract class FeatureCursor extends Cursor<Feature> {
         }
 
         @Override
-        public Geometry geometry() {
-            Geometry g = super.geometry();
-            return g != null ? reproject(g) : null;
+        protected Geometry wrap(Geometry g) {
+            return Proj.transform(g, transform);
+        }
+    }
+
+    private static class ReprojectCursor<T extends Feature> extends FeatureCursorWrapper {
+
+        Map<String, CoordinateTransform> transforms;
+        CoordinateReferenceSystem target;
+
+        ReprojectCursor(Cursor<Feature> delegate, CoordinateReferenceSystem target) {
+            super(delegate);
+
+            this.target = Objects.requireNonNull(target, "target crs must not be null");
+            transforms = new HashMap<>();
         }
 
         @Override
-        public Object get(String key) {
-            Object obj = super.get(key);
-            if (obj instanceof Geometry) {
-                obj = reproject((Geometry)obj);
-            }
-            return obj;
+        public Feature next() throws IOException {
+            return new ReprojectFeature(super.next(), target, transforms);
+        }
+    }
+
+    private static class ReprojectFeature extends GeometryTransformFeature {
+
+        CoordinateReferenceSystem target;
+        Map<String,CoordinateTransform> transforms;
+
+        public ReprojectFeature(Feature delegate, CoordinateReferenceSystem target, Map<String,CoordinateTransform> transforms) {
+            super(delegate);
+            this.target = target;
+            this.transforms = transforms;
         }
 
-        public List<Object> list() {
-            List<Object> l = new ArrayList<Object>(delegate.list());
-            for (int i = 0; i < l.size(); i++) {
-                Object obj = l.get(i);
-                if (obj instanceof Geometry) {
-                    l.set(i, reproject((Geometry) obj));
+        @Override
+        protected Geometry wrap(Geometry g) {
+            CoordinateReferenceSystem crs = Proj.crs(g);
+            if (crs != null) {
+                CoordinateTransform tx = transforms.get(crs.getName());
+                if (tx == null) {
+                    tx = Proj.transform(crs, target);
+                    transforms.put(crs.getName(), tx);
                 }
-            }
-            return l;
-        }
 
-        public Map<String,Object> map() {
-            LinkedHashMap<String,Object> m = new LinkedHashMap<String,Object>(delegate.map());
-            for (Map.Entry<String, Object> e : m.entrySet()) {
-                Object obj = e.getValue();
-                if (obj instanceof Geometry) {
-                    e.setValue(reproject((Geometry)obj));
-                }
+                g = Proj.transform(g, tx);
             }
-            return m;
-        }
-
-        Geometry reproject(Geometry g) {
-            return Proj.transform(g, transform);
+            return g;
         }
     }
 
@@ -201,7 +140,7 @@ public abstract class FeatureCursor extends Cursor<Feature> {
         return new CrsOverrideCursor(this, crs);
     }
 
-    private static class CrsOverrideCursor extends CursorWrapper {
+    private static class CrsOverrideCursor<T extends Feature> extends FeatureCursorWrapper {
 
         CoordinateReferenceSystem crs;
 
@@ -213,18 +152,10 @@ public abstract class FeatureCursor extends Cursor<Feature> {
         @Override
         public Feature next() throws IOException {
             Feature f = super.next();
-            return new FeatureWrapper(f) {
+            return new GeometryTransformFeature(f) {
                 @Override
-                public Schema schema() {
-                    //TODO: optimize by checking whether the delegate feature
-                    // is schemaless (ie. delegate.schema(false) == null) and if not
-                    // then cache the crs overriden schemacr
-                    return SchemaBuilder.crs(super.schema(), crs);
-                }
-
-                @Override
-                public CoordinateReferenceSystem crs() {
-                    return crs;
+                protected Geometry wrap(Geometry g) {
+                    return Proj.crs(g, crs);
                 }
             };
         }
@@ -275,7 +206,7 @@ public abstract class FeatureCursor extends Cursor<Feature> {
      * Transforms non geometry collection objects from the specified cursor to the appropriate
      * geometry collection.
      */
-    public FeatureCursor multify() throws IOException {
+    public FeatureCursor multify() {
         return wrap(map(new Function<Feature, Feature>() {
             @Override
             public Feature apply(Feature value) {
@@ -292,49 +223,30 @@ public abstract class FeatureCursor extends Cursor<Feature> {
      * @return The selected cursor.
      */
     public FeatureCursor select(final Iterable<String> fields) {
-       return new SelectFieldsCursor(this, fields);
+        return new SelectFieldsCursor(this, fields);
     }
 
-    static class SelectFieldsCursor extends CursorWrapper {
-        private final Iterable<String> fields;
-        private final Map<String, Object> values;
-        private Schema schema;
+    static class SelectFieldsCursor extends FeatureCursorWrapper {
+        private final List<String> fields;
 
         public SelectFieldsCursor(Cursor<Feature> delegate, Iterable<String> fields) {
             super(delegate);
-            this.fields = fields;
-            this.values = new HashMap<>();
+            this.fields = new ArrayList();
+            for (String f : fields) {
+                this.fields.add(f);
+            }
         }
 
         @Override
         public Feature next() throws IOException {
             Feature next = super.next();
             if (next != null) {
-                if (schema == null ) {
-                    schema = schema(next);
-                }
+                Map<String,Object> values = new LinkedHashMap<>(next.map());
+                values.keySet().retainAll(fields);
 
-                // values is copied by BasicFeature, so we reuse it
-                for (String f : fields) {
-                    values.put(f, next.get(f));
-                }
-
-                // this may not be the most efficient approach compared
-                // to wrapping the feature
-                next = new BasicFeature(next.id(), values, schema);
+                return new MapFeature(next.id(), values);
             }
             return next;
-        }
-
-        public Schema schema(Feature original) {
-            // if schemaless, don't use any existing derived schema as it will
-            // now look invalid due to removed features
-            // otherwise, derive a new one
-            Schema s = original.schema(false);
-            if (s != null) {
-                s = SchemaBuilder.select(original.schema(), fields);
-            }
-            return s;
         }
     }
 
@@ -362,18 +274,19 @@ public abstract class FeatureCursor extends Cursor<Feature> {
      * Wraps a cursor of Feature as a FeatureCursor, if it is not an instance
      * already.
      */
-    public static FeatureCursor wrap(Cursor<Feature> cursor) {
+    public static <T extends Feature> FeatureCursor wrap(Cursor<Feature> cursor) {
         if (cursor instanceof FeatureCursor) {
             return (FeatureCursor) cursor;
         }
-        return new CursorWrapper(cursor);
+        return new FeatureCursorWrapper(cursor);
     }
 
-    static class CursorWrapper extends FeatureCursor {
-        protected Cursor<Feature> delegate;
+    static class FeatureCursorWrapper extends FeatureCursor {
 
-        CursorWrapper(Cursor<Feature> delegate) {
-            this.delegate = delegate;
+        Cursor<Feature> delegate;
+
+        public FeatureCursorWrapper(Cursor<Feature> cursor) {
+            this.delegate = cursor;
         }
 
         @Override
@@ -387,25 +300,14 @@ public abstract class FeatureCursor extends Cursor<Feature> {
         }
 
         @Override
-        public FeatureCursor write() throws IOException {
-            delegate.write();
-            return this;
-        }
-
-        @Override
-        public FeatureCursor remove() throws IOException {
-            delegate.remove();
-            return this;
-        }
-
-        @Override
-        public boolean rewind() throws IOException {
-            return delegate.rewind();
+        public void rewind() {
+            delegate.rewind();
         }
 
         @Override
         public void close() throws IOException {
             delegate.close();
         }
+
     }
 }

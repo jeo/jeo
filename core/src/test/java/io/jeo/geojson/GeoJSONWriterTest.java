@@ -25,7 +25,7 @@ import io.jeo.geom.Geom;
 import io.jeo.json.JSONArray;
 import io.jeo.json.JSONObject;
 import io.jeo.json.JSONValue;
-import io.jeo.vector.BasicFeature;
+import io.jeo.vector.MapFeature;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -130,7 +130,7 @@ public class GeoJSONWriterTest {
         map.put("geom", Geom.point(0, 0));
         map.put("name", "zero");
 
-        w.feature(new BasicFeature(null, map));
+        w.feature(new MapFeature(map));
 
         JSONObject obj = (JSONObject) JSONValue.parse(string());
         assertEquals("Feature", obj.get("type"));

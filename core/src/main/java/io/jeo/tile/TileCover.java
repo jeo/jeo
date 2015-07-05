@@ -113,16 +113,12 @@ public class TileCover {
      * @param tileset The tile source.
      */
     public void fill(TileDataset tileset) throws IOException {
-        Cursor<Tile> cursor = cursor(tileset);
-        try {
-            for (Tile t : cursor) {
+        try (Cursor<Tile> cursor = cursor(tileset)) {
+            while (cursor.hasNext()) {
+                Tile t = cursor.next();
                 tiles[t.x()-x0][t.y()-y0] = t;
             }
         }
-        finally {
-            cursor.close();
-        }
-        
     }
 
     /**

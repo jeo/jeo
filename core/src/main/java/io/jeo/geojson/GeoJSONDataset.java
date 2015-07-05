@@ -23,30 +23,26 @@ import java.nio.file.Files;
 import java.util.Collections;
 import java.util.Map;
 
-import io.jeo.data.Cursor;
-import io.jeo.data.Cursor.Mode;
 import io.jeo.data.Driver;
 import io.jeo.data.FileData;
 import io.jeo.geojson.parser.CRSFinder;
 import io.jeo.json.parser.ParseException;
-import io.jeo.util.Optional;
 import io.jeo.util.Util;
+import io.jeo.vector.FeatureAppendCursor;
 import io.jeo.vector.FeatureCursor;
-import io.jeo.vector.Field;
+import io.jeo.vector.FeatureWriteCursor;
+import io.jeo.vector.Features;
 import io.jeo.vector.VectorQueryPlan;
 import io.jeo.geojson.parser.RootHandler;
 import io.jeo.json.parser.JSONParser;
 import io.jeo.proj.Proj;
 import io.jeo.util.Key;
-import io.jeo.vector.Feature;
 import io.jeo.vector.Schema;
-import io.jeo.vector.SchemaBuilder;
 import io.jeo.vector.VectorDataset;
 import io.jeo.vector.VectorQuery;
 import org.osgeo.proj4j.CoordinateReferenceSystem;
 
 import com.vividsolutions.jts.geom.Envelope;
-import com.vividsolutions.jts.geom.Geometry;
 
 public class GeoJSONDataset implements VectorDataset, FileData {
 
@@ -78,21 +74,7 @@ public class GeoJSONDataset implements VectorDataset, FileData {
 
     @Override
     public Schema schema() throws IOException {
-        Optional<Feature> f = first();
-        if (f.isPresent()) {
-            Schema schema = f.get().schema();
-            SchemaBuilder sb = Schema.build(name()).crs(crs());
-            for (Field fld : schema) {
-                if (fld.geometry() && fld.crs() == null) {
-                    sb.field(fld.name(), (Class<Geometry>) fld.type(), crs());
-                }
-                else {
-                    sb.field(fld);
-                }
-            }
-            return sb.schema();
-        }
-        return null;
+        return Features.schema(this).orElse(null);
     }
 
     @Override
@@ -133,34 +115,24 @@ public class GeoJSONDataset implements VectorDataset, FileData {
 
     @Override
     public FeatureCursor read(VectorQuery q) throws IOException {
-        if (q.mode() == Mode.UPDATE) {
-            throw new IOException("Update cursor not supported");
-        }
-        if (q.mode() == Mode.APPEND) {
-            if (!Util.isEmpty(file)) {
-                throw new IOException("Can't append to non empty dataset");
-            }
-            return new GeoJSONAppendCursor(writer());
-        }
-
         return new VectorQueryPlan(q).apply(new GeoJSONCursor(reader()));
     }
 
     @Override
-    public void close() {
+    public FeatureWriteCursor update(VectorQuery q) throws IOException {
+        throw new IOException("Update cursor not supported");
     }
 
-    Optional<Feature> first() throws IOException {
-        Cursor<Feature> c = read(new VectorQuery());
-        try {
-            if (c.hasNext()) {
-                return Optional.of(c.next());
-            }
-            return Optional.empty();
+    @Override
+    public FeatureAppendCursor append(VectorQuery q) throws IOException {
+        if (!Util.isEmpty(file)) {
+            throw new IOException("Can't append to non empty dataset");
         }
-        finally {
-            c.close();
-        }
+        return new GeoJSONAppendCursor(writer());
+    }
+
+    @Override
+    public void close() {
     }
 
     Reader reader() throws IOException {

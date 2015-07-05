@@ -23,8 +23,9 @@ import java.util.Set;
 import io.jeo.data.Cursor;
 import io.jeo.data.Dataset;
 import io.jeo.geom.GeomBuilder;
-import io.jeo.vector.Features;
+import io.jeo.vector.FeatureWriteCursor;
 import io.jeo.data.Handle;
+import io.jeo.vector.ListFeature;
 import io.jeo.vector.VectorQuery;
 import io.jeo.vector.Feature;
 import io.jeo.vector.Schema;
@@ -52,12 +53,10 @@ public class MemoryTest {
             .field("id", Integer.class)
             .field("name", String.class)
             .field("cost", Double.class).schema();
-        MemVector data = mem.create(schema);
-        data.add(Features.create(null, data.schema(), gb.point(0, 0).toPoint(), 1, "anvil", 10.99));
-        data.add(Features.create(null, data.schema(), 
-            gb.points(10,10,20,20).toLineString(), 2, "bomb", 11.99));
-        data.add(Features.create(null, data.schema(), 
-            gb.point(100,100).toPoint().buffer(10), 3, "dynamate", 12.99));
+        MemVectorDataset data = mem.create(schema);
+        data.add(new ListFeature(data.schema(), gb.point(0, 0).toPoint(), 1, "anvil", 10.99));
+        data.add(new ListFeature(data.schema(), gb.points(10,10,20,20).toLineString(), 2, "bomb", 11.99));
+        data.add(new ListFeature(data.schema(), gb.point(100,100).toPoint().buffer(10), 3, "dynamite", 12.99));
     }
 
     @Test
@@ -72,7 +71,7 @@ public class MemoryTest {
 
     @Test
     public void testCount() throws IOException {
-        MemVector widgets = (MemVector) mem.get("widgets"); 
+        MemVectorDataset widgets = (MemVectorDataset) mem.get("widgets");
         assertEquals(3, widgets.count(new VectorQuery()));
         assertEquals(2, widgets.count(new VectorQuery().limit(2)));
         assertEquals(1, widgets.count(new VectorQuery().bounds(new Envelope(-1,1,-1,1))));
@@ -82,7 +81,7 @@ public class MemoryTest {
 
     @Test
     public void testCursorRead() throws IOException {
-        MemVector widgets = (MemVector) mem.get("widgets");
+        MemVectorDataset widgets = (MemVectorDataset) mem.get("widgets");
         assertCovered(widgets.read(new VectorQuery()), 1, 2, 3);
         assertCovered(widgets.read(new VectorQuery().limit(2)), 1, 2);
         assertCovered(widgets.read(new VectorQuery().bounds(new Envelope(-1, 1, -1, 1))), 1);
@@ -100,18 +99,18 @@ public class MemoryTest {
 
     @Test
     public void testCursorWrite() throws IOException {
-        MemVector widgets = (MemVector) mem.get("widgets");
+        MemVectorDataset widgets = (MemVectorDataset) mem.get("widgets");
         assertEquals(0, widgets.count(new VectorQuery().filter("cost  > 13.0")));
 
-        Cursor<Feature> c = widgets.read(new VectorQuery().update());
+        FeatureWriteCursor c = widgets.update(new VectorQuery());
         for (Feature f : c) {
-            f.put("cost", ((Double)f.get("cost"))*2);
+            f.put("cost", ((Double) f.get("cost")) * 2);
             c.write();
         }
 
         assertEquals(3, widgets.count(new VectorQuery().filter("cost  > 13.0")));
         
-        c = widgets.read(new VectorQuery().append());
+        c = widgets.append(new VectorQuery());
         assertTrue(c.hasNext());
 
         Feature f = c.next();

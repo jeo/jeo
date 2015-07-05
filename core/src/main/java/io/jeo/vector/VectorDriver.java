@@ -28,7 +28,16 @@ public interface VectorDriver<T> extends Driver<T> {
     /**
      * Vector driver capability enumeration.
      */
-    public static enum Capability {
+    enum Capability {
+        /**
+         * Ability to update dataset contents.
+         */
+        UPDATE,
+        /**
+         * Ability to append dataset contents.
+         */
+        APPEND,
+
         /**
          * Ability to handle bounding box queries.
          */

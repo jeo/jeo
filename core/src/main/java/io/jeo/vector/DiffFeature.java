@@ -14,6 +14,8 @@
  */
 package io.jeo.vector;
 
+import com.vividsolutions.jts.geom.Geometry;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -28,7 +30,7 @@ public class DiffFeature extends FeatureWrapper {
 
     public DiffFeature(Feature feature) {
         super(feature);
-        changed = new HashMap<String, Object>();
+        changed = new HashMap<>();
     }
 
     /**
@@ -58,6 +60,16 @@ public class DiffFeature extends FeatureWrapper {
 
     public Feature put(String key, Object val) {
         changed.put(key, val);
+        return this;
+    }
+
+    @Override
+    public Feature put(Geometry g) {
+        for (Map.Entry<String,Object> e : delegate.map().entrySet()) {
+            if (e.getValue() instanceof Geometry) {
+                changed.put(e.getKey(), g);
+            }
+        }
         return this;
     }
 }

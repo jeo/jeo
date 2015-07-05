@@ -22,7 +22,6 @@ import java.util.List;
 import java.util.Set;
 
 import io.jeo.data.Cursor;
-import io.jeo.data.Cursor.Mode;
 import io.jeo.data.Sort;
 import io.jeo.data.Transaction;
 import io.jeo.filter.Filter;
@@ -95,11 +94,6 @@ public class VectorQuery {
      * Transaction associated with the query
      */
     Transaction transaction = Transaction.NULL;
-
-    /**
-     * Cursor mode
-     */
-    Mode mode = Cursor.READ;
 
     /**
      * New query instance.
@@ -192,13 +186,6 @@ public class VectorQuery {
      */
     public List<Sort> sort() {
         return sort;
-    }
-
-    /**
-     * The mode of cursor to return when handling this query.
-     */
-    public Cursor.Mode mode() {
-        return mode;
     }
 
     /**
@@ -364,28 +351,6 @@ public class VectorQuery {
     }
 
     /**
-     * Sets the query to update mode, specifying that any returned cursor should be in mode 
-     * {@link Cursor#UPDATE}.
-     * 
-     * @return This object.
-     */
-    public VectorQuery update() {
-        mode = Cursor.UPDATE;
-        return this;
-    }
-
-    /**
-     * Sets the query to append mode, specifying that any returned cursor should be in mode 
-     * {@link Cursor#APPEND}.
-     * 
-     * @return This object.
-     */
-    public VectorQuery append() {
-        mode = Cursor.APPEND;
-        return this;
-    }
-
-    /**
      * Sets the transaction of the query.
      * 
      * @return This object.
@@ -459,7 +424,6 @@ public class VectorQuery {
         result = prime * result + ((fields == null) ? 0 : fields.hashCode());
         result = prime * result + ((filter == null) ? 0 : filter.hashCode());
         result = prime * result + ((limit == null) ? 0 : limit.hashCode());
-        result = prime * result + ((mode == null) ? 0 : mode.hashCode());
         result = prime * result + ((offset == null) ? 0 : offset.hashCode());
         result = prime * result
                 + ((reproject == null) ? 0 : reproject.hashCode());
@@ -500,8 +464,6 @@ public class VectorQuery {
                 return false;
         } else if (!limit.equals(other.limit))
             return false;
-        if (mode != other.mode)
-            return false;
         if (offset == null) {
             if (other.offset != null)
                 return false;
@@ -529,6 +491,4 @@ public class VectorQuery {
             return false;
         return true;
     }
-
-    
 }

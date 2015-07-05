@@ -160,8 +160,9 @@ public class SchemaBuilder {
      * Adds fields to the schema being built described by a GeoTools style schema specification
      * of the form: <pre>&lt;name>:&lt;type>[:srid=&lt;srid>][,...]</pre>
      * 
-     * @param spec
-     * @return
+     * @param spec String describing the schema.
+     *
+     * @return This builder.
      */
     public SchemaBuilder fields(String spec) {
         for (String field : spec.split(" *, *")) {
@@ -185,6 +186,28 @@ public class SchemaBuilder {
             }
 
             fields.add(new Field(name, type, crs));
+        }
+        return this;
+    }
+
+    /**
+     * Adds fields to the schema derived from the attributes of the specified feature.
+     *
+     * @param f The feature.
+     *
+     * @return This builder.
+     */
+    public SchemaBuilder fields(Feature f) {
+        for (Map.Entry<String,Object> kv : f.map().entrySet()) {
+            String key = kv.getKey();
+            Object val = kv.getValue();
+            if (val instanceof Geometry) {
+                Geometry g = (Geometry) val;
+                field(key, g.getClass(), Proj.crs(g));
+            }
+            else {
+                field(key, val != null ? val.getClass() : Object.class);
+            }
         }
         return this;
     }

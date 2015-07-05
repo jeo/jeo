@@ -18,12 +18,12 @@ import java.io.IOException;
 import java.io.Reader;
 import java.util.Collection;
 
+import io.jeo.data.Cursor;
 import io.jeo.data.Cursors;
 import io.jeo.geojson.parser.GeometryHandler;
 import io.jeo.geojson.parser.RootHandler;
 import io.jeo.json.parser.JSONParser;
 import io.jeo.json.parser.ParseException;
-import io.jeo.vector.FeatureCursor;
 import io.jeo.vector.Feature;
 import io.jeo.geojson.parser.BaseHandler;
 import io.jeo.geojson.parser.FeatureCollectionHandler;
@@ -43,7 +43,7 @@ import com.vividsolutions.jts.geom.Polygon;
 /**
  * GeoJSON reader class.
  * <p>
- * See {@linkplain http://www.geojson.org/geojson-spec.html}.
+ * See <a href="http://www.geojson.org/geojson-spec.html">GeoJSON Specification</a>.
  * </p>
  * <p>
  * Methods of this class take any input that be converted to a {@link Reader}. See the 
@@ -166,7 +166,7 @@ public class GeoJSONReader {
      * 
      * @return The feature collection as a cursor. 
      */
-    public FeatureCursor features(Object json) {
+    public Cursor<Feature> features(Object json) {
         try {
             return new GeoJSONCursor(toReader(json));
         } catch (IOException e) {

@@ -18,13 +18,17 @@ import java.io.IOException;
 import java.io.Reader;
 
 import io.jeo.json.parser.ParseException;
-import io.jeo.vector.FeatureCursor;
 import io.jeo.vector.Feature;
 import io.jeo.geojson.parser.FeatureCollectionHandler;
 import io.jeo.geojson.parser.RootHandler;
 import io.jeo.json.parser.JSONParser;
+import io.jeo.vector.FeatureCursor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class GeoJSONCursor extends FeatureCursor {
+
+    static Logger LOG = LoggerFactory.getLogger(GeoJSONCursor.class);
 
     Reader input;
     JSONParser parser;
@@ -68,7 +72,7 @@ public class GeoJSONCursor extends FeatureCursor {
     public void close() throws IOException {
         if (input != null) {
             input.close();
+            input = null;
         }
-        input = null;
     }
 }

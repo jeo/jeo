@@ -26,9 +26,11 @@ import java.util.List;
 
 import io.jeo.data.Cursor;
 import io.jeo.data.Cursors;
-import io.jeo.vector.BasicFeature;
+import io.jeo.proj.Proj;
 import io.jeo.vector.Feature;
 import io.jeo.geom.GeomBuilder;
+import io.jeo.vector.ListFeature;
+import io.jeo.vector.Schema;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -153,7 +155,7 @@ public class GeoJSONReadWriteTest {
         assertEquals(1.1, (Double) f.get("double"), 0.1);
         assertEquals("one", f.get("string"));
         assertEquals("feature.1", f.id());
-        assertNotNull(f.crs());
+        assertNotNull(Proj.crs(f.geometry()));
     }
 
     @Test
@@ -166,7 +168,7 @@ public class GeoJSONReadWriteTest {
         assertEquals(1.1, (Double) f.get("double"), 0.1);
         assertEquals("one", f.get("string"));
         assertEquals("feature.1", f.id());
-        assertNotNull(f.crs());
+        assertNotNull(Proj.crs(f.geometry()));
     }
 
     @Test
@@ -403,13 +405,20 @@ public class GeoJSONReadWriteTest {
     }
 
     Feature feature(int val) {
-        List<Object> l = new ArrayList<Object>(); 
+        Schema schema = Schema.build("feature")
+            .field("geometry", Point.class, Proj.EPSG_4326)
+            .field("int", Integer.class)
+            .field("double", Double.class)
+            .field("string", String.class)
+            .schema();
+
+        List<Object> l = new ArrayList<>();
         l.add(new GeomBuilder().point(val+0.1, val+0.1).toPoint());
         l.add(val);
         l.add(val + 0.1);
         l.add(toString(val));
         
-        return new BasicFeature("feature."+val, l);
+        return new ListFeature("feature."+val, schema, l);
     }
 
     String featureText(int val) {

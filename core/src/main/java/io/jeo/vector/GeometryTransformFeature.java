@@ -14,9 +14,7 @@
  */
 package io.jeo.vector;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import com.vividsolutions.jts.geom.Geometry;
@@ -26,9 +24,9 @@ import com.vividsolutions.jts.geom.Geometry;
  * 
  * @author Justin Deoliveira, OpenGeo
  */
-public class GeometryTransformWrapper extends FeatureWrapper {
+public class GeometryTransformFeature extends FeatureWrapper {
 
-    public GeometryTransformWrapper(Feature delegate) {
+    public GeometryTransformFeature(Feature delegate) {
         super(delegate);
     }
 
@@ -54,18 +52,6 @@ public class GeometryTransformWrapper extends FeatureWrapper {
             }
         }
         return map;
-    }
-
-    @Override
-    public List<Object> list() {
-        List<Object> list = new ArrayList<Object>(super.list());
-        for (int i = 0; i < list.size(); i++) {
-            Object obj = list.get(i);
-            if (obj instanceof Geometry) {
-                list.set(i, wrap((Geometry)obj));
-            }
-        }
-        return list;
     }
 
     protected Geometry wrap(Geometry g) {

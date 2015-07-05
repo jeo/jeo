@@ -112,7 +112,6 @@ public class Proj {
         return csFactory.createFromName(s);
     }
 
-    
     /**
      * Creates a crs object from projection parameter definition.
      * 
@@ -125,6 +124,62 @@ public class Proj {
             return csFactory.createFromParameters(null, projdef[0]);
         }
         return csFactory.createFromParameters(null, projdef);
+    }
+
+    /**
+     * Returns the crs of the geometry, if it exists.
+     *
+     * @param geom The geometry object.
+     *
+     * @return The crs, or null.
+     */
+    public static CoordinateReferenceSystem crs(Geometry geom) {
+        Object userData = geom.getUserData();
+        if (userData instanceof CoordinateReferenceSystem) {
+            return (CoordinateReferenceSystem) userData;
+        }
+
+        int srid = geom.getSRID();
+        if (srid > 0) {
+            return crs(srid);
+        }
+
+        return null;
+    }
+
+    /**
+     * Sets the coordinate reference system of a geometry.
+     *
+     * @param g The geometry.
+     * @param crs The crs.
+     *
+     * @return The original geometry object.
+     * @see #crs(Geometry, CoordinateReferenceSystem, boolean)
+     */
+    public static Geometry crs(Geometry g, CoordinateReferenceSystem crs) {
+        return crs(g, crs, true);
+    }
+
+    /**
+     * Sets the coordinate reference system of a geometry.
+     *
+     * @param g The geometry.
+     * @param crs The crs.
+     * @param overwrite Whether to overwrite an existing crs that may exist.
+     */
+    public static Geometry crs(Geometry g, CoordinateReferenceSystem crs, boolean overwrite) {
+        if (g != null) {
+            if (g.getUserData() == null || (overwrite && g.getUserData() instanceof CoordinateReferenceSystem)) {
+                g.setUserData(crs);
+            }
+            if (g.getSRID() == 0 || overwrite) {
+                Integer srid = epsgCode(crs);
+                if (srid != null) {
+                    g.setSRID(srid);
+                }
+            }
+        }
+        return g;
     }
 
     private static CoordinateReferenceSystem createFromExtra(String auth, String code) {

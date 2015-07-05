@@ -39,7 +39,7 @@ import com.vividsolutions.jts.geom.Polygon;
 import com.vividsolutions.jts.geom.impl.CoordinateArraySequence;
 
 /**
- * Writes out GeoJSON objects as defined by {@linkplain http://www.geojson.org/geojson-spec.html}.
+ * Writes out GeoJSON objects as defined by the <a href="http://www.geojson.org/geojson-spec.html">GeoJSON Specification</a>.
  * <p>
  * Example:
  * <pre><code>
@@ -63,7 +63,7 @@ public class GeoJSONWriter extends JSONEncoder {
      * 
      * @return A GeoJSON geometry string.
      * 
-     * @see {@linkplain http://www.geojson.org/geojson-spec.html#geometry-objects}
+     * @see <a href="http://www.geojson.org/geojson-spec.html#geometry-objects}">Geometry Objects</a>
      */
     public static String toString(Geometry g) {
         StringWriter w = new StringWriter();
@@ -82,7 +82,7 @@ public class GeoJSONWriter extends JSONEncoder {
      * 
      * @return A GeoJSON feature string.
      * 
-     * @see {@linkplain http://www.geojson.org/geojson-spec.html#feature-objects}
+     * @see <a href="http://www.geojson.org/geojson-spec.html#feature-objects}">Feature Objects</a>
      */
     public static String toString(Feature f) {
         StringWriter w = new StringWriter();
@@ -101,7 +101,7 @@ public class GeoJSONWriter extends JSONEncoder {
      * 
      * @return A GeoJSON feature collection string.
      * 
-     * @see {@linkplain http://www.geojson.org/geojson-spec.html#feature-collection-objects}
+     * @see <a href="http://www.geojson.org/geojson-spec.html#feature-collection-objects}">FeatureCollection Objects</a>
      */
     public static String toString(Cursor<Feature> features) throws IOException {
         StringWriter w = new StringWriter();
@@ -133,7 +133,7 @@ public class GeoJSONWriter extends JSONEncoder {
      * Encodes a bounding box as a 4 element array.
      * 
      * @param b The The bounding box.
-     * @see {@linkplain http://www.geojson.org/geojson-spec.html#bounding-boxes}
+     * @see <a href="http://www.geojson.org/geojson-spec.html#bounding-boxes}">Bounding Box Objects</a>
      */
     public GeoJSONWriter bbox(Envelope b) throws IOException {
         array()
@@ -146,7 +146,7 @@ public class GeoJSONWriter extends JSONEncoder {
      * Encodes a crs as a named crs.
      * 
      * @param crs The crs object.
-     * @see {@linkplain http://www.geojson.org/geojson-spec.html#named-crs}
+     * @see <a href="http://www.geojson.org/geojson-spec.html#named-crs}">CRS Objects</a>
      */
     public GeoJSONWriter crs(CoordinateReferenceSystem crs)  throws IOException {
         if (crs == null) {
@@ -170,7 +170,7 @@ public class GeoJSONWriter extends JSONEncoder {
      * 
      * @param g The geometry.
      * 
-     * @see {@linkplain http://www.geojson.org/geojson-spec.html#geometry-objects}
+     * @see <a href="http://www.geojson.org/geojson-spec.html#geometry-objects}">Geometry Objects</a>
      */
     public GeoJSONWriter geometry(Geometry g)  throws IOException {
         if (g == null) {
@@ -201,7 +201,7 @@ public class GeoJSONWriter extends JSONEncoder {
      * 
      * @param p The point.
      * 
-     * @see {@linkplain http://www.geojson.org/geojson-spec.html#point}
+     * @see <a href="http://www.geojson.org/geojson-spec.html#point}">Point Objects</a>
      */
     public GeoJSONWriter point(Point p) throws IOException {
         if (p == null) {
@@ -228,7 +228,7 @@ public class GeoJSONWriter extends JSONEncoder {
      * 
      * @param l The linestring.
      * 
-     * @see {@linkplain http://www.geojson.org/geojson-spec.html#linestring}
+     * @see <a href="http://www.geojson.org/geojson-spec.html#linestring}">LineString Objects</a>
      */
     public GeoJSONWriter lineString(LineString l) throws IOException {
         if (l == null) {
@@ -248,7 +248,7 @@ public class GeoJSONWriter extends JSONEncoder {
      * 
      * @param p The polygon
      * 
-     * @see {@linkplain http://www.geojson.org/geojson-spec.html#polygon}
+     * @see <a href="http://www.geojson.org/geojson-spec.html#polygon}">Polygon Objects</a>
      */
     public GeoJSONWriter polygon(Polygon p) throws IOException {
         if (p == null) {
@@ -268,7 +268,7 @@ public class GeoJSONWriter extends JSONEncoder {
      * 
      * @param mp The multipoint
      * 
-     * @see {@linkplain http://www.geojson.org/geojson-spec.html#multipoint}
+     * @see <a href="http://www.geojson.org/geojson-spec.html#multipoint}">MultiPoint Objects</a>
      */
     public GeoJSONWriter multiPoint(MultiPoint mp) throws IOException {
         if (mp == null) {
@@ -288,7 +288,7 @@ public class GeoJSONWriter extends JSONEncoder {
      * 
      * @param ml The multilinestring
      * 
-     * @see {@linkplain http://www.geojson.org/geojson-spec.html#multilinestring}
+     * @see <a href="http://www.geojson.org/geojson-spec.html#multilinestring}">MultiLineString Objects</a>
      */
     public GeoJSONWriter multiLineString(MultiLineString ml) throws IOException {
         if (ml == null) {
@@ -315,7 +315,7 @@ public class GeoJSONWriter extends JSONEncoder {
      * 
      * @param mp The multipolygon
      * 
-     * @see {@linkplain http://www.geojson.org/geojson-spec.html#multipolygon}
+     * @see <a href="http://www.geojson.org/geojson-spec.html#multipolygon}">MultiPolygon Objects</a>
      */
     public GeoJSONWriter multiPolygon(MultiPolygon mp) throws IOException {
         if (mp == null) {
@@ -342,7 +342,7 @@ public class GeoJSONWriter extends JSONEncoder {
      * 
      * @param gc The geometry collection.
      * 
-     * @see {@linkplain http://www.geojson.org/geojson-spec.html#geometry-collection}
+     * @see <a href="http://www.geojson.org/geojson-spec.html#geometry-collection}">GeometryCollection Objects</a>
      */
     public GeoJSONWriter geometryCollection(GeometryCollection gc) throws IOException {
         if (gc == null) {
@@ -372,7 +372,7 @@ public class GeoJSONWriter extends JSONEncoder {
      * 
      * @param f The feature.
      * 
-     * @see {@linkplain http://www.geojson.org/geojson-spec.html#feature-objects}
+     * @see <a href="http://www.geojson.org/geojson-spec.html#feature-objects}">Feature Objects</a>
      */
     public GeoJSONWriter feature(Feature f)  throws IOException {
         if (f == null) {
@@ -417,13 +417,15 @@ public class GeoJSONWriter extends JSONEncoder {
     /**
      * Encodes a feature collection.
      *
-     * @see {@linkplain http://www.geojson.org/geojson-spec.html#feature-collection-objects}
+     * @see <a href="http://www.geojson.org/geojson-spec.html#feature-collection-objects}">FeatureCollection Objects</a>
      */
     public GeoJSONWriter featureCollection(Cursor<Feature> features)  throws IOException {
         featureCollection();
 
-        for (Feature f : features) {
-            feature(f);
+        try (Cursor<Feature> c = features) {
+            while (c.hasNext()) {
+                feature(c.next());
+            }
         }
 
         return endFeatureCollection();
@@ -436,7 +438,7 @@ public class GeoJSONWriter extends JSONEncoder {
      * finally terminated with a call to {@link #endFeatureCollection()}.
      * </p> 
      * 
-     * @see {@linkplain http://www.geojson.org/geojson-spec.html#feature-collection-objects}
+     * @see <a href="http://www.geojson.org/geojson-spec.html#feature-collection-objects}">FeatureCollection Objects</a>
      */
     public GeoJSONWriter featureCollection() throws IOException {
         object()

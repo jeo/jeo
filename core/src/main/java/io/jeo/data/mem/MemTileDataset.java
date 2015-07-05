@@ -123,7 +123,7 @@ public class MemTileDataset implements TileDataset {
             }
 
             @Override
-            public void close() throws IOException {
+            public void close() {
             }
         };
     }

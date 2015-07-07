@@ -152,6 +152,11 @@ public class ListFeature implements Feature {
     }
 
     @Override
+    public String toString() {
+        return Features.toString(this);
+    }
+
+    @Override
     public boolean equals(Object obj) {
         if (obj instanceof Feature) {
             return Features.equals(this, (Feature) obj);

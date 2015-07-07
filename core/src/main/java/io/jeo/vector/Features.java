@@ -296,4 +296,22 @@ public class Features {
     public static int hashCode(Feature f) {
         return Objects.hash(f.id(), f.map());
     }
+
+    /**
+     * Returns a string representation of a feature.
+     * <p>
+     *  Implementations of {@link Feature} are encouraged to use this method to implement {@link Feature#toString()}.
+     * </p>
+     */
+    public static String toString(Feature f) {
+        StringBuilder sb = new StringBuilder(f.id()).append("{");
+        Map<String,Object> map = f.map();
+        if (!map.isEmpty()) {
+            for (Map.Entry<String,Object> e : map.entrySet()) {
+                sb.append(e.getKey()).append("=").append(e.getValue()).append(", ");
+            }
+            sb.setLength(sb.length()-2);
+        }
+        return sb.append("}").toString();
+    }
 }

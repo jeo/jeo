@@ -24,7 +24,9 @@ import io.jeo.geom.Envelopes;
 import io.jeo.proj.Proj;
 import io.jeo.util.Key;
 import io.jeo.util.Pair;
+import io.jeo.vector.FeatureAppendCursor;
 import io.jeo.vector.FeatureCursor;
+import io.jeo.vector.FeatureWriteCursor;
 import io.jeo.vector.Field;
 import io.jeo.vector.Schema;
 import io.jeo.vector.SchemaBuilder;
@@ -185,6 +187,7 @@ public class SolrDataset implements VectorDataset {
             for (String fld : q.fields()) {
                 sq.addField(fld);
             }
+            qp.fields();
         }
         if (key != null) {
             sq.addField(key);
@@ -193,11 +196,21 @@ public class SolrDataset implements VectorDataset {
         LOG.debug("{}", sq);
 
         try {
-            return qp.apply(new SolrCursor(runRequest(new QueryRequest(sq)).process(solr), this));
+            return qp.apply(new SolrCursor(runRequest(new QueryRequest(sq)).process(solr), this)
+                .stripDocId(!q.fields().isEmpty() && !q.fields().contains(key)));
         } catch (SolrServerException e) {
             throw new IOException(e);
         }
+    }
 
+    @Override
+    public FeatureWriteCursor update(VectorQuery q) throws IOException {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public FeatureAppendCursor append(VectorQuery q) throws IOException {
+        throw new UnsupportedOperationException();
     }
 
     void encodeQuery(SolrQuery sq, VectorQuery q, VectorQueryPlan qp) throws IOException {

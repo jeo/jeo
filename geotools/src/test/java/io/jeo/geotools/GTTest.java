@@ -17,10 +17,10 @@ import static org.junit.Assert.*;
 
 import java.util.Map;
 
+import io.jeo.vector.MapFeature;
 import org.geotools.feature.simple.SimpleFeatureBuilder;
 import org.geotools.feature.simple.SimpleFeatureTypeBuilder;
 import org.geotools.geometry.jts.GeometryBuilder;
-import io.jeo.vector.BasicFeature;
 import io.jeo.vector.Feature;
 import io.jeo.vector.Schema;
 import io.jeo.vector.SchemaBuilder;
@@ -102,7 +102,7 @@ public class GTTest {
 
     @Test
     public void testFromFeature() {
-        Feature f = new BasicFeature(null, (Map)Util.map("geometry", new GeometryBuilder().point(0,0), 
+        Feature f = new MapFeature(null, (Map)Util.map("geometry", new GeometryBuilder().point(0,0),
             "id", 1, "name", "bomb", "price", 10.99));
         SimpleFeature sf = GT.feature(f);
 

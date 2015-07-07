@@ -19,10 +19,9 @@ import static io.jeo.map.CartoCSS.*;
 import java.util.ArrayList;
 import java.util.List;
 
+import io.jeo.vector.ListFeature;
 import io.jeo.vector.VectorDataset;
-import io.jeo.data.mem.MemVector;
-import io.jeo.vector.BasicFeature;
-import io.jeo.vector.Feature;
+import io.jeo.data.mem.MemVectorDataset;
 import io.jeo.vector.Schema;
 
 import com.vividsolutions.jts.geom.Polygon;
@@ -109,13 +108,10 @@ public class LabelIndex {
      * </p>
      */
     public VectorDataset features() {
-        MemVector mem = new MemVector(Schema.build("labels")
+        MemVectorDataset mem = new MemVectorDataset(Schema.build("labels")
             .field("geometry", Polygon.class).field("text", String.class).schema());
         for (Label l : all()) {
-            Feature f = new BasicFeature(null, mem.schema());
-            f.put(l.shape());
-            f.put("text", l.getText());
-            mem.add(f);
+            mem.add(new ListFeature(mem.schema(), l.shape(), l.getText()));
         }
 
         return mem;

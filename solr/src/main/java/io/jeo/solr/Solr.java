@@ -24,8 +24,15 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
+
+import static io.jeo.vector.VectorDriver.Capability.BOUND;
+import static io.jeo.vector.VectorDriver.Capability.FIELD;
+import static io.jeo.vector.VectorDriver.Capability.FILTER;
+import static io.jeo.vector.VectorDriver.Capability.LIMIT;
+import static io.jeo.vector.VectorDriver.Capability.OFFSET;
 
 /**
  * Driver for Apache Solr.
@@ -94,8 +101,10 @@ public class Solr implements VectorDriver<SolrWorkspace> {
         throw new UnsupportedOperationException();
     }
 
+    static EnumSet<Capability> CAPABILITIES = EnumSet.of(BOUND, FILTER, FIELD, LIMIT, OFFSET);
+
     @Override
     public boolean supports(Capability cap) {
-        return false;
+        return CAPABILITIES.contains(cap);
     }
 }

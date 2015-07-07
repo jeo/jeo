@@ -23,6 +23,10 @@ import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
+import io.jeo.vector.FeatureAppendCursor;
+import io.jeo.vector.FeatureCursor;
+import io.jeo.vector.FeatureWriteCursor;
+import io.jeo.vector.ListFeature;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.DirectoryReader;
@@ -51,9 +55,7 @@ import io.jeo.proj.Proj;
 import io.jeo.util.Key;
 import io.jeo.util.Optional;
 import io.jeo.util.Pair;
-import io.jeo.vector.BasicFeature;
 import io.jeo.vector.Feature;
-import io.jeo.vector.FeatureCursor;
 import io.jeo.vector.Field;
 import io.jeo.vector.Schema;
 import io.jeo.vector.SchemaBuilder;
@@ -165,6 +167,16 @@ public class LuceneDataset implements VectorDataset, FileData {
         }
 
         return qp.apply(cursor(lq, q.limit()));
+    }
+
+    @Override
+    public FeatureWriteCursor update(VectorQuery q) throws IOException {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public FeatureAppendCursor append(VectorQuery q) throws IOException {
+        throw new UnsupportedOperationException();
     }
 
     Pair<TopDocs, IndexSearcher> search(Query lq, Integer n) throws IOException {
@@ -313,10 +325,9 @@ public class LuceneDataset implements VectorDataset, FileData {
                     values.add(f.stringValue());
                 }
             }
-
         }
 
-        return new BasicFeature(String.valueOf(docId), values, schema);
+        return new ListFeature(String.valueOf(docId), schema, values);
     }
 
     SpatialField spatialField(Field fld) {

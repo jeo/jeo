@@ -15,78 +15,65 @@
 package io.jeo.geotools;
 
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 
-import io.jeo.vector.BasicFeature;
-import io.jeo.vector.Schema;
+import io.jeo.vector.Feature;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.type.AttributeDescriptor;
 
 import com.vividsolutions.jts.geom.Geometry;
 
-public class GTFeature extends BasicFeature {
+public class GTFeature implements Feature {
 
     SimpleFeature feature;
 
-    public GTFeature(final SimpleFeature feature, Schema schema) {
-        super(feature.getID(), new BasicFeature.Storage(schema) {
-
-            @Override
-            protected Schema buildSchema() {
-                return null;
-            }
-
-            @Override
-            protected Geometry findGeometry() {
-                return (Geometry) feature.getDefaultGeometry();
-            }
-
-            @Override
-            protected boolean has(String key) {
-                return feature.getFeatureType().indexOf(key) >= 0;
-            }
-
-            @Override
-            protected Object get(String key) {
-                return feature.getAttribute(key); 
-            }
-
-            @Override
-            protected Object get(int index) {
-                return feature.getAttribute(index); 
-            }
-
-            @Override
-            protected void put(String key, Object value) {
-                feature.setAttribute(key, value);
-            }
-
-            @Override
-            protected void set(int index, Object value) {
-                feature.setAttribute(index, value);
-            }
-
-            @Override
-            protected List<Object> list() {
-                return feature.getAttributes();
-            }
-
-            @Override
-            protected Map<String, Object> map() {
-                Map<String,Object> map = new LinkedHashMap<String, Object>();
-                for (AttributeDescriptor ad : feature.getType().getAttributeDescriptors()) {
-                    String att = ad.getLocalName();
-                    map.put(att, get(att));
-                }
-                return map;
-            }
-            
-        });
+    public GTFeature(SimpleFeature feature) {
         this.feature = feature;
     }
 
-    public SimpleFeature getFeature() {
+    @Override
+    public String id() {
+        return feature.getID();
+    }
+
+    @Override
+    public boolean has(String key) {
+        return feature.getFeatureType().indexOf(key) >= 0;
+    }
+
+    @Override
+    public Object get(String key) {
+        return feature.getAttribute(key);
+    }
+
+    @Override
+    public Geometry geometry() {
+        return (Geometry) feature.getDefaultGeometry();
+    }
+
+    @Override
+    public Feature put(String key, Object val) {
+        feature.setAttribute(key, val);
+        return this;
+    }
+
+    @Override
+    public Feature put(Geometry g) {
+        feature.setDefaultGeometry(g);
+        return this;
+    }
+
+    @Override
+    public Map<String, Object> map() {
+        Map<String,Object> map = new LinkedHashMap<>();
+        for (AttributeDescriptor ad : feature.getType().getAttributeDescriptors()) {
+            String att = ad.getLocalName();
+            map.put(att, get(att));
+        }
+        return map;
+    }
+
+    public SimpleFeature feature() {
         return feature;
     }
 }

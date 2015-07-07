@@ -26,8 +26,9 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import io.jeo.data.Cursor;
+import io.jeo.vector.ListFeature;
+import io.jeo.vector.MapFeature;
 import io.jeo.vector.VectorQuery;
-import io.jeo.vector.BasicFeature;
 import io.jeo.vector.Feature;
 import io.jeo.vector.Schema;
 import io.jeo.vector.SchemaBuilder;
@@ -185,7 +186,7 @@ public class FeatureHandlerTest extends HandlerTestSupport {
 
     @Test
     public void testPutEditFeature() throws Exception {
-        Feature feature = new BasicFeature("baz");
+        Feature feature = new MapFeature("baz");
         feature.put("name", "fourtytwo");
         mock = MockServer.create()
                 .withVectorLayer()
@@ -229,7 +230,7 @@ public class FeatureHandlerTest extends HandlerTestSupport {
         );
 
         mock.verify();
-        assertTrue(mock.memoryLayer.count(new VectorQuery()) == 0);
+        assertEquals(0, mock.memoryLayer.count(new VectorQuery()));
 
         mock = MockServer.create()
                 .withMemoryVectorLayer()
@@ -248,7 +249,7 @@ public class FeatureHandlerTest extends HandlerTestSupport {
                 field("geometry", Point.class).
                 field("name", String.class).
                 schema();
-        Feature receiver = new BasicFeature("receiver", schema);
+        Feature receiver = new ListFeature("receiver", schema);
         mock = MockServer.create()
                     .withWritableVectorLayer(receiver)
                 .replay();

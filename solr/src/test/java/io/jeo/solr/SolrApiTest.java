@@ -14,7 +14,6 @@
  */
 package io.jeo.solr;
 
-import io.jeo.Tests;
 import io.jeo.vector.VectorApiTestBase;
 import io.jeo.vector.VectorDataset;
 import org.junit.Assume;
@@ -35,7 +34,7 @@ public class SolrApiTest extends VectorApiTestBase {
     @BeforeClass
     public static void setupData() throws Exception {
         SolrTests.setupStatesData();
-//        Tests.debugLogging("io.jeo.solr");
+        //io.jeo.Tests.debugLogging("io.jeo.solr");
     }
 
     @Override

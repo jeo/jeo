@@ -20,10 +20,10 @@ import com.spatial4j.core.shape.jts.JtsPoint;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.io.ParseException;
 import com.vividsolutions.jts.io.WKTReader;
-import io.jeo.vector.BasicFeature;
 import io.jeo.vector.Feature;
 import io.jeo.vector.FeatureCursor;
 import io.jeo.vector.Field;
+import io.jeo.vector.MapFeature;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocument;
 import org.slf4j.Logger;
@@ -41,6 +41,7 @@ public class SolrCursor extends FeatureCursor {
     Iterator<SolrDocument> it;
     SolrDataset dataset;
     List<Field> geomFields;
+    boolean stripDocId = false;
 
     public SolrCursor(QueryResponse query, SolrDataset dataset) throws IOException {
         this.dataset = dataset;
@@ -52,6 +53,11 @@ public class SolrCursor extends FeatureCursor {
                 geomFields.add(f);
             }
         }
+    }
+
+    public SolrCursor stripDocId(boolean stripDocId) {
+        this.stripDocId = stripDocId;
+        return this;
     }
 
     @Override
@@ -68,7 +74,10 @@ public class SolrCursor extends FeatureCursor {
             convertToGeom(g, doc);
         }
 
-        return new BasicFeature(id!=null?id.toString():null, doc, dataset.schema());
+        if (stripDocId) {
+            doc.remove(dataset.key);
+        }
+        return new MapFeature(id!=null?id.toString():null, doc);
     }
 
     void convertToGeom(Field g, SolrDocument doc) {

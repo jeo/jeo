@@ -14,15 +14,15 @@
  */
 package io.jeo.lucene;
 
+import io.jeo.vector.FeatureCursor;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.TopDocs;
 import io.jeo.vector.Feature;
-import io.jeo.vector.FeatureCursor;
 
 import java.io.IOException;
 
-public class LuceneCursor extends FeatureCursor  {
+public class LuceneCursor extends FeatureCursor {
 
     TopDocs results;
     IndexSearcher searcher;

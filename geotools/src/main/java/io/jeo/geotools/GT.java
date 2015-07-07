@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.util.*;
 import java.util.List;
 
+import io.jeo.vector.Features;
 import org.geotools.factory.CommonFactoryFinder;
 import org.geotools.factory.Hints;
 import org.geotools.feature.simple.SimpleFeatureImpl;
@@ -80,19 +81,15 @@ public class GT {
     }
 
     public static Feature feature(SimpleFeature feature) {
-        return feature(feature, schema(feature.getType()));
-    }
-
-    public static GTFeature feature(SimpleFeature feature, Schema schema) {
-        return new GTFeature(feature, schema);
+        return new GTFeature(feature);
     }
 
     public static SimpleFeature feature(Feature feature) {
-        return feature(feature, featureType(feature.schema()));
+        return feature(feature, featureType(Features.schema("feature", feature)));
     }
 
     public static SimpleFeature feature(Feature feature, SimpleFeatureType featureType) {
-        return new SimpleFeatureImpl(feature.list(), featureType, new FeatureIdImpl(feature.id()));
+        return new SimpleFeatureImpl(new ArrayList(feature.map().values()), featureType, new FeatureIdImpl(feature.id()));
     }
 
     public static Schema schema(SimpleFeatureType featureType) {

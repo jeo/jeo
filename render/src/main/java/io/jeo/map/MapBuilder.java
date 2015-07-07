@@ -21,7 +21,7 @@ import io.jeo.data.Cursor;
 import io.jeo.data.Dataset;
 import io.jeo.data.Drivers;
 import io.jeo.data.Workspace;
-import io.jeo.data.mem.MemVector;
+import io.jeo.data.mem.MemVectorDataset;
 import io.jeo.vector.Feature;
 import io.jeo.filter.Filter;
 import org.osgeo.proj4j.CoordinateReferenceSystem;
@@ -129,7 +129,7 @@ public class MapBuilder {
             return this;
         }
 
-        MemVector mem = new MemVector(first.schema());
+        MemVectorDataset mem = new MemVectorDataset();
         mem.add(first);
 
         try {

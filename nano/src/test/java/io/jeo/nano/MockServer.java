@@ -36,6 +36,11 @@ import io.jeo.filter.Id;
 import io.jeo.filter.Literal;
 import io.jeo.filter.Property;
 import io.jeo.filter.TypeOf;
+import io.jeo.vector.FeatureAppendCursor;
+import io.jeo.vector.FeatureCursor;
+import io.jeo.vector.FeatureWriteCursor;
+import io.jeo.vector.ListFeature;
+import io.jeo.vector.MapFeature;
 import org.easymock.IAnswer;
 import org.easymock.IExpectationSetters;
 import org.easymock.classextension.EasyMock;
@@ -43,7 +48,6 @@ import io.jeo.data.DataRepositoryView;
 import io.jeo.data.Dataset;
 import io.jeo.data.Driver;
 import io.jeo.data.Handle;
-import io.jeo.vector.FeatureCursor;
 import io.jeo.vector.VectorQuery;
 import io.jeo.map.Style;
 import io.jeo.map.View;
@@ -55,8 +59,7 @@ import io.jeo.tile.TileDataset;
 import io.jeo.tile.TilePyramid;
 import io.jeo.vector.VectorDataset;
 import io.jeo.data.Workspace;
-import io.jeo.data.mem.MemVector;
-import io.jeo.vector.BasicFeature;
+import io.jeo.data.mem.MemVectorDataset;
 import io.jeo.vector.Feature;
 import io.jeo.vector.Features;
 import io.jeo.vector.Field;
@@ -69,7 +72,7 @@ public class MockServer {
 
     private final List<Object> mocks = new ArrayList<Object>();
     final NanoServer server;
-    MemVector memoryLayer;
+    MemVectorDataset memoryLayer;
     private VectorDataset vectorLayer;
     private TileDataset tileLayer;
     private Workspace workspace;
@@ -105,8 +108,8 @@ public class MockServer {
         for (int i = 0; i < kv.length; i+=2) {
             vals.put(kv[i].toString(), kv[i+1]);
         }
-        Feature f = new BasicFeature(id, vals);
-        MemVector v = new MemVector(null);
+        Feature f = new MapFeature(id, vals);
+        MemVectorDataset v = new MemVectorDataset();
         v.add(f);
         expect(vectorLayer.read((VectorQuery) anyObject())).andReturn(v.read(new VectorQuery())).once();
         
@@ -142,17 +145,19 @@ public class MockServer {
     }
 
     MockServer withFeatureHavingId(String id) throws Exception {
-        Feature f = new BasicFeature(id);
+        Feature f = new MapFeature(id);
         f.put("id", id);
 
         FeatureCursor c = createMock(FeatureCursor.class);
-        expect(c.iterator()).andReturn(Iterators.forArray(f));
         expect(c.hasNext()).andReturn(true);
-        
+        expect(c.hasNext()).andReturn(true);
+        expect(c.next()).andReturn(f);
+        expect(c.hasNext()).andReturn(false);
+
         expect(vectorLayer.read(new VectorQuery().filter(new Id(new Literal(id))))).andReturn(c);
         expect(vectorLayer.read((VectorQuery) anyObject())).andReturn(FeatureCursor.empty()).anyTimes();
         c.close();
-        expectLastCall().once();
+        expectLastCall().atLeastOnce();
 
         expect(vectorLayer.read(new VectorQuery().filter((Filter) anyObject())))
                 .andReturn(FeatureCursor.empty()).anyTimes();
@@ -161,17 +166,18 @@ public class MockServer {
     }
 
     MockServer withFeatureHavingIdForEdit(Feature feature, boolean expectSuccess) throws Exception {
-        FeatureCursor c = createMock(FeatureCursor.class);
+        FeatureWriteCursor c = createMock(FeatureWriteCursor.class);
         expect(c.hasNext()).andReturn(Boolean.TRUE);
         expect(c.next()).andReturn(feature);
         expect(c.write()).andReturn(c);
 
-        IExpectationSetters<FeatureCursor> cursor =
-                expect(vectorLayer.read(new VectorQuery().update().filter(new Id(new Literal(feature.id()))))).andReturn(c);
+        IExpectationSetters<FeatureWriteCursor> cursor =
+                expect(vectorLayer.update(new VectorQuery().filter(new Id(new Literal(feature.id()))))).andReturn(c);
         if (!expectSuccess) {
             cursor.anyTimes();
         }
-        expect(vectorLayer.read((VectorQuery) anyObject())).andReturn(FeatureCursor.empty()).anyTimes();
+
+        expect(vectorLayer.update((VectorQuery) anyObject())).andReturn(FeatureWriteCursor.empty()).anyTimes();
         c.close();
         expectLastCall().once();
 
@@ -186,7 +192,6 @@ public class MockServer {
 
         FeatureCursor c = createMock(FeatureCursor.class);
         expect(c.next()).andReturn(f).once();
-        expect(c.write()).andReturn(c).once();
         c.close();
         expectLastCall().once();
 
@@ -349,11 +354,11 @@ public class MockServer {
     MockServer withWritableVectorLayer(Feature receiver) throws Exception {
         withVectorLayer();
 
-        FeatureCursor c = createMock(FeatureCursor.class);
+        FeatureAppendCursor c = createMock(FeatureAppendCursor.class);
         expect(c.next()).andReturn(receiver);
         expect(c.write()).andReturn(c);
 
-        expect(vectorLayer.read(new VectorQuery().append())).andReturn(c);
+        expect(vectorLayer.append(new VectorQuery())).andReturn(c);
         c.close();
         expectLastCall().once();
 
@@ -366,8 +371,8 @@ public class MockServer {
         Schema schema = new SchemaBuilder("memory")
                 .field("name", String.class)
                 .schema();
-        memoryLayer = new MemVector(schema);
-        memoryLayer.add(Features.create("42", schema, "foo"));
+        memoryLayer = new MemVectorDataset(schema);
+        memoryLayer.add(new ListFeature("42", schema, "foo"));
         expect(workspace.get("bar")).andReturn(memoryLayer).once();
         expect(workspace.get((String) anyObject())).andReturn(null).anyTimes();
 

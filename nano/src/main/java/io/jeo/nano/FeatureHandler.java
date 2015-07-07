@@ -48,6 +48,8 @@ import java.util.regex.Pattern;
 
 import io.jeo.data.Cursor;
 import io.jeo.data.Dataset;
+import io.jeo.util.Function;
+import io.jeo.vector.FeatureWriteCursor;
 import io.jeo.vector.VectorQuery;
 import io.jeo.data.Transaction;
 import io.jeo.data.Transactional;
@@ -405,8 +407,8 @@ public class FeatureHandler extends Handler {
     }
 
     Response handlePutEditFeature(String fid, Request request, NanoServer server) throws IOException {
-        VectorQuery query = new VectorQuery().update().filter(new Id(new Literal(fid)));
-        handleWrite(request, server, query, true);
+        VectorQuery query = new VectorQuery().filter(new Id(new Literal(fid)));
+        handleWrite(request, server, query, true, false);
 
         return new Response(HTTP_OK, MIME_PLAINTEXT, "");
     }
@@ -434,13 +436,13 @@ public class FeatureHandler extends Handler {
     }
 
     Response handlePostAddFeatures(Request request, NanoServer server) throws IOException {
-        VectorQuery query = new VectorQuery().append();
-        handleWrite(request, server, query, false);
+        VectorQuery query = new VectorQuery();
+        handleWrite(request, server, query, false, true);
         //TODO: set Location header
         return new Response(HTTP_CREATED, MIME_PLAINTEXT, "");
     }
 
-    void handleWrite(Request request, NanoServer server, VectorQuery query, boolean shouldExist) throws IOException {
+    void handleWrite(Request request, NanoServer server, VectorQuery query, boolean shouldExist, boolean append) throws IOException {
         Pair<Workspace, VectorDataset> p = findVectorLayer(request, server);
 
         Object obj = new GeoJSONReader().read(getInput(request));
@@ -450,7 +452,7 @@ public class FeatureHandler extends Handler {
             Transaction tx = buildTransaction(layer, request);
             query.transaction(tx);
 
-            Cursor<Feature> c = layer.read(query);
+            FeatureWriteCursor c = append ? layer.append(query) : layer.update(query);
             try {
                 if (shouldExist && ! c.hasNext()) {
                     throw new HttpException(HTTP_NOTFOUND, "requested feature does not exist : " + request.getUri());
@@ -499,10 +501,10 @@ public class FeatureHandler extends Handler {
         VectorDataset layer = p.second;
         Transaction tx = buildTransaction(layer, request);
 
-        VectorQuery query = new VectorQuery().update().filter(new Id(new Literal(fid))).transaction(tx);
-        Cursor<Feature> c = layer.read(query);
+        VectorQuery query = new VectorQuery().filter(new Id(new Literal(fid))).transaction(tx);
+        FeatureWriteCursor c = layer.update(query);
         try {
-            if (! c.hasNext()) {
+            if (!c.hasNext()) {
                 throw new HttpException(HTTP_NOTFOUND, "requested feature does not exist : " + request.getUri());
             }
             c.next();

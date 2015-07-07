@@ -21,7 +21,6 @@ import static org.junit.Assert.assertTrue;
 import java.util.List;
 import java.util.Map;
 
-import io.jeo.vector.BasicFeature;
 import io.jeo.filter.Expression;
 import io.jeo.filter.Function;
 import io.jeo.filter.Mixed;
@@ -30,6 +29,7 @@ import io.jeo.map.RGB;
 import io.jeo.map.Rule;
 import io.jeo.map.Selector;
 import io.jeo.map.Style;
+import io.jeo.vector.MapFeature;
 import org.junit.Test;
 
 import com.google.common.collect.Maps;
@@ -234,7 +234,7 @@ public class CartoTest {
         Map<String,Object> map = Maps.newHashMap();
         map.put("attr", "1");
         assertEquals(Integer.valueOf(1), 
-            r.eval(new BasicFeature(null, map), "line-width", Integer.class));
+            r.eval(new MapFeature(map), "line-width", Integer.class));
     }
 
     @Test
@@ -343,7 +343,7 @@ public class CartoTest {
         Map<String,Object> map = Maps.newHashMap();
         map.put("foo", 500);
 
-        assertNotNull(r.eval(new BasicFeature(null, map), "polygon-fill", RGB.class));
+        assertNotNull(r.eval(new MapFeature(map), "polygon-fill", RGB.class));
     }
 
     void dumpTokens(String css) {

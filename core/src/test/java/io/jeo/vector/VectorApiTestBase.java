@@ -242,7 +242,7 @@ public abstract class VectorApiTestBase {
         } finally {
             cursor.close();
         }
-        assertTrue(next.map().size() == 2);
+        assertEquals(2, next.map().size());
         assertEquals("California", next.get("STATE_NAME"));
         assertEquals(3792553, ((Number)next.get("SAMP_POP")).intValue());
     }

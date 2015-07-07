@@ -26,6 +26,12 @@ import io.jeo.vector.VectorDriver;
 import io.jeo.vector.Schema;
 import io.jeo.util.Key;
 import io.jeo.util.Password;
+import io.jeo.vector.VectorDriver.Capability;
+
+import static io.jeo.vector.VectorDriver.Capability.FIELD;
+import static io.jeo.vector.VectorDriver.Capability.FILTER;
+import static io.jeo.vector.VectorDriver.Capability.LIMIT;
+import static io.jeo.vector.VectorDriver.Capability.OFFSET;
 
 /**
  * Support for a Geopackage Driver. An implementation only needs to provide
@@ -85,10 +91,10 @@ public abstract class GeoPkgBaseDriver extends FileVectorDriver<GeoPkgWorkspace>
         return ws;
     }
 
-    static final EnumSet<VectorDriver.Capability> CAPABILITIES = EnumSet.of(VectorDriver.Capability.FILTER, VectorDriver.Capability.LIMIT, VectorDriver.Capability.OFFSET);
+    static final EnumSet<Capability> CAPABILITIES = EnumSet.of(FILTER, LIMIT, OFFSET, FIELD);
 
     @Override
-    public final boolean supports(VectorDriver.Capability cap) {
+    public final boolean supports(Capability cap) {
         return CAPABILITIES.contains(cap);
     }
 

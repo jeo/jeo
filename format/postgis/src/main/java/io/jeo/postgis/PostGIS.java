@@ -26,6 +26,12 @@ import io.jeo.util.Key;
 import io.jeo.util.Messages;
 import io.jeo.util.Password;
 
+import static io.jeo.vector.VectorDriver.Capability.BOUND;
+import static io.jeo.vector.VectorDriver.Capability.FIELD;
+import static io.jeo.vector.VectorDriver.Capability.FILTER;
+import static io.jeo.vector.VectorDriver.Capability.LIMIT;
+import static io.jeo.vector.VectorDriver.Capability.OFFSET;
+
 public class PostGIS implements VectorDriver<PostGISWorkspace>{
 
     /**
@@ -119,8 +125,7 @@ public class PostGIS implements VectorDriver<PostGISWorkspace>{
         throw new UnsupportedOperationException();
     }
 
-    static final EnumSet<Capability> CAPABILITIES =
-        EnumSet.of(Capability.BOUND, Capability.LIMIT, Capability.OFFSET, Capability.FILTER);
+    static final EnumSet<Capability> CAPABILITIES = EnumSet.of(BOUND, LIMIT, OFFSET, FILTER, FIELD);
 
     @Override
     public boolean supports(VectorDriver.Capability cap) {

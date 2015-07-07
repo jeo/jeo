@@ -39,6 +39,10 @@ public interface VectorDriver<T> extends Driver<T> {
         APPEND,
 
         /**
+         * Ability to handle field selection.
+         */
+        FIELD,
+        /**
          * Ability to handle bounding box queries.
          */
         BOUND,

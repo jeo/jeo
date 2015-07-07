@@ -35,6 +35,38 @@ import java.io.IOException;
  */
 public abstract class FeatureWriteCursor extends FeatureCursor implements WriteCursor {
 
+    /**
+     * Returns an empty cursor.
+     */
+    public static FeatureWriteCursor empty() {
+        return new FeatureWriteCursor() {
+            @Override
+            public boolean hasNext() throws IOException {
+                return false;
+            }
+
+            @Override
+            public Feature next() throws IOException {
+                return null;
+            }
+
+            @Override
+            public FeatureWriteCursor write() throws IOException {
+                return null;
+            }
+
+            @Override
+            public FeatureWriteCursor remove() throws IOException {
+                return null;
+            }
+
+            @Override
+            public void close() throws IOException {
+
+            }
+        };
+    }
+
     @Override
     public abstract FeatureWriteCursor write() throws IOException;
 

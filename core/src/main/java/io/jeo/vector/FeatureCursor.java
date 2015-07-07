@@ -27,6 +27,27 @@ import java.util.Objects;
 public abstract class FeatureCursor extends Cursor<Feature> {
 
     /**
+     * Returns an empty feature cursor.
+     */
+    public static FeatureCursor empty() {
+        return new FeatureCursor() {
+            @Override
+            public boolean hasNext() throws IOException {
+                return false;
+            }
+
+            @Override
+            public Feature next() throws IOException {
+                return null;
+            }
+
+            @Override
+            public void close() throws IOException {
+            }
+        };
+    }
+
+    /**
      * Reprojects features in the stream to a specified coordinate reference system.
      * <p>
      * This method determines the source crs from objects in the underlying cursor. Use

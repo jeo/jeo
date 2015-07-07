@@ -88,7 +88,7 @@ public class Util {
 
     public static Map<Object,Object> map(Object... kv) {
         if (kv.length % 2 != 0) {
-            throw new IllegalArgumentException("odd number of argumets");
+            throw new IllegalArgumentException("odd number of arguments");
         }
         LinkedHashMap<Object, Object> map = new LinkedHashMap<Object, Object>();
         for (int i = 0; i < kv.length; i+=2) {

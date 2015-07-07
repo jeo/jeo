@@ -46,6 +46,10 @@ public class MemVectorDataset implements VectorDataset {
     Map<String,Feature> features = new LinkedHashMap<>();
     SpatialIndex index;
 
+    public MemVectorDataset() {
+        this(Schema.build("feature").schema());
+    }
+
     public MemVectorDataset(Schema schema) {
         this.schema = schema;
         index = new Quadtree();

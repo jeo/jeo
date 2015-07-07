@@ -155,7 +155,7 @@ public class MemVectorDataset implements VectorDataset {
     }
 
     public void remove(Feature f) {
-        features.remove(f);
+        features.remove(f.id());
 
         Geometry g = f.geometry();
         if (g != null) {

@@ -20,7 +20,9 @@ import io.jeo.geom.Envelopes;
 import io.jeo.util.Key;
 import io.jeo.util.Optional;
 import io.jeo.util.Supplier;
+import io.jeo.vector.FeatureAppendCursor;
 import io.jeo.vector.FeatureCursor;
+import io.jeo.vector.FeatureWriteCursor;
 import io.jeo.vector.Schema;
 import io.jeo.vector.VectorDataset;
 import io.jeo.vector.VectorQuery;
@@ -99,6 +101,16 @@ public class GTVectorDataset implements VectorDataset {
 
         SimpleFeatureIterator it = source.getFeatures(gtq).features();
         return qp.apply(new GTFeatureCursor(it, this));
+    }
+
+    @Override
+    public FeatureWriteCursor update(VectorQuery q) throws IOException {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public FeatureAppendCursor append(VectorQuery q) throws IOException {
+        throw new UnsupportedOperationException();
     }
 
     @Override

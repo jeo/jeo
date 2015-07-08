@@ -85,7 +85,11 @@ public class GT {
     }
 
     public static SimpleFeature feature(Feature feature, SimpleFeatureType featureType) {
-        return new SimpleFeatureImpl(new ArrayList(feature.map().values()), featureType, new FeatureIdImpl(feature.id()));
+        List<Object> list = new ArrayList<>();
+        for (AttributeDescriptor a : featureType.getAttributeDescriptors()) {
+            list.add(feature.get(a.getLocalName()));
+        }
+        return new SimpleFeatureImpl(list, featureType, new FeatureIdImpl(feature.id()));
     }
 
     public static Schema schema(SimpleFeatureType featureType) {

@@ -17,8 +17,8 @@ package io.jeo.geotools;
 import io.jeo.TestData;
 import io.jeo.Tests;
 import io.jeo.util.Function;
-import io.jeo.vector.BasicFeature;
 import io.jeo.vector.Feature;
+import io.jeo.vector.MapFeature;
 import io.jeo.vector.Schema;
 import io.jeo.vector.SchemaBuilder;
 import io.jeo.vector.VectorApiTestBase;
@@ -64,7 +64,7 @@ public class ShapefileApiTest extends VectorApiTestBase {
                 Map<String,Object> map = f.map();
                 map.put("the_geom", map.get("geometry"));
                 map.remove("geometry");
-                return new BasicFeature(f.id(), map, schema);
+                return new MapFeature(f.id(), map);
             }
         })) {
             features.add(GT.feature(f, type));

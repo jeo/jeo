@@ -98,6 +98,8 @@ public abstract class GTVectorDriver implements VectorDriver<GTWorkspace> {
             case LIMIT:
             case OFFSET:
                 return true;
+            case UPDATE:
+            case APPEND:
             case REPROJECT:
             case SIMPLIFY:
             case SORT:

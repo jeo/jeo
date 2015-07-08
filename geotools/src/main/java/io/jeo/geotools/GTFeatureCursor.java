@@ -38,7 +38,7 @@ public class GTFeatureCursor extends FeatureCursor {
 
     @Override
     public Feature next() throws IOException {
-        return new GTFeature(features.next(), schema);
+        return new GTFeature(features.next());
     }
 
     @Override

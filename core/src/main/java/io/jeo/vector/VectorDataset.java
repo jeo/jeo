@@ -62,7 +62,7 @@ public interface VectorDataset extends Dataset {
      * If the dataset does not support apend this method should throw {@link UnsupportedOperationException}.
      * Application code can check {@link VectorDriver#supports(Capability)}.
      * </p>
-     * @param q
+     * @param q Query object.
      */
     FeatureAppendCursor append(VectorQuery q) throws IOException;
 }

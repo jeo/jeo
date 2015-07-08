@@ -103,7 +103,10 @@ public class VectorQuery {
 
     /**
      * Set of Feature properties to query, an empty set means all properties.
-     *
+     * <p>
+     * The field list applies to {@link VectorDataset#read(VectorQuery)} and {@link VectorDataset#update(VectorQuery)}
+     * operations.
+     * </p>
      */
     public Set<String> fields() {
         return fields;
@@ -134,6 +137,10 @@ public class VectorQuery {
 
     /**
      * Bounds constraints on the query, may be <code>null</code> meaning no bounds constraint.
+     * <p>
+     * The bounds constraint applies to {@link VectorDataset#read(VectorQuery)} and
+     * {@link VectorDataset#update(VectorQuery)} operations.
+     * </p>
      */
     public Envelope bounds() {
         return bounds;
@@ -141,6 +148,10 @@ public class VectorQuery {
 
     /**
      * Constraint on the query, may be <code>null</code> meaning no constraint.
+     * <p>
+     * The filter constraint applies to {@link VectorDataset#read(VectorQuery)} and
+     * {@link VectorDataset#update(VectorQuery)} operations.
+     * </p>
      */
     public Filter<Feature> filter() {
         return filter;
@@ -148,6 +159,10 @@ public class VectorQuery {
 
     /**
      * Limit on the number of features to return from the query, <code>null</code> meaning no limit.
+     * <p>
+     * The feature limit applies to {@link VectorDataset#read(VectorQuery)} and
+     * {@link VectorDataset#update(VectorQuery)} operations.
+     * </p>
      */
     public Integer limit() {
         return limit;
@@ -156,6 +171,10 @@ public class VectorQuery {
     /**
      *  Offset into query result set from which to start returning features, <code>null</code> 
      *  meaning no offset.
+     * <p>
+     * The feature offset applies to {@link VectorDataset#read(VectorQuery)} and
+     * {@link VectorDataset#update(VectorQuery)} operations.
+     * </p>
      */
     public Integer offset() {
         return offset;
@@ -168,6 +187,10 @@ public class VectorQuery {
      * The first element in the pair may be <code>null</code> to signify that the dataset crs 
      * (if available) should be used
      * </p>
+     * <p>
+     * The reproject field applies to {@link VectorDataset#read(VectorQuery)} and
+     * {@link VectorDataset#update(VectorQuery)} operations.
+     * </p>
      */
     public Pair<CoordinateReferenceSystem, CoordinateReferenceSystem> reproject() {
         return reproject;
@@ -176,6 +199,10 @@ public class VectorQuery {
     /**
      * Simplification tolerance to apply to feature geometries, <code>null</code> meaning no 
      * simplification.
+     * <p>
+     * The simplification tolerance applies to {@link VectorDataset#read(VectorQuery)} and
+     * {@link VectorDataset#update(VectorQuery)} operations.
+     * </p>
      */
     public Double simplify() {
         return simplify;
@@ -183,6 +210,10 @@ public class VectorQuery {
 
     /**
      * Sort criteria for the query, <code>null</code> meaning no sorting.
+     * <p>
+     * The sorting criteria applies to {@link VectorDataset#read(VectorQuery)} and
+     * {@link VectorDataset#update(VectorQuery)} operations.
+     * </p>
      */
     public List<Sort> sort() {
         return sort;
@@ -190,6 +221,10 @@ public class VectorQuery {
 
     /**
      * Transaction of the query, may be <code>null</code>.
+     * <p>
+     * The transaction applies to {@link VectorDataset#update(VectorQuery)} and {@link VectorDataset#append(VectorQuery)}
+     * operations.
+     * </p>
      */
     public Transaction transaction() {
         return transaction;

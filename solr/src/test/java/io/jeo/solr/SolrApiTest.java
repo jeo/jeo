@@ -25,16 +25,12 @@ public class SolrApiTest extends VectorApiTestBase {
     public static void connect()  {
         try {
             SolrTests.connect();
+            SolrTests.setupStatesData();
+            //io.jeo.Tests.debugLogging("io.jeo.solr");
         }
         catch(Exception e) {
             Assume.assumeTrue(false);
         }
-    }
-
-    @BeforeClass
-    public static void setupData() throws Exception {
-        SolrTests.setupStatesData();
-        //io.jeo.Tests.debugLogging("io.jeo.solr");
     }
 
     @Override

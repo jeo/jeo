@@ -14,9 +14,13 @@
  */
 package io.jeo;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -25,6 +29,8 @@ import java.util.Properties;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static java.lang.String.format;
 
 /**
  * Build information about the library.
@@ -73,6 +79,52 @@ public class Jeo {
         return null;
     }
 
+    /**
+     * Returns the jeo home directory.
+     * <p>
+     * The jeo home directory can be set with the <tt>jeo.home</tt> system property. If unset it
+     * falls back to a directory named <tt>.jeo</tt> under the users home directory. If that directory
+     * can not be created a temporary directory is created.
+     * </p>
+     */
+    public static Path home() throws IOException {
+        // first check jeo.home
+        String h = System.getProperty("jeo.home");
+        if (h != null) {
+            Path p =  Paths.get(h);
+            File f = p.toFile();
+            if (!f.exists()) {
+                throw new IOException(format(Locale.ROOT, "jeo.home was set to %s but does not exist", h));
+            }
+
+            if (!f.canRead()) {
+                throw new IOException(format(Locale.ROOT, "jeo.home was set to %s but is not readable", h));
+            }
+
+            return p;
+        }
+
+        // next try under %HOME%/.jeo
+        if (h == null) {
+            h = System.getProperty("user.home");
+            if (h != null) {
+                Path p = Paths.get(h).resolve(".jeo");
+                File f = p.toFile();
+                if (f.exists()) {
+                    return p;
+                }
+
+                if (f.mkdirs()) {
+                    return p;
+                }
+
+                LOG.debug("Unable to create jeo home directory: {}", f.getPath());
+            }
+        }
+
+        return Files.createTempDirectory("jeo");
+    }
+
     static SimpleDateFormat dateFormatISO() {
         return new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ", Locale.ROOT);
     }
@@ -110,7 +162,7 @@ public class Jeo {
      * Prints version info for the library.
      */
     public static void printVersionInfo(PrintStream out) {
-        out.println(String.format(Locale.ROOT,"jeo %s (%s, %s)", version(), revisionShort(), 
+        out.println(format(Locale.ROOT, "jeo %s (%s, %s)", version(), revisionShort(),
             dateFormatHuman().format(buildDate())));
     }
 }

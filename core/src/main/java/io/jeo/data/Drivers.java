@@ -451,6 +451,11 @@ public class Drivers {
     }
 
     static URI convertFileURI(URI uri) {
+        if (uri.getScheme() == null) {
+            // treat as a file uri
+            uri = new File(uri.toString()).toURI();
+        }
+
         if ("file".equalsIgnoreCase(uri.getScheme())) {
             //hack for files, turn file extension 
             String ext = Util.extension(uri.getPath());

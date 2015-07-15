@@ -132,6 +132,11 @@ public class SolrWorkspace implements Workspace {
     }
 
     @Override
+    public void destroy(String name) throws IOException {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public void close() {
         if (solr != null) {
             solr = null;

@@ -64,6 +64,13 @@ public class GTWorkspace implements Workspace {
 
     @Override
     public GTVectorDataset create(Schema schema) throws IOException {
+        // TODO: implement
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void destroy(String name) throws IOException {
+        // TODO: implement
         throw new UnsupportedOperationException();
     }
 

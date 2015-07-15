@@ -125,6 +125,11 @@ public class CachedRepository implements DataRepository {
         }
 
         @Override
+        public void destroy(String name) throws IOException {
+            ws.destroy(name);
+        }
+
+        @Override
         public Iterable<Handle<Dataset>> list() throws IOException {
             return ws.list();
         }

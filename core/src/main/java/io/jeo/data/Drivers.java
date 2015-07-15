@@ -229,6 +229,19 @@ public class Drivers {
 
     /**
      * Opens a connection to data described by the specified options.
+     *
+     * @param opts Connection options.
+     *
+     * @return The data object, or <code>null</code> if no suitable driver could be found for the
+     *   specified options.
+     * @see #open(Map, Class)
+     */
+    public static <T> T open(Map<?, Object> opts) throws IOException {
+        return (T) open(opts, Object.class, REGISTRY);
+    }
+
+    /**
+     * Opens a connection to data described by the specified options.
      * <p>
      * The optional <tt>class</tt> parameter is used to filter the candidate driver set. For 
      * example to constrain to workspace drivers.

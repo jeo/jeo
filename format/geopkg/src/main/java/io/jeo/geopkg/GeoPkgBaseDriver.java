@@ -17,23 +17,16 @@ package io.jeo.geopkg;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import io.jeo.vector.FileVectorDriver;
 import io.jeo.vector.Schema;
 import io.jeo.util.Key;
 import io.jeo.util.Password;
 
-import static io.jeo.vector.VectorDriver.Capability.CREATE;
-import static io.jeo.vector.VectorDriver.Capability.DESTROY;
-import static io.jeo.vector.VectorDriver.Capability.APPEND;
-import static io.jeo.vector.VectorDriver.Capability.UPDATE;
-import static io.jeo.vector.VectorDriver.Capability.FIELD;
-import static io.jeo.vector.VectorDriver.Capability.FILTER;
-import static io.jeo.vector.VectorDriver.Capability.LIMIT;
-import static io.jeo.vector.VectorDriver.Capability.OFFSET;
+import static io.jeo.util.Util.set;
 
 /**
  * Support for a Geopackage Driver. An implementation only needs to provide
@@ -93,12 +86,10 @@ public abstract class GeoPkgBaseDriver extends FileVectorDriver<GeoPkgWorkspace>
         return ws;
     }
 
-    static final EnumSet<Capability> CAPABILITIES =
-        EnumSet.of(CREATE, DESTROY, UPDATE, APPEND, FILTER, LIMIT, OFFSET, FIELD);
+    static final Set<Capability> CAPABILITIES = set(CREATE, DESTROY, UPDATE, APPEND, FILTER, LIMIT, OFFSET, FIELD);
 
     @Override
-    public final boolean supports(Capability cap) {
-        return CAPABILITIES.contains(cap);
+    public Set<Capability> capabilities() {
+        return CAPABILITIES;
     }
-
 }

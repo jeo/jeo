@@ -17,12 +17,14 @@ package io.jeo.geojson;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import io.jeo.vector.FileVectorDriver;
 import io.jeo.vector.Schema;
+
+import static io.jeo.util.Util.set;
 
 /**
  * GeoJSON format driver.
@@ -70,10 +72,10 @@ public class GeoJSON extends FileVectorDriver<GeoJSONDataset> {
         return new GeoJSONDataset(file);
     }
 
-    static final EnumSet<Capability> CAPABILITIES = EnumSet.of(Capability.APPEND);
+    static final Set<Capability> CAPABILITIES = set(APPEND);
 
     @Override
-    public boolean supports(Capability cap) {
-        return CAPABILITIES.contains(cap);
+    public Set<Capability> capabilities() {
+        return CAPABILITIES;
     }
 }

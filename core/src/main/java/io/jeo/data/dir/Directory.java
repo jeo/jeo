@@ -19,7 +19,9 @@ import io.jeo.util.Messages;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Driver for directory of files.
@@ -56,5 +58,10 @@ public class Directory extends FileDriver<DirWorkspace> {
     @Override
     protected DirWorkspace open(File file, Map<?, Object> opts) throws IOException {
         return new DirWorkspace(file);
+    }
+
+    @Override
+    public Set<Capability> capabilities() {
+        return Collections.emptySet();
     }
 }

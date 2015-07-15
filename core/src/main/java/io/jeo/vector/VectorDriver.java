@@ -26,65 +26,55 @@ import io.jeo.util.Messages;
 public interface VectorDriver<T> extends Driver<T> {
 
     /**
-     * Vector driver capability enumeration.
+     * Ability to create datasets.
      */
-    enum Capability {
-        /**
-         * Ability to create datasets.
-         */
-        CREATE,
-        /**
-         * Ability to destroy datasets.
-         */
-        DESTROY,
-
-        /**
-         * Ability to update dataset contents.
-         */
-        UPDATE,
-        /**
-         * Ability to append dataset contents.
-         */
-        APPEND,
-
-        /**
-         * Ability to handle field selection.
-         */
-        FIELD,
-        /**
-         * Ability to handle bounding box queries.
-         */
-        BOUND,
-        /**
-         * Ability to handle filters.
-         */
-        FILTER,
-        /**
-         * Ability to perform reprojection.
-         */
-        REPROJECT,
-        /**
-         * Ability to simplify vector geometries.
-         */
-        SIMPLIFY,
-        /**
-         * Ability to limit a result set.
-         */
-        LIMIT,
-        /**
-         * Ability to handle offset of a result set.
-         */
-        OFFSET,
-        /**
-         * Ability to sort a result set.
-         */
-        SORT;
-    }
+    Capability CREATE = new Capability("create");
+    /**
+     * Ability to destroy datasets.
+     */
+    Capability DESTROY = new Capability("destroy");
 
     /**
-     * Determines if the driver natively supports the specified capability.
+     * Ability to update dataset contents.
      */
-    boolean supports(VectorDriver.Capability cap);
+    Capability UPDATE = new Capability("update");
+    /**
+     * Ability to append dataset contents.
+     */
+    Capability APPEND = new Capability("append");
+
+    /**
+     * Ability to handle field selection.
+     */
+    Capability FIELD = new Capability("field");
+    /**
+     * Ability to handle bounding box queries.
+     */
+    Capability BOUND = new Capability("bound");
+    /**
+     * Ability to handle filters.
+     */
+    Capability FILTER = new Capability("filter");
+    /**
+     * Ability to perform reprojection.
+     */
+    Capability REPROJECT = new Capability("reproject");
+    /**
+     * Ability to simplify vector geometries.
+     */
+    Capability SIMPLIFY = new Capability("simplify");
+    /**
+     * Ability to limit a result set.
+     */
+    Capability LIMIT = new Capability("limit");
+    /**
+     * Ability to handle offset of a result set.
+     */
+    Capability OFFSET = new Capability("offset");
+    /**
+     * Ability to sort a result set.
+     */
+    Capability SORT = new Capability("sort");
 
     /**
      * Determines if this driver can create a connection to the data described by the specified

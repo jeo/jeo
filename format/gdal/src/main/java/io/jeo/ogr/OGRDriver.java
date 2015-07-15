@@ -22,6 +22,7 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import io.jeo.vector.FileVectorDriver;
 import io.jeo.vector.VectorDriver;
@@ -80,7 +81,7 @@ public abstract class OGRDriver<T> extends FileVectorDriver<T> {
     protected abstract String getOGRDriverName();
 
     @Override
-    public boolean supports(VectorDriver.Capability cap) {
-        return OGR.CAPABILITIES.contains(cap);
+    public Set<Capability> capabilities() {
+        return OGR.CAPABILITIES;
     }
 }

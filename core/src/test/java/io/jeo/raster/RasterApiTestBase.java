@@ -193,7 +193,7 @@ public abstract class RasterApiTestBase {
     @Test
     public void testReproject() throws IOException {
         Assume.assumeTrue("Driver does not support reprojection",
-            ((RasterDriver)dem.driver()).supports(RasterDriver.Capability.REPROJECT));
+            dem.driver().capabilities().contains(RasterDriver.REPROJECT));
 
         RasterQuery q = new RasterQuery()
             .size(10,10)

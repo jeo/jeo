@@ -19,8 +19,10 @@ import java.nio.charset.Charset;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -86,15 +88,50 @@ public class Util {
         }
     }
 
-    public static Map<Object,Object> map(Object... kv) {
+    /**
+     * Constructs a map taking a variable set of key value pairs.
+     * <p>
+     * This method creates a {@link LinkedHashMap}. Use {@link #map(Object, Object, Object...)} to
+     * control the map type.
+     * </p>
+     */
+    public static <K,V> Map<K,V> map(K k, V v, Object... kv) {
+        return map(new LinkedHashMap<K,V>(), k, v, kv);
+    }
+
+    /**
+     * Populates a map taking a variable set of key value pairs.
+     */
+    public static <K,V,T extends Map<K,V>> T map(T map, K k, V v, Object... kv) {
         if (kv.length % 2 != 0) {
             throw new IllegalArgumentException("odd number of arguments");
         }
-        LinkedHashMap<Object, Object> map = new LinkedHashMap<Object, Object>();
+        map.put(k, v);
         for (int i = 0; i < kv.length; i+=2) {
-            map.put(kv[i].toString(), kv[i+1]);
+            map.put((K) kv[i], (V) kv[i+1]);
         }
         return map;
+    }
+
+    /**
+     * Constructs a set from a set of variable list arguments.
+     * <p>
+     * This method creates a {@link LinkedHashSet}. Use {@link #set(Set, Object[])} to control the
+     * set type.
+     * </p>
+     */
+    public static <T> Set<T> set(T... values) {
+        return set(new LinkedHashSet<T>(), values);
+    }
+
+    /**
+     * Populates a set from a set of variable list arguments.
+     */
+    public static <T> Set<T> set(Set<T> set, T... values) {
+        for (T v : values) {
+            set.add(v);
+        }
+        return set;
     }
 
     /**

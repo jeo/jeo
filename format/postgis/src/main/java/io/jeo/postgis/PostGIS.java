@@ -16,9 +16,9 @@ package io.jeo.postgis;
 
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import io.jeo.vector.VectorDriver;
 import io.jeo.vector.Schema;
@@ -26,15 +26,7 @@ import io.jeo.util.Key;
 import io.jeo.util.Messages;
 import io.jeo.util.Password;
 
-import static io.jeo.vector.VectorDriver.Capability.APPEND;
-import static io.jeo.vector.VectorDriver.Capability.BOUND;
-import static io.jeo.vector.VectorDriver.Capability.CREATE;
-import static io.jeo.vector.VectorDriver.Capability.DESTROY;
-import static io.jeo.vector.VectorDriver.Capability.FIELD;
-import static io.jeo.vector.VectorDriver.Capability.FILTER;
-import static io.jeo.vector.VectorDriver.Capability.LIMIT;
-import static io.jeo.vector.VectorDriver.Capability.OFFSET;
-import static io.jeo.vector.VectorDriver.Capability.UPDATE;
+import static io.jeo.util.Util.set;
 
 public class PostGIS implements VectorDriver<PostGISWorkspace>{
 
@@ -129,11 +121,11 @@ public class PostGIS implements VectorDriver<PostGISWorkspace>{
         throw new UnsupportedOperationException();
     }
 
-    static final EnumSet<Capability> CAPABILITIES =
-        EnumSet.of(CREATE, DESTROY, APPEND, UPDATE, BOUND, LIMIT, OFFSET, FILTER, FIELD);
+    static final Set<Capability> CAPABILITIES =
+        set(CREATE, DESTROY, APPEND, UPDATE, BOUND, LIMIT, OFFSET, FILTER, FIELD);
 
     @Override
-    public boolean supports(VectorDriver.Capability cap) {
-        return CAPABILITIES.contains(cap);
+    public Set<Capability> capabilities() {
+        return CAPABILITIES;
     }
 }

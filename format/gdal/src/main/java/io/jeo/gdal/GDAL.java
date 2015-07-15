@@ -27,9 +27,11 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+
+import static io.jeo.util.Util.set;
 
 /**
  * Justin Deoliveira, Boundless
@@ -148,10 +150,10 @@ public class GDAL extends FileDriver<GDALDataset> implements RasterDriver<GDALDa
         return new GDALDataset(file, ds, this);
     }
 
-    static final EnumSet<Capability> CAPABILITIES = EnumSet.of(Capability.REPROJECT, Capability.RESAMPLE);
+    static final Set<Capability> CAPABILITIES = set(REPROJECT, RESAMPLE);
 
     @Override
-    public boolean supports(RasterDriver.Capability cap) {
-        return CAPABILITIES.contains(cap);
+    public Set<Capability> capabilities() {
+        return CAPABILITIES;
     }
 }

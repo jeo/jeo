@@ -17,9 +17,9 @@ package io.jeo.ogr;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.gdal.ogr.DataSource;
 import org.gdal.ogr.Driver;
@@ -32,6 +32,8 @@ import io.jeo.util.Key;
 import io.jeo.util.Messages;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static io.jeo.util.Util.set;
 
 /**
  * Driver for formats supported by the OGR/GDAL library.
@@ -190,10 +192,10 @@ public class OGR extends FileVectorDriver<OGRWorkspace> implements Disposable {
         }
     }
 
-    static final EnumSet<Capability> CAPABILITIES = EnumSet.of(Capability.BOUND);
+    static final Set<Capability> CAPABILITIES = set(BOUND);
 
     @Override
-    public boolean supports(VectorDriver.Capability cap) {
-        return CAPABILITIES.contains(cap);
+    public Set<Capability> capabilities() {
+        return CAPABILITIES;
     }
 }

@@ -14,22 +14,21 @@
  */
 package io.jeo.data.mem;
 
-import java.io.IOException;
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-
-import io.jeo.vector.VectorDriver;
 import io.jeo.raster.RasterDriver;
-import io.jeo.vector.Schema;
 import io.jeo.util.Key;
 import io.jeo.util.Messages;
+import io.jeo.vector.Schema;
+import io.jeo.vector.VectorDriver;
 
-import static io.jeo.raster.RasterDriver.Capability.RESAMPLE;
-import static io.jeo.vector.VectorDriver.Capability.APPEND;
-import static io.jeo.vector.VectorDriver.Capability.BOUND;
-import static io.jeo.vector.VectorDriver.Capability.CREATE;
-import static io.jeo.vector.VectorDriver.Capability.DESTROY;
-import static io.jeo.vector.VectorDriver.Capability.UPDATE;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+
+import static io.jeo.util.Util.set;
 
 /**
  * Driver for in memory workspace objects.
@@ -117,16 +116,10 @@ public class Memory implements VectorDriver<MemWorkspace>, RasterDriver<MemWorks
         return ws;
     }
 
-    static final EnumSet<VectorDriver.Capability> VECTOR_CAPABILITIES = EnumSet.of(CREATE, DESTROY, UPDATE, APPEND, BOUND);
-    static final EnumSet<RasterDriver.Capability> RASTER_CAPABILITIES = EnumSet.of(RESAMPLE);
+    static Set<Capability> CAPABILITIES = set(CREATE, DESTROY, UPDATE, APPEND, BOUND, RESAMPLE);
 
     @Override
-    public boolean supports(VectorDriver.Capability cap) {
-       return VECTOR_CAPABILITIES.contains(cap);
-    }
-
-    @Override
-    public boolean supports(RasterDriver.Capability cap) {
-        return RASTER_CAPABILITIES.contains(cap);
+    public Set<Capability> capabilities() {
+        return CAPABILITIES;
     }
 }

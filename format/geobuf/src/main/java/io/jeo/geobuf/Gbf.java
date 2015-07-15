@@ -17,8 +17,10 @@ package io.jeo.geobuf;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import io.jeo.data.FileDriver;
 import io.jeo.util.Messages;
@@ -66,8 +68,8 @@ public class Gbf extends FileDriver<GeobufDataset> implements VectorDriver<Geobu
     }
 
     @Override
-    public boolean supports(Capability cap) {
-        return false;
+    public Set<Capability> capabilities() {
+        return Collections.emptySet();
     }
 
     @Override

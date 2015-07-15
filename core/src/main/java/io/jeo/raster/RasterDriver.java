@@ -24,14 +24,12 @@ import io.jeo.data.Driver;
 public interface RasterDriver<T> extends Driver<T> {
 
     /**
-     * Raster driver capability enumeration.
+     * Ability to resample on read.
      */
-    public enum Capability {
-        RESAMPLE, REPROJECT;
-    }
+    Driver.Capability RESAMPLE = new Driver.Capability("resample");
 
     /**
-     * Determines if the driver natively supports the specified capability.
+     * Ability to reproject/work on read.
      */
-    boolean supports(RasterDriver.Capability cap);
+    Driver.Capability REPROJECT = new Driver.Capability("reproject");
 }

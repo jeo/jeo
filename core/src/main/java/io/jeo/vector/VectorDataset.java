@@ -17,7 +17,6 @@ package io.jeo.vector;
 import java.io.IOException;
 
 import io.jeo.data.Dataset;
-import io.jeo.vector.VectorDriver.Capability;
 
 /**
  * A data set consisting of objects with a vector geometry, known as {@link Feature} objects.

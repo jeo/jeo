@@ -61,7 +61,7 @@ public abstract class FileDriver<T> implements Driver<T> {
 
     /**
      * Checks for the existence of the {@link FileDriver#FILE} key and calls through to 
-     * {@link #canOpen(File, Map)} 
+     * {@link #canOpen(File, Map, Messages)}
      */
     @Override
     public boolean canOpen(Map<?, Object> opts, Messages msgs) {
@@ -85,7 +85,7 @@ public abstract class FileDriver<T> implements Driver<T> {
     }
 
     /**
-     * Same semantics as {@link Driver#canOpen(Map)}, and supplies the file to open. 
+     * Same semantics as {@link Driver#canOpen(Map, Messages)}, and supplies the file to open.
      * 
      * @param file The file to open.
      * @param opts The original driver options.

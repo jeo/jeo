@@ -15,8 +15,10 @@
 package io.jeo.data;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import io.jeo.util.Key;
 import io.jeo.util.Messages;
@@ -38,6 +40,30 @@ import io.jeo.util.Messages;
  * @author Justin Deoliveira, OpenGeo
  */
 public interface Driver<T> {
+
+    /**
+     * A capability is an operation that the driver can handle natively.
+     *
+     * @see #capabilities()
+     */
+    class Capability {
+
+        /**
+         * Name of the capability.
+         */
+        public final String name;
+
+        public Capability(String name) {
+            this.name = name;
+        }
+
+        /**
+         * Determines if the capability is in the specified collection.
+         */
+        public boolean in(Collection<Capability> collection) {
+            return collection.contains(this);
+        }
+    }
 
     /**
      * Name identifying the driver.
@@ -74,6 +100,20 @@ public interface Driver<T> {
      * Returns the keys supported by the driver.
      */
     List<Key<?>> keys();
+
+    /**
+     * The driver capabilities that declare what operations the driver is capable of handling natively.
+     * <p>
+     *  For example, to check if a vector driver supports bounding box queries.
+     *  <pre>
+     *   VectorDriver drv = ...;
+     *   if (drv.capabilities().contains(VectorDriver.BOUND)) {
+     *       // driver supports native bbox queries
+     *   }
+     *  </pre>
+     * </p>
+     */
+    Set<Capability> capabilities();
 
     /**
      * Determines if the driver is enabled.

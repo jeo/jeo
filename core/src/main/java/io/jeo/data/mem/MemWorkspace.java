@@ -36,17 +36,20 @@ import io.jeo.util.Key;
  */
 public class MemWorkspace implements Workspace {
 
+    String name;
     Map<String,Dataset> map;
 
-    public MemWorkspace() {
-        this(Collections.EMPTY_MAP);
+    public MemWorkspace(String name) {
+        this(name, Collections.EMPTY_MAP);
     }
 
-    public MemWorkspace(Dataset dataset) {
-        this(Collections.singletonMap(dataset.name(), dataset));
+    public MemWorkspace(String name, Dataset dataset) {
+        this(name, Collections.singletonMap(dataset.name(), dataset));
     }
-    public MemWorkspace(Map<String,Dataset> map) {
-        this.map = new LinkedHashMap<String, Dataset>(map);
+
+    public MemWorkspace(String name, Map<String,Dataset> map) {
+        this.name = name;
+        this.map = new LinkedHashMap<>(map);
     }
 
     @Override
@@ -56,7 +59,7 @@ public class MemWorkspace implements Workspace {
 
     @Override
     public Map<Key<?>, Object> driverOptions() {
-        return Collections.emptyMap();
+        return (Map) Collections.singletonMap(Memory.NAME, name);
     }
 
     @Override

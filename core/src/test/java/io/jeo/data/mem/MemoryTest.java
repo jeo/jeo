@@ -47,7 +47,7 @@ public class MemoryTest {
     public void setUp() throws IOException {
         GeomBuilder gb = new GeomBuilder();
 
-        mem = new MemWorkspace();
+        mem = new MemWorkspace("foo");
         Schema schema = new SchemaBuilder("widgets")
             .field("geometry", Geometry.class)
             .field("id", Integer.class)

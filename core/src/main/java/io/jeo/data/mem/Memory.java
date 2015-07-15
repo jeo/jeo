@@ -92,7 +92,7 @@ public class Memory implements VectorDriver<MemWorkspace>, RasterDriver<MemWorks
         }
 
         synchronized (this) {
-            WORKSPACES.put(name, new MemWorkspace());
+            WORKSPACES.put(name, new MemWorkspace(name));
         }
 
         return WORKSPACES.get(name);

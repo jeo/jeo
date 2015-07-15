@@ -26,6 +26,12 @@ import io.jeo.util.Key;
 import io.jeo.util.Messages;
 import io.jeo.util.Password;
 
+import static io.jeo.vector.VectorDriver.Capability.APPEND;
+import static io.jeo.vector.VectorDriver.Capability.BOUND;
+import static io.jeo.vector.VectorDriver.Capability.LIMIT;
+import static io.jeo.vector.VectorDriver.Capability.OFFSET;
+import static io.jeo.vector.VectorDriver.Capability.UPDATE;
+
 public class MongoDB implements VectorDriver<MongoWorkspace> {
 
     public static final Key<String> DB = new Key<String>("db", String.class);
@@ -99,7 +105,7 @@ public class MongoDB implements VectorDriver<MongoWorkspace> {
         throw new UnsupportedOperationException();
     }
 
-    static final EnumSet<Capability> CAPABILITIES = EnumSet.of(Capability.BOUND, Capability.LIMIT, Capability.OFFSET);
+    static final EnumSet<Capability> CAPABILITIES = EnumSet.of(APPEND, UPDATE, BOUND, LIMIT, OFFSET);
 
     @Override
     public boolean supports(Capability cap) {

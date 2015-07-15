@@ -67,7 +67,7 @@ public class Geom {
         private final String name;
         private final String simpleName;
         
-        private Type(Class<? extends Geometry> type) {
+        Type(Class<? extends Geometry> type) {
             this.type = type;
             this.name = type.getSimpleName();
             this.simpleName = (name.startsWith("Multi") ? name.substring(5) : name);
@@ -453,6 +453,12 @@ public class Geom {
         }
     }
 
+    /**
+     * Visits a geometry object.
+     *
+     * @param g The geometry.
+     * @param v The visitor.
+     */
     public static void visit(Geometry g, GeometryVisitor v) {
         ArrayDeque<Geometry> stack = new ArrayDeque<>();
         stack.push(g);

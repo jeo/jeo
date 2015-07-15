@@ -23,13 +23,11 @@ import io.jeo.vector.Schema;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
-import static io.jeo.vector.VectorDriver.Capability.BOUND;
-import static io.jeo.vector.VectorDriver.Capability.FILTER;
-import static io.jeo.vector.VectorDriver.Capability.LIMIT;
+import static io.jeo.util.Util.set;
 
 /**
  * Lucene driver.
@@ -109,9 +107,10 @@ public class Lucene extends FileVectorDriver<LuceneDataset> {
         return null;
     }
 
-    static EnumSet<Capability> CAPABILITIES = EnumSet.of(BOUND, FILTER, LIMIT);
+    static Set<Capability> CAPABILITIES = set(BOUND, FILTER, LIMIT);
+
     @Override
-    public boolean supports(Capability cap) {
-        return false;
+    public Set<Capability> capabilities() {
+        return CAPABILITIES;
     }
 }

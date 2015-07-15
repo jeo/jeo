@@ -17,8 +17,10 @@ package io.jeo.carto;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import io.jeo.data.FileDriver;
 import io.jeo.map.Style;
@@ -45,4 +47,8 @@ public class CartoCSS extends FileDriver<Style> {
         return Carto.parse(file);
     }
 
+    @Override
+    public Set<Capability> capabilities() {
+        return Collections.emptySet();
+    }
 }

@@ -30,6 +30,9 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+
+import static io.jeo.util.Util.set;
 
 /**
  * Abstract base class for GeoTools based drivers.
@@ -90,23 +93,12 @@ public abstract class GTVectorDriver implements VectorDriver<GTWorkspace> {
         }).orElse(false);
     }
 
+    //TODO: others are supported but we haven't mapped them over yet
+    static Set<Capability> CAPABILITIES = set(BOUND, FILTER, LIMIT, OFFSET);
+
     @Override
-    public boolean supports(Capability cap) {
-        switch(cap) {
-            case BOUND:
-            case FILTER:
-            case LIMIT:
-            case OFFSET:
-                return true;
-            case UPDATE:
-            case APPEND:
-            case REPROJECT:
-            case SIMPLIFY:
-            case SORT:
-            default:
-                //TODO: these are supported but we haven't mapped them over yet
-                return false;
-        }
+    public Set<Capability> capabilities() {
+        return CAPABILITIES;
     }
 
     @Override

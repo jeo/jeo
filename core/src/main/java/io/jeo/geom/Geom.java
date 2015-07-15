@@ -25,6 +25,8 @@ import java.util.List;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.prep.PreparedGeometry;
 import com.vividsolutions.jts.geom.prep.PreparedGeometryFactory;
+import com.vividsolutions.jts.io.WKTReader;
+import io.jeo.geojson.GeoJSONReader;
 import io.jeo.geojson.GeoJSONWriter;
 
 import com.vividsolutions.jts.geom.Geometry;
@@ -524,5 +526,51 @@ public class Geom {
                     throw new IllegalArgumentException("Unknown geometry type: " + g);
             }
         }
+    }
+
+    static List<GeomParser> PARSERS = new ArrayList<>();
+    static {
+        PARSERS.add(new GeomParser() {
+            @Override
+            public Geometry parse(String str) throws Exception {
+                return new WKTReader().read(str);
+            }
+        });
+        PARSERS.add(new GeomParser() {
+            @Override
+            public Geometry parse(String str) throws Exception {
+                return new GeoJSONReader().geometry(str);
+            }
+        });
+    }
+    /**
+     * Parses the specified string into a geometry.
+     * <p>
+     *  Currently the following geometry formats are supported.
+     *  <ul>
+     *    <li>Well Known Text</li>
+     *    <li>GeoJSON</li>
+     *  </ul>
+     * </p>
+     * @param str The geometry string.
+     *
+     * @return The parsed geometry, or <code>null</code> if it could not be parsed in on of the formats listed above.
+     */
+    public static Geometry parse(String str) {
+       for (GeomParser p : PARSERS) {
+           try {
+               Geometry g = p.parse(str);
+               if (g != null) {
+                   return g;
+               }
+           }
+           catch(Exception e) {
+           }
+       }
+       return null;
+    }
+
+    interface GeomParser {
+        Geometry parse(String str) throws Exception;
     }
 }

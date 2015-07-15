@@ -8,6 +8,8 @@ import org.junit.Test;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 public class GeomTest {
@@ -35,5 +37,12 @@ public class GeomTest {
         assertEquals(1d, flat.get(0).getX(), 0.1);
         assertEquals(2d, flat.get(1).getX(), 0.1);
         assertEquals(4d, flat.get(2).getX(), 0.1);
+    }
+
+    @Test
+    public void testParse() {
+        assertNotNull(Geom.parse("POINT(1 2)"));
+        assertNotNull(Geom.parse("{\"type\": \"Point\", \"coordinates\": [1,2]}"));
+        assertNull(Geom.parse("foo"));
     }
 }

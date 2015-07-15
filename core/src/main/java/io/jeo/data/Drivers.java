@@ -398,7 +398,12 @@ public class Drivers {
         throw new IllegalArgumentException(d.name() + " driver returned " + obj);
     }
 
-    static Map<String,Object> parseURI(URI uri, Driver<?> d) {
+    /**
+     * Parses a jeo data uri into a map of connection parameters.
+     */
+    public static Map<String,Object> parseURI(URI uri, Driver<?> d) {
+        uri = convertFileURI(uri);
+
         Map<String,Object> opts = new HashMap<String, Object>();
         
         // parse host / path

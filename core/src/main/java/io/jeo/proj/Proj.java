@@ -86,6 +86,11 @@ public class Proj {
         if (s == null || s.isEmpty()) {
             return null;
         }
+
+        if ("urn:ogc:def:crs:OGC:1.3:CRS84".equalsIgnoreCase(s)) {
+            return EPSG_4326;
+        }
+
         if (!AUTH_CODE.matcher(s).matches()) {
             try {
                 return crs(new String[]{s});

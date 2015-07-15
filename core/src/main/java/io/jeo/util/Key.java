@@ -246,5 +246,8 @@ public class Key<T> {
         return true;
     }
 
-    
+    @Override
+    public String toString() {
+        return name();
+    }
 }

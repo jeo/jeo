@@ -16,9 +16,9 @@ package io.jeo.mongo;
 
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import io.jeo.vector.VectorDriver;
 import io.jeo.vector.Schema;
@@ -26,13 +26,7 @@ import io.jeo.util.Key;
 import io.jeo.util.Messages;
 import io.jeo.util.Password;
 
-import static io.jeo.vector.VectorDriver.Capability.APPEND;
-import static io.jeo.vector.VectorDriver.Capability.BOUND;
-import static io.jeo.vector.VectorDriver.Capability.CREATE;
-import static io.jeo.vector.VectorDriver.Capability.DESTROY;
-import static io.jeo.vector.VectorDriver.Capability.LIMIT;
-import static io.jeo.vector.VectorDriver.Capability.OFFSET;
-import static io.jeo.vector.VectorDriver.Capability.UPDATE;
+import static io.jeo.util.Util.set;
 
 public class MongoDB implements VectorDriver<MongoWorkspace> {
 
@@ -107,10 +101,10 @@ public class MongoDB implements VectorDriver<MongoWorkspace> {
         throw new UnsupportedOperationException();
     }
 
-    static final EnumSet<Capability> CAPABILITIES = EnumSet.of(APPEND, UPDATE, CREATE, DESTROY, BOUND, LIMIT, OFFSET);
+    static final Set<Capability> CAPABILITIES = set(APPEND, UPDATE, CREATE, DESTROY, BOUND, LIMIT, OFFSET);
 
     @Override
-    public boolean supports(Capability cap) {
-       return CAPABILITIES.contains(cap);
+    public Set<Capability> capabilities() {
+        return CAPABILITIES;
     }
 }

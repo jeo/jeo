@@ -93,6 +93,14 @@ public class MongoWorkspace implements Workspace {
     }
 
     @Override
+    public void destroy(String name) throws IOException {
+        DBCollection col = db.getCollection(name);
+        if (col != null) {
+            col.drop();
+        }
+    }
+
+    @Override
     public void close() {
     }
 

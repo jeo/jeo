@@ -96,7 +96,7 @@ public class MongoDB implements VectorDriver<MongoWorkspace> {
 
     @Override
     public boolean canCreate(Map<?, Object> opts, Messages msgs) {
-        Messages.of(msgs).report("Creation not suported");
+        Messages.of(msgs).report("Creation not supported");
         return false;
     }
 

@@ -86,6 +86,11 @@ public class DirWorkspace implements Workspace, FileData {
     }
 
     @Override
+    public void destroy(String name) throws IOException {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public void close() {
     }
 

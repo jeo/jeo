@@ -24,6 +24,13 @@ import io.jeo.vector.Schema;
 import io.jeo.util.Key;
 import io.jeo.util.Messages;
 
+import static io.jeo.raster.RasterDriver.Capability.RESAMPLE;
+import static io.jeo.vector.VectorDriver.Capability.APPEND;
+import static io.jeo.vector.VectorDriver.Capability.BOUND;
+import static io.jeo.vector.VectorDriver.Capability.CREATE;
+import static io.jeo.vector.VectorDriver.Capability.DESTROY;
+import static io.jeo.vector.VectorDriver.Capability.UPDATE;
+
 /**
  * Driver for in memory workspace objects.
  * <p>
@@ -110,8 +117,8 @@ public class Memory implements VectorDriver<MemWorkspace>, RasterDriver<MemWorks
         return ws;
     }
 
-    static final EnumSet<VectorDriver.Capability> VECTOR_CAPABILITIES = EnumSet.of(VectorDriver.Capability.BOUND);
-    static final EnumSet<RasterDriver.Capability> RASTER_CAPABILITIES = EnumSet.of(RasterDriver.Capability.RESAMPLE);
+    static final EnumSet<VectorDriver.Capability> VECTOR_CAPABILITIES = EnumSet.of(CREATE, DESTROY, UPDATE, APPEND, BOUND);
+    static final EnumSet<RasterDriver.Capability> RASTER_CAPABILITIES = EnumSet.of(RESAMPLE);
 
     @Override
     public boolean supports(VectorDriver.Capability cap) {

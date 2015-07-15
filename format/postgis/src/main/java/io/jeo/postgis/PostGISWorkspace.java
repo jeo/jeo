@@ -246,6 +246,38 @@ public class PostGISWorkspace implements Workspace {
         return get(schema.name());
     }
 
+    @Override
+    public void destroy(final String name) throws IOException {
+        run(new DbOP<Object>() {
+            @Override
+            protected Object doRun(Connection cx) throws Exception {
+                cx.setAutoCommit(false);
+
+                SQL sql = new SQL("DROP TABLE ").name(schema().orElse(null), name);
+                LOG.debug(sql.toString());
+
+                Statement st = open(cx.createStatement());
+                st.execute(sql.toString());
+
+                if (!info.isAtLeastVersion2()) {
+                    //de-registry geometry columns
+                    sql = new SQL("DELETE FROM geometry_columns ")
+                      .add(" WHERE f_table_schema = ? ")
+                      .add(" AND f_table_name = ?");
+
+                    List<Pair<Object,Integer>> values = new ArrayList<Pair<Object,Integer>>();
+                    values.add(new Pair(schema().orElse("public"), Types.VARCHAR));
+                    values.add(new Pair(name, Types.VARCHAR));
+
+                    logQuery(sql, values);
+                    open(prepareStatement(sql, values, cx)).execute();
+                }
+                cx.commit();
+                return null;
+            }
+        });
+    }
+
     String findIdColumnName(Schema schema) {
         String[] names = new String[]{"fid", "gid", "jid"};
         String prefix = "";

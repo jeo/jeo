@@ -22,12 +22,14 @@ import java.util.List;
 import java.util.Map;
 
 import io.jeo.vector.FileVectorDriver;
-import io.jeo.vector.VectorDriver;
 import io.jeo.vector.Schema;
 import io.jeo.util.Key;
 import io.jeo.util.Password;
-import io.jeo.vector.VectorDriver.Capability;
 
+import static io.jeo.vector.VectorDriver.Capability.CREATE;
+import static io.jeo.vector.VectorDriver.Capability.DESTROY;
+import static io.jeo.vector.VectorDriver.Capability.APPEND;
+import static io.jeo.vector.VectorDriver.Capability.UPDATE;
 import static io.jeo.vector.VectorDriver.Capability.FIELD;
 import static io.jeo.vector.VectorDriver.Capability.FILTER;
 import static io.jeo.vector.VectorDriver.Capability.LIMIT;
@@ -91,7 +93,8 @@ public abstract class GeoPkgBaseDriver extends FileVectorDriver<GeoPkgWorkspace>
         return ws;
     }
 
-    static final EnumSet<Capability> CAPABILITIES = EnumSet.of(FILTER, LIMIT, OFFSET, FIELD);
+    static final EnumSet<Capability> CAPABILITIES =
+        EnumSet.of(CREATE, DESTROY, UPDATE, APPEND, FILTER, LIMIT, OFFSET, FIELD);
 
     @Override
     public final boolean supports(Capability cap) {

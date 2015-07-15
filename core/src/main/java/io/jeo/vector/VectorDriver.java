@@ -30,6 +30,15 @@ public interface VectorDriver<T> extends Driver<T> {
      */
     enum Capability {
         /**
+         * Ability to create datasets.
+         */
+        CREATE,
+        /**
+         * Ability to destroy datasets.
+         */
+        DESTROY,
+
+        /**
          * Ability to update dataset contents.
          */
         UPDATE,
@@ -77,7 +86,34 @@ public interface VectorDriver<T> extends Driver<T> {
      */
     boolean supports(VectorDriver.Capability cap);
 
-    boolean canCreate(Map<?,Object> opts, Messages msgs);
+    /**
+     * Determines if this driver can create a connection to the data described by the specified
+     * options from scratch.
+     * <p>
+     * This method differs from {@link #canOpen(Map, Messages)} in that it is meant to operate
+     * when a data source physically doesn't exist. It is typically used by file based drivers.
+     * </p>
+     * <p>
+     * The <tt>messages</tt> list is optionally used for the driver to report back any messages
+     * or exceptions that prevent the driver from creating the specified data source.
+     * </p>
+     * @param opts Options describing the data.
+     * @param messages Messages reported from the driver, optionally <code>null</code>.
+     *
+     * @return True if the driver can open the data, otherwise false.
+     */
+    boolean canCreate(Map<?,Object> opts, Messages messages);
 
+    /**
+     * Creates a new data source described by the specified options and schema.
+     *
+     * @param opts Options describing the data to connect to.
+     * @param schema Schema to create.
+     *
+     * @return The data.
+     *
+     * @throws IOException In the event of a connection error such as a file system error or
+     *   database connection failure.
+     */
     T create(Map<?,Object> opts, Schema schema) throws IOException;
 }

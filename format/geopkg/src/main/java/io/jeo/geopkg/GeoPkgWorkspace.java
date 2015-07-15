@@ -154,17 +154,23 @@ public class GeoPkgWorkspace implements Workspace, FileData {
 
     @Override
     public Dataset get(String layer) throws IOException {
-        FeatureEntry fe = feature(layer);
-        if (fe != null) {
-            return new GeoPkgVector(fe, this);
+        Entry e = entry(layer);
+        if (e instanceof FeatureEntry) {
+            return new GeoPkgVector((FeatureEntry) e, this);
         }
-
-        TileEntry te = tile(layer);
-        if (te != null) {
-            return new GeoPkgTileSet(te, this);
+        if (e instanceof TileEntry) {
+            return new GeoPkgTileSet((TileEntry) e, this);
         }
 
         return null;
+    }
+
+    Entry entry(String name) throws IOException {
+        Entry e = feature(name);
+        if (e == null) {
+            e = tile(name);
+        }
+        return e;
     }
 
     /**
@@ -434,6 +440,33 @@ public class GeoPkgWorkspace implements Workspace, FileData {
         return (GeoPkgVector) get(schema.name());
     }
 
+    @Override
+    public void destroy(String name) throws IOException {
+        Entry e = entry(name);
+        if (e != null) {
+            destroy(e);
+        }
+    }
+
+    void destroy(Entry e) throws IOException {
+        Session session = backend.transaction();
+        try {
+            boolean complete = false;
+            try {
+                removeGeopackageContentsEntry(e, session);
+                if (e instanceof FeatureEntry) {
+                    removeGeometryColumnsEntry((FeatureEntry)e, session);
+                }
+                removeGeopackageContentsEntry(e, session);
+                complete = true;
+            } finally {
+                session.endTransaction(complete);
+            }
+        } finally {
+            session.close();
+        }
+    }
+
     public void create(FeatureEntry entry, Schema schema) throws IOException {
         //clone entry so we can work on it
         FeatureEntry e = new FeatureEntry();
@@ -521,6 +554,11 @@ public class GeoPkgWorkspace implements Workspace, FileData {
         session.execute(sql.toString());
     }
 
+    void dropTable(Entry entry, Session session) throws IOException {
+        SQL sql = new SQL("DROP TABLE ").name(entry.getTableName());
+        session.execute(sql.toString());
+    }
+
     void addSpatialRefSysEntry(Schema schema, FeatureEntry entry, Session session) throws IOException {
         Integer srid = entry.getSrid();
 
@@ -591,11 +629,17 @@ public class GeoPkgWorkspace implements Workspace, FileData {
         session.executePrepared(sqlb.toString(), args.toArray());
     }
 
+    void removeGeopackageContentsEntry(Entry entry, Session session) throws IOException {
+        SQL sql = new SQL("DELETE FROM %s", GEOPACKAGE_CONTENTS)
+            .add(" WHERE table_name = ?");
+        session.executePrepared(sql.toString(), entry.getTableName());
+    }
+
     void addGeometryColumnsEntry(final Schema schema, final FeatureEntry entry, Session cx)
         throws IOException {
 
         String sql = format(Locale.ROOT,
-                    "INSERT INTO %s VALUES (?, ?, ?, ?, ?, ?);", GEOMETRY_COLUMNS);
+            "INSERT INTO %s VALUES (?, ?, ?, ?, ?, ?);", GEOMETRY_COLUMNS);
 
         cx.executePrepared(sql,
             entry.getTableName(),
@@ -605,6 +649,13 @@ public class GeoPkgWorkspace implements Workspace, FileData {
             entry.hasZ(),
             entry.hasM()
         );
+    }
+
+    void removeGeometryColumnsEntry(FeatureEntry entry, Session session)
+        throws IOException {
+
+        String sql = new SQL("DELETE FROM %s WHERE table_name = ?", GEOMETRY_COLUMNS).toString();
+        session.executePrepared(sql, entry.getTableName());
     }
 
     String findPrimaryKeyColumnName(Schema schema) {

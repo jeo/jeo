@@ -118,6 +118,13 @@ public class OGRWorkspace implements Workspace, FileData {
 
     @Override
     public VectorDataset create(Schema schema) throws IOException {
+        // TODO: implement
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void destroy(String name) throws IOException {
+        // TODO: implement
         throw new UnsupportedOperationException();
     }
 

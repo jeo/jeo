@@ -58,12 +58,25 @@ public interface Workspace extends Disposable {
      * Creates a new vector dataset in the workspace.
      * <p>
      * This method should throw {@link UnsupportedOperationException} if the workspace is not 
-     * capable of creating new vector datasets.
+     * capable of creating new vector datasets. In this case the driver should also report that
+     * {@link io.jeo.vector.VectorDriver.Capability#CREATE} is not supported.
      * </p>
      * @param schema The schema of the vector dataset.
      * 
      */
     VectorDataset create(Schema schema) throws IOException;
+
+    /**
+     * Destroys the dataset within the workspace.
+     * <p>
+     * This method should throw {@link UnsupportedOperationException} if the workspace is not
+     * capable of destroying datasets. In this case the driver should also report that
+     * {@link io.jeo.vector.VectorDriver.Capability#DESTROY} is not supported.
+     * </p>
+     *
+     * @param name The name of the dataset.
+     */
+    void destroy(String name) throws IOException;
 
     /**
      * Closes the workspace.

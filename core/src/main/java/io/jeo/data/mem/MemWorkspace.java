@@ -88,6 +88,11 @@ public class MemWorkspace implements Workspace {
         return v;
     }
 
+    @Override
+    public void destroy(String name) throws IOException {
+        map.remove(name);
+    }
+
     public MemWorkspace remove(String layer) {
         map.remove(layer);
         return this;

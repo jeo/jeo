@@ -51,16 +51,7 @@ public class MongoTest {
 
     @BeforeClass
     public static void connect() {
-        Exception error = null;
-        try {
-            db = new MongoOpts("jeo").connect();
-            db.getCollectionNames();
-        } catch (Exception e) {
-            error = e;
-        }
-
-        Assume.assumeNoException(error);
-        Assume.assumeNotNull(db);
+        db = MongoTests.connect();
     }
 
     protected MongoWorkspace mongo;

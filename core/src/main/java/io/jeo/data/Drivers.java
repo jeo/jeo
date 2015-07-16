@@ -55,57 +55,62 @@ public class Drivers {
     /**
      * Lists all registered drivers.
      */
-    public static Iterator<Driver<?>> list() {
+    public static Iterable<Driver<?>> list() {
         return list(REGISTRY);
     }
 
     /**
      * Lists all registered drivers from the specified registry.
      */
-    public static Iterator<Driver<?>> list(DriverRegistry registry) {
+    public static Iterable<Driver<?>> list(DriverRegistry registry) {
         return list(Driver.class, registry);
     }
 
     /**
      * Lists all registered drivers that extend from the specified class.
      */
-    public static Iterator<Driver<?>> list(final Class<?> filter) {
+    public static Iterable<Driver<?>> list(final Class<?> filter) {
         return list(filter, REGISTRY);
     }
 
     /**
      * Lists all registered drivers from the specified registry that extend from the specified class.
      */
-    public static Iterator<Driver<?>> list(final Class<?> filter, DriverRegistry registry) {
+    public static Iterable<Driver<?>> list(final Class<?> filter, DriverRegistry registry) {
         final Iterator<? extends Driver<?>> it = registry.list();
-        return new Iterator<Driver<?>>() {
-            Driver<?> next;
-
+        return new Iterable<Driver<?>>() {
             @Override
-            public boolean hasNext() {
-                while(next == null && it.hasNext()) {
-                    next = it.next();
-                    if (filter == null || !filter.isInstance(next)) {
-                        next = null;
+            public Iterator<Driver<?>> iterator() {
+                return new Iterator<Driver<?>>() {
+                    Driver<?> next;
+
+                    @Override
+                    public boolean hasNext() {
+                        while(next == null && it.hasNext()) {
+                            next = it.next();
+                            if (filter == null || !filter.isInstance(next)) {
+                                next = null;
+                            }
+                        }
+
+                        return next != null;
                     }
-                }
 
-                return next != null;
-            }
+                    @Override
+                    public Driver<?> next() {
+                        try {
+                            return next;
+                        }
+                        finally {
+                            next = null;
+                        }
+                    }
 
-            @Override
-            public Driver<?> next() {
-                try {
-                    return next;
-                }
-                finally {
-                    next = null;
-                }
-            }
-
-            @Override
-            public void remove() {
-                throw new UnsupportedOperationException();
+                    @Override
+                    public void remove() {
+                        throw new UnsupportedOperationException();
+                    }
+                };
             }
         };
     }
@@ -132,8 +137,7 @@ public class Drivers {
      * @see Driver#name()
      */
     public static Driver<?> find(String name, DriverRegistry registry) {
-        for (Iterator<Driver<?>> it = list(registry); it.hasNext();) {
-            Driver<?> d = it.next();
+        for (Driver<?> d : list(registry)) {
             if (name.equalsIgnoreCase(d.name()) || d.aliases().contains(name)) {
                 return d;
             }
@@ -431,11 +435,10 @@ public class Drivers {
         return opts;
     }
 
-    static <T> T open(Map<?, Object> opts, Class<T> clazz, Iterator<Driver<?>> it) 
+    static <T> T open(Map<?, Object> opts, Class<T> clazz, Iterable<Driver<?>> it)
         throws IOException {
 
-        while (it.hasNext()) {
-            Driver<?> drv = it.next();
+        for (Driver<?> drv : it) {
             if (clazz != null && !clazz.isAssignableFrom(drv.type())) {
                 continue;
             }

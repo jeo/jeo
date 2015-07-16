@@ -21,6 +21,7 @@
     <module>mbtiles</module>
     <module>mongo</module>
     <module>postgis</module>
+    <module>all</module>
   </modules>
 
 </project>

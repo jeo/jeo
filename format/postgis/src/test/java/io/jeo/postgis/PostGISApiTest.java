@@ -24,12 +24,7 @@ public class PostGISApiTest extends VectorApiTestBase {
 
     @BeforeClass
     public static void connect()  {
-        try {
-            PostGISTests.connect();
-        }
-        catch(Exception e) {
-            Assume.assumeTrue(false);
-        }
+        PostGISTests.connect();
     }
 
     @BeforeClass

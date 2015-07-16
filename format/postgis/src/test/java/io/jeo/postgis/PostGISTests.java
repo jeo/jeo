@@ -42,12 +42,17 @@ public class PostGISTests {
         log.addHandler(h);
     }
 
-    public static void connect() throws Exception  {
-        PGPoolingDataSource ds = PostGISWorkspace.createDataSource(OPTS); 
-        Connection cx = ds.getConnection();
-        Assume.assumeNotNull(cx);
-        cx.close();
-        ds.close();
+    public static void connect() {
+        try {
+            PGPoolingDataSource ds = PostGISWorkspace.createDataSource(OPTS);
+            Connection cx = ds.getConnection();
+            Assume.assumeNotNull(cx);
+            cx.close();
+            ds.close();
+        }
+        catch(Exception e) {
+            Assume.assumeNoException(e);
+        }
     }
 
     public static void setupStatesData() throws Exception {

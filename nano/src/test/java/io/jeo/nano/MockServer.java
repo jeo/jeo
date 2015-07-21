@@ -17,7 +17,6 @@ package io.jeo.nano;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
-import com.vividsolutions.jts.geom.Envelope;
 
 import java.io.OutputStream;
 import java.util.*;
@@ -36,6 +35,7 @@ import io.jeo.filter.Id;
 import io.jeo.filter.Literal;
 import io.jeo.filter.Property;
 import io.jeo.filter.TypeOf;
+import io.jeo.geom.Bounds;
 import io.jeo.vector.FeatureAppendCursor;
 import io.jeo.vector.FeatureCursor;
 import io.jeo.vector.FeatureWriteCursor;
@@ -61,7 +61,6 @@ import io.jeo.vector.VectorDataset;
 import io.jeo.data.Workspace;
 import io.jeo.data.mem.MemVectorDataset;
 import io.jeo.vector.Feature;
-import io.jeo.vector.Features;
 import io.jeo.vector.Field;
 import io.jeo.vector.Schema;
 import io.jeo.vector.SchemaBuilder;
@@ -138,7 +137,7 @@ public class MockServer {
     }
 
     MockServer withNoFeatures() throws Exception {
-        expect(vectorLayer.read(new VectorQuery().bounds(new Envelope(-180, 180, -90, 90))))
+        expect(vectorLayer.read(new VectorQuery().bounds(new Bounds(-180, 180, -90, 90))))
                 .andReturn(FeatureCursor.empty()).once();
 
         return this;
@@ -205,7 +204,7 @@ public class MockServer {
         assert active != null : "expected a tile or vector layer";
 
         expect(active.name()).andReturn("emptylayer").anyTimes();
-        expect(active.bounds()).andReturn(new Envelope(-180, 180, -90, 90)).anyTimes();
+        expect(active.bounds()).andReturn(new Bounds(-180, 180, -90, 90)).anyTimes();
         expect(active.crs()).andReturn(Proj.EPSG_4326).anyTimes();
         Driver driver = createMock(Driver.class);
         expect(driver.name()).andReturn("mockDriver").anyTimes();
@@ -251,7 +250,7 @@ public class MockServer {
         return this;
     }
     
-    Handle<Dataset> createVectorDataset(String name, String title, Envelope env, Schema schema) throws Exception {
+    Handle<Dataset> createVectorDataset(String name, String title, Bounds env, Schema schema) throws Exception {
         CoordinateReferenceSystem crs = schema.geometry().crs();
         VectorDataset dataSet = createMock(VectorDataset.class);
         expect(dataSet.bounds()).andReturn(env).anyTimes();
@@ -343,7 +342,7 @@ public class MockServer {
         expectLastCall().once();
 
         TilePyramid tilePyramid = createMock(TilePyramid.class);
-        expect(tilePyramid.bounds((Tile) anyObject())).andReturn(new Envelope(-42, 42, -42, 42)).anyTimes();
+        expect(tilePyramid.bounds((Tile) anyObject())).andReturn(new Bounds(-42, 42, -42, 42)).anyTimes();
         expect(tileLayer.pyramid()).andReturn(tilePyramid).anyTimes();
 
         expect(workspace.get("bar")).andReturn(tileLayer).once();

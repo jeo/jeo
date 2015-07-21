@@ -17,8 +17,8 @@ package io.jeo.render;
 import java.util.HashMap;
 import java.util.Map;
 
+import io.jeo.geom.Bounds;
 import io.jeo.vector.Feature;
-import io.jeo.geom.Envelopes;
 import io.jeo.map.Rule;
 
 import com.vividsolutions.jts.geom.Coordinate;
@@ -191,7 +191,7 @@ public class Label {
             throw new IllegalStateException("Label has no bounds or shape");
         }
 
-        return Envelopes.toPolygon(bounds);
+        return Bounds.toPolygon(bounds);
     }
 
     /**

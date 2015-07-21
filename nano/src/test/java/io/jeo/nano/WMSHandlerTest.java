@@ -14,7 +14,6 @@
  */
 package io.jeo.nano;
 
-import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.Point;
 import java.io.ByteArrayInputStream;
@@ -32,6 +31,7 @@ import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathFactory;
 import io.jeo.data.Dataset;
 import io.jeo.data.Handle;
+import io.jeo.geom.Bounds;
 import io.jeo.vector.Schema;
 import io.jeo.vector.SchemaBuilder;
 import io.jeo.filter.Filter;
@@ -109,10 +109,10 @@ public class WMSHandlerTest extends HandlerTestSupport {
         server.withPngRenderer();
         Schema s1 = new SchemaBuilder("s1").field("geom", Point.class, "EPSG:4326").schema();
         Schema s2 = new SchemaBuilder("s2").field("geom", LineString.class, "EPSG:3857").schema();
-        Handle<Dataset> ds1 = server.createVectorDataset("ds1", "DataSet 1", new Envelope(-105, -100, 40, 45), s1);
-        Handle<Dataset> ds2 = server.createVectorDataset("ds2", "DataSet 2", new Envelope(-42.42, -42, 42, 42.42), s2);
-        Handle<Dataset> ds3 = server.createVectorDataset("ds3", "DataSet 3", new Envelope(-42.42, -42, 42, 42.42), s2);
-        Handle<Dataset> ds4 = server.createVectorDataset("ds4", "DataSet 4", new Envelope(-42.42, -42, 42, 42.42), s2);
+        Handle<Dataset> ds1 = server.createVectorDataset("ds1", "DataSet 1", new Bounds(-105, -100, 40, 45), s1);
+        Handle<Dataset> ds2 = server.createVectorDataset("ds2", "DataSet 2", new Bounds(-42.42, -42, 42, 42.42), s2);
+        Handle<Dataset> ds3 = server.createVectorDataset("ds3", "DataSet 3", new Bounds(-42.42, -42, 42, 42.42), s2);
+        Handle<Dataset> ds4 = server.createVectorDataset("ds4", "DataSet 4", new Bounds(-42.42, -42, 42, 42.42), s2);
         server.createWorkspace("ws", ds1, ds2, ds3, ds4);
         server.buildRegistry().replay();
     }
@@ -187,14 +187,14 @@ public class WMSHandlerTest extends HandlerTestSupport {
         List<Dataset> dataSet;
         List<Style> styles;
         CoordinateReferenceSystem crs;
-        Envelope bbox;
+        Bounds bbox;
         int width;
         int height;
         String format;
         List<Filter> filters;
         @Override
             NanoHTTPD.Response render(RendererFactory f, List<Dataset> dataSet, List<Style> styles,
-                CoordinateReferenceSystem crs, Envelope bbox, int width, int height,
+                CoordinateReferenceSystem crs, Bounds bbox, int width, int height,
                 String format, List<Filter> filters) throws IOException {
                 this.dataSet = dataSet;
                 this.styles = styles;

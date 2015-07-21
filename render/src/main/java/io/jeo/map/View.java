@@ -17,13 +17,12 @@ package io.jeo.map;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+import io.jeo.geom.Bounds;
 import io.jeo.proj.Proj;
 import io.jeo.util.Rect;
 import org.osgeo.proj4j.CoordinateReferenceSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.vividsolutions.jts.geom.Envelope;
 
 /**
  * Encapsulates the bounding box and screen/view size of a {@link Map}.
@@ -43,7 +42,7 @@ public class View {
          * @param bounds The new bounds of the view.
          * @param old The old bounds of the view, possibly <tt>null</tt>.
          */
-        void onBoundsChanged(View view, Envelope bounds, Envelope old);
+        void onBoundsChanged(View view, Bounds bounds, Bounds old);
     
         /**
          * Callback fired when the projection of the view are changed.
@@ -80,7 +79,7 @@ public class View {
 
     Map map;
 
-    Envelope bounds = new Envelope(-180,180,-90,90);
+    Bounds bounds = new Bounds(-180,180,-90,90);
     CoordinateReferenceSystem crs = Proj.EPSG_4326;
     int width = DEFAULT_WIDTH;
     int height = DEFAULT_HEIGHT;
@@ -153,7 +152,7 @@ public class View {
     /**
      * The spatial/world extent of the view.
      */
-    public Envelope getBounds() {
+    public Bounds getBounds() {
         return bounds;
     }
 
@@ -161,24 +160,24 @@ public class View {
      * Sets the spatial/world extent of the view.
      * <p>
      * Application code should generally only call this method during initialization of the 
-     * map/view and instead call {@link #zoomto(Envelope))} to change the bounds of the view
+     * map/view and instead call {@link #zoomto(Bounds))} to change the bounds of the view
      * dynamically. This method will not result in any events being fired. 
      * </p>
      */
-    public void setBounds(Envelope bounds) {
+    public void setBounds(Bounds bounds) {
         this.bounds = bounds;
     }
 
     /**
      * Changes the spatial/world extent of the view.
      * <p>
-     * This method results in {@link Listener#onBoundsChanged(View, Envelope, Envelope)} 
+     * This method results in {@link Listener#onBoundsChanged(View, Bounds, Bounds)}
      * being fired.
      * </p>
      * @param newBounds The new extent.
      */
-    public void zoomto(Envelope newBounds) {
-       Envelope oldBounds = bounds;
+    public void zoomto(Bounds newBounds) {
+       Bounds oldBounds = bounds;
        setBounds(newBounds);
        fireBoundsChanged(oldBounds);
     }
@@ -273,7 +272,7 @@ public class View {
      * @return The rectangle corresponding to the intersecting portion of
      *  of the specified envelope, or <tt>null</tt> if it does not intersect.
      */
-    public Rect mapToWindow(Envelope e) {
+    public Rect mapToWindow(Bounds e) {
         e = bounds.intersection(e);
         if (e.isNull()) {
             return null;
@@ -324,7 +323,7 @@ public class View {
         return v;
     }
 
-    void fireBoundsChanged(Envelope old) {
+    void fireBoundsChanged(Bounds old) {
         for (Listener cb : callbacks) {
             try {
                 cb.onBoundsChanged(this, bounds, old);

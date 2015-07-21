@@ -48,7 +48,7 @@ import java.util.regex.Pattern;
 
 import io.jeo.data.Cursor;
 import io.jeo.data.Dataset;
-import io.jeo.util.Function;
+import io.jeo.geom.Bounds;
 import io.jeo.vector.FeatureWriteCursor;
 import io.jeo.vector.VectorQuery;
 import io.jeo.data.Transaction;
@@ -65,7 +65,6 @@ import io.jeo.filter.cql.CQL;
 import io.jeo.filter.cql.ParseException;
 import io.jeo.geojson.GeoJSONReader;
 import io.jeo.geojson.GeoJSONWriter;
-import io.jeo.geom.Envelopes;
 import io.jeo.geom.Geom;
 import io.jeo.json.JSONObject;
 import io.jeo.json.JSONValue;
@@ -81,8 +80,6 @@ import io.jeo.util.Pair;
 import org.osgeo.proj4j.CoordinateReferenceSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.vividsolutions.jts.geom.Envelope;
 
 import io.jeo.filter.Id;
 import io.jeo.filter.Literal;
@@ -199,7 +196,7 @@ public class FeatureHandler extends Handler {
         Properties p = request.getParms();
 
         //parse the bbox
-        Envelope bbox = null;
+        Bounds bbox = null;
 
         if (p.containsKey("bbox")) {
             bbox = parseBBOX(p.getProperty("bbox"));
@@ -264,7 +261,7 @@ public class FeatureHandler extends Handler {
 
         Properties p = request.getParms();
 
-        Envelope bbox = p.containsKey("bbox") ? parseBBOX(p.getProperty("bbox")) : null;
+        Bounds bbox = p.containsKey("bbox") ? parseBBOX(p.getProperty("bbox")) : null;
         CoordinateReferenceSystem crs = parseCRS(p);
         if (crs == null) {
             // no crs specified, use layer crs
@@ -282,7 +279,7 @@ public class FeatureHandler extends Handler {
             }
         }
 
-        vars.put("bbox", Envelopes.toString(bbox));
+        vars.put("bbox", Bounds.toString(bbox));
 
         if (p.containsKey("srs")) {
             vars.put("srs", p.getProperty("srs"));
@@ -302,14 +299,14 @@ public class FeatureHandler extends Handler {
             else {
                 // fall back to epsg:4326, may have to reproject bbox again
                 vars.put("srs", "epsg:4326");
-                vars.put("bbox", Envelopes.toString(reprojectIfNecessary(bbox, crs, Proj.EPSG_4326)));
+                vars.put("bbox", Bounds.toString(reprojectIfNecessary(bbox, crs, Proj.EPSG_4326)));
             }
         }
 
         return new Response(HTTP_OK, MIME_HTML, renderTemplate("feature.html", vars));
     }
 
-    Envelope reprojectIfNecessary(Envelope bbox, 
+    Bounds reprojectIfNecessary(Bounds bbox,
         CoordinateReferenceSystem from, CoordinateReferenceSystem to) {
         if (from != null && !Proj.equal(to, from)) {
             bbox = Proj.reproject(bbox, from, to);
@@ -546,9 +543,9 @@ public class FeatureHandler extends Handler {
         return m.group(3) != null ? m.group(3) : null;
     }
 
-    Envelope parseBBOX(String bbox) {
+    Bounds parseBBOX(String bbox) {
         String[] split = bbox.split(",");
-        return new Envelope(Double.parseDouble(split[0]), Double.parseDouble(split[2]), 
+        return new Bounds(Double.parseDouble(split[0]), Double.parseDouble(split[2]),
             Double.parseDouble(split[1]), Double.parseDouble(split[3]));
     }
 

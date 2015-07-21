@@ -23,6 +23,7 @@ import java.util.Collections;
 import java.util.List;
 
 import io.jeo.data.Dataset;
+import io.jeo.geom.Bounds;
 import io.jeo.map.Colorizer;
 import io.jeo.map.Layer;
 import io.jeo.map.Map;
@@ -43,7 +44,6 @@ import io.jeo.util.Function;
 import io.jeo.vector.Feature;
 import io.jeo.filter.Filter;
 import io.jeo.filter.Filters;
-import io.jeo.geom.Envelopes;
 import io.jeo.geom.Geom;
 import io.jeo.proj.Proj;
 import io.jeo.util.Rect;
@@ -53,7 +53,6 @@ import org.osgeo.proj4j.CoordinateReferenceSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 
 /**
@@ -148,7 +147,7 @@ public abstract class BaseRenderer implements Renderer {
         }
     }
 
-    protected Envelope reproject(VectorQuery q, Envelope bbox, Dataset data) throws IOException {
+    protected Bounds reproject(VectorQuery q, Bounds bbox, Dataset data) throws IOException {
         CoordinateReferenceSystem crs = data.crs();
 
         // reproject
@@ -177,7 +176,7 @@ public abstract class BaseRenderer implements Renderer {
         VectorQuery q = new VectorQuery();
 
         // bounds, we may have to reproject it
-        Envelope bbox = reproject(q, view.getBounds(), data);
+        Bounds bbox = reproject(q, view.getBounds(), data);
         
         q.bounds(bbox);
         if (filter != null) {
@@ -218,7 +217,7 @@ public abstract class BaseRenderer implements Renderer {
 
         // map the result to position on the screen to determine size
         // of raster to read
-        Envelope bbox = data.bounds();
+        Bounds bbox = data.bounds();
         if (view.getCRS() != null) {
             CoordinateReferenceSystem crs = data.crs();
             if (!Proj.equal(view.getCRS(), data.crs())) {
@@ -407,7 +406,7 @@ public abstract class BaseRenderer implements Renderer {
     protected Geometry clipGeometry(Geometry g) {
         // TODO: doing a full intersection is sub-optimal, look at a more efficient clipping 
         // algorithm, like cohen-sutherland
-        return g.intersection(Envelopes.toPolygon(view.getBounds()));
+        return g.intersection(view.getBounds().polygon());
     }
 
     /**

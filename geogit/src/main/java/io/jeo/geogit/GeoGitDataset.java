@@ -36,7 +36,6 @@ import io.jeo.data.Transactional;
 import io.jeo.vector.FeatureCursor;
 import io.jeo.vector.VectorDataset;
 import io.jeo.vector.Schema;
-import io.jeo.geom.Envelopes;
 import io.jeo.util.Key;
 import io.jeo.util.Pair;
 import io.jeo.vector.VectorQuery;

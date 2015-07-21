@@ -31,13 +31,13 @@ import java.util.regex.Pattern;
 
 import io.jeo.data.Cursor;
 import io.jeo.data.Dataset;
+import io.jeo.geom.Bounds;
 import io.jeo.tile.Tile;
 import io.jeo.tile.TileDataset;
 import io.jeo.tile.TileGrid;
 import io.jeo.tile.TilePyramid;
 import io.jeo.tile.TilePyramid.Origin;
 import io.jeo.data.Workspace;
-import io.jeo.geom.Envelopes;
 import io.jeo.nano.NanoHTTPD.Response;
 import io.jeo.util.Pair;
 
@@ -129,9 +129,9 @@ public class TileHandler extends Handler {
         Map<String,String> vars = new HashMap<String, String>();
         vars.put("name", layer.name());
         vars.put("path", createPath(request));
-        vars.put("max_bbox", Envelopes.toString(layer.bounds()));
+        vars.put("max_bbox", Bounds.toString(layer.bounds()));
         
-        vars.put("bbox", Envelopes.toString(layer.pyramid().bounds(tile)));
+        vars.put("bbox", Bounds.toString(layer.pyramid().bounds(tile)));
 
         return new Response(HTTP_OK, MIME_HTML, renderTemplate("tile.html", vars));
     }

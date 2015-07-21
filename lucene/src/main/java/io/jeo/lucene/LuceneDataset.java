@@ -20,9 +20,9 @@ import com.spatial4j.core.shape.Rectangle;
 import com.spatial4j.core.shape.Shape;
 import com.spatial4j.core.shape.jts.JtsGeometry;
 import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
+import io.jeo.geom.Bounds;
 import io.jeo.vector.FeatureAppendCursor;
 import io.jeo.vector.FeatureCursor;
 import io.jeo.vector.FeatureWriteCursor;
@@ -50,7 +50,6 @@ import io.jeo.data.FileData;
 import io.jeo.filter.Filter;
 import io.jeo.filter.FilterSplitter;
 import io.jeo.filter.Filters;
-import io.jeo.geom.Envelopes;
 import io.jeo.proj.Proj;
 import io.jeo.util.Key;
 import io.jeo.util.Optional;
@@ -124,7 +123,7 @@ public class LuceneDataset implements VectorDataset, FileData {
     }
 
     @Override
-    public Envelope bounds() throws IOException {
+    public Bounds bounds() throws IOException {
         return read(new VectorQuery()).bounds();
     }
 
@@ -189,8 +188,8 @@ public class LuceneDataset implements VectorDataset, FileData {
     Query createQuery(VectorQuery q, VectorQueryPlan qp) throws IOException {
         BooleanQuery lq = new BooleanQuery();
 
-        Envelope bounds = q.bounds();
-        if (!Envelopes.isNull(bounds)) {
+        Bounds bounds = q.bounds();
+        if (!Bounds.isNull(bounds)) {
             Rectangle rect =
                 ctx().makeRectangle(bounds.getMinX(), bounds.getMaxX(), bounds.getMinY(), bounds.getMaxY());
             Query spatial = null;
@@ -354,6 +353,6 @@ public class LuceneDataset implements VectorDataset, FileData {
         }
 
         Rectangle box = shp.getBoundingBox();
-        return gf.toGeometry(new Envelope(box.getMinX(), box.getMaxX(), box.getMinY(), box.getMaxY()));
+        return gf.toGeometry(new Bounds(box.getMinX(), box.getMaxX(), box.getMinY(), box.getMaxY()));
     }
 }

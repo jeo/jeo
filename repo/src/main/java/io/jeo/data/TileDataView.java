@@ -19,9 +19,7 @@ import java.util.List;
 
 import io.jeo.Pending;
 
-import com.vividsolutions.jts.geom.Envelope;
-import io.jeo.data.Cursor;
-import io.jeo.data.Disposable;
+import io.jeo.geom.Bounds;
 import io.jeo.tile.Tile;
 import io.jeo.tile.TileDataset;
 import io.jeo.tile.TileGrid;
@@ -44,11 +42,11 @@ public class TileDataView implements Disposable {
         return i < grids.size() ? grids.get(i) : null;
     }
 
-    public Cursor<Tile> cursor(Envelope bbox, int width, int height) throws IOException {
+    public Cursor<Tile> cursor(Bounds bbox, int width, int height) throws IOException {
         return tiles.pyramid().cover(bbox, width, height).cursor(tiles);
     }
     
-    public Cursor<Tile> cursor(Envelope bbox, double resx, double resy) throws IOException {
+    public Cursor<Tile> cursor(Bounds bbox, double resx, double resy) throws IOException {
         return tiles.pyramid().cover(bbox, resx, resy).cursor(tiles);
     }
 

@@ -14,13 +14,12 @@
  */
 package io.jeo.solr;
 
-import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 import io.jeo.data.Driver;
 import io.jeo.filter.Filter;
 import io.jeo.filter.FilterSplitter;
 import io.jeo.filter.Filters;
-import io.jeo.geom.Envelopes;
+import io.jeo.geom.Bounds;
 import io.jeo.proj.Proj;
 import io.jeo.util.Key;
 import io.jeo.util.Pair;
@@ -136,7 +135,7 @@ public class SolrDataset implements VectorDataset {
     }
 
     @Override
-    public Envelope bounds() throws IOException {
+    public Bounds bounds() throws IOException {
         return read(VectorQuery.all()).bounds();
     }
 
@@ -214,8 +213,8 @@ public class SolrDataset implements VectorDataset {
     }
 
     void encodeQuery(SolrQuery sq, VectorQuery q, VectorQueryPlan qp) throws IOException {
-        if (!Envelopes.isNull(q.bounds())) {
-            Envelope e = q.bounds();
+        if (!Bounds.isNull(q.bounds())) {
+            Bounds e = q.bounds();
             for (Field fld : schema()) {
                 if (fld.geometry()) {
                     sq.addFilterQuery(format(Locale.ROOT, "%s:\"Intersects(ENVELOPE(%f, %f, %f, %f))\"",

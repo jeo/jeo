@@ -21,9 +21,9 @@ import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import io.jeo.geom.Bounds;
 import io.jeo.vector.Feature;
 import io.jeo.geom.CoordinatePath;
-import io.jeo.geom.Envelopes;
 import io.jeo.map.RGB;
 import io.jeo.map.Rule;
 import io.jeo.map.RuleList;
@@ -479,14 +479,14 @@ public class SVGRenderer extends BaseRenderer implements Labeller {
         float height = text.font.size;
         float width = (float) (text.value.length() * height * 0.5);
 
-        Envelope bbox = new Envelope(anchor.x, anchor.x + width, anchor.y, anchor.y + height);
+        Bounds bbox = new Bounds(anchor.x, anchor.x + width, anchor.y, anchor.y + height);
 
         switch(text.anchor) {
         case middle:
-            bbox = Envelopes.translate(bbox, -width/2f, 0);
+            bbox = bbox.shift(-width / 2f, 0);
             break;
         case end:
-            bbox = Envelopes.translate(bbox, -width, 0);
+            bbox = bbox.shift(-width, 0);
             break;
         }
 

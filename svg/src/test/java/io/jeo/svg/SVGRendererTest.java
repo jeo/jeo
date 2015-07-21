@@ -5,10 +5,10 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 
+import io.jeo.geom.Bounds;
 import org.apache.commons.io.FileUtils;
 import io.jeo.TestData;
 import io.jeo.filter.Property;
-import io.jeo.geom.Envelopes;
 import io.jeo.map.Map;
 import io.jeo.map.RGB;
 import io.jeo.map.Style;
@@ -17,8 +17,6 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestName;
-
-import com.vividsolutions.jts.geom.Envelope;
 
 import static io.jeo.map.CartoCSS.*;
 
@@ -57,7 +55,7 @@ public class SVGRendererTest {
                 .set(TEXT_DY, 5)
                 .style();
 
-        Envelope bbox = Envelopes.scale(TestData.point().bounds(), 1.5);
+        Bounds bbox = TestData.point().bounds().scale(1.5);
         View v = Map.build().layer(TestData.point()).style(s).bounds(bbox).size(256,256).view();
         r.init(v, null);
         r.render(output);
@@ -77,7 +75,7 @@ public class SVGRendererTest {
                 .set(TEXT_DY, 5)
                 .style();
 
-        Envelope bbox = Envelopes.scale(TestData.point().bounds(), 1.5);
+        Bounds bbox = TestData.point().bounds().scale(1.5);
         View v = Map.build().layer(TestData.point()).style(s).bounds(bbox).size(256,256).view();
         r.init(v, null);
         r.render(output);

@@ -22,13 +22,12 @@ import io.jeo.data.Dataset;
 import io.jeo.data.Drivers;
 import io.jeo.data.Workspace;
 import io.jeo.data.mem.MemVectorDataset;
+import io.jeo.geom.Bounds;
 import io.jeo.vector.Feature;
 import io.jeo.filter.Filter;
 import org.osgeo.proj4j.CoordinateReferenceSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.vividsolutions.jts.geom.Envelope;
 
 public class MapBuilder {
 
@@ -51,14 +50,14 @@ public class MapBuilder {
         return this;
     }
 
-    public MapBuilder bounds(Envelope bounds) {
+    public MapBuilder bounds(Bounds bounds) {
         view.setBounds(bounds);
         this.bounds = true;
         return this;
     }
 
     public MapBuilder bounds(double x1, double y1, double x2, double y2) {
-        return bounds(new Envelope(x1,x2,y1,y2));
+        return bounds(new Bounds(x1,x2,y1,y2));
     }
 
     public MapBuilder crs(CoordinateReferenceSystem crs) {
@@ -156,7 +155,7 @@ public class MapBuilder {
                 Layer l = it.next();
                 try {
                     if (!bounds) {
-                        Envelope e = l.getData().bounds();
+                        Bounds e = l.getData().bounds();
                         if (e != null && !e.isNull()) {
                             view.setBounds(e);
                             bounds = true;
@@ -177,7 +176,7 @@ public class MapBuilder {
 
         if (!size) {
             //set from bounds
-            Envelope e = view.getBounds();
+            Bounds e = view.getBounds();
             if (e != null) {
                 view.setWidth(View.DEFAULT_WIDTH);
                 view.setHeight((int)(view.getWidth() * e.getHeight() / e.getWidth()));

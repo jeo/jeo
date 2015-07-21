@@ -14,7 +14,6 @@
  */
 package io.jeo.nano;
 
-import com.vividsolutions.jts.geom.Envelope;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -29,6 +28,7 @@ import java.util.regex.Pattern;
 import io.jeo.data.Dataset;
 import io.jeo.data.DataRepository;
 import io.jeo.data.Workspace;
+import io.jeo.geom.Bounds;
 import io.jeo.map.CartoCSS;
 import io.jeo.map.Style;
 import static io.jeo.nano.NanoHTTPD.HTTP_BADREQUEST;
@@ -195,13 +195,13 @@ public abstract class Handler {
             return val == null ? null : val.length() == 0 ? null : val.split(",");
         }
 
-        Envelope getBBox() {
+        Bounds getBBox() {
             return getBBox(false);
         }
 
-        Envelope getBBox(boolean flippedAxis) {
+        Bounds getBBox(boolean flippedAxis) {
             String[] bbox = getList("bbox", true);
-            Envelope e = null;
+            Bounds e = null;
             if (bbox != null) {
                 if (bbox.length != 4) {
                     addError("BBOX invalid, must have 4 values");
@@ -225,7 +225,7 @@ public abstract class Handler {
                         if (miny > maxy) {
                             addError("Invalid bbox, miny > maxy");
                         }
-                        e = new Envelope(minx, maxx, miny, maxy);
+                        e = new Bounds(minx, maxx, miny, maxy);
                     } catch (NumberFormatException nfe) {
                         addError("BBOX invalid, bad number");
                     }

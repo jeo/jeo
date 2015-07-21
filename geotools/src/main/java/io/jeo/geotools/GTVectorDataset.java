@@ -14,9 +14,8 @@
  */
 package io.jeo.geotools;
 
-import com.vividsolutions.jts.geom.Envelope;
 import io.jeo.data.Driver;
-import io.jeo.geom.Envelopes;
+import io.jeo.geom.Bounds;
 import io.jeo.util.Key;
 import io.jeo.util.Optional;
 import io.jeo.util.Supplier;
@@ -78,8 +77,8 @@ public class GTVectorDataset implements VectorDataset {
     }
 
     @Override
-    public Envelope bounds() throws IOException {
-        return source.getBounds();
+    public Bounds bounds() throws IOException {
+        return new Bounds(source.getBounds());
     }
 
     @Override
@@ -125,7 +124,7 @@ public class GTVectorDataset implements VectorDataset {
         Query gtq = new Query(name());
 
         if (!q.isAll()) {
-            if (!Envelopes.isNull(q.bounds())) {
+            if (!Bounds.isNull(q.bounds())) {
                 GeometryDescriptor geom = defaultGeom().orElseThrow(new Supplier<RuntimeException>() {
                     @Override
                     public RuntimeException get() {

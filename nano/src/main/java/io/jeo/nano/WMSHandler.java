@@ -14,7 +14,6 @@
  */
 package io.jeo.nano;
 
-import com.vividsolutions.jts.geom.Envelope;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -31,6 +30,7 @@ import io.jeo.data.Workspace;
 import io.jeo.filter.Filter;
 import io.jeo.filter.cql.CQL;
 import io.jeo.filter.cql.ParseException;
+import io.jeo.geom.Bounds;
 import io.jeo.map.MapBuilder;
 import io.jeo.map.Style;
 import io.jeo.map.View;
@@ -71,7 +71,7 @@ public class WMSHandler extends OWSHandler {
 
     // for testing
     NanoHTTPD.Response render(RendererFactory factory, List<Dataset> dataSet, List<Style> styles,
-            CoordinateReferenceSystem crs, Envelope bbox, int width, int height,
+            CoordinateReferenceSystem crs, Bounds bbox, int width, int height,
             String mimeType, List<Filter> filters) throws IOException {
         MapBuilder mb = new MapBuilder();
         ByteArrayOutputStream bout = new ByteArrayOutputStream();
@@ -176,7 +176,7 @@ public class WMSHandler extends OWSHandler {
             xml.element("Title", "WMS");
             writeCRS();
             writeBoundingBox("CRS:84", -180, 180, -90, 90);
-            writeLatLonBoundingBox(new Envelope(-180, 180, -90, 90));
+            writeLatLonBoundingBox(new Bounds(-180, 180, -90, 90));
             writeStyles();
             writeLayers();
             xml.end("Layer");
@@ -253,14 +253,14 @@ public class WMSHandler extends OWSHandler {
             String epsgCode = "EPSG:" + Proj.epsgCode(crs);
             xml.element("CRS", epsgCode);
             xml.element("CRS", "CRS:84");
-            Envelope bbox = lyr.bounds();
+            Bounds bbox = lyr.bounds();
             if (bbox == null) {
                 // @todo another good guess?
-                bbox = new Envelope(-180,180,-90,90);
+                bbox = new Bounds(-180,180,-90,90);
                 LOG.warn(ws.name() + ":" + lyr.name() + " is missing bbox");
             }
 
-            Envelope lonLat =Proj.reproject(bbox, crs, Proj.EPSG_4326);
+            Bounds lonLat =Proj.reproject(bbox, crs, Proj.EPSG_4326);
 
             writeBoundingBox("CRS:84", lonLat.getMinX(), lonLat.getMaxX(), lonLat.getMinY(), lonLat.getMaxY());
             // yay, the flipped bbox
@@ -278,7 +278,7 @@ public class WMSHandler extends OWSHandler {
             return f;
         }
 
-        private void writeLatLonBoundingBox(Envelope bbox) {
+        private void writeLatLonBoundingBox(Bounds bbox) {
             xml.start("EX_GeographicBoundingBox");
             xml.element("westBoundLongitude", bbox.getMinX());
             xml.element("eastBoundLongitude", bbox.getMaxX());
@@ -309,7 +309,7 @@ public class WMSHandler extends OWSHandler {
             String format = getParameter("format", "image/png");
             String filterSpec = getParameter("cql_filter", false);
             CoordinateReferenceSystem crs = getCRS();
-            Envelope bbox = null;
+            Bounds bbox = null;
             List<Filter> filters = new ArrayList<Filter>(3);
 
             if (crs != null) {

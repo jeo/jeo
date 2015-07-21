@@ -30,8 +30,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import io.jeo.data.Cursor;
 import io.jeo.data.Driver;
+import io.jeo.geom.Bounds;
 import io.jeo.vector.FeatureAppendCursor;
 import io.jeo.vector.FeatureCursor;
 import io.jeo.vector.FeatureWriteCursor;
@@ -43,7 +43,6 @@ import io.jeo.vector.Field;
 import io.jeo.vector.Schema;
 import io.jeo.filter.Filter;
 import io.jeo.filter.Filters;
-import io.jeo.geom.Envelopes;
 import io.jeo.sql.DbOP;
 import io.jeo.sql.FilterSQLEncoder;
 import io.jeo.sql.PrimaryKey;
@@ -55,7 +54,6 @@ import io.jeo.util.Pair;
 import io.jeo.util.Util;
 import org.osgeo.proj4j.CoordinateReferenceSystem;
 
-import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Polygon;
 import com.vividsolutions.jts.io.WKBReader;
@@ -103,14 +101,14 @@ public class PostGISDataset implements VectorDataset {
     }
 
     @Override
-    public Envelope bounds() throws IOException {
+    public Bounds bounds() throws IOException {
         if (schema().geometry() == null) {
             return null;
         }
 
-        return pg.run(new DbOP<Envelope>() {
+        return pg.run(new DbOP<Bounds>() {
             @Override
-            protected Envelope doRun(Connection cx) throws Exception {
+            protected Bounds doRun(Connection cx) throws Exception {
                 Schema schema = schema();
 
                 String sql = new SQL("SELECT st_asbinary(st_force_2d(st_extent(")
@@ -122,7 +120,7 @@ public class PostGISDataset implements VectorDataset {
                 rs.next();
 
                 byte[] wkb = rs.getBytes(1);
-                return new WKBReader().read(wkb).getEnvelopeInternal();
+                return new Bounds(new WKBReader().read(wkb).getEnvelopeInternal());
             }
         });
     }
@@ -262,13 +260,13 @@ public class PostGISDataset implements VectorDataset {
     void encodeQuery(SQL sql, VectorQuery q, VectorQueryPlan qp, List<Pair<Object,Integer>> args) {
         Schema schema = schema();
 
-        if (schema.geometry() != null && !Envelopes.isNull(q.bounds())) {
+        if (schema.geometry() != null && !Bounds.isNull(q.bounds())) {
             qp.bounded();
 
             String geom = schema.geometry().name();
             Integer srid = schema.geometry().property("srid", Integer.class);
             
-            Polygon poly = Envelopes.toPolygon(q.bounds());
+            Polygon poly = q.bounds().polygon();
 
             sql.add(" WHERE ").name(geom).add(" && ST_GeomFromText(?, ?)");
                //.add(" AND ST_Intersects(").name(geom).add(", ST_GeomFromText(?, ?))");

@@ -21,7 +21,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import io.jeo.geom.Envelopes;
+import com.vividsolutions.jts.geom.Envelope;
+import io.jeo.geom.Bounds;
 import io.jeo.vector.DiffFeature;
 import io.jeo.vector.FeatureAppendCursor;
 import io.jeo.vector.FeatureCursor;
@@ -35,7 +36,6 @@ import io.jeo.vector.Schema;
 import io.jeo.util.Key;
 import org.osgeo.proj4j.CoordinateReferenceSystem;
 
-import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.index.SpatialIndex;
 import com.vividsolutions.jts.index.quadtree.Quadtree;
@@ -78,12 +78,12 @@ public class MemVectorDataset implements VectorDataset {
     }
     
     @Override
-    public Envelope bounds() throws IOException {
+    public Bounds bounds() throws IOException {
         if (schema.geometry() == null) {
             return null;
         }
-    
-        Envelope e = new Envelope();
+
+        Bounds e = new Bounds();
         e.setToNull();
     
         if (features.isEmpty()) {
@@ -115,7 +115,7 @@ public class MemVectorDataset implements VectorDataset {
         VectorQueryPlan qp = new VectorQueryPlan(q);
 
         Iterable<Feature> features = features();
-        if (!Envelopes.isNull(q.bounds())) {
+        if (!Bounds.isNull(q.bounds())) {
             features = query(q.bounds());
             qp.bounded();
         }

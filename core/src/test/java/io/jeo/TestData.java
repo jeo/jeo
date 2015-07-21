@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.util.Arrays;
 
 import com.vividsolutions.jts.geom.*;
+import io.jeo.geom.Bounds;
 import io.jeo.raster.Band;
 import io.jeo.raster.RasterDataset;
 import io.jeo.data.mem.MemRasterDataset;
@@ -222,7 +223,7 @@ public class TestData {
      */
     public static RasterDataset dem() throws IOException {
         MemRasterDataset dem =
-            new MemRasterDataset("dem", new Envelope(589980.0, 609000.0, 4913700.0, 4928010.0), Proj.crs("epsg:26713"));
+            new MemRasterDataset("dem", new Bounds(589980.0, 609000.0, 4913700.0, 4928010.0), Proj.crs("epsg:26713"));
         dem.addBand("1", Band.Color.GRAY, DataType.FLOAT, new float[][]{
             {1099, 1234, 1177, 1157, 1148, 1122, 1121, 1234, 1124, 1188},
             {1116, 1158, 1182, 1191, 1171, 1142, 1214, 1205, 1133, 1098},
@@ -243,7 +244,7 @@ public class TestData {
      *  1 pure blue pixel (0,1) and a gray pixel (1,1).
      */
     public static RasterDataset rgb() throws IOException {
-        MemRasterDataset rgb = new MemRasterDataset("rgb", new Envelope(-180,180,-90,90), Proj.EPSG_4326);
+        MemRasterDataset rgb = new MemRasterDataset("rgb", new Bounds(-180,180,-90,90), Proj.EPSG_4326);
         rgb.addBand("red", Band.Color.RED, DataType.BYTE, new byte[][]{
             {(byte)0xff, 0},
             {0, (byte) 0x80},

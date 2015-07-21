@@ -14,11 +14,11 @@
  */
 package io.jeo.mongo;
 
+import io.jeo.geom.Bounds;
 import io.jeo.vector.Feature;
 
 import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
-import com.vividsolutions.jts.geom.Envelope;
 
 /**
  * Strategy interface for mapping documents in a mongo collection to features.
@@ -40,10 +40,10 @@ public interface MongoMapper {
     /**
      * Computes the bounding box of a mongo collection. 
      */
-    Envelope bbox(DBCollection dbcol, MongoDataset data);
+    Bounds bbox(DBCollection dbcol, MongoDataset data);
 
     /**
      * Encodes a bounding box query.
      */
-    DBObject query(Envelope bbox, MongoDataset data);
+    DBObject query(Bounds bbox, MongoDataset data);
 }

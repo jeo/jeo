@@ -30,6 +30,7 @@ import io.jeo.data.Cursor;
 import io.jeo.data.Dataset;
 import io.jeo.data.FileData;
 import io.jeo.data.Handle;
+import io.jeo.geom.Bounds;
 import io.jeo.vector.FeatureCursor;
 import io.jeo.vector.VectorQuery;
 import io.jeo.vector.VectorQueryPlan;
@@ -42,7 +43,6 @@ import io.jeo.vector.Features;
 import io.jeo.vector.Field;
 import io.jeo.vector.Schema;
 import io.jeo.filter.Filters;
-import io.jeo.geom.Envelopes;
 import io.jeo.geom.Geom;
 import io.jeo.geopkg.Entry.DataType;
 import io.jeo.proj.Proj;
@@ -218,7 +218,7 @@ public class GeoPkgWorkspace implements Workspace, FileData {
     public long count(final FeatureEntry entry, final VectorQuery q) throws IOException {
         VectorQueryPlan qp = new VectorQueryPlan(q);
 
-        if (!Envelopes.isNull(q.bounds())) {
+        if (!Bounds.isNull(q.bounds())) {
             return read(entry, q).count();
         }
 
@@ -299,7 +299,7 @@ public class GeoPkgWorkspace implements Workspace, FileData {
         FeatureCursor c = new GeoPkgFeatureCursor(session, rs, entry, this, schema, pk, queryFields)
             .closeSession(closeSession);
 
-        if (!Envelopes.isNull(q.bounds())) {
+        if (!Bounds.isNull(q.bounds())) {
             c = c.intersect(q.bounds(), true);
         }
 

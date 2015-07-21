@@ -17,9 +17,8 @@ package io.jeo.data;
 import java.io.IOException;
 import java.util.Locale;
 
+import io.jeo.geom.Bounds;
 import org.osgeo.proj4j.CoordinateReferenceSystem;
-
-import com.vividsolutions.jts.geom.Envelope;
 
 /**
  * Reference to a data object.
@@ -58,7 +57,7 @@ public abstract class Handle<T> implements Disposable {
     /**
      * object bounding box
      */
-    protected Envelope bounds;
+    protected Bounds bounds;
 
     /**
      * object type
@@ -129,7 +128,7 @@ public abstract class Handle<T> implements Disposable {
     /**
      * Returns the bounds of the data object resolving the handle if necessary.
      */
-    public Envelope bounds() throws IOException {
+    public Bounds bounds() throws IOException {
         if (bounds == null) {
             if (Dataset.class.isAssignableFrom(type)) {
 

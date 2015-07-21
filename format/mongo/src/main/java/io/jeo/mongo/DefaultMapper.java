@@ -14,8 +14,8 @@
  */
 package io.jeo.mongo;
 
+import io.jeo.geom.Bounds;
 import io.jeo.vector.Feature;
-import io.jeo.geom.Envelopes;
 
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
@@ -24,7 +24,6 @@ import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
 import com.mongodb.MapReduceCommand;
 import com.mongodb.MapReduceCommand.OutputType;
-import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Polygon;
 
 /**
@@ -68,20 +67,20 @@ public class DefaultMapper implements MongoMapper {
     }
 
     @Override
-    public Envelope bbox(DBCollection dbcol, MongoDataset data) {
+    public Bounds bbox(DBCollection dbcol, MongoDataset data) {
         MapReduceCommand mr = new MapReduceCommand(
             dbcol, bboxMap, bboxReduce, null, OutputType.INLINE, new BasicDBObject());
 
         BasicDBList list = (BasicDBList) dbcol.mapReduce(mr).getCommandResult().get("results");
         DBObject bbox = (DBObject) ((DBObject) list.get(0)).get("value");
 
-        return new Envelope((Double)bbox.get("x1"), (Double)bbox.get("x2"), 
+        return new Bounds((Double)bbox.get("x1"), (Double)bbox.get("x2"),
             (Double)bbox.get("y1"), (Double)bbox.get("y2"));
     }
 
     @Override
-    public DBObject query(Envelope bbox, MongoDataset data) {
-        Polygon p = Envelopes.toPolygon(bbox);
+    public DBObject query(Bounds bbox, MongoDataset data) {
+        Polygon p = bbox.polygon();
         return BasicDBObjectBuilder.start().push(mapping.geometry().join()).push("$geoIntersects")
             .append("$geometry", GeoJSON.toObject(p)).get();
     }

@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 
 import io.jeo.data.FileData;
+import io.jeo.geom.Bounds;
 import io.jeo.util.Key;
 import io.jeo.util.Util;
 import io.jeo.vector.Feature;
@@ -37,7 +38,6 @@ import io.jeo.vector.VectorQueryPlan;
 import org.osgeo.proj4j.CoordinateReferenceSystem;
 
 import com.csvreader.CsvReader;
-import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 
 public class CSVDataset implements VectorDataset, FileData {
@@ -121,7 +121,7 @@ public class CSVDataset implements VectorDataset, FileData {
     }
 
     @Override
-    public Envelope bounds() throws IOException {
+    public Bounds bounds() throws IOException {
         return read(new VectorQuery()).bounds();
     }
 

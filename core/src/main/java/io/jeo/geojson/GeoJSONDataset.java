@@ -26,6 +26,7 @@ import java.util.Map;
 import io.jeo.data.Driver;
 import io.jeo.data.FileData;
 import io.jeo.geojson.parser.CRSFinder;
+import io.jeo.geom.Bounds;
 import io.jeo.json.parser.ParseException;
 import io.jeo.util.Util;
 import io.jeo.vector.FeatureAppendCursor;
@@ -41,8 +42,6 @@ import io.jeo.vector.Schema;
 import io.jeo.vector.VectorDataset;
 import io.jeo.vector.VectorQuery;
 import org.osgeo.proj4j.CoordinateReferenceSystem;
-
-import com.vividsolutions.jts.geom.Envelope;
 
 public class GeoJSONDataset implements VectorDataset, FileData {
 
@@ -104,7 +103,7 @@ public class GeoJSONDataset implements VectorDataset, FileData {
     }
 
     @Override
-    public Envelope bounds() throws IOException {
+    public Bounds bounds() throws IOException {
         return read(new VectorQuery()).bounds();
     }
 

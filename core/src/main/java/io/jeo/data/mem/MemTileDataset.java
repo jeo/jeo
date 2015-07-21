@@ -21,14 +21,13 @@ import java.util.Map;
 
 import io.jeo.data.Cursor;
 import io.jeo.data.Driver;
+import io.jeo.geom.Bounds;
 import io.jeo.tile.Tile;
 import io.jeo.tile.TileDataset;
 import io.jeo.tile.TileGrid;
 import io.jeo.tile.TilePyramid;
 import io.jeo.util.Key;
 import org.osgeo.proj4j.CoordinateReferenceSystem;
-
-import com.vividsolutions.jts.geom.Envelope;
 
 public class MemTileDataset implements TileDataset {
 
@@ -63,7 +62,7 @@ public class MemTileDataset implements TileDataset {
     }
 
     @Override
-    public Envelope bounds() throws IOException {
+    public Bounds bounds() throws IOException {
         return pyramid.bounds();
     }
 

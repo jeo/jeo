@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.Map;
 
+import io.jeo.geom.Bounds;
 import io.jeo.vector.FeatureAppendCursor;
 import io.jeo.vector.FeatureCursor;
 import io.jeo.vector.FeatureWriteCursor;
@@ -34,7 +35,6 @@ import io.jeo.vector.VectorQueryPlan;
 import io.jeo.vector.VectorDataset;
 import io.jeo.vector.Schema;
 import io.jeo.vector.SchemaBuilder;
-import io.jeo.geom.Envelopes;
 import io.jeo.proj.Proj;
 import io.jeo.util.Key;
 import io.jeo.util.Pair;
@@ -42,7 +42,6 @@ import org.osgeo.proj4j.CoordinateReferenceSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryCollection;
 import com.vividsolutions.jts.geom.LinearRing;
@@ -257,11 +256,11 @@ public class OGRDataset implements VectorDataset, FileData {
     }
     
     @Override
-    public Envelope bounds() throws IOException {
+    public Bounds bounds() throws IOException {
         Pair<Layer,DataSource> data = open();
         try {
             double[] d = data.first.GetExtent(true);
-            return new Envelope(d[0], d[1], d[2], d[3]);
+            return new Bounds(d[0], d[1], d[2], d[3]);
         }
         catch(Exception e) {
             throw new IOException("Error calculating bounds", e);
@@ -278,8 +277,8 @@ public class OGRDataset implements VectorDataset, FileData {
         try {
             Layer l = data.first;
 
-            if (!Envelopes.isNull(q.bounds())) {
-                Envelope bb = q.bounds();
+            if (!Bounds.isNull(q.bounds())) {
+                Bounds bb = q.bounds();
                 l.SetSpatialFilterRect(bb.getMinX(), bb.getMinY(), bb.getMaxX(), bb.getMaxY());
             }
 
@@ -306,8 +305,8 @@ public class OGRDataset implements VectorDataset, FileData {
         Layer l = data.first;
 
         VectorQueryPlan qp = new VectorQueryPlan(q);
-        if (!Envelopes.isNull(q.bounds())) {
-            Envelope bb = q.bounds();
+        if (!Bounds.isNull(q.bounds())) {
+            Bounds bb = q.bounds();
             l.SetSpatialFilterRect(bb.getMinX(), bb.getMinY(), bb.getMaxX(), bb.getMaxY());
             qp.bounded();
         }

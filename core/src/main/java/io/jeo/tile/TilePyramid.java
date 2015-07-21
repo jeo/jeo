@@ -21,11 +21,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
+import io.jeo.geom.Bounds;
 import io.jeo.util.Pair;
 import io.jeo.proj.Proj;
 import org.osgeo.proj4j.CoordinateReferenceSystem;
-
-import com.vividsolutions.jts.geom.Envelope;
 
 /**
  * Represents a multi level structure of tiles.
@@ -51,7 +50,7 @@ public class TilePyramid {
     }
 
     CoordinateReferenceSystem crs = Proj.EPSG_4326;
-    Envelope bounds = new Envelope(-180,180,-90,90);
+    Bounds bounds = new Bounds(-180,180,-90,90);
     List<TileGrid> grids = new ArrayList<TileGrid>();
     Origin origin = Origin.BOTTOM_LEFT;
     Integer tileWidth = 256;
@@ -67,14 +66,14 @@ public class TilePyramid {
     /**
      * The spatial extent of the tile pyramid.
      */
-    public Envelope bounds() {
+    public Bounds bounds() {
         return bounds;
     }
 
     /**
      * Sets the spatial extent of the tile pyramid.
      */
-    public TilePyramid bounds(Envelope bounds) {
+    public TilePyramid bounds(Bounds bounds) {
         this.bounds = bounds;
         return this;
     }
@@ -177,7 +176,7 @@ public class TilePyramid {
      * 
      * @throws IllegalArgumentException If the tile has a z value not defined by the pyramid. 
      */
-    public Envelope bounds(Tile t) {
+    public Bounds bounds(Tile t) {
         TileGrid grid = grid(t.z());
         if (grid == null) {
             throw new IllegalArgumentException(String.format(Locale.ROOT,"no grid at zoom %d", t.z()));
@@ -186,7 +185,7 @@ public class TilePyramid {
         int w = grid.width();
         int h = grid.height();
 
-        Envelope b = bounds;
+        Bounds b = bounds;
         
         double dx = b.getWidth() / ((double)w);
         double dy = b.getHeight() / ((double)h);
@@ -211,7 +210,7 @@ public class TilePyramid {
             y = b.getMinY() + dy*(h - t.y());
         }
 
-        return new Envelope(x, x+dx, y, y+dx);
+        return new Bounds(x, x+dx, y, y+dx);
     }
 
     /**
@@ -275,7 +274,7 @@ public class TilePyramid {
      * Creates a tile cover for the specified bounds using the specified width, height to 
      * determine the appropriate tile resolution.
      */
-    public TileCover cover(Envelope e, int width, int height) {
+    public TileCover cover(Bounds e, int width, int height) {
         Pair<Double,Double> res = res(e, width, height);
         return cover(e, res.first, res.second);
     }
@@ -283,14 +282,14 @@ public class TilePyramid {
     /**
      * Creates a tile cover for the specified bounds at the specified resolutions.
      */
-    public TileCover cover(Envelope e, double resx, double resy) {
+    public TileCover cover(Bounds e, double resx, double resy) {
         return cover(e, match(e, resx, resy));
     }
 
     /**
      * Creates a tile cover for the specified bounds at the specified zoom level.
      */
-    public TileCover cover(Envelope e, int z) {
+    public TileCover cover(Bounds e, int z) {
         TileGrid grid = grid(z);
         return grid != null ? cover(e, grid) : null;
     }
@@ -298,7 +297,7 @@ public class TilePyramid {
     /**
      * Creates a tile cover for the specified bounds at the tile grid.
      */
-    public TileCover cover(Envelope e, TileGrid grid) {
+    public TileCover cover(Bounds e, TileGrid grid) {
         int[] cov = cov(e, grid);
         if (cov == null) {
             return null;
@@ -307,13 +306,13 @@ public class TilePyramid {
         return new TileCover(grid, cov[0], cov[2], cov[1], cov[3]);
     }
 
-    Pair<Double,Double> res(Envelope bbox, int width, int height) {
+    Pair<Double,Double> res(Bounds bbox, int width, int height) {
         double resx = bbox.getWidth() / ((double)width);
         double resy = bbox.getHeight() / ((double)height);
         return new Pair<Double,Double>(resx, resy);
     }
 
-    TileGrid match(Envelope bbox, double resx, double resy) {
+    TileGrid match(Bounds bbox, double resx, double resy) {
         TileGrid best = null;
         double score = Double.MAX_VALUE;
         for (TileGrid grid : grids) {
@@ -331,7 +330,7 @@ public class TilePyramid {
         return best;
     }
     
-    int[] cov(Envelope bbox, TileGrid grid) {
+    int[] cov(Bounds bbox, TileGrid grid) {
         int x1 = (int) 
             floor((((bbox.getMinX() - bounds.getMinX()) / bounds.getWidth()) * grid.width()));
         int x2 = (int) 

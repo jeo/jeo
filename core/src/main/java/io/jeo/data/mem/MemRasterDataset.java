@@ -14,8 +14,7 @@
  */
 package io.jeo.data.mem;
 
-import com.vividsolutions.jts.geom.Envelope;
-
+import io.jeo.geom.Bounds;
 import io.jeo.raster.Band;
 import io.jeo.raster.Band.Color;
 import io.jeo.data.Driver;
@@ -42,12 +41,12 @@ import java.util.Map;
 public class MemRasterDataset implements RasterDataset {
 
     String name;
-    Envelope bounds;
+    Bounds bounds;
     CoordinateReferenceSystem crs;
 
     List<MemBand> bands = new ArrayList<MemBand>();
 
-    public MemRasterDataset(String name, Envelope bounds, CoordinateReferenceSystem crs) {
+    public MemRasterDataset(String name, Bounds bounds, CoordinateReferenceSystem crs) {
         this.name = name;
         this.bounds = bounds;
         this.crs = crs;
@@ -97,7 +96,7 @@ public class MemRasterDataset implements RasterDataset {
     }
 
     @Override
-    public Envelope bounds() throws IOException {
+    public Bounds bounds() throws IOException {
         return bounds;
     }
 

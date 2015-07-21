@@ -17,12 +17,11 @@ package io.jeo.data;
 import java.io.IOException;
 import java.util.Map;
 
+import io.jeo.geom.Bounds;
 import io.jeo.tile.TileDataset;
 import io.jeo.vector.VectorDataset;
 import io.jeo.util.Key;
 import org.osgeo.proj4j.CoordinateReferenceSystem;
-
-import com.vividsolutions.jts.geom.Envelope;
 
 /**
  * A geospatial dataset.
@@ -67,8 +66,8 @@ public interface Dataset extends Disposable {
      * The extent of the dataset in its native coordinate reference system.
      * <p>
      * In the event the layer is empty this method should return an null envelope with 
-     * {@link Envelope#setToNull()}.
+     * {@link Bounds#setToNull()}.
      * </p>
      */
-    Envelope bounds() throws IOException;
+    Bounds bounds() throws IOException;
 }

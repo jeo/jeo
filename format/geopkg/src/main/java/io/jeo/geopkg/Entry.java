@@ -20,7 +20,7 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
 
-import com.vividsolutions.jts.geom.Envelope;
+import io.jeo.geom.Bounds;
 
 /**
  * Entry in a geopackage.
@@ -57,7 +57,7 @@ public class Entry {
     protected String identifier;
     protected String description;
     protected String lastChange;
-    protected Envelope bounds;
+    protected Bounds bounds;
     protected Integer srid;
 
     public String getTableName() {
@@ -112,11 +112,11 @@ public class Entry {
         lastChange = dateFormat().format(date);
     }
 
-    public Envelope getBounds() {
+    public Bounds getBounds() {
         return bounds;
     }
 
-    public void setBounds(Envelope bounds) {
+    public void setBounds(Bounds bounds) {
         this.bounds = bounds;
     }
 

@@ -14,8 +14,9 @@
  */
 package io.jeo.geopkg;
 
-import com.vividsolutions.jts.geom.Envelope;
 import java.io.IOException;
+
+import io.jeo.geom.Bounds;
 import io.jeo.geom.Geom;
 import io.jeo.sql.DbTypes;
 
@@ -47,8 +48,7 @@ public abstract class Backend extends io.jeo.sql.Backend {
         e.setIdentifier(rs.getString(2));
         e.setDescription(rs.getString(3));
         e.setLastChange(rs.getString(4));
-        e.setBounds(new Envelope(
-                rs.getDouble(5), rs.getDouble(7), rs.getDouble(6), rs.getDouble(8)));
+        e.setBounds(new Bounds(rs.getDouble(5), rs.getDouble(7), rs.getDouble(6), rs.getDouble(8)));
         e.setSrid(rs.getInt(9));
     }
 }

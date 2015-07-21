@@ -4,7 +4,7 @@ import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.prep.PreparedGeometry;
 import io.jeo.data.Cursor;
-import io.jeo.geom.Envelopes;
+import io.jeo.geom.Bounds;
 import io.jeo.geom.Geom;
 import io.jeo.proj.Proj;
 import io.jeo.util.Function;
@@ -200,7 +200,7 @@ public abstract class FeatureCursor extends Cursor<Feature> {
             }
         };
         if (!loose) {
-            final PreparedGeometry poly = Geom.prepare(Envelopes.toPolygon(bbox));
+            final PreparedGeometry poly = Geom.prepare(Bounds.toPolygon(bbox));
             p = p.and(new Predicate<Geometry>() {
                 @Override
                 public boolean test(Geometry val) {

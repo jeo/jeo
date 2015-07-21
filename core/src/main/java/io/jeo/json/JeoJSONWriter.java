@@ -19,7 +19,7 @@ import io.jeo.data.Dataset;
 import io.jeo.data.Driver;
 import io.jeo.data.Handle;
 import io.jeo.data.Workspace;
-import io.jeo.geom.Envelopes;
+import io.jeo.geom.Bounds;
 import io.jeo.raster.Band;
 import io.jeo.raster.RasterDataset;
 import io.jeo.tile.TileDataset;
@@ -303,7 +303,7 @@ public class JeoJSONWriter extends GeoJSONWriter {
         key("driver").value(ds.driver().name());
 
         Envelope bbox = ds.bounds();
-        if (!Envelopes.isNull(bbox)) {
+        if (!Bounds.isNull(bbox)) {
             key("bbox");
             bbox(bbox);
         }

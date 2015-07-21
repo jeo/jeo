@@ -21,14 +21,13 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
-import io.jeo.data.Cursor;
 import io.jeo.data.Sort;
 import io.jeo.data.Transaction;
 import io.jeo.filter.Filter;
 import io.jeo.filter.Filters;
 import io.jeo.filter.cql.CQL;
 import io.jeo.filter.cql.ParseException;
-import io.jeo.geom.Envelopes;
+import io.jeo.geom.Bounds;
 import io.jeo.proj.Proj;
 import io.jeo.util.Pair;
 import org.osgeo.proj4j.CoordinateReferenceSystem;
@@ -63,7 +62,7 @@ public class VectorQuery {
     /**
      * Spatial bounds of the query.
      */
-    Envelope bounds;
+    Bounds bounds;
 
     /**
      * Filter of the query
@@ -142,7 +141,7 @@ public class VectorQuery {
      * {@link VectorDataset#update(VectorQuery)} operations.
      * </p>
      */
-    public Envelope bounds() {
+    public Bounds bounds() {
         return bounds;
     }
 
@@ -287,10 +286,19 @@ public class VectorQuery {
 
     /**
      * Sets the bounds constraint of the query.
+     *
+     * @return This object.
+     */
+    public VectorQuery bounds(Envelope env) {
+        return bounds(new Bounds(env));
+    }
+
+    /**
+     * Sets the bounds constraint of the query.
      * 
      * @return This object.
      */
-    public VectorQuery bounds(Envelope bounds) {
+    public VectorQuery bounds(Bounds bounds) {
         this.bounds = bounds;
         return this;
     }
@@ -401,7 +409,7 @@ public class VectorQuery {
      * @return True if no bounds or filter constraint is applied, otherwise false.
      */
     public boolean isAll() {
-        return Envelopes.isNull(bounds) && !isFiltered();
+        return Bounds.isNull(bounds) && !isFiltered();
     }
 
     /**

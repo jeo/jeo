@@ -14,9 +14,8 @@
  */
 package io.jeo.data;
 
-import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
-import io.jeo.geom.Envelopes;
+import io.jeo.geom.Bounds;
 import io.jeo.util.Consumer;
 import io.jeo.util.Function;
 import io.jeo.util.Optional;
@@ -176,10 +175,10 @@ public abstract class Cursor<T> implements Closeable, Iterable<T> {
      *
      * TODO: move this to FeatureStream
      */
-    public Envelope bounds() throws IOException {
-        return bounds(new Function<T, Envelope>() {
+    public Bounds bounds() throws IOException {
+        return bounds(new Function<T, Bounds>() {
             @Override
-            public Envelope apply(T obj) {
+            public Bounds apply(T obj) {
                 Geometry g = null;
                 if (obj instanceof Geometry) {
                     g = (Geometry) obj;
@@ -187,7 +186,7 @@ public abstract class Cursor<T> implements Closeable, Iterable<T> {
                     g = ((Feature) obj).geometry();
                 }
                 if (g != null) {
-                    return g.getEnvelopeInternal();
+                    return new Bounds(g.getEnvelopeInternal());
                 }
                 return null;
             }
@@ -199,14 +198,14 @@ public abstract class Cursor<T> implements Closeable, Iterable<T> {
      *
      * @param env Function providing envelopes for objects in the stream.
      */
-    public Envelope bounds(Function<T, Envelope> env) throws IOException {
+    public Bounds bounds(Function<T, Bounds> env) throws IOException {
         try (Cursor<T> c = this) {
-            Envelope extent = new Envelope();
+            Bounds extent = new Bounds();
             extent.setToNull();
 
             while (c.hasNext()) {
-                Envelope e = env.apply(c.next());
-                if (!Envelopes.isNull(e)) {
+                Bounds e = env.apply(c.next());
+                if (!Bounds.isNull(e)) {
                     extent.expandToInclude(e);
                 }
             }

@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.util.Map;
 
 import io.jeo.data.Driver;
+import io.jeo.geom.Bounds;
 import io.jeo.vector.FeatureAppendCursor;
 import io.jeo.vector.FeatureCursor;
 import io.jeo.vector.FeatureWriteCursor;
@@ -27,7 +28,6 @@ import io.jeo.vector.VectorDataset;
 import io.jeo.vector.Schema;
 import io.jeo.vector.SchemaBuilder;
 import io.jeo.filter.Filters;
-import io.jeo.geom.Envelopes;
 import io.jeo.proj.Proj;
 import io.jeo.util.Key;
 import org.osgeo.proj4j.CoordinateReferenceSystem;
@@ -35,8 +35,6 @@ import org.osgeo.proj4j.CoordinateReferenceSystem;
 import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
-import com.vividsolutions.jts.geom.Envelope;
-import com.vividsolutions.jts.geom.Geometry;
 
 public class MongoDataset implements VectorDataset {
 
@@ -88,7 +86,7 @@ public class MongoDataset implements VectorDataset {
     }
 
     @Override
-    public Envelope bounds() throws IOException {
+    public Bounds bounds() throws IOException {
         return mapper().bbox(dbcol, this);
     }
 
@@ -122,7 +120,7 @@ public class MongoDataset implements VectorDataset {
         VectorQueryPlan qp = new VectorQueryPlan(q);
 
         //TODO: sorting
-        DBCursor dbCursor = !Envelopes.isNull(q.bounds()) ?
+        DBCursor dbCursor = !Bounds.isNull(q.bounds()) ?
             dbcol.find(encodeBboxQuery(q.bounds())) : dbcol.find();
         qp.bounded();
 
@@ -141,7 +139,7 @@ public class MongoDataset implements VectorDataset {
         return qp.apply(new MongoCursor(dbCursor, this));
     }
 
-    DBObject encodeBboxQuery(Envelope bbox) {
+    DBObject encodeBboxQuery(Bounds bbox) {
         return mapper().query(bbox, this);
     }
 

@@ -24,7 +24,7 @@ import java.util.Set;
 import com.google.common.collect.Iterators;
 import io.jeo.TestData;
 import io.jeo.data.Cursor;
-import io.jeo.geom.Envelopes;
+import io.jeo.geom.Bounds;
 import io.jeo.geom.Geom;
 import io.jeo.proj.Proj;
 import org.junit.Before;
@@ -32,7 +32,6 @@ import org.junit.Test;
 import org.osgeo.proj4j.CoordinateReferenceSystem;
 
 import com.google.common.base.Predicate;
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Point;
@@ -109,7 +108,7 @@ public abstract class VectorApiTestBase {
 
         // count with spatial filters
         assertEquals(abbrs.size(), data.count(new VectorQuery().filter(String.format(Locale.ROOT,"INTERSECTS(%s, %s)",
-            data.schema().geometry().name(), Envelopes.toPolygon(bbox)))));
+            data.schema().geometry().name(), Bounds.toPolygon(bbox)))));
 
         // count with attribute filters
         assertEquals(1, data.count(new VectorQuery().filter("STATE_NAME = 'Texas'")));
@@ -142,7 +141,7 @@ public abstract class VectorApiTestBase {
 
         // spatial filter
         assertCovered(data.read(new VectorQuery().filter(String.format(Locale.ROOT, "INTERSECTS(%s, %s)",
-                data.schema().geometry().name(), Envelopes.toPolygon(bbox)))),
+                data.schema().geometry().name(), Bounds.toPolygon(bbox)))),
             "MO", "OK", "TX", "NM", "AR", "LA");
 
         // comparison filter

@@ -25,18 +25,16 @@ import java.util.Map;
 import io.jeo.data.Cursor;
 import io.jeo.data.Driver;
 import io.jeo.data.FileData;
+import io.jeo.geom.Bounds;
 import io.jeo.tile.Tile;
 import io.jeo.tile.TileDataset;
 import io.jeo.tile.TilePyramid;
 import io.jeo.tile.TilePyramidBuilder;
-import io.jeo.geom.Envelopes;
 import io.jeo.proj.Proj;
 import io.jeo.util.Key;
 import io.jeo.util.Util;
 import io.jeo.sql.Backend;
 import org.osgeo.proj4j.CoordinateReferenceSystem;
-
-import com.vividsolutions.jts.geom.Envelope;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -152,13 +150,13 @@ public class MBTileSet implements TileDataset, FileData {
     }
 
     @Override
-    public Envelope bounds() throws IOException {
+    public Bounds bounds() throws IOException {
         try {
             String sql = String.format(Locale.ROOT,"SELECT value FROM %s WHERE name = ?", METADATA);
             Backend.Results results = backend.queryPrepared(sql, "bounds");
             try {
                 if (results.next()) {
-                    Envelope b = Envelopes.parse(results.getString(0), true);
+                    Bounds b = Bounds.parse(results.getString(0), true);
                     return b;
                 }
             } finally {

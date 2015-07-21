@@ -23,6 +23,7 @@ import java.util.Map;
 import io.jeo.data.Driver;
 import io.jeo.data.FileData;
 import io.jeo.geobuf.Geobuf.Data.DataTypeCase;
+import io.jeo.geom.Bounds;
 import io.jeo.util.Util;
 import io.jeo.vector.FeatureAppendCursor;
 import io.jeo.vector.FeatureCursor;
@@ -34,8 +35,6 @@ import io.jeo.vector.Schema;
 import io.jeo.util.Key;
 import io.jeo.vector.VectorQueryPlan;
 import org.osgeo.proj4j.CoordinateReferenceSystem;
-
-import com.vividsolutions.jts.geom.Envelope;
 
 public class GeobufDataset implements VectorDataset, FileData {
 
@@ -77,7 +76,7 @@ public class GeobufDataset implements VectorDataset, FileData {
     }
 
     @Override
-    public Envelope bounds() throws IOException {
+    public Bounds bounds() throws IOException {
         return read(new VectorQuery()).bounds();
     }
 

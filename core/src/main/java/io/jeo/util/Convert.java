@@ -20,7 +20,7 @@ import com.vividsolutions.jts.io.ParseException;
 import com.vividsolutions.jts.io.WKTReader;
 
 import io.jeo.geojson.GeoJSONReader;
-import io.jeo.geom.Envelopes;
+import io.jeo.geom.Bounds;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -254,7 +254,7 @@ public class Convert {
         }
         if (obj instanceof Envelope) {
             Envelope env = (Envelope) obj;
-            return Optional.of((Geometry) Envelopes.toPolygon(env));
+            return Optional.of((Geometry) Bounds.toPolygon(env));
         }
         if (obj instanceof String) {
             String str = (String) obj;
@@ -282,7 +282,7 @@ public class Convert {
             return Optional.of((Envelope)obj);
         }
         if (obj instanceof String) {
-            Envelope env = Envelopes.parse(obj.toString());
+            Envelope env = Bounds.parse(obj.toString());
             if (env != null) {
                 return Optional.of(env);
             }

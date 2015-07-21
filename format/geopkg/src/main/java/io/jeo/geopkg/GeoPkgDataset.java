@@ -19,11 +19,10 @@ import java.util.Map;
 
 import io.jeo.data.Dataset;
 import io.jeo.data.Driver;
+import io.jeo.geom.Bounds;
 import io.jeo.proj.Proj;
 import io.jeo.util.Key;
 import org.osgeo.proj4j.CoordinateReferenceSystem;
-
-import com.vividsolutions.jts.geom.Envelope;
 
 public class GeoPkgDataset<T extends Entry> implements Dataset {
 
@@ -67,7 +66,7 @@ public class GeoPkgDataset<T extends Entry> implements Dataset {
     }
     
     @Override
-    public Envelope bounds() throws IOException {
+    public Bounds bounds() throws IOException {
         return entry.getBounds();
     }
 

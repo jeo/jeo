@@ -16,11 +16,9 @@ package io.jeo.tile;
 
 import static org.junit.Assert.*;
 
-import io.jeo.geom.Envelopes;
+import io.jeo.geom.Bounds;
 import org.junit.Before;
 import org.junit.Test;
-
-import com.vividsolutions.jts.geom.Envelope;
 
 public class TilePyramidTest {
 
@@ -58,7 +56,7 @@ public class TilePyramidTest {
 
     @Test
     public void testCover() {
-        Envelope b = tp.bounds();
+        Bounds b = tp.bounds();
 
         TileCover cov = tp.cover(b, 1);
         assertEquals(4, cov.width());
@@ -68,8 +66,7 @@ public class TilePyramidTest {
         assertEquals(3, cov.x1());
         assertEquals(1, cov.y1());
         
-        cov = tp.cover(
-            Envelopes.translate(b, -b.getWidth() / 2f, -b.getHeight() / 2f), 1);
+        cov = tp.cover(Bounds.translate(b, -b.getWidth() / 2f, -b.getHeight() / 2f), 1);
         assertEquals(4, cov.width());
         assertEquals(2, cov.height());
         assertEquals(-2, cov.x0());
@@ -77,7 +74,7 @@ public class TilePyramidTest {
         assertEquals(1, cov.x1());
         assertEquals(0, cov.y1());
 
-        cov = tp.cover(Envelopes.scale(b, 0.1), 1);
+        cov = tp.cover(Bounds.scale(b, 0.1), 1);
         assertEquals(2, cov.width());
         assertEquals(2, cov.height());
         assertEquals(1, cov.x0());
@@ -86,7 +83,7 @@ public class TilePyramidTest {
         assertEquals(1, cov.y1());
     }
 
-    void assertEnvelope(Envelope e, double x1, double y1, double x2, double y2) {
+    void assertEnvelope(Bounds e, double x1, double y1, double x2, double y2) {
         assertEquals(x1, e.getMinX(), 0.1);
         assertEquals(x2, e.getMaxX(), 0.1);
         assertEquals(y1, e.getMinY(), 0.1);

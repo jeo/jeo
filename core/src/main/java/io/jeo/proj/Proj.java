@@ -20,6 +20,8 @@ import java.text.ParseException;
 import java.util.Locale;
 import java.util.regex.Pattern;
 
+import com.vividsolutions.jts.geom.Envelope;
+import io.jeo.geom.Bounds;
 import io.jeo.geom.GeomBuilder;
 import io.jeo.proj.wkt.ProjWKTEncoder;
 import io.jeo.proj.wkt.ProjWKTParser;
@@ -37,7 +39,6 @@ import org.slf4j.LoggerFactory;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.CoordinateSequenceFilter;
-import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Point;
 
@@ -230,7 +231,7 @@ public class Proj {
      * @return An approximate bounds of validity for the crs object, or <code>null</code> if it 
      *  can not be determined.
      */
-    public static Envelope bounds(CoordinateReferenceSystem crs) {
+    public static Bounds bounds(CoordinateReferenceSystem crs) {
         //TODO: this method is wildly inaccurate, find a better way to determine bounds 
         // from a projection/crs        
         Projection p = crs.getProjection();
@@ -243,7 +244,7 @@ public class Proj {
             p1 = reproject(p1, geo, crs);
             p2 = reproject(p2, geo, crs);
 
-            return new Envelope(p1.getX(), p2.getX(), p1.getY(), p2.getY());
+            return new Bounds(p1.getX(), p2.getX(), p1.getY(), p2.getY());
         }
 
         return null;
@@ -350,7 +351,7 @@ public class Proj {
      * @see {@link #reproject(Envelope, CoordinateReferenceSystem, CoordinateReferenceSystem)}
      * 
      */
-    public static Envelope reproject(Envelope e, String from, String to) {
+    public static Bounds reproject(Envelope e, String from, String to) {
         return reproject(e, crs(from), crs(to));
     }
 
@@ -371,12 +372,12 @@ public class Proj {
      * 
      * @throws IllegalArgumentException If no coordinate transform can be found.
      */
-    public static Envelope reproject(Envelope e, CoordinateReferenceSystem from, 
+    public static Bounds reproject(Envelope e, CoordinateReferenceSystem from,
         CoordinateReferenceSystem to) {
         
         CoordinateTransform tx = transform(from, to);
         if (tx instanceof IdentityCoordinateTransform) {
-            return e;
+            return new Bounds(e);
         }
 
         CoordinateTransformer txr = new CoordinateTransformer(tx);
@@ -386,7 +387,7 @@ public class Proj {
         txr.filter(c1);
         txr.filter(c2);
 
-        return new Envelope(c1.x, c2.x, c1.y, c2.y);
+        return new Bounds(c1.x, c2.x, c1.y, c2.y);
     }
 
     public static CoordinateTransform transform(CoordinateReferenceSystem from, 

@@ -14,10 +14,9 @@
  */
 package io.jeo.filter;
 
-import io.jeo.geom.Envelopes;
-
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
+import io.jeo.geom.Bounds;
 
 import java.util.Locale;
 import java.util.Objects;
@@ -171,7 +170,7 @@ public class Spatial<T> extends BinaryFilter<T> {
             return (Geometry) o;
         }
         if (o instanceof Envelope) {
-            return Envelopes.toPolygon((Envelope) o);
+            return Bounds.toPolygon((Envelope) o);
         }
 
         throw new IllegalArgumentException("Unable to convert " + o + " to geometry");

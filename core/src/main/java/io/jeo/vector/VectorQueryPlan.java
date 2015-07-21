@@ -15,10 +15,10 @@
 package io.jeo.vector;
 
 import io.jeo.filter.Filters;
+import io.jeo.geom.Bounds;
 import io.jeo.util.Pair;
 import io.jeo.filter.Filter;
 import io.jeo.util.Predicate;
-import io.jeo.geom.Envelopes;
 import org.osgeo.proj4j.CoordinateReferenceSystem;
 
 import com.vividsolutions.jts.geom.Envelope;
@@ -187,7 +187,7 @@ public class VectorQueryPlan {
     public FeatureCursor apply(FeatureCursor cursor) {
 
         Envelope bounds = q.bounds();
-        if (!isBounded() && !Envelopes.isNull(bounds)) {
+        if (!isBounded() && !Bounds.isNull(bounds)) {
             cursor = cursor.intersect(bounds, true);
         }
 

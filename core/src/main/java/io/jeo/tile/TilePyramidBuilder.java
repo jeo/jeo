@@ -16,10 +16,9 @@ package io.jeo.tile;
 
 import java.util.List;
 
+import io.jeo.geom.Bounds;
 import io.jeo.proj.Proj;
 import org.osgeo.proj4j.CoordinateReferenceSystem;
-
-import com.vividsolutions.jts.geom.Envelope;
 
 /**
  * Builder for {@link TilePyramid} objects.
@@ -48,13 +47,13 @@ public class TilePyramidBuilder {
      * Sets bounds of the pyramid.
      */
     public TilePyramidBuilder bounds(double minx, double miny, double maxx, double maxy) {
-        return bounds(new Envelope(minx, maxx, miny, maxy));
+        return bounds(new Bounds(minx, maxx, miny, maxy));
     }
 
     /**
      * Sets bounds of the pyramid.
      */
-    public TilePyramidBuilder bounds(Envelope bounds) {
+    public TilePyramidBuilder bounds(Bounds bounds) {
         tp.bounds(bounds);
         return this;
     }
@@ -143,7 +142,7 @@ public class TilePyramidBuilder {
     public TilePyramidBuilder grid() {
         List<TileGrid> grids = tp.grids();
         if (grids.isEmpty()) {
-            Envelope bounds = tp.bounds();
+            Bounds bounds = tp.bounds();
             if (bounds != null) {
                 if (bounds.getWidth() > bounds.getHeight()) {
                     return grid(0, (int)(bounds.getWidth()/bounds.getHeight()), 1);

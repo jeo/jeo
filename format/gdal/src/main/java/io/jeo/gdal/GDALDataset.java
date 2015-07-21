@@ -14,7 +14,7 @@
  */
 package io.jeo.gdal;
 
-import com.vividsolutions.jts.geom.Envelope;
+import io.jeo.geom.Bounds;
 import io.jeo.raster.Band;
 import io.jeo.raster.DataBuffer;
 import io.jeo.raster.DataType;
@@ -94,14 +94,14 @@ public class GDALDataset implements RasterDataset, FileData {
     }
 
     @Override
-    public Envelope bounds() throws IOException {
+    public Bounds bounds() throws IOException {
         return bounds(dataset);
     }
 
-    Envelope bounds(Dataset dataset) {
+    Bounds bounds(Dataset dataset) {
         Dimension size = size(dataset);
         double[] tx = dataset.GetGeoTransform();
-        return new Envelope(tx[0], tx[0] + size.width() * tx[1],
+        return new Bounds(tx[0], tx[0] + size.width() * tx[1],
                 tx[3], tx[3] + size.width()*tx[4] + size.height()*tx[5]);
     }
 
@@ -154,10 +154,10 @@ public class GDALDataset implements RasterDataset, FileData {
 
         // area of raster to load
         Rect r = rect(data);            // raster space
-        Envelope bbox = bounds(data);   // world space
+        Bounds bbox = bounds(data);   // world space
         if (query.bounds() != null) {
             // intersect bounds with query bounds
-            Envelope i = bbox.intersection(query.bounds());
+            Bounds i = bbox.intersection(query.bounds());
             r = r.map(i, bbox);
             bbox = i;
         }

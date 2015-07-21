@@ -24,6 +24,7 @@ import static org.junit.Assert.assertTrue;
 import java.io.File;
 import java.util.List;
 
+import io.jeo.geom.Bounds;
 import io.jeo.vector.FeatureWriteCursor;
 import io.jeo.vector.ListFeature;
 import org.apache.commons.io.FileUtils;
@@ -31,7 +32,6 @@ import io.jeo.data.Cursor;
 import io.jeo.vector.VectorQuery;
 import io.jeo.vector.VectorDataset;
 import io.jeo.vector.Feature;
-import io.jeo.vector.Features;
 import io.jeo.vector.Schema;
 import io.jeo.vector.SchemaBuilder;
 import io.jeo.geom.Geom;
@@ -40,7 +40,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.MultiPolygon;
 import com.vividsolutions.jts.geom.Point;
@@ -186,7 +185,7 @@ public class GeoPkgFeatureTest extends GeoPkgTestSupport {
 
         FeatureEntry entry = new FeatureEntry();
         entry.setSrid(4326);
-        entry.setBounds(new Envelope(-180, 180, -90, 90));
+        entry.setBounds(new Bounds(-180, 180, -90, 90));
         geopkg.create(entry, schema);
 
         geopkg.insert(entry, new ListFeature(schema, Geom.point(1,2), "anvil", 10.99), null);

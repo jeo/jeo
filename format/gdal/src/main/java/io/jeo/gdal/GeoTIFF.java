@@ -14,8 +14,8 @@
  */
 package io.jeo.gdal;
 
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,8 +33,8 @@ import java.util.List;
  */
 public class GeoTIFF extends GDAL {
 
-    public static GDALDataset open(File file) throws IOException {
-        return new GeoTIFF().open(file, null);
+    public static GDALDataset open(Path path) throws IOException {
+        return new GeoTIFF().open(path.toFile(), null);
     }
 
     public GeoTIFF() {

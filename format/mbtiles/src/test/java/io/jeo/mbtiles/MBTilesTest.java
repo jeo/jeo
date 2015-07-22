@@ -14,7 +14,8 @@
  */
 package io.jeo.mbtiles;
 
-import java.io.File;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 
 import org.junit.Test;
@@ -25,8 +26,8 @@ public class MBTilesTest {
 
     @Test
     public void open() throws Exception {
-        File file = new File(getClass().getClassLoader().getResource("io/jeo/mbtiles/test.mbtiles").toURI());
-        MBTileSet mbtileset = MBTiles.open(file);
+        Path path = Paths.get(getClass().getClassLoader().getResource("io/jeo/mbtiles/test.mbtiles").toURI());
+        MBTileSet mbtileset = MBTiles.open(path);
         assertNotNull(mbtileset);
         assertEquals("test", mbtileset.name());
         assertEquals("random", mbtileset.title());

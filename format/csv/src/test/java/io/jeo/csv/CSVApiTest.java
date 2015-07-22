@@ -14,8 +14,8 @@
  */
 package io.jeo.csv;
 
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 
 import io.jeo.Tests;
 import io.jeo.vector.VectorApiTestBase;
@@ -25,10 +25,10 @@ public class CSVApiTest extends VectorApiTestBase {
 
     @Override
     protected VectorDataset createVectorData() throws Exception {
-        File tmp = Tests.newTmpDir("states", "csv");
+        Path tmp = Tests.newTmpDir("states", "csv");
         Tests.unzip(getClass().getResourceAsStream("states.csv.zip"), tmp);
 
-        return CSV.open(new File(tmp, "states.csv"), new CSVOpts().wkt("wkt").delimiter(';'));
+        return CSV.open(tmp.resolve("states.csv"), new CSVOpts().wkt("wkt").delimiter(';'));
     }
 
     @Override

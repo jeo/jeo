@@ -17,6 +17,7 @@ package io.jeo.ogr;
 import static org.junit.Assert.*;
 
 import java.io.File;
+import java.nio.file.Path;
 
 import io.jeo.Tests;
 import io.jeo.data.Drivers;
@@ -41,10 +42,10 @@ public class OGRTest {
 
     @Before
     public void setUp() throws Exception {
-        File dir = Tests.newTmpDir("ogr", "data");
+        Path dir = Tests.newTmpDir("ogr", "data");
         Tests.unzip(getClass().getResourceAsStream("states.zip"), dir);
 
-        data = new File(dir, "states.shp");
+        data = dir.resolve("states.shp").toFile();
     }
 
     @Test

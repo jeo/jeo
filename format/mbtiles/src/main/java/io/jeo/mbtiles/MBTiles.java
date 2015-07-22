@@ -16,6 +16,7 @@ package io.jeo.mbtiles;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -31,8 +32,8 @@ import io.jeo.data.FileDriver;
  */
 public class MBTiles extends FileDriver<MBTileSet> {
 
-    public static MBTileSet open(File file){
-        return new MBTileSet(file);
+    public static MBTileSet open(Path path){
+        return new MBTileSet(path.toFile());
     }
 
     @Override

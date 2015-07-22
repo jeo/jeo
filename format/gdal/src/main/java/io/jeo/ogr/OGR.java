@@ -16,6 +16,7 @@ package io.jeo.ogr;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -67,8 +68,8 @@ public class OGR extends FileVectorDriver<OGRWorkspace> implements Disposable {
         }
     }
 
-    public static OGRWorkspace open(File file) throws IOException {
-        return new OGR().open(file, null);
+    public static OGRWorkspace open(Path path) throws IOException {
+        return new OGR().open(path.toFile(), null);
     }
 
     org.gdal.ogr.Driver ogrDrv;

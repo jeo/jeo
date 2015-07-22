@@ -14,8 +14,8 @@
  */
 package io.jeo.geopkg;
 
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 
 import io.jeo.Tests;
 import org.junit.Rule;
@@ -38,7 +38,7 @@ public class GeoPkgTestSupport {
 
     @Rule public TestName name = new TestName();
 
-    protected File newTmpDir() throws IOException {
+    protected Path newTmpDir() throws IOException {
         return Tests.newTmpDir("geopkg", name.getMethodName());
     }
 }

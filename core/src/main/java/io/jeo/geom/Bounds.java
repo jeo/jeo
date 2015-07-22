@@ -518,6 +518,6 @@ public class Bounds extends Envelope {
 
     @Override
     public String toString() {
-        return String.format("(%f, %f, %f, %f)", west(), south(), east(), north());
+        return String.format(Locale.ROOT, "(%f, %f, %f, %f)", west(), south(), east(), north());
     }
 }

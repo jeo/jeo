@@ -16,6 +16,7 @@ package io.jeo.geopkg;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.*;
 
 /**
@@ -25,7 +26,8 @@ import java.util.*;
  */
 public class GeoPackage extends GeoPkgBaseDriver {
 
-    public static GeoPkgWorkspace open(File file) throws IOException {
+    public static GeoPkgWorkspace open(Path path) throws IOException {
+        File file = path.toFile();
         return new GeoPackage().open(file, (Map) Collections.singletonMap(FILE, file));
     }
 

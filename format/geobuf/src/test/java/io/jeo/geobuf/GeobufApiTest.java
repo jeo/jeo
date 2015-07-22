@@ -18,15 +18,15 @@ import io.jeo.Tests;
 import io.jeo.vector.VectorApiTestBase;
 import io.jeo.vector.VectorDataset;
 
-import java.io.File;
+import java.nio.file.Path;
 
 public class GeobufApiTest extends VectorApiTestBase {
 
     @Override
     protected VectorDataset createVectorData() throws Exception {
-        File f = Tests.gunzip(getClass().getResourceAsStream("states.pbf.gz"), 
+        Path f = Tests.gunzip(getClass().getResourceAsStream("states.pbf.gz"),
             Tests.newTmpDir("states", "pbf"), "states.pbf");
-        return new GeobufDataset(f);
+        return new GeobufDataset(f.toFile());
     }
 
 }

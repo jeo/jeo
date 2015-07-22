@@ -5,12 +5,13 @@ import io.jeo.data.Workspace;
 import io.jeo.data.WorkspaceApiTestBase;
 
 import java.io.File;
+import java.nio.file.Path;
 
 public class GeoPkgWorkspaceApiTest extends WorkspaceApiTestBase {
     @Override
     protected Workspace createWorkspace() throws Exception {
-        File dir = Tests.newTmpDir("work", "gpkg");
+        Path dir = Tests.newTmpDir("work", "gpkg");
 
-        return GeoPackage.open(new File(dir, "test.gpkg"));
+        return GeoPackage.open(dir.resolve("test.gpkg"));
     }
 }

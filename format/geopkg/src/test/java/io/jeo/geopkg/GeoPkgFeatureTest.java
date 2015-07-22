@@ -22,6 +22,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
+import java.nio.file.Path;
 import java.util.List;
 
 import io.jeo.geom.Bounds;
@@ -53,8 +54,8 @@ public class GeoPkgFeatureTest extends GeoPkgTestSupport {
 
     @Before
     public void setUp() throws Exception {
-        File dir = unzip(getClass().getResourceAsStream("usa.gpkg.zip"), newTmpDir());
-        geopkg = GeoPackage.open(new File(dir, "usa.gpkg"));
+        Path dir = unzip(getClass().getResourceAsStream("usa.gpkg.zip"), newTmpDir());
+        geopkg = GeoPackage.open(dir.resolve("usa.gpkg"));
     }
 
     @After

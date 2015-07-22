@@ -16,7 +16,7 @@ package io.jeo.geopkg;
 
 import static io.jeo.Tests.unzip;
 
-import java.io.File;
+import java.nio.file.Path;
 
 import io.jeo.Tests;
 import io.jeo.tile.TileApiTestBase;
@@ -29,8 +29,8 @@ public class GeoPkgTileApiTest extends TileApiTestBase {
 
     @Override
     protected TileDataset createTileData() throws Exception {
-        File dir = unzip(getClass().getResourceAsStream("ne.gpkg.zip"), Tests.newTmpDir());
-        gpkg = GeoPackage.open(new File(dir, "ne.gpkg"));
+        Path dir = unzip(getClass().getResourceAsStream("ne.gpkg.zip"), Tests.newTmpDir());
+        gpkg = GeoPackage.open(dir.resolve("ne.gpkg"));
         return (TileDataset) gpkg.get("tiles");
     }
 

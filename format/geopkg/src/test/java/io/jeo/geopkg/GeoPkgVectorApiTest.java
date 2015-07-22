@@ -14,7 +14,7 @@
  */
 package io.jeo.geopkg;
 
-import java.io.File;
+import java.nio.file.Path;
 
 import io.jeo.Tests;
 import io.jeo.vector.VectorApiTestBase;
@@ -27,10 +27,10 @@ public class GeoPkgVectorApiTest extends VectorApiTestBase {
 
     @Override
     protected VectorDataset createVectorData() throws Exception {
-        File dir = Tests.newTmpDir("gpkg", "states");
+        Path dir = Tests.newTmpDir("gpkg", "states");
         Tests.unzip(getClass().getResourceAsStream("usa.gpkg.zip"), dir);
 
-        gpkg = GeoPackage.open(new File(dir, "usa.gpkg"));
+        gpkg = GeoPackage.open(dir.resolve("usa.gpkg"));
         return (VectorDataset) gpkg.get("states");
     }
 

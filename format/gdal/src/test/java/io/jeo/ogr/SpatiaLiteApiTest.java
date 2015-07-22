@@ -14,7 +14,7 @@
  */
 package io.jeo.ogr;
 
-import java.io.File;
+import java.nio.file.Path;
 
 import io.jeo.Tests;
 import io.jeo.vector.VectorApiTestBase;
@@ -30,10 +30,10 @@ public class SpatiaLiteApiTest extends VectorApiTestBase {
 
     @Override
     protected VectorDataset createVectorData() throws Exception {
-        File dir = Tests.newTmpDir("spatialite", "data");
+        Path dir = Tests.newTmpDir("spatialite", "data");
         Tests.unzip(getClass().getResourceAsStream("usa.db.zip"), dir);
 
-        OGRWorkspace ws = SpatiaLite.open(new File(dir, "usa.db"));
+        OGRWorkspace ws = SpatiaLite.open(dir.resolve("usa.db"));
         return ws.get("states");
     }
 

@@ -26,6 +26,7 @@ import org.junit.Test;
 import java.io.File;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.nio.file.Path;
 
 import static junit.framework.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -46,10 +47,10 @@ public class GDALTest {
 
     @Before
     public void setUp() throws Exception {
-        File dir = Tests.newTmpDir("gdal", "data");
+        Path dir = Tests.newTmpDir("gdal", "data");
         Tests.unzip(getClass().getResourceAsStream("dem.tif.zip"), dir);
 
-        data = new File(dir, "dem.tif");
+        data = dir.resolve("dem.tif").toFile();
     }
 
     @Test

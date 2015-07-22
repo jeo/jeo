@@ -16,6 +16,7 @@ package io.jeo.csv;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -37,8 +38,8 @@ public class CSV extends FileVectorDriver<CSVDataset> {
 
     public static final Key<Object> Y = new Key<Object>("y", Object.class, "y");
 
-    public static CSVDataset open(File file, CSVOpts csvOpts) throws IOException {
-        return new CSVDataset(file, csvOpts);
+    public static CSVDataset open(Path path, CSVOpts csvOpts) throws IOException {
+        return new CSVDataset(path.toFile(), csvOpts);
     }
 
     @Override

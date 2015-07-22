@@ -14,7 +14,7 @@
  */
 package io.jeo.ogr;
 
-import java.io.File;
+import java.nio.file.Path;
 
 import io.jeo.Tests;
 import io.jeo.vector.VectorApiTestBase;
@@ -30,10 +30,10 @@ public class ShapefileApiTest extends VectorApiTestBase {
 
     @Override
     protected VectorDataset createVectorData() throws Exception {
-        File dir = Tests.newTmpDir("shp", "data");
+        Path dir = Tests.newTmpDir("shp", "data");
         Tests.unzip(getClass().getResourceAsStream("states.zip"), dir);
 
-        return Shapefile.open(new File(dir, "states.shp"));
+        return Shapefile.open(dir.resolve("states.shp"));
     }
 
 }

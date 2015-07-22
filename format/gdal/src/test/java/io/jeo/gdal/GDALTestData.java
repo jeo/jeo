@@ -18,7 +18,7 @@ import io.jeo.TestData;
 import io.jeo.Tests;
 import io.jeo.raster.RasterDataset;
 
-import java.io.File;
+import java.nio.file.Path;
 
 /**
  * Utility class exposing GDAL test datasets.
@@ -42,19 +42,19 @@ public class GDALTestData {
      * Returns the same dataset as described by {@link TestData#dem()}.
      */
     public static RasterDataset dem() throws Exception {
-        File dir = Tests.newTmpDir("gdal", "data");
+        Path dir = Tests.newTmpDir("gdal", "data");
         Tests.unzip(GDALTestData.class.getResourceAsStream("dem.tif.zip"), dir);
 
-        return GeoTIFF.open(new File(dir, "dem.tif"));
+        return GeoTIFF.open(dir.resolve("dem.tif"));
     }
 
     /**
      * Returns the same dataset as described by {@link TestData#rgb()}.
      */
     public static RasterDataset rgb() throws Exception {
-        File dir = Tests.newTmpDir("gdal", "data");
+        Path dir = Tests.newTmpDir("gdal", "data");
         Tests.unzip(GDALTestData.class.getResourceAsStream("rgb.tif.zip"), dir);
 
-        return GeoTIFF.open(new File(dir, "rgb.tif"));
+        return GeoTIFF.open(dir.resolve("rgb.tif"));
     }
 }

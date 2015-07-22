@@ -14,7 +14,7 @@
  */
 package io.jeo.geojson;
 
-import java.io.File;
+import java.nio.file.Path;
 
 import io.jeo.Tests;
 import io.jeo.vector.VectorApiTestBase;
@@ -24,8 +24,8 @@ public class GeoJSONTest extends VectorApiTestBase {
 
     @Override
     protected VectorDataset createVectorData() throws Exception {
-        File dir = Tests.unzip(getClass().getResourceAsStream("states.zip"), Tests.newTmpDir());
-        return new GeoJSONDataset(new File(dir, "states.json"));
+        Path dir = Tests.unzip(getClass().getResourceAsStream("states.zip"), Tests.newTmpDir());
+        return new GeoJSONDataset(dir.resolve("states.json").toFile());
     }
 
 }

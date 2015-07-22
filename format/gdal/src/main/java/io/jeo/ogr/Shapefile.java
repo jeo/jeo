@@ -14,8 +14,8 @@
  */
 package io.jeo.ogr;
 
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -37,8 +37,8 @@ import java.util.Map;
  */
 public class Shapefile extends OGRDriver<OGRDataset> {
 
-    public static OGRDataset open(File file) throws IOException {
-        return new Shapefile().open((Map)Collections.singletonMap(FILE, file));
+    public static OGRDataset open(Path path) throws IOException {
+        return new Shapefile().open((Map)Collections.singletonMap(FILE, path.toFile()));
     }
 
     @Override

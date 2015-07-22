@@ -39,7 +39,7 @@ public class MBTileSetTest {
     @Before
     public void before() throws Exception {
         File file = new File(getClass().getClassLoader().getResource("io/jeo/mbtiles/test.mbtiles").toURI());
-        tileset = MBTiles.open(file);
+        tileset = MBTiles.open(file.toPath());
     }
 
     @After

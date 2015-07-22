@@ -16,6 +16,7 @@ package io.jeo.ogr;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.Collections;
 import java.util.Map;
 
@@ -35,8 +36,8 @@ import java.util.Map;
  */
 public class SpatiaLite extends OGRDriver<OGRWorkspace> {
 
-    public static OGRWorkspace open(File file) throws IOException {
-        return new SpatiaLite().open((Map)Collections.singletonMap(FILE, file));
+    public static OGRWorkspace open(Path path) throws IOException {
+        return new SpatiaLite().open((Map)Collections.singletonMap(FILE, path.toFile()));
     }
 
     @Override

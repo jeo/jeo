@@ -21,7 +21,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
-import java.io.File;
+import java.nio.file.Path;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
@@ -36,8 +36,8 @@ public class GeoPkgTileTest extends GeoPkgTestSupport {
 
     @Before
     public void setUp() throws Exception {
-        File dir = unzip(getClass().getResourceAsStream("ne.gpkg.zip"), newTmpDir());
-        geopkg = GeoPackage.open(new File(dir, "ne.gpkg"));
+        Path dir = unzip(getClass().getResourceAsStream("ne.gpkg.zip"), newTmpDir());
+        geopkg = GeoPackage.open(dir.resolve("ne.gpkg"));
     }
 
     @After

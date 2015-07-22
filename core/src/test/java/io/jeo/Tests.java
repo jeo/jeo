@@ -17,18 +17,18 @@ package io.jeo;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+import java.nio.file.attribute.FileAttribute;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.ZipEntry;
-import java.util.zip.ZipException;
 import java.util.zip.ZipInputStream;
-
-import com.google.common.io.ByteStreams;
-import com.google.common.io.Files;
-import com.google.common.io.InputSupplier;
 
 /**
  * Test utility class.
@@ -44,13 +44,14 @@ public class Tests {
      *  being run as part of a maven build). Otherwise it will resolve to "java.io.tmpdir".
      * </p>
      */
-    public static File tmpRoot() {
-        File target = new File("target");
-        if (target.exists() && target.isDirectory()) {
+    public static Path tmpRoot() {
+        Path target = Paths.get("target");
+        File file = target.toFile();
+        if (file.exists() && file.isDirectory()) {
             return target;
         }
 
-        return new File(System.getProperty("java.io.tmpdir"));
+        return Paths.get(System.getProperty("java.io.tmpdir"));
     }
 
     /**
@@ -58,7 +59,7 @@ public class Tests {
      * 
      * @return The handle to the directory.
      */
-    public static File newTmpDir() throws IOException {
+    public static Path newTmpDir() throws IOException {
         return newTmpDir("jeo", "test");
     }
 
@@ -67,7 +68,7 @@ public class Tests {
      * 
      * @return The handle to the file.
      */
-    public static File newTmpFile() throws IOException {
+    public static Path newTmpFile() throws IOException {
         return newTmpFile(null);
     }
 
@@ -77,23 +78,22 @@ public class Tests {
      * 
      * @return The handle to the file.
      */
-    public static File newTmpFile(InputStream contents) throws IOException {
+    public static Path newTmpFile(InputStream contents) throws IOException {
         return newTmpFile("jeo", "test", contents);
     }
 
     /**
      * Creates a new temp directory under the "target" directory of the calling module.
      * <p>
-     * The <tt>prefix</tt> and <tt>suffix</tt> parameters are those as passed to 
-     * {@link File#createTempFile(String, String)}
+     * The <tt>prefix</tt> parameters are those as passed to
+     * {@link Files#createTempDirectory(String, FileAttribute[])}
      * </p>
      *
      * @return The handle to the directory.
      */
-    public static File newTmpDir(String prefix, String suffix) throws IOException {
-        File dir = File.createTempFile(prefix, suffix, tmpRoot());
-        dir.delete();
-        dir.mkdirs();
+    public static Path newTmpDir(String prefix, String suffix) throws IOException {
+        Path dir = Files.createTempDirectory(tmpRoot(), prefix);
+        dir.toFile().mkdirs();
         return dir;
     }
 
@@ -103,16 +103,11 @@ public class Tests {
      * 
      * @return The handle to the file.
      */
-    public static File newTmpFile(String prefix, String suffix, final InputStream contents) 
+    public static Path newTmpFile(String prefix, String suffix, final InputStream contents)
         throws IOException {
-        File file = File.createTempFile(prefix, suffix, tmpRoot());
+        Path file = Files.createTempFile(tmpRoot(), prefix, suffix);
         if (contents != null) {
-            Files.copy(new InputSupplier<InputStream>() {
-                @Override
-                public InputStream getInput() throws IOException {
-                    return contents;
-                }
-            }, file);
+            Files.copy(contents, file, StandardCopyOption.REPLACE_EXISTING);
         }
         return file;
     }
@@ -122,8 +117,7 @@ public class Tests {
      * 
      * @return The originaly specified directory.
      */
-    public static File unzip(final InputStream archive, final File dir) 
-        throws ZipException, IOException {
+    public static Path unzip(final InputStream archive, final Path dir) throws IOException {
     
         ZipInputStream zipin = new ZipInputStream(archive);
         ZipEntry zipEntry = null;
@@ -131,11 +125,11 @@ public class Tests {
         while((zipEntry = zipin.getNextEntry()) != null) {
             if (zipEntry.isDirectory())
                 continue;
-    
-            final File targetFile = new File(dir, zipEntry.getName());
-            Files.createParentDirs(targetFile);
-    
-            ByteStreams.copy(zipin, Files.newOutputStreamSupplier(targetFile).getOutput());
+
+            Path targetFile = dir.resolve(zipEntry.getName());
+            targetFile.getParent().toFile().mkdirs();
+
+            Files.copy(zipin, targetFile);
         }
     
         zipin.close();
@@ -150,12 +144,12 @@ public class Tests {
      * @param filename The filename to gunzip to.
      * 
      */
-    public static File gunzip(final InputStream gzipped, final File dir, String filename) 
+    public static Path gunzip(final InputStream gzipped, final Path dir, String filename)
         throws IOException {
         GZIPInputStream gzipin = new GZIPInputStream(gzipped);
 
-        File file = new File(dir, filename);
-        ByteStreams.copy(gzipin, Files.newOutputStreamSupplier(file).getOutput());
+        Path file = dir.resolve(filename);
+        Files.copy(gzipin, file);
 
         return file;
     }

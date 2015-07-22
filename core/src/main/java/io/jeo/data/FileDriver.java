@@ -37,7 +37,7 @@ public abstract class FileDriver<T> implements Driver<T> {
     /**
      * Key specifying the file path.
      */
-    public static final Key<File> FILE = new Key<File>("file", File.class);
+    public static final Key<File> FILE = new Key<>("file", File.class);
 
     @Override
     public boolean isEnabled(Messages messages) {

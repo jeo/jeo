@@ -19,6 +19,7 @@ import io.jeo.util.Messages;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
@@ -31,8 +32,8 @@ import java.util.Set;
  */
 public class Directory extends FileDriver<DirWorkspace> {
 
-    public static DirWorkspace open(File file) {
-        return new DirWorkspace(file);
+    public static DirWorkspace open(Path path) {
+        return new DirWorkspace(path.toFile());
     }
 
     @Override

@@ -36,6 +36,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -68,6 +69,9 @@ public class Convert {
         }
         else if (File.class.isAssignableFrom(clazz)) {
             return (Optional<T>) toFile(obj);
+        }
+        else if (Path.class.isAssignableFrom(clazz)) {
+            return (Optional<T>) toPath(obj);
         }
         else if (URL.class.isAssignableFrom(clazz)) {
             return (Optional<T>) toURL(obj);
@@ -114,13 +118,56 @@ public class Convert {
         return Optional.empty();
     }
 
+    public static Optional<Path> toPath(Object obj) {
+        return toPath(obj, false);
+    }
+
+    static Optional<Path> toPath(Object obj, boolean checkFile) {
+        if (obj instanceof Path) {
+            return Optional.of(((Path) obj));
+        }
+
+        if (obj instanceof String) {
+            return Optional.of(Paths.get((String)obj));
+        }
+
+        if (checkFile) {
+            Optional<File> file = toFile(obj, false);
+            return file.map(new Function<File, Path>() {
+                @Override
+                public Path apply(File f) {
+                    return f.toPath();
+                }
+            });
+        }
+
+        return Optional.empty();
+    }
+
     public static Optional<File> toFile(Object obj) {
+        return toFile(obj, true);
+    }
+
+    static Optional<File> toFile(Object obj, boolean checkPath) {
         if (obj instanceof File) {
             return Optional.of((File) obj);
         }
 
+        if (obj instanceof Path) {
+            return Optional.of(((Path)obj).toFile());
+        }
+
         if (obj instanceof String) {
             return Optional.of(new File((String)obj));
+        }
+
+        if (checkPath) {
+            return toPath(obj, false).map(new Function<Path, File>() {
+                @Override
+                public File apply(Path p) {
+                    return p.toFile();
+                }
+            });
         }
 
         return Optional.empty();

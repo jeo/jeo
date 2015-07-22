@@ -16,6 +16,7 @@ package io.jeo.geojson;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -42,8 +43,8 @@ public class GeoJSON extends FileVectorDriver<GeoJSONDataset> {
     /**
      * Opens a file containing encoded GeoJSON.
      */
-    public static GeoJSONDataset open(File file) {
-        return new GeoJSONDataset(file);
+    public static GeoJSONDataset open(Path path) {
+        return new GeoJSONDataset(path.toFile());
     }
 
     @Override

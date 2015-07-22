@@ -18,8 +18,8 @@ import static org.junit.Assert.*;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 
-import io.jeo.data.Cursor;
 import io.jeo.vector.FeatureWriteCursor;
 import io.jeo.vector.VectorQuery;
 import io.jeo.vector.VectorDataset;
@@ -68,12 +68,12 @@ public class GeoPkgTest extends GeoPkgTestSupport {
         assertEquals(2, widgets.count(new VectorQuery()));
     }
 
-    File newFile(String name) throws IOException {
+    Path newFile(String name) throws IOException {
         File f = new File(new File("target"), name);
         if (f.exists()) {
             f.delete();
         }
         f.createNewFile();
-        return f;
+        return f.toPath();
     }
 }

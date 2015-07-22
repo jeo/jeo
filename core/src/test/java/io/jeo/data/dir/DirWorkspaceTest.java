@@ -16,7 +16,6 @@ package io.jeo.data.dir;
 
 import com.google.common.base.Charsets;
 import com.google.common.collect.Iterables;
-import com.google.common.io.Files;
 import io.jeo.TestData;
 import io.jeo.Tests;
 import io.jeo.data.Workspace;
@@ -25,9 +24,10 @@ import io.jeo.vector.VectorDataset;
 import io.jeo.vector.VectorQuery;
 import org.junit.Test;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.Writer;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -36,7 +36,7 @@ public class DirWorkspaceTest {
 
     @Test
     public void test() throws IOException {
-        File dir = Tests.newTmpDir();
+        Path dir = Tests.newTmpDir();
         writeTo(TestData.states(), dir);
         writeTo(TestData.point(), dir);
         writeTo(TestData.polygon(), dir);
@@ -48,8 +48,8 @@ public class DirWorkspaceTest {
         assertNotNull(work.get("polygon"));
     }
 
-    void writeTo(VectorDataset data, File dir) throws IOException {
-        try (Writer w = Files.newWriter(new File(dir, data.name()+".json"), Charsets.UTF_8)){
+    void writeTo(VectorDataset data, Path dir) throws IOException {
+        try (Writer w = Files.newBufferedWriter(dir.resolve(data.name()+".json"), Charsets.UTF_8)) {
             new GeoJSONWriter(w)
                 .featureCollection(data.read(VectorQuery.all()))
                 .flush();

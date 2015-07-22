@@ -16,6 +16,7 @@ package io.jeo.geobuf;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -43,8 +44,8 @@ import io.jeo.vector.Schema;
  */
 public class Gbf extends FileDriver<GeobufDataset> implements VectorDriver<GeobufDataset> {
 
-    public static GeobufDataset open(File file) throws IOException {
-        return new GeobufDataset(file);
+    public static GeobufDataset open(Path path) throws IOException {
+        return new Gbf().open(path.toFile(), null);
     }
 
     @Override
@@ -64,7 +65,7 @@ public class Gbf extends FileDriver<GeobufDataset> implements VectorDriver<Geobu
     
     @Override
     public GeobufDataset open(File file, Map opts) throws IOException {
-        return open(file);
+        return new GeobufDataset(file);
     }
 
     @Override

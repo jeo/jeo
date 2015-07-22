@@ -74,10 +74,10 @@ public class VectorQuery {
      */
     Integer limit, offset;
 
-    /** 
-     * sorting
-     */
-    List<Sort> sort;
+//    /**
+//     * sorting
+//     */
+//    List<Sort> sort;
 
     /**
      * reprojection
@@ -207,16 +207,16 @@ public class VectorQuery {
         return simplify;
     }
 
-    /**
-     * Sort criteria for the query, <code>null</code> meaning no sorting.
-     * <p>
-     * The sorting criteria applies to {@link VectorDataset#read(VectorQuery)} and
-     * {@link VectorDataset#update(VectorQuery)} operations.
-     * </p>
-     */
-    public List<Sort> sort() {
-        return sort;
-    }
+//    /**
+//     * Sort criteria for the query, <code>null</code> meaning no sorting.
+//     * <p>
+//     * The sorting criteria applies to {@link VectorDataset#read(VectorQuery)} and
+//     * {@link VectorDataset#update(VectorQuery)} operations.
+//     * </p>
+//     */
+//    public List<Sort> sort() {
+//        return sort;
+//    }
 
     /**
      * Transaction of the query, may be <code>null</code>.
@@ -323,19 +323,19 @@ public class VectorQuery {
         return this;
     }
 
-    /**
-     * Sets the properties to sort results by.
-     *
-     * @return This object.
-     */
-    public VectorQuery sort(String... sort) {
-        List<Sort> list = new ArrayList<Sort>();
-        for (String s : sort) {
-            list.add(new Sort(s));
-        }
-        this.sort = list;
-        return this;
-    }
+//    /**
+//     * Sets the properties to sort results by.
+//     *
+//     * @return This object.
+//     */
+//    public VectorQuery sort(String... sort) {
+//        List<Sort> list = new ArrayList<Sort>();
+//        for (String s : sort) {
+//            list.add(new Sort(s));
+//        }
+//        this.sort = list;
+//        return this;
+//    }
 
     /**
      * Sets the srs to re-project query results to. 
@@ -472,7 +472,7 @@ public class VectorQuery {
                 + ((reproject == null) ? 0 : reproject.hashCode());
         result = prime * result
                 + ((simplify == null) ? 0 : simplify.hashCode());
-        result = prime * result + ((sort == null) ? 0 : sort.hashCode());
+        //result = prime * result + ((sort == null) ? 0 : sort.hashCode());
         result = prime * result
                 + ((transaction == null) ? 0 : transaction.hashCode());
         return result;
@@ -522,11 +522,11 @@ public class VectorQuery {
                 return false;
         } else if (!simplify.equals(other.simplify))
             return false;
-        if (sort == null) {
-            if (other.sort != null)
-                return false;
-        } else if (!sort.equals(other.sort))
-            return false;
+//        if (sort == null) {
+//            if (other.sort != null)
+//                return false;
+//        } else if (!sort.equals(other.sort))
+//            return false;
         if (transaction == null) {
             if (other.transaction != null)
                 return false;

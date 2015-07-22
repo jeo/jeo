@@ -55,14 +55,14 @@ public interface VectorDriver<T> extends Driver<T> {
      * Ability to handle filters.
      */
     Capability FILTER = new Capability("filter");
-    /**
-     * Ability to perform reprojection.
-     */
-    Capability REPROJECT = new Capability("reproject");
-    /**
-     * Ability to simplify vector geometries.
-     */
-    Capability SIMPLIFY = new Capability("simplify");
+//    /**
+//     * Ability to perform reprojection.
+//     */
+//    Capability REPROJECT = new Capability("reproject");
+//    /**
+//     * Ability to simplify vector geometries.
+//     */
+//    Capability SIMPLIFY = new Capability("simplify");
     /**
      * Ability to limit a result set.
      */
@@ -71,10 +71,10 @@ public interface VectorDriver<T> extends Driver<T> {
      * Ability to handle offset of a result set.
      */
     Capability OFFSET = new Capability("offset");
-    /**
-     * Ability to sort a result set.
-     */
-    Capability SORT = new Capability("sort");
+//    /**
+//     * Ability to sort a result set.
+//     */
+//    Capability SORT = new Capability("sort");
 
     /**
      * Determines if this driver can create a connection to the data described by the specified

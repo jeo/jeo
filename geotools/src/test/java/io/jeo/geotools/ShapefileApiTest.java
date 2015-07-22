@@ -44,7 +44,7 @@ public class ShapefileApiTest extends VectorApiTestBase {
 
     @BeforeClass
     public static void createShp() throws IOException {
-        shp = new File(Tests.newTmpDir(), "states.shp");
+        shp = Tests.newTmpDir().resolve("states.shp").toFile();
 
         ShapefileDataStoreFactory factory = new ShapefileDataStoreFactory();
         DataStore data = factory.createNewDataStore((Map) Collections.singletonMap("url", DataUtilities.fileToURL(shp)));

@@ -23,14 +23,11 @@ import static org.easymock.classextension.EasyMock.*;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import io.jeo.data.Driver;
-import io.jeo.data.DriverRegistry;
-import io.jeo.data.Handle;
-import io.jeo.data.Workspace;
 import org.apache.commons.io.FileUtils;
 import org.easymock.IAnswer;
 import io.jeo.Tests;
@@ -56,11 +53,11 @@ public class DirectoryRepositoryTest {
 
     @Before
     public void setUp() throws Exception {
-        File dir = Tests.newTmpDir("dir", "repo");
-        FileUtils.touch(new File(dir, "foo.json"));
-        FileUtils.touch(new File(dir, "bar.json"));
+        Path dir = Tests.newTmpDir("dir", "repo");
+        FileUtils.touch(dir.resolve("foo.json").toFile());
+        FileUtils.touch(dir.resolve("bar.json").toFile());
 
-        repo = new DirectoryRepository(dir);
+        repo = new DirectoryRepository(dir.toFile());
     }
 
     @After

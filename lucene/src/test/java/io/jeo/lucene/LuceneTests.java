@@ -46,7 +46,7 @@ public class LuceneTests {
     public static LuceneDataset setUpData(VectorDataset dataset, SpatialField spatial)
         throws IOException {
 
-        Path idxDir = Tests.newTmpDir().toPath().resolve(dataset.name());
+        Path idxDir = Tests.newTmpDir().resolve(dataset.name());
         idxDir.toFile().mkdir();
 
         IndexWriter w = new IndexWriter(FSDirectory.open(idxDir), new IndexWriterConfig(new StandardAnalyzer()));

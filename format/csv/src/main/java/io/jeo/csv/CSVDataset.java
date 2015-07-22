@@ -84,7 +84,7 @@ public class CSVDataset implements VectorDataset, FileData {
         SchemaBuilder sb = Schema.build(name());
         sb.field("geometry", Geometry.class);
 
-        if (opts.hasHeader()) {
+        if (opts.header()) {
             //read first row
             CsvReader r = reader();
             r.readHeaders();
@@ -133,7 +133,7 @@ public class CSVDataset implements VectorDataset, FileData {
     @Override
     public FeatureCursor read(VectorQuery q) throws IOException {
         CsvReader reader = reader();
-        if (opts.hasHeader()) {
+        if (opts.header()) {
             reader.readHeaders();
         }
 
@@ -154,7 +154,7 @@ public class CSVDataset implements VectorDataset, FileData {
     }
 
     CsvReader reader() throws IOException {
-        return new CsvReader(Files.newBufferedReader(file.toPath(), Util.UTF_8), opts.getDelimiter());
+        return new CsvReader(Files.newBufferedReader(file.toPath(), Util.UTF_8), opts.delimiter());
     }
 
     Feature feature(int i, CsvReader r) throws IOException {

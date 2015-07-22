@@ -49,7 +49,7 @@ public class CSVOpts {
         return csvOpts;
     }
 
-    public Character getDelimiter() {
+    public Character delimiter() {
         return delim;
     }
 
@@ -58,7 +58,7 @@ public class CSVOpts {
         return this;
     }
 
-    public boolean hasHeader() {
+    public boolean header() {
         return header;
     }
 

@@ -77,7 +77,7 @@ public class PostGIS implements VectorDriver<PostGISWorkspace>{
 
     @Override
     public List<String> aliases() {
-        return Arrays.asList("pg");
+        return Arrays.asList("pg", "pgsql");
     }
 
     @Override

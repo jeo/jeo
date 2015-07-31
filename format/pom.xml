@@ -19,7 +19,6 @@
     <module>geobuf</module>
     <module>geopkg</module>
     <module>mbtiles</module>
-    <module>mongo</module>
     <module>postgis</module>
     <module>all</module>
   </modules>

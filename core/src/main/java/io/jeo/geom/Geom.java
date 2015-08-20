@@ -364,6 +364,16 @@ public class Geom {
         return flat;
     }
 
+    /**
+     * Recursively unwraps a geometry collection containing single object.
+     */
+    public static Geometry singlify(Geometry geom) {
+        while (geom instanceof GeometryCollection && geom.getNumGeometries() == 1) {
+            geom = geom.getGeometryN(0);
+        }
+        return geom;
+    }
+
     /*
      * Private iterable class.
      */

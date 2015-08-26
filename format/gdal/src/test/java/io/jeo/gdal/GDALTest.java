@@ -94,21 +94,17 @@ public class GDALTest {
     }
 
     @Test
-    public void testQueryRaster() throws Exception {
+    public void testQuerySmallerRaster() throws Exception {
 
       GDALDataset ds = GDAL.open(data);
       
-      Raster out = ds.read(new RasterQuery());
-      int count = out.data().size();
+      Raster wholeimage = ds.read(new RasterQuery());
+      int count = wholeimage.data().size();
       assertEquals(count, (ds.size().width()*ds.size().height()));
-      //printRaster(out);
-      
-      Bounds smaller = ds.bounds().scale(0.5);
-      
-      //System.out.println( ds.bounds() + " [DS] " + ds.bounds().getWidth() + " >> " +ds.bounds().getArea() );
-      //System.out.println( smaller + " [S1] " + smaller.getWidth() + " >> " +smaller.getArea() );
-
+      //printRaster(wholeimage);
+            
       // This is a smaller area
+      Bounds smaller = ds.bounds().scale(0.5);
       assertTrue(ds.bounds().getArea()> smaller.getArea());
       ds.bounds().contains(smaller);
       
@@ -116,11 +112,13 @@ public class GDALTest {
         .datatype(DataType.DOUBLE)
         .bounds(smaller);
 
+      Raster halfsize = ds.read(q1);
 
-      Raster out1 = ds.read(q1);
-
-      //System.out.println( out1.bounds() + " :: " + out1.size());
-
-      //printRaster(out1);
+      System.out.println( halfsize.bounds() + " :: " + halfsize.size());
+      assertEquals("should be half", 
+          (Integer)new Double(wholeimage.size().width()*.5).intValue(), 
+          (Integer)halfsize.size().width());
+      
+      //printRaster(halfsize);
     }
 }

@@ -66,6 +66,10 @@ public class OGRCursor extends FeatureCursor {
 
     @Override
     public Feature next() throws IOException {
+        if(curr==null) {
+          hasNext(); // will try to set the current
+        }
+      
         try {
             return curr;
         }

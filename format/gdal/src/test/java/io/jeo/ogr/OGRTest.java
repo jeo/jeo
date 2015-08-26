@@ -21,6 +21,10 @@ import java.nio.file.Path;
 
 import io.jeo.Tests;
 import io.jeo.data.Drivers;
+import io.jeo.vector.Feature;
+import io.jeo.vector.FeatureCursor;
+import io.jeo.vector.VectorQuery;
+
 import org.junit.Assume;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -58,4 +62,31 @@ public class OGRTest {
     public void testDriverOpen() throws Exception {
         assertTrue(OGRDataset.class.isInstance(Drivers.open(data)));
     }
+
+    @Test
+    public void testCursor() throws Exception {
+      
+      int count = 0;
+      OGRDataset dataset = Shapefile.open(data.toPath());
+      
+      // Calling 'hadNext()' multiple times should not affect the cursor
+      FeatureCursor cursor = dataset.read(new VectorQuery());
+      while(cursor.hasNext()) {
+        cursor.next();
+        cursor.hasNext(); // should not affect the number
+        count++;
+      }
+      assertEquals(49, count); // make sure we have the right number
+      assertNull(cursor.next());
+      assertFalse(cursor.hasNext());
+      
+      // Calling 'next()' without hasNext() should advance
+      cursor = dataset.read(new VectorQuery());
+      for(int i=0; i<count; i++) {
+        Feature f = cursor.next();
+        assertNotNull(f);
+      }
+      assertNull(cursor.next());
+    }
+    
 }

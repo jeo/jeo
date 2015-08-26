@@ -22,7 +22,7 @@ options {
    MULTI=false;
 
    BUILD_NODE_FILES=false; // Generate sample implementations for SimpleNode and any other nodes used in the grammar   	
-   NODE_PACKAGE="org.jeo.filter.cql";
+   NODE_PACKAGE="io.jeo.filter.cql";
 
    SANITY_CHECK=true;
    VISITOR=false;
@@ -38,7 +38,7 @@ options {
 
 PARSER_BEGIN(CQLParser)
 
-package org.jeo.filter.cql;
+package io.jeo.filter.cql;
         
 import java.util.HashSet;
 import java.util.Set;

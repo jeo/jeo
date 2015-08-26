@@ -3,12 +3,12 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <groupId>org.jeo</groupId>
+    <groupId>io.jeo</groupId>
     <artifactId>jeo-parent</artifactId>
     <version>0-SNAPSHOT</version>
   </parent>
 
-  <groupId>org.jeo</groupId>
+  <groupId>io.jeo</groupId>
   <artifactId>format</artifactId>
   <packaging>pom</packaging>
   <name>Format Modules</name>
@@ -16,19 +16,11 @@
   <modules>
     <module>csv</module>
     <module>gdal</module>
+    <module>geobuf</module>
     <module>geopkg</module>
     <module>mbtiles</module>
-    <module>mongo</module>
     <module>postgis</module>
+    <module>all</module>
   </modules>
-
-  <profiles>
-    <profile>
-      <id>protobuf</id>
-      <modules>
-        <module>protobuf</module>
-      </modules>
-    </profile>
-  </profiles>
 
 </project>

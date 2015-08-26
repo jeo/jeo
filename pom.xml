@@ -2,33 +2,49 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>org.jeo</groupId>
+  <groupId>io.jeo</groupId>
   <artifactId>jeo-parent</artifactId>
   <version>0-SNAPSHOT</version>
   <packaging>pom</packaging>
-  <name>JEO</name>
 
-  <repositories>
-    <repository>
-      <id>boundless</id>
-      <name>Boundless Maven Repository</name>
-      <url>http://repo.boundlessgeo.com/main</url>
-    </repository>
-  </repositories>
+  <name>jeo</name>
+  <description>
+    Java Geospatial Library
+  </description>
+
+  <url>http://jeo.io</url>
+
+  <licenses>
+    <license>
+      <name>Apache License, Version 2.0</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0</url>
+    </license>
+  </licenses>
+
+  <developers>
+    <developer>
+      <name>Justin Deoliveira</name>
+      <email>jdeolive@gmail.com</email>
+      <organization>jeo</organization>
+      <organizationUrl>http://github.com/jeo</organizationUrl>
+    </developer>
+  </developers>
+
+  <scm>
+    <connection>scm:git:git@github.com:jeo/jeo.git</connection>
+    <developerConnection>scm:git:git@github.com:jeo/jeo.git</developerConnection>
+    <url>git@github.com:jeo/jeo.git</url>
+  </scm>
 
   <distributionManagement>
-    <repository>
-      <id>boundless</id>
-      <name>Boundless Maven Repository</name>
-      <url>http://repo.boundlessgeo.com/main</url>
-      <uniqueVersion>false</uniqueVersion>
-    </repository>
     <snapshotRepository>
-      <id>boundless</id>
-      <name>Boundless Maven Repository</name>
-      <url>http://repo.boundlessgeo.com/main</url>
-      <uniqueVersion>false</uniqueVersion>
+      <id>ossrh</id>
+      <url>https://oss.sonatype.org/content/repositories/snapshots</url>
     </snapshotRepository>
+    <repository>
+      <id>ossrh</id>
+      <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+    </repository>
   </distributionManagement>
 
   <dependencyManagement>
@@ -243,12 +259,58 @@
         <verbose>false</verbose>
       </configuration>
     </plugin>
+
+    <!-- Check for unsafe API calls -->
+    <plugin>
+      <groupId>de.thetaphi</groupId>
+      <artifactId>forbiddenapis</artifactId>
+      <version>1.7</version>
+      <executions>
+        <execution>
+          <goals>
+            <goal>check</goal>
+          </goals>
+        </execution>
+      </executions>
+      <configuration>
+        <!-- disallow undocumented classes like sun.misc.Unsafe: -->
+        <internalRuntimeForbidden>true</internalRuntimeForbidden>
+        <bundledSignatures>
+          <bundledSignature>jdk-system-out</bundledSignature>
+          <bundledSignature>jdk-unsafe</bundledSignature>
+          <bundledSignature>jdk-deprecated</bundledSignature>
+        </bundledSignatures>
+        <failOnUnsupportedJava>false</failOnUnsupportedJava>
+        <targetVersion>1.7</targetVersion>
+        <excludes>
+          <!-- Generated Files -->
+          <exclude>io/jeo/json/parser/Yylex.class</exclude>
+          <exclude>io/jeo/filter/cql/**</exclude>
+
+          <!-- Uses System.out for printVersionInfo()-->
+          <exclude>io/jeo/Jeo.class</exclude>
+          <exclude>${forbiddenapis.exclude}</exclude>
+        </excludes>
+      </configuration>
+    </plugin>
    </plugins>
   </build>
 
+  <repositories>
+    <repository>
+      <id>ossrh</id>
+      <name>Sonatype OSS Maven Repository</name>
+      <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
+    </repository>
+  </repositories>
+
   <profiles>
     <profile>
-      <id>assembly</id>
+      <!--
+      Release profile builds additional artifacts (and signs them). It is used 
+      to build release artifacts for assembly and publishing to maven central.
+      -->
+      <id>release</id>
       <build>
         <plugins>
           <!-- attach javadoc jars -->
@@ -270,7 +332,7 @@
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-dependency-plugin</artifactId>
             <executions>
-              <execution>             
+              <execution>
                 <id>copy-dependencies</id>
                 <phase>package</phase>
                 <goals>
@@ -291,6 +353,33 @@
             </executions>
           </plugin>
 
+          <!-- sign artifacts -->
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-gpg-plugin</artifactId>
+            <version>1.5</version>
+            <executions>
+              <execution>
+                <id>sign-artifacts</id>
+                <phase>verify</phase>
+                <goals>
+                  <goal>sign</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+
+    <profile>
+      <!--
+      Assembly profile builds downloadable artifacts
+      -->
+
+      <id>assembly</id>
+      <build>
+        <plugins>
           <!-- assemble artifacts -->
           <plugin>
             <artifactId>maven-assembly-plugin</artifactId>
@@ -309,6 +398,7 @@
         <module>assembly</module>
       </modules>
     </profile>
+
   </profiles>
 
   <modules>
@@ -319,6 +409,11 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+    <!-- config hook to allow modules to specify exclusions -->
+    <forbiddenapis.exclude>none</forbiddenapis.exclude>
+
+    <!-- versions -->
     <slf4j.version>1.7.2</slf4j.version>
     <gdal.version>1.11.1</gdal.version>
   </properties>

@@ -69,7 +69,7 @@ public class OGRTest {
       int count = 0;
       OGRDataset dataset = Shapefile.open(data.toPath());
       
-      // Calling 'hadNext()' multiple times should not affect the cursor
+      // Calling 'hasNext()' multiple times should not affect the cursor
       FeatureCursor cursor = dataset.read(new VectorQuery());
       while(cursor.hasNext()) {
         cursor.next();

@@ -101,12 +101,12 @@ public class GDALTest {
       Raster out = ds.read(new RasterQuery());
       int count = out.data().size();
       assertEquals(count, (ds.size().width()*ds.size().height()));
-      printRaster(out);
+      //printRaster(out);
       
       Bounds smaller = ds.bounds().scale(0.5);
       
-      System.out.println( ds.bounds() + " [DS] " + ds.bounds().getWidth() + " >> " +ds.bounds().getArea() );
-      System.out.println( smaller + " [S1] " + smaller.getWidth() + " >> " +smaller.getArea() );
+      //System.out.println( ds.bounds() + " [DS] " + ds.bounds().getWidth() + " >> " +ds.bounds().getArea() );
+      //System.out.println( smaller + " [S1] " + smaller.getWidth() + " >> " +smaller.getArea() );
 
       // This is a smaller area
       assertTrue(ds.bounds().getArea()> smaller.getArea());
@@ -119,8 +119,8 @@ public class GDALTest {
 
       Raster out1 = ds.read(q1);
 
-      System.out.println( out1.bounds() + " :: " + out1.size());
+      //System.out.println( out1.bounds() + " :: " + out1.size());
 
-      printRaster(out1);
+      //printRaster(out1);
     }
 }

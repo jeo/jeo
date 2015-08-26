@@ -114,7 +114,7 @@ public class GDALTest {
 
       Raster halfsize = ds.read(q1);
 
-      System.out.println( halfsize.bounds() + " :: " + halfsize.size());
+      //System.out.println( halfsize.bounds() + " :: " + halfsize.size());
       assertEquals("should be half", 
           (Integer)new Double(wholeimage.size().width()*.5).intValue(), 
           (Integer)halfsize.size().width());

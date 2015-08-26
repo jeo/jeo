@@ -166,7 +166,13 @@ public class GDALDataset implements RasterDataset, FileData {
         // raster size
         Dimension s = query.size();
         if (s == null) {
+          // use the size of the query bounds if that is set
+          if(query.bounds()!=null) {
+            s = new Dimension(r.width(), r.height());
+          }
+          else {
             s = size(data);
+          }
         }
         raster.size(s);
 

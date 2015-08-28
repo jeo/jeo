@@ -76,23 +76,6 @@ public class GDALTest {
         ds.ReadRaster_Direct(0, 0, 1, 1, 1, 1, gdalconst.GDT_Float32, buf, null);
     }
 
-    /**
-     * I'm not sure what the right X,Y order is... for the sample square image, it does not matter :)
-     */
-    private void printRaster(Raster out) {
-      int idx = 0;
-      int w = out.size().width();
-      int h = out.size().height();
-      for(int x=0; x<w; x++) {
-        System.out.print( x+"> \t");
-        for(int y=0; y<h; y++) {
-          Object v = out.data().get(idx++);
-          System.out.print( v + "\t");
-        }
-        System.out.println();
-      }
-    }
-
     @Test
     public void testQuerySmallerRaster() throws Exception {
 
@@ -101,7 +84,7 @@ public class GDALTest {
       Raster wholeimage = ds.read(new RasterQuery());
       int count = wholeimage.data().size();
       assertEquals(count, (ds.size().width()*ds.size().height()));
-      //printRaster(wholeimage);
+      //wholeimage.print(System.out);
             
       // This is a smaller area
       Bounds smaller = ds.bounds().scale(0.5);
@@ -118,7 +101,6 @@ public class GDALTest {
       assertEquals("should be half", 
           (Integer)new Double(wholeimage.size().width()*.5).intValue(), 
           (Integer)halfsize.size().width());
-      
-      //printRaster(halfsize);
+      //halfsize.print(System.out);
     }
 }

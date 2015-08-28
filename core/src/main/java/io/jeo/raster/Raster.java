@@ -18,6 +18,7 @@ import com.vividsolutions.jts.geom.Envelope;
 import io.jeo.util.Dimension;
 import org.osgeo.proj4j.CoordinateReferenceSystem;
 
+import java.io.PrintStream;
 import java.util.List;
 
 /**
@@ -145,6 +146,32 @@ public class Raster {
      */
     public Raster nodata(NoData nodata) {
         this.nodata = nodata;
+        return this;
+    }
+
+    /**
+     * Prints out the values of the raster in column row order.
+     * <p>
+     * This method is meant for debugging purposes and really only suitable for very 
+     * small rasters. 
+     * </p>
+     */
+    public Raster print(PrintStream out) {
+        int idx = 0;
+        int w = size().width();
+        int h = size().height();
+
+        DataBuffer data = data();
+        for(int x=0; x<w; x++) {
+            out.print( x+"> \t");
+            for(int y=0; y<h; y++) {
+                Object v = data.get(idx++);
+                out.print( v + "\t");
+            }
+            out.println();
+        }
+        
+        data.buffer().rewind();
         return this;
     }
 }

@@ -132,7 +132,13 @@ public class MemRasterDataset implements RasterDataset {
 
         Dimension size = query.size();
         if (size == null) {
-            size = size();
+            // use the size of the query bounds if that is set
+            if(query.bounds()!=null) {
+                size = new Dimension(r.width(), r.height());
+            }
+            else {
+                size = size();
+            }
         }
         raster.size(size);
 

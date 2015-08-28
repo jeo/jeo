@@ -48,8 +48,8 @@ import static org.junit.Assert.assertNotEquals;
  */
 public abstract class RasterApiTestBase {
 
-    RasterDataset dem;
-    RasterDataset rgb;
+    protected RasterDataset dem;
+    protected RasterDataset rgb;
 
     @Before
     public final void setUp() throws Exception {
@@ -124,8 +124,11 @@ public abstract class RasterApiTestBase {
     @Test
     public void testRead() throws IOException {
         // read all data
+        
         ByteBuffer buf = dem.read(new RasterQuery().datatype(DataType.FLOAT)
-            .bounds(new Envelope(589980.0, 609000.0, 4913700.0, 4928010.0))).data().buffer();
+            .bounds(new Envelope(589980.0, 609000.0, 4913700.0, 4928010.0)))
+            //.print(System.out)
+            .data().buffer();
         assertNotNull(buf);
 
         FloatBuffer fb = buf.asFloatBuffer();
@@ -137,7 +140,28 @@ public abstract class RasterApiTestBase {
 
         // read subset
         buf = dem.read(new RasterQuery().datatype(DataType.FLOAT)
-            .bounds(new Envelope(589980.0, 599490.0, 4920855.0, 4928010.0))).data().buffer();
+            .bounds(new Envelope(589980.0, 599490.0, 4920855.0, 4928010.0)))
+            //.print(System.out)
+            .data().buffer();
+        assertNotNull(buf);
+
+        fb = buf.asFloatBuffer();
+        assertEquals(25, fb.limit());
+
+        assertEquals(1099.0, fb.get(0), 0.1);
+        assertEquals(1234.0, fb.get(1), 0.1);
+        assertEquals(1177.0, fb.get(2), 0.1);
+
+        assertEquals(1361.0, fb.get(22), 0.1);
+        assertEquals(1369.0, fb.get(23), 0.1);
+        assertEquals(1326.0, fb.get(24), 0.1);
+
+        // read subset scaled
+        buf = dem.read(new RasterQuery().datatype(DataType.FLOAT)
+            .bounds(new Envelope(589980.0, 599490.0, 4920855.0, 4928010.0))
+            .size(10, 10))
+            //.print(System.out)
+            .data().buffer();
         assertNotNull(buf);
 
         fb = buf.asFloatBuffer();

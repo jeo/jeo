@@ -45,7 +45,8 @@ public interface RasterDataset extends Dataset {
      * Reads data from the raster into a buffer.
      * <p>
      * Implementations must handle data type conversion specified by {@link RasterQuery#bands()}
-     * and image resampling specified by {@link RasterQuery#size()}.
+     * and image resampling specified by {@link RasterQuery#size()}. When no {@link RasterQuery#size()} is specified
+     * implementations should create a result proportionate to the size of the requested bounds. 
      * </p>
      * <p>
      * The returned buffer should always be in read mode.

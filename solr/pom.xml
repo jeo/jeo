@@ -45,6 +45,6 @@
 
   <properties>
     <solr.version>5.0.0</solr.version>
-    <spatial4j.version>0.5-VG3</spatial4j.version>
+    <spatial4j.version>0.5</spatial4j.version>
   </properties>
 </project>

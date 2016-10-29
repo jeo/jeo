@@ -210,7 +210,7 @@ public class TilePyramid {
             y = b.getMinY() + dy*(h - t.y());
         }
 
-        return new Bounds(x, x+dx, y, y+dx);
+        return new Bounds(x, x+dx, y, y+dy);
     }
 
     /**

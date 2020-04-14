@@ -1,0 +1,54 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>io.jeo</groupId>
+    <artifactId>jeo-parent</artifactId>
+    <version>0-SNAPSHOT</version>
+  </parent>
+
+  <groupId>io.jeo</groupId>
+  <artifactId>contrib</artifactId>
+  <name>Contrib Modules</name>
+  <version>0-SNAPSHOT</version>
+  <packaging>pom</packaging>
+
+  <dependencies>
+    <dependency>
+      <groupId>io.jeo</groupId>
+      <artifactId>jeo</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>io.jeo</groupId>
+      <artifactId>jeo</artifactId>
+      <version>${project.version}</version>
+      <scope>test</scope>
+      <classifier>tests</classifier>
+    </dependency>
+  </dependencies>
+
+  <modules>
+   <module>carto</module>
+   <module>geotools</module>
+   <module>guava</module>
+   <module>lucene</module>
+   <module>mongo</module>
+   <module>nano</module>
+   <module>render</module>
+   <module>repo</module>
+   <module>solr</module>
+   <module>svg</module>
+  </modules>
+
+  <profiles>
+    <profile>
+      <id>geogit</id>
+      <modules>
+        <module>geogit</module>
+      </modules>
+    </profile>
+  </profiles>
+
+</project>

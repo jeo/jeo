@@ -2,6 +2,8 @@
 
 [![](https://jitpack.io/v/jeo/jeo.svg)](https://jitpack.io/#jeo/jeo)
 
+This project is currently not maintained. Pull Requests are welcome though.
+
 ## Building
 
 Building jeo requires the following:

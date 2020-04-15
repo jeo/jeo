@@ -405,6 +405,7 @@
     <module>core</module>
     <module>format</module>
     <module>util</module>
+    <module>contrib</module>
   </modules>
 
   <properties>

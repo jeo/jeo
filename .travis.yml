@@ -7,10 +7,16 @@ branches:
     - travis
 
 addons:
-  postgresql: "9.3"
+  postgresql: "9.6"
+  apt:
+    packages:
+    - postgresql-9.6
+    - postgresql-client-9.6
+    - postgresql-9.6-postgis-2.4
 
 services:
   - mongodb
+  - postgresql
 
 before_script:
   - psql -c 'create database jeo' -U postgres
@@ -25,9 +31,7 @@ after_success:
   - if [[ "$JAVA_HOME" == *"java-7-openjdk"* ]]; then mvn deploy -DskipTests --settings target/travis/settings.xml; fi
 
 jdk:
-  - openjdk7
-  - oraclejdk7
-  - oraclejdk8
+  - openjdk8
 
 notifications:
   email:
@@ -40,3 +44,4 @@ env:
   global:
     - secure: "V/bzSLcg07nvbUvHyDpoxo75SQpqblD3VYzHReyFPusPAzaO1fhNlAfvAgvhH8lo43VMiQI7rx7lw7/N/M7BnTPc/IuPh/ROZDG4PdAGOiYsmNuRwEVNWZ1M2iykEGTeXmPdI7Una0SRNGoo3kCYHEiYXxreSC3/Abnq3usnktw="
     - secure: "ffmKckmzq/rsMiph2sUqVIExDG9EtRxVXFcJuJrfkNEodQEQs3SpXbLt7AnVtbu+fzz62kkWO4lrdWJadmH6ew4zHhGHAB0SauneaPgQwkwetM21U79VJkik/LPIdEABw00DFpsYrnYnpA1t8+2oTqhsAQiAed1GiLMz1hl3kiM="
+

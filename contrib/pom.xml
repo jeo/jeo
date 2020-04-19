@@ -34,7 +34,7 @@
    <module>geotools</module>
    <module>guava</module>
    <module>lucene</module>
-   <module>mongo</module>
+<!--   <module>mongo</module>-->
    <module>nano</module>
    <module>render</module>
    <module>repo</module>

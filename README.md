@@ -1,5 +1,9 @@
 # jeo - lightweight geo library for the jvm 
 
+[![](https://jitpack.io/v/jeo/jeo.svg)](https://jitpack.io/#jeo/jeo)
+
+This project is currently not maintained. Pull Requests are welcome though.
+
 ## Building
 
 Building jeo requires the following:
@@ -11,3 +15,16 @@ Once build pre-requisites are satisfied build with:
 
     mvn install
 
+## Adding jeo to your application
+
+Add the jitpack repository:
+```
+  allprojects {
+    repositories {
+      ...
+      maven { url 'https://jitpack.io' }
+    }
+  }
+```
+
+Afterwards, you can add dependencies for the complete library including all submodules (`com.github.jeo:jeo:$version`) or or single submodules (`com.github.jeo.jeo:$submodule:$version`).
